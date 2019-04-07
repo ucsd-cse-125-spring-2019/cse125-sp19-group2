@@ -244,6 +244,7 @@ _Pvt_Extensions
 ## Build generated
 build/
 DerivedData/
+Shared.lib
 
 ## Various settings
 *.pbxuser

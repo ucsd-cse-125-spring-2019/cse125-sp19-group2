@@ -1,7 +1,7 @@
 #include <cstdio>
 
 #include "Shared/PlayerState.h"
-#include "Library/include/SOIL.h"
+#include "SOIL.h"
 
 int main(int argc, char ** argv)
 {
