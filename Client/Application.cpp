@@ -4,8 +4,9 @@
 
 #include "Application.hpp"
 #include <iostream>
+#include "Camera.hpp"
 
-Application::Application(const char *windowTitle, int argc, char **argv)
+Application::Application(const char *windowTitle, int argc, char **argv) : _camera(new Camera)
 {
 	_win_title  = windowTitle;
 	_win_width  = 800;
@@ -44,6 +45,9 @@ void Application::Setup()
 	glDepthFunc(GL_LEQUAL);
 	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 	glEnable(GL_CULL_FACE);
+
+  // Test Camera 
+	
 }
 
 void Application::Cleanup()
@@ -83,7 +87,7 @@ void Application::Run()
 
 	while (!glfwWindowShouldClose(_window))
 	{
-		float current_frame = glfwGetTime();
+		float current_frame = static_cast<float>(glfwGetTime());
 		_delta_time = current_frame - _last_frame;
 		_last_frame = current_frame;
 
@@ -98,6 +102,7 @@ void Application::Run()
 
 void Application::Update()
 {
+	_camera->Update();
 }
 
 void Application::Draw()
