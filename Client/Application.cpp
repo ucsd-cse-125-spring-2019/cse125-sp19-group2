@@ -6,7 +6,7 @@
 #include <iostream>
 #include "Camera.hpp"
 
-Application::Application(const char *windowTitle, int argc, char **argv) : _camera(new Camera), _testShader(new Shader())
+Application::Application(const char *windowTitle, int argc, char **argv) : _camera(new Camera), _testShader(new Shader)
 {
 	_win_title  = windowTitle;
 	_win_width  = 800;
@@ -34,18 +34,19 @@ Application::~Application() {
 }
 
 void Application::Setup() {
-  // Background color
-  glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-  glEnable(GL_DEPTH_TEST);
-  glDepthFunc(GL_LEQUAL);
-  glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-  glEnable(GL_CULL_FACE);
+	// Background color
+	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+	glEnable(GL_DEPTH_TEST);
+	glDepthFunc(GL_LEQUAL);
+	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+	glEnable(GL_CULL_FACE);
 
-  // Set up testing shader program
-  _testShader->LoadFromFile(GL_VERTEX_SHADER, "./Resources/Shaders/pano.vert");
-  _testShader->LoadFromFile(GL_FRAGMENT_SHADER, "./Resources/Shaders/pano.frag");
-  _testShader->CreateProgram();
-  _testShader->RegisterUniform("view");
+	// Set up testing shader program
+	_testShader->LoadFromFile(GL_VERTEX_SHADER, "./Resources/Shaders/pano.vert");
+	_testShader->LoadFromFile(GL_FRAGMENT_SHADER, "./Resources/Shaders/pano.frag");
+	_testShader->CreateProgram();
+	_testShader->RegisterUniform("view");
+}
 
 void Application::Cleanup() {
 }
