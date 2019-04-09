@@ -7,8 +7,9 @@
 
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
-#include "Camera.hpp"
 #include <memory>
+#include "Shader.hpp"
+#include "Camera.hpp"
 
 class Application {
 public:
@@ -55,6 +56,9 @@ private:
 	float _delta_time = 0;
 	float _last_frame = 0;
 
+  // Testing Shader
+	std::unique_ptr<Shader> _testShader;
+  
   // Test camera
 	std::unique_ptr<Camera> _camera;
 };
