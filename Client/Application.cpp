@@ -6,7 +6,7 @@
 #include <iostream>
 #include "Camera.hpp"
 
-Application::Application(const char *windowTitle, int argc, char **argv) : _camera(new Camera), _testShader(new Shader)
+Application::Application(const char *windowTitle, int argc, char **argv)
 {
 	_win_title  = windowTitle;
 	_win_width  = 800;
@@ -41,11 +41,25 @@ void Application::Setup() {
 	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 	glEnable(GL_CULL_FACE);
 
+  // Initialize pointers
+	_testShader = std::make_unique<Shader>();
+	_quadShader = std::make_unique<Shader>();
+
+	_camera = std::make_unique<Camera>();
+	_frameBuffer = std::make_unique<FrameBuffer>(800, 600);
+	_quadFrameBuffer = std::make_unique<FrameBuffer>(800, 600);
+
 	// Set up testing shader program
 	_testShader->LoadFromFile(GL_VERTEX_SHADER, "./Resources/Shaders/pano.vert");
 	_testShader->LoadFromFile(GL_FRAGMENT_SHADER, "./Resources/Shaders/pano.frag");
 	_testShader->CreateProgram();
-	_testShader->RegisterUniform("view");
+	_testShader->RegisterUniform("rgbTexture");
+
+  // quad pass through shader
+	_quadShader->LoadFromFile(GL_VERTEX_SHADER, "./Resources/Shaders/quad.vert");
+	_quadShader->LoadFromFile(GL_FRAGMENT_SHADER, "./Resources/Shaders/quad.frag");
+	_quadShader->CreateProgram();
+	_quadShader->RegisterUniform("rgbTexture");
 }
 
 void Application::Cleanup() {
@@ -105,9 +119,14 @@ void Application::Draw() {
   glViewport(0, 0, _win_width, _win_height);
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-  // Test Shader
-  _testShader->Use();
-  _testShader->set_uniform("view", glm::mat4(1.0));
+  // Test FBO
+  _quadFrameBuffer->renderScene([this]{
+    // render scene
+	  _frameBuffer->drawQuad(_testShader);
+  });
+
+  // Render _frameBuffer Quad
+  _quadFrameBuffer->drawQuad(_quadShader);
 
   // Finish drawing scene
   glFinish();

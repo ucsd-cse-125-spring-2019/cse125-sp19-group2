@@ -57,6 +57,6 @@ void main(){
 	}else{
 		color = texture( rgbTexture, finalUV );
 	}
-	//color = vec4(x,y ,0,1);
+	color = vec4(x,y ,0,1);
 	
 }
