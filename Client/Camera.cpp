@@ -1,10 +1,6 @@
-//
-//  Cam.cpp
-//  cse169
-//
-//  Created by Andy Hwang on 5/2/18.
-//  Copyright © 2018 Andy Hwang. All rights reserved.
-//
+/**
+ * Camera.cpp
+ */
 
 #include "Camera.hpp"
 
@@ -133,7 +129,7 @@ void Camera::set_position(const glm::vec3 & position)
   _position = position;
 }
 
-void Camera::set_position(int x, int y, int z)
+void Camera::set_position(float x, float y, float z)
 {
   _position.x = x;
   _position.y = y;

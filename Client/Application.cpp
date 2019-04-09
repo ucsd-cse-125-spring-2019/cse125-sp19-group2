@@ -83,7 +83,7 @@ void Application::Run()
 
 	while (!glfwWindowShouldClose(_window))
 	{
-		float current_frame = glfwGetTime();
+		float current_frame = static_cast<float>(glfwGetTime());
 		_delta_time = current_frame - _last_frame;
 		_last_frame = current_frame;
 

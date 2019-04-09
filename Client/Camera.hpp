@@ -1,5 +1,5 @@
 /**
- * Cam.hpp
+ * Camera.hpp
  */
 
 #ifndef CAMERA_HPP
@@ -68,7 +68,7 @@ class Camera
   float fov() const;
 
   void set_position(const glm::vec3 & position);
-  void set_position(int x, int y, int z);
+  void set_position(float x, float y, float z);
   void set_aspect(float aspect);  
   void set_movement_speed(float speed);
   void set_mouse_sensitivity(float sensitivity);
