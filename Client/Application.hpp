@@ -9,6 +9,7 @@
 #include <GLFW/glfw3.h>
 #include <memory>
 #include "Shader.hpp"
+#include "Camera.hpp"
 
 class Application {
 public:
@@ -57,6 +58,9 @@ private:
 
   // Testing Shader
 	std::unique_ptr<Shader> _testShader;
+  
+  // Test camera
+	std::unique_ptr<Camera> _camera;
 };
 
 #endif

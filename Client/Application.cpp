@@ -4,12 +4,14 @@
 
 #include "Application.hpp"
 #include <iostream>
+#include "Camera.hpp"
 
-Application::Application(const char* windowTitle, int argc, char** argv) : _testShader(new Shader()) {
-  _win_title = windowTitle;
-  _win_width = 800;
-  _win_height = 600;
-
+Application::Application(const char *windowTitle, int argc, char **argv) : _camera(new Camera), _testShader(new Shader())
+{
+	_win_title  = windowTitle;
+	_win_width  = 800;
+	_win_height = 600;
+  
   if (argc == 1) {
   }
   else {
@@ -44,7 +46,6 @@ void Application::Setup() {
   _testShader->LoadFromFile(GL_FRAGMENT_SHADER, "./Resources/Shaders/pano.frag");
   _testShader->CreateProgram();
   _testShader->RegisterUniform("view");
-}
 
 void Application::Cleanup() {
 }
@@ -77,10 +78,12 @@ void Application::Run() {
   glfwGetFramebufferSize(_window, &_win_width, &_win_height);
   StaticResize(_window, _win_width, _win_height);
 
-  while (!glfwWindowShouldClose(_window)) {
-    float current_frame = glfwGetTime();
-    _delta_time = current_frame - _last_frame;
-    _last_frame = current_frame;
+
+	while (!glfwWindowShouldClose(_window))
+	{
+		float current_frame = static_cast<float>(glfwGetTime());
+		_delta_time = current_frame - _last_frame;
+		_last_frame = current_frame;
 
     glfwPollEvents();
     Update();
@@ -91,7 +94,9 @@ void Application::Run() {
   Cleanup();
 }
 
-void Application::Update() {
+void Application::Update()
+{
+	_camera->Update();
 }
 
 void Application::Draw() {
