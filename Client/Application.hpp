@@ -7,6 +7,8 @@
 
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
+#include <memory>
+#include "Shader.hpp"
 
 class Application {
 public:
@@ -52,6 +54,9 @@ private:
 	// Frame management
 	float _delta_time = 0;
 	float _last_frame = 0;
+
+  // Testing Shader
+	std::unique_ptr<Shader> _testShader;
 };
 
 #endif

@@ -149,6 +149,8 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
+    <None Include="Resources\Shaders\pano.frag" />
+    <None Include="Resources\Shaders\pano.vert" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Application.hpp" />
