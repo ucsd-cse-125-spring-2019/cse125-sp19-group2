@@ -28,9 +28,8 @@ void Shader::LoadFromFile(GLenum type, const char* path) {
     shader_string_stream << shader_file.rdbuf();
     shader_file.close();
 
-    //const char *code = shader_string_stream.str().c_str(); 
-    // code will be a dangling pointer since the internal buffer might be destroy anytime
-    LoadFromText(type, shader_string_stream.str().c_str());
+    const std::string code = shader_string_stream.str();
+    LoadFromText(type, code.c_str());
   }
   catch (std::ifstream::failure e) {
     std::cerr << "[ERROR] Shader file unsuccessfully read at path: " << path
