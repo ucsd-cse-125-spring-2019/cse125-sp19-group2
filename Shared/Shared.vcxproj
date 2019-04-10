@@ -130,6 +130,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="BlockingQueue.hpp" />
     <ClInclude Include="Common.hpp" />
     <ClInclude Include="BaseState.hpp" />
     <ClInclude Include="ExampleState.hpp" />

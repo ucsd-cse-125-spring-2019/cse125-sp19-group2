@@ -27,6 +27,9 @@
     <ClInclude Include="ExampleState.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="BlockingQueue.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
