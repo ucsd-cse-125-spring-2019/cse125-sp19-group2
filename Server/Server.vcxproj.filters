@@ -23,7 +23,10 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="SGameEntity.hpp">
+    <ClInclude Include="SBaseEntity.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="SExampleEntity.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -131,14 +131,15 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="Common.hpp" />
-    <ClInclude Include="GameEntity.hpp" />
+    <ClInclude Include="BaseState.hpp" />
+    <ClInclude Include="ExampleState.hpp" />
     <ClInclude Include="GameEvent.hpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="GameEntity.cpp" />
+    <ClCompile Include="Common.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
