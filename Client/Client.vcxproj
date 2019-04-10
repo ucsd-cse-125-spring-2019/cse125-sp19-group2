@@ -158,7 +158,8 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Application.hpp" />
-    <ClInclude Include="CGameEntity.hpp" />
+    <ClInclude Include="CBaseEntity.hpp" />
+    <ClInclude Include="CExampleEntity.hpp" />
     <ClInclude Include="FrameBuffer.h" />
     <ClInclude Include="Shader.hpp" />
     <ClInclude Include="Camera.hpp" />

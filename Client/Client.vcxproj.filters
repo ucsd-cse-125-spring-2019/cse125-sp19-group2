@@ -33,7 +33,10 @@
     <ClInclude Include="FrameBuffer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="CGameEntity.hpp">
+    <ClInclude Include="CBaseEntity.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="CExampleEntity.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
