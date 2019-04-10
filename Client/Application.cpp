@@ -41,7 +41,7 @@ void Application::Setup() {
 	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 	glEnable(GL_CULL_FACE);
 
-  // Initialize pointers
+	// Initialize pointers
 	_testShader = std::make_unique<Shader>();
 	_quadShader = std::make_unique<Shader>();
 
@@ -55,7 +55,7 @@ void Application::Setup() {
 	_testShader->CreateProgram();
 	_testShader->RegisterUniform("rgbTexture");
 
-  // quad pass through shader
+	// quad pass through shader
 	_quadShader->LoadFromFile(GL_VERTEX_SHADER, "./Resources/Shaders/quad.vert");
 	_quadShader->LoadFromFile(GL_FRAGMENT_SHADER, "./Resources/Shaders/quad.frag");
 	_quadShader->CreateProgram();
