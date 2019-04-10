@@ -1,7 +1,5 @@
 #pragma once
 
-#include <cereal/cereal.hpp>
-#include <cereal/archives/binary.hpp>
 #include <glm/glm.hpp>
 
 #include "Shared/Common.hpp"	// GameEntity type enum
@@ -12,9 +10,7 @@ namespace cereal
 	template<class Archive>
 	void serialize(Archive & archive, glm::vec3 &v)
 	{
-		archive(cereal::make_nvp("x", v.x),
-				cereal::make_nvp("y", v.y),
-				cereal::make_nvp("z", v.z));
+        archive(v.x, v.y, v.z);
 	}
 }
 
