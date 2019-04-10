@@ -33,7 +33,7 @@ private:
 	double _scale;	   // Scale of object
 
 public:
-	GameEntity() {};
+	GameEntity();
 	GameEntity(uint32_t id,
 			   glm::vec3 pos,
 			   glm::vec3 up,
@@ -46,7 +46,7 @@ public:
 		_normal = normal;
 		_scale = scale;
 	};
-	~GameEntity() {};
+	~GameEntity();
 
 	// Serialization for Cereal
 	template<class Archive>
