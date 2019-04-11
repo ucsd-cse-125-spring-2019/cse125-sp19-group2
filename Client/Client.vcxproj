@@ -144,6 +144,7 @@
   <ItemGroup>
     <ClCompile Include="Application.cpp" />
     <ClCompile Include="Camera.cpp" />
+    <ClCompile Include="FrameBuffer.cpp" />
     <ClCompile Include="glad.c" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Shader.cpp" />
@@ -152,9 +153,12 @@
     <None Include="packages.config" />
     <None Include="Resources\Shaders\pano.frag" />
     <None Include="Resources\Shaders\pano.vert" />
+    <None Include="Resources\Shaders\quad.frag" />
+    <None Include="Resources\Shaders\quad.vert" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Application.hpp" />
+    <ClInclude Include="FrameBuffer.h" />
     <ClInclude Include="Shader.hpp" />
     <ClInclude Include="Camera.hpp" />
   </ItemGroup>

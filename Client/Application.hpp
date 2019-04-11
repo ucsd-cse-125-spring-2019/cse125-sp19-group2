@@ -10,6 +10,7 @@
 #include <memory>
 #include "Shader.hpp"
 #include "Camera.hpp"
+#include "FrameBuffer.h"
 
 class Application {
 public:
@@ -56,11 +57,16 @@ private:
 	float _delta_time = 0;
 	float _last_frame = 0;
 
-  // Testing Shader
+  // Test Shader
 	std::unique_ptr<Shader> _testShader;
+	std::unique_ptr<Shader> _quadShader;
   
   // Test camera
 	std::unique_ptr<Camera> _camera;
+
+  // Test frameBuffer
+	std::unique_ptr<FrameBuffer> _frameBuffer;
+	std::unique_ptr<FrameBuffer> _quadFrameBuffer;
 };
 
 #endif
