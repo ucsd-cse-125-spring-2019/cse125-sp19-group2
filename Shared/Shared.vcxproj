@@ -137,10 +137,10 @@
     <ClInclude Include="GameEvent.hpp" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="packages.config" />
+    <ClCompile Include="Common.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Common.cpp" />
+    <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

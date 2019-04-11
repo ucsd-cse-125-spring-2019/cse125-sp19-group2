@@ -26,10 +26,11 @@ private:
 			uint8_t maxConnections);
 
 	/*
-	** Pulls from player socket and adds to the _eventQueue, sends to
-	** player socket and removes from _updateQueue. One instance per player.
+	** Pulls from player sockets and adds to the _eventQueue, sends to
+	** player sockets and removes from _updateQueue. Handles all active player
+	** connections.
 	*/
-	void socketHandler(SOCKET socket, uint32_t playerId);
+	void socketHandler();
 
 	// Queues for events and entity updates
 	std::unique_ptr<std::queue<std::shared_ptr<GameEvent>>> _eventQueue;

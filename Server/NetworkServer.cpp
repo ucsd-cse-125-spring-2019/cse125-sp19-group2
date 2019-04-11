@@ -61,9 +61,9 @@ void NetworkServer::connectionListener(
 }
 
 
-void NetworkServer::socketHandler(SOCKET socket, uint32_t playerId)
+void NetworkServer::socketHandler()
 {
-	// TODO: handle player socket (empty update queue, fill event queue)
+	// TODO: handle active connections (empty update queue, fill event queue)
 }
 
 
