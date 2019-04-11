@@ -3,6 +3,7 @@
 #include <vector>
 #include <memory>
 #include <winsock2.h>
+#include <WS2tcpip.h>
 #include <thread>
 #include <chrono>
 #include <iostream>
@@ -20,7 +21,9 @@ private:
 	** Runs in its own thread; created by by the constructor. Spawns a new
 	** thread with socketHandler() for each new player connection.
 	*/
-	void connectionListener(uint8_t maxConnections);
+	void connectionListener(
+			std::string port,
+			uint8_t maxConnections);
 
 	/*
 	** Pulls from player socket and adds to the _eventQueue, sends to
@@ -34,6 +37,7 @@ private:
 	
 	// thread that listens for connections
 	std::thread _listener;
+
 public:
 	/*
 	** Initialize queues, spawn a thread with connectionListener() to listen
@@ -41,7 +45,7 @@ public:
 	**
 	** TODO: write and pass in IDGenerator
 	*/
-	NetworkServer(std::string address, uint8_t port);
+	NetworkServer(std::string port);
 
 	/*
 	** Close connections and destroy queues.
