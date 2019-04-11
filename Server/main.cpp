@@ -6,6 +6,7 @@
 #include <cereal/types/polymorphic.hpp>
 
 #include "SExampleEntity.hpp"
+#include "NetworkServer.hpp"
 
 int main(int argc, char ** argv)
 {

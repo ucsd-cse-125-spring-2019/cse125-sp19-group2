@@ -2,7 +2,12 @@
 
 NetworkServer::NetworkServer(std::string address, uint8_t port)
 {
-	// TODO: initialize queues and listener
+	// Initialize queues
+	_updateQueue = std::make_unique<BlockingQueue<std::shared_ptr<BaseState>>>();
+	_eventQueue = std::make_unique<std::queue<std::shared_ptr<GameEvent>>>();
+
+	// Start listener thread
+	_listener = std::thread(&NetworkServer::connectionListener, this, MAX_CONNECTIONS);
 }
 
 
@@ -27,6 +32,7 @@ void NetworkServer::socketHandler(SOCKET socket, uint32_t playerId)
 std::vector<std::shared_ptr<GameEvent>> NetworkServer::receiveEvents()
 {
 	// TODO: return contents of event queue
+	return std::vector<std::shared_ptr<GameEvent>>();
 }
 
 

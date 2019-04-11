@@ -3,6 +3,9 @@
 #include <vector>
 #include <memory>
 #include <winsock2.h>
+#include <thread>
+#include <chrono>
+#include <iostream>
 
 #include "Shared/BaseState.hpp"
 #include "Shared/GameEvent.hpp"
@@ -28,7 +31,9 @@ private:
 	// Queues for events and entity updates
 	std::unique_ptr<std::queue<std::shared_ptr<GameEvent>>> _eventQueue;
 	std::unique_ptr<BlockingQueue<std::shared_ptr<BaseState>>> _updateQueue;
-
+	
+	// thread that listens for connections
+	std::thread _listener;
 public:
 	/*
 	** Initialize queues, spawn a thread with connectionListener() to listen
