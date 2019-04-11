@@ -19,8 +19,8 @@ private:
 	void socketHandler(SOCKET socket);
 	
 	// Queues for events and entity updates
-	std::unique_ptr<std::shared_ptr<BlockingQueue<GameEvent>>> _eventQueue;
-	std::unique_ptr<std::shared_ptr<std::queue<BaseState>>> _updateQueue;
+	std::unique_ptr<BlockingQueue<std::shared_ptr<GameEvent>>> _eventQueue;
+	std::unique_ptr<std::queue<std::shared_ptr<BaseState>>> _updateQueue;
 
 public:
 	/*

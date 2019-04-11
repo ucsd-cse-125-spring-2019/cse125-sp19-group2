@@ -8,8 +8,28 @@ template<typename T>
 class BlockingQueue
 {
 private:
-	// TODO
+	std::queue<T> _queue;
+	std::mutex _mutex;
+	std::condition_variable _cond;
 public:
-	// TODO
+	void push(T & item)
+	{
+		std::unique_lock<std::mutex> lock(_mutex);
+		_queue.push(item);
+		lock.unlock();
+		_cond.notify_one();
+	};
+
+	T & pop()
+	{
+		std::unique_lock<std::mutex> lock(_mutex);
+		while (_queue.empty())
+		{
+			_cond.wait(lock);
+		}
+		auto item = _queue.front();
+		_queue.pop();
+		return item;
+	}
 };
 
