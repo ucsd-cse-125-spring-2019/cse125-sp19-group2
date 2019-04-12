@@ -324,18 +324,25 @@ void NetworkServer::socketWriteHandler()
     std::stringstream ss;
     while (true)
     {
-        // this is blocking
-        std::shared_ptr<BaseState> nextItem = _updateQueue->pop();
+        // Retreive next item from queue. This will block until an item appears
+		// on the queue.
+		std::shared_ptr<BaseState> nextItem;
+		_updateQueue->pop(nextItem);
+
+		// Create an output archive and serialize the object from the queue
         cereal::BinaryOutputArchive oarchive(ss);
         oarchive(nextItem);
+
+		// Get size of serialized object
         ss.seekg(0, std::ios::end);
         uint32_t size = (uint32_t)ss.tellg();
         ss.seekg(0, std::ios::beg);
 
+		// Copy into char buffer
         char * databuf = (char*)malloc(size);
-
         ss.read(databuf, size);
 
+		// Lock and iterate over player sessions
         std::shared_lock<std::shared_mutex> lock(_sessionMutex);
         for (auto& pair : _sessions)
         {

@@ -20,16 +20,15 @@ public:
 		_cond.notify_one();
 	};
 
-	T & pop()
+	void pop(T & item)
 	{
 		std::unique_lock<std::mutex> lock(_mutex);
 		while (_queue.empty())
 		{
 			_cond.wait(lock);
 		}
-		auto item = _queue.front();
+		item = _queue.front();
 		_queue.pop();
-		return item;
 	}
 };
 
