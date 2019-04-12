@@ -1,3 +1,7 @@
+#include <cereal/archives/binary.hpp>
+#include <cereal/types/string.hpp>
+#include <cereal/types/memory.hpp>
+
 #include "NetworkServer.hpp"
 
 NetworkServer::NetworkServer(std::string port)
@@ -14,6 +18,11 @@ NetworkServer::NetworkServer(std::string port)
 			this,
 			port,
 			MAX_CONNECTIONS);
+
+    // Start socket read thread
+    _readThread = std::thread(
+            &NetworkServer::socketReadHandler,
+            this);
 }
 
 
@@ -96,7 +105,7 @@ void NetworkServer::connectionListener(
 	{
 		tempSock = accept(listenSock, NULL, NULL);
 
-		std::unique_lock<std::mutex> lock(_sessionMutex);
+		std::unique_lock<std::shared_mutex> lock(_sessionMutex);
 		if (_sessions.size() >= maxConnections)
 		{
 			closesocket(tempSock);
@@ -111,11 +120,11 @@ void NetworkServer::connectionListener(
 			{
 				IdGenerator::getInstance()->getNextId(), // create a new player id
 				tempSock, // socket
-				std::vector<byte>(), // read buffer
+				std::vector<char>(RECV_BUFSIZE), // read buffer
 				false, // is reading
 				0, // length (bytes to read)
 				0, // bytes read
-				std::vector<byte>() // write buffer
+				std::vector<char>(SEND_BUFSIZE) // write buffer
 			};
 
 			std::cerr << "Accepting new connection with playerId: "
@@ -142,7 +151,7 @@ void NetworkServer::connectionListener(
 				}
 
 				// unlocks when out of scope
-				std::unique_lock<std::mutex> lock(_sessionMutex);
+				std::unique_lock<std::shared_mutex> lock(_sessionMutex);
 
 				// Add to session map
 				_sessions.insert({clientState.playerId, clientState});
@@ -163,27 +172,173 @@ void NetworkServer::connectionListener(
 }
 
 
-void NetworkServer::socketHandler()
+void NetworkServer::socketReadHandler()
 {
 	// Read socket set for select()
 	FD_SET readSet;
+    FD_SET exceptSet;
+
+    // String stream for reading from sockets
+    std::stringstream ss;
+
+    // List of dead sockets to kill
+    std::queue<uint32_t> sessionsToKill = std::queue<uint32_t>();
+
+    // Timeval struct for timeout
+    TIMEVAL * timeout = (TIMEVAL *)calloc(1, sizeof(timeout));
+    timeout->tv_sec = SELECT_TIMEOUT_SEC;
 
 	while (true)
 	{
 		// Reset readSet and add sockets from session map
 		FD_ZERO(&readSet);
-		std::unique_lock<std::mutex> lock(_sessionMutex);
+        FD_ZERO(&exceptSet);
+		std::shared_lock<std::shared_mutex> lock(_sessionMutex);
+
+        // If no active sessions, sleep and restart the loop
+        if (!_sessions.size())
+        {
+            lock.unlock();
+            std::this_thread::sleep_for(std::chrono::seconds(SELECT_TIMEOUT_SEC));
+            continue;
+        }
+
+        // Set read and except FDs
 		for (auto& pair : _sessions)
 		{
 			FD_SET(pair.second.socket, &readSet);
+            FD_SET(pair.second.socket, &exceptSet);
 		}
 
 		// Unlock and wait for read activity
 		lock.unlock();
-		// TODO
+
+        if (select(0, &readSet, NULL, &exceptSet, timeout) == SOCKET_ERROR)
+        {
+            std::cerr << "WARNING: Select returned error in read thread: "
+                    << WSAGetLastError() << std::endl;
+        }
+        else
+        {
+            std::shared_lock<std::shared_mutex> lock(_sessionMutex);
+
+            // Iterate over sessions
+            for (auto& pair : _sessions)
+            {
+                SocketState session = pair.second;
+
+                // If in the read set, recv and push to buffer
+                if (FD_ISSET(session.socket, &readSet))
+                {
+                    int recvResult = recv(
+                            session.socket,
+                            session.readBuf.data(),
+                            (int)session.readBuf.size(),
+                            0);
+
+                    // If zero, we had a clean disconnect, so mark as dead
+                    if (!recvResult)
+                    {
+                        // Mark socket as dead
+                        sessionsToKill.push(session.playerId);
+                    }
+                    else if (recvResult != SOCKET_ERROR)
+                    {
+                        session.bytesRead += recvResult;
+
+                        // If we're not in reading mode and received at least
+                        // four bytes, store length and go into reading mode.
+                        if (!session.isReading && session.bytesRead >= sizeof(uint32_t))
+                        {
+                            // Get the first four bytes and store as length
+                            memcpy(&(session.length), session.readBuf.data(), sizeof(uint32_t));
+                            session.isReading = true;
+
+                            // Remove size from beginning of buffer
+                            session.bytesRead -= sizeof(uint32_t);
+                            session.readBuf.erase(session.readBuf.begin(), session.readBuf.begin() + sizeof(uint32_t));
+                        }
+
+                        // Deserialize object
+                        if (session.isReading && session.bytesRead >= session.length)
+                        {
+                            ss.write(session.readBuf.data(), session.length);
+                            cereal::BinaryInputArchive iarchive(ss);
+                            std::shared_ptr<GameEvent> eventPtr;
+                            iarchive(eventPtr);
+
+                            // Lock and add to queue
+                            std::unique_lock<std::mutex> eventLock(_eventMutex);
+                            _eventQueue->push(eventPtr);
+                            eventLock.unlock();
+                        }
+                    }
+                    else
+                    {
+                        // Otherwise we had a miscellaneous error. Mark as dead.
+                        if (WSAGetLastError() != WSAEWOULDBLOCK)
+                        {
+                            std::cerr << "Encountered error while reading socket for player "
+                                    << session.playerId << " with code " << WSAGetLastError()
+                                    << ". Closing player session." << std::endl;
+                            sessionsToKill.push(session.playerId);
+                        }
+                    }
+                }
+
+                // If in the exception set, mark session as dead.
+                if (FD_ISSET(session.socket, &exceptSet))
+                {
+                    // Mark socket as dead 
+                    if (WSAGetLastError() != WSAEWOULDBLOCK)
+                    {
+                        std::cerr << "Encountered error while reading socket for player "
+                                << session.playerId << " with code " << WSAGetLastError()
+                                << ". Closing player session." << std::endl;
+                        sessionsToKill.push(session.playerId);
+                    }
+                }
+            }
+
+            // Kill sessions marked for death
+            lock.unlock();
+            while (!sessionsToKill.empty())
+            {
+                closePlayerSession(sessionsToKill.front());
+                sessionsToKill.pop();
+            }
+        }
 	}
 }
 
+
+void NetworkServer::socketWriteHandler()
+{
+    return;
+}
+
+
+void NetworkServer::closePlayerSession(uint32_t playerId)
+{
+    std::unique_lock<std::shared_mutex> lock(_sessionMutex);
+
+    // Get a copy of the session that we're going to close
+    auto result = _sessions.find(playerId);
+
+    // If found, close the socket and remove from the map.
+    if (result != _sessions.end())
+    {
+        std::cerr << "Closing session for player " << playerId
+                << std::endl;
+        closesocket(result->second.socket);
+        _sessions.erase(result);
+    }
+    else
+    {
+        std::cerr << "Failed to find session for player " << playerId
+                << std::endl;
+    }
+}
 
 std::vector<std::shared_ptr<GameEvent>> NetworkServer::receiveEvents()
 {
@@ -194,6 +349,5 @@ std::vector<std::shared_ptr<GameEvent>> NetworkServer::receiveEvents()
 
 void NetworkServer::sendUpdates(std::vector<std::shared_ptr<BaseState>>)
 {
-	
 	// TODO: add to update queue
 }
