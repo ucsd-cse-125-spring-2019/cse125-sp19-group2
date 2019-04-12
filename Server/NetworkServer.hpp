@@ -56,7 +56,7 @@ private:
 	std::unique_ptr<BlockingQueue<std::shared_ptr<BaseState>>> _updateQueue;
 	
 	// Network threads
-	std::thread _listener, _readThread;
+	std::thread _listener, _readThread, _writeThread;
 
 	struct SocketState
 	{

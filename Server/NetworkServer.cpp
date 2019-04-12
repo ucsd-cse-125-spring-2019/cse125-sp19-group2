@@ -1,6 +1,7 @@
 #include <cereal/archives/binary.hpp>
 #include <cereal/types/string.hpp>
 #include <cereal/types/memory.hpp>
+#include <algorithm>
 
 #include "NetworkServer.hpp"
 
@@ -22,6 +23,11 @@ NetworkServer::NetworkServer(std::string port)
     // Start socket read thread
     _readThread = std::thread(
             &NetworkServer::socketReadHandler,
+            this);
+
+    // Start socket write thread
+    _writeThread = std::thread(
+            &NetworkServer::socketWriteHandler,
             this);
 }
 
@@ -314,6 +320,33 @@ void NetworkServer::socketReadHandler()
 
 void NetworkServer::socketWriteHandler()
 {
+
+    std::stringstream ss;
+    while (true)
+    {
+        // this is blocking
+        std::shared_ptr<BaseState> nextItem = _updateQueue->pop();
+        cereal::BinaryOutputArchive oarchive(ss);
+        oarchive(nextItem);
+        ss.seekg(0, std::ios::end);
+        uint32_t size = (uint32_t)ss.tellg();
+        ss.seekg(0, std::ios::beg);
+
+        char * databuf = (char*)malloc(size);
+
+        ss.read(databuf, size);
+
+        std::shared_lock<std::shared_mutex> lock(_sessionMutex);
+        for (auto& pair : _sessions)
+        {
+            SocketState session = pair.second;
+            std::copy(databuf, databuf + size, std::back_inserter(session.writeBuf));
+        }
+
+        std::cerr << "Bufsize: " << size;
+         
+        free(databuf);
+    }
     return;
 }
 
@@ -347,7 +380,10 @@ std::vector<std::shared_ptr<GameEvent>> NetworkServer::receiveEvents()
 }
 
 
-void NetworkServer::sendUpdates(std::vector<std::shared_ptr<BaseState>>)
+void NetworkServer::sendUpdates(std::vector<std::shared_ptr<BaseState>> updates)
 {
-	// TODO: add to update queue
+    for (auto& update : updates)
+    {
+        _updateQueue->push(update);
+    }
 }

@@ -40,6 +40,18 @@ int main(int argc, char ** argv)
 
 	NetworkServer * server = new NetworkServer(PORTNUM);
 
+    std::shared_ptr<BaseState> testState = std::make_shared<BaseState>();
+    testState->id = 5;
+    testState->scale = 2.5;
+
+    for (int i = 0; i < 5; i++)
+    {
+        std::vector<std::shared_ptr<BaseState>> states = std::vector<std::shared_ptr<BaseState>>();
+        states.push_back(testState);
+        server->sendUpdates(states);
+        std::this_thread::sleep_for(std::chrono::seconds(1));
+    }
+
     std::cout << "Hello World!" << std::endl;
 	fgetc(stdin);
 }
