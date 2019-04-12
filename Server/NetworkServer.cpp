@@ -165,7 +165,23 @@ void NetworkServer::connectionListener(
 
 void NetworkServer::socketHandler()
 {
-	// TODO: handle active connections (empty update queue, fill event queue)
+	// Read socket set for select()
+	FD_SET readSet;
+
+	while (true)
+	{
+		// Reset readSet and add sockets from session map
+		FD_ZERO(&readSet);
+		std::unique_lock<std::mutex> lock(_sessionMutex);
+		for (auto& pair : _sessions)
+		{
+			FD_SET(pair.second.socket, &readSet);
+		}
+
+		// Unlock and wait for read activity
+		lock.unlock();
+		// TODO
+	}
 }
 
 

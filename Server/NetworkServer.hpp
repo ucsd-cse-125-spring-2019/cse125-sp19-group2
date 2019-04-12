@@ -13,7 +13,8 @@
 #include "Shared/BlockingQueue.hpp"
 #include "IdGenerator.hpp"
 
-#define MAX_CONNECTIONS 2
+#define MAX_CONNECTIONS 10
+#define SELECT_TIMEOUT_MILLISEC 1000
 
 class NetworkServer
 {
