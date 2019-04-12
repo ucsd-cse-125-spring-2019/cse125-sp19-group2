@@ -339,18 +339,48 @@ void NetworkServer::socketWriteHandler()
         ss.seekg(0, std::ios::beg);
 
 		// Copy into char buffer
-        char * databuf = (char*)malloc(size);
-        ss.read(databuf, size);
+        char * databuf = (char*)malloc(size + sizeof(uint32_t));
+
+		// Size of serialized object first, then object itself
+		memcpy(databuf, &size, sizeof(uint32_t));
+        ss.read(databuf + sizeof(uint32_t), size);
 
 		// Lock and iterate over player sessions
         std::shared_lock<std::shared_mutex> lock(_sessionMutex);
         for (auto& pair : _sessions)
         {
             SocketState session = pair.second;
-            std::copy(databuf, databuf + size, std::back_inserter(session.writeBuf));
+            std::copy(
+					databuf,
+					databuf + size + sizeof(uint32_t),
+					std::back_inserter(session.writeBuf));
+
+			// Loop until write buffer is empty
+			while (session.writeBuf.size())
+			{
+				int sendResult = send(
+						session.socket,
+						session.writeBuf.data(),
+						session.writeBuf.size(),
+						0);
+
+				// If no error, shrink buffer
+				if (sendResult > 0)
+				{
+					session.writeBuf.erase(
+						session.writeBuf.begin(),
+						session.writeBuf.begin() + sendResult);
+				}
+				else if (sendResult == SOCKET_ERROR && WSAGetLastError() != WSAEWOULDBLOCK)
+				{
+					std::cerr << "Encountered error while writing socket for player "
+						<< session.playerId << " with code " << WSAGetLastError()
+						<< std::endl;
+				}
+			}
         }
 
-        std::cerr << "Bufsize: " << size;
+        std::cerr << "Bufsize: " << size << std::endl;
          
         free(databuf);
     }

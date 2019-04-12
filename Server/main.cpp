@@ -49,7 +49,7 @@ int main(int argc, char ** argv)
         std::vector<std::shared_ptr<BaseState>> states = std::vector<std::shared_ptr<BaseState>>();
         states.push_back(testState);
         server->sendUpdates(states);
-        std::this_thread::sleep_for(std::chrono::seconds(1));
+        std::this_thread::sleep_for(std::chrono::seconds(5));
     }
 
     std::cout << "Hello World!" << std::endl;
