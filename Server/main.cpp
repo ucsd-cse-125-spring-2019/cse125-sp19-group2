@@ -11,7 +11,7 @@
 int main(int argc, char ** argv)
 {
     // Example serialization and deserialization
-    std::stringstream ss;
+   /* std::stringstream ss;
     {
         cereal::BinaryOutputArchive oarchive(ss);
 
@@ -36,6 +36,9 @@ int main(int argc, char ** argv)
         // It shouldn't be garbage
         std::cout << castState->extraVar << std::endl;
     }
+	*/
+
+	NetworkServer * server = new NetworkServer(PORTNUM);
 
     std::cout << "Hello World!" << std::endl;
 	fgetc(stdin);

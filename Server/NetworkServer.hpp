@@ -11,8 +11,9 @@
 #include "Shared/BaseState.hpp"
 #include "Shared/GameEvent.hpp"
 #include "Shared/BlockingQueue.hpp"
+#include "IdGenerator.hpp"
 
-#define MAX_CONNECTIONS 10
+#define MAX_CONNECTIONS 2
 
 class NetworkServer
 {
@@ -38,6 +39,22 @@ private:
 	
 	// thread that listens for connections
 	std::thread _listener;
+
+	struct SocketState
+	{
+		uint32_t playerId;
+		SOCKET socket;
+		// reads stuff
+		std::vector<byte> readBuf;
+		bool isReading;
+		uint32_t length;
+		uint32_t bytesRead;
+		std::vector<byte> writeBuf;
+	};
+
+	// client session state map from player id to session
+	std::unordered_map<uint32_t, SocketState> _sessions;
+	std::mutex _sessionMutex;
 
 public:
 	/*

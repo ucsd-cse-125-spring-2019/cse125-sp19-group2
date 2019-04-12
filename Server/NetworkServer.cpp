@@ -6,6 +6,8 @@ NetworkServer::NetworkServer(std::string port)
 	_updateQueue = std::make_unique<BlockingQueue<std::shared_ptr<BaseState>>>();
 	_eventQueue = std::make_unique<std::queue<std::shared_ptr<GameEvent>>>();
 
+	_sessions = std::unordered_map<uint32_t, SocketState>();
+
 	// Start listener thread
 	_listener = std::thread(
 			&NetworkServer::connectionListener,
@@ -58,6 +60,106 @@ void NetworkServer::connectionListener(
 		WSACleanup();
 		exit(1);
 	}
+
+	listenSock = socket(result->ai_family, result->ai_socktype, result->ai_protocol);
+
+	if (listenSock == INVALID_SOCKET)
+	{
+		std::cerr << "socket failed with error: " << WSAGetLastError() << std::endl;
+		freeaddrinfo(result);
+		WSACleanup();
+		exit(1);
+	}
+
+	res = bind(listenSock, result->ai_addr, (int)result->ai_addrlen);
+
+	if (res == SOCKET_ERROR)
+	{
+		std::cerr << "socket failed with error: " << WSAGetLastError() << std::endl;
+		freeaddrinfo(result);
+		closesocket(listenSock);
+		WSACleanup();
+		exit(1);
+	}
+
+	res = listen(listenSock, SOMAXCONN);
+
+	if (res == SOCKET_ERROR)
+	{
+		std::cerr << "socket failed with error: " << WSAGetLastError() << std::endl;
+		closesocket(listenSock);
+		WSACleanup();
+		exit(1);
+	}
+
+	while (true)
+	{
+		tempSock = accept(listenSock, NULL, NULL);
+
+		std::unique_lock<std::mutex> lock(_sessionMutex);
+		if (_sessions.size() >= maxConnections)
+		{
+			closesocket(tempSock);
+			continue;
+		}
+		lock.unlock();
+		if (tempSock != INVALID_SOCKET)
+		{
+			char value = 1;
+			setsockopt(tempSock, IPPROTO_TCP, TCP_NODELAY, &value, sizeof(value));
+			SocketState clientState =
+			{
+				IdGenerator::getInstance()->getNextId(), // create a new player id
+				tempSock, // socket
+				std::vector<byte>(), // read buffer
+				false, // is reading
+				0, // length (bytes to read)
+				0, // bytes read
+				std::vector<byte>() // write buffer
+			};
+
+			std::cerr << "Accepting new connection with playerId: "
+					<< clientState.playerId << std::endl;
+
+
+			// Send player ID (4 bytes) at the beginning of connection
+			if (send(tempSock,
+					(char*)(&(clientState.playerId)), 
+					sizeof(uint32_t), 0) == sizeof(uint32_t))
+			{
+				// Set socket as non-blocking
+				u_long socketMode = 1;
+				res = ioctlsocket(tempSock, FIONBIO, &socketMode);
+
+				// Check if error setting as non-blocking
+				if (res == SOCKET_ERROR)
+				{
+					std::cerr << "Failed to set socket as non-blocking. Error code: "
+							<< res << std::endl;
+					closesocket(tempSock);
+					WSACleanup();
+					exit(1);
+				}
+
+				// unlocks when out of scope
+				std::unique_lock<std::mutex> lock(_sessionMutex);
+
+				// Add to session map
+				_sessions.insert({clientState.playerId, clientState});
+			}
+			else
+			{
+				std::cerr << "Failed to send player ID to new client" << std::endl;
+				closesocket(tempSock);
+			}
+			tempSock = INVALID_SOCKET;
+
+		}
+		else
+		{
+			std::cerr << "client connection failed :( " << WSAGetLastError() << std::endl;
+		}
+	}
 }
 
 
@@ -76,5 +178,6 @@ std::vector<std::shared_ptr<GameEvent>> NetworkServer::receiveEvents()
 
 void NetworkServer::sendUpdates(std::vector<std::shared_ptr<BaseState>>)
 {
+	
 	// TODO: add to update queue
 }

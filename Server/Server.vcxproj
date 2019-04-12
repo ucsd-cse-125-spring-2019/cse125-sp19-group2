@@ -143,8 +143,10 @@
   <ItemGroup>
     <ClCompile Include="main.cpp" />
     <ClCompile Include="NetworkServer.cpp" />
+    <ClCompile Include="IdGenerator.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="IdGenerator.hpp" />
     <ClInclude Include="NetworkServer.hpp" />
     <ClInclude Include="SBaseEntity.hpp" />
     <ClInclude Include="SExampleEntity.hpp" />
