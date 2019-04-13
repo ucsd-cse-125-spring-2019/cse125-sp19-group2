@@ -19,6 +19,10 @@
 #define RECV_BUFSIZE 8192
 #define SEND_BUFSIZE 8192
 
+/*
+** Class to interact with clients over the network. Public documentation marked
+** with "API".
+*/
 class NetworkServer
 {
 public:
@@ -40,11 +44,23 @@ public:
     ** API: Returns a vector of active player IDs. Synchronous.
     */
     std::vector<uint32_t> getPlayerList();
+    
+    /*
+    ** API: Forcefully disconnects a player from the server. Synchronous.
+    **
+    ** Throws: runtime_exception if the playerId could not be found.
+    **
+    ** Internal: Removes player session with playerId from _sessions.
+    */
+    void closePlayerSession(uint32_t playerId);
 
 	/*
     ** API: receive events from all clients. No guarantees on client order, but
     ** events should be received in order on a per-client basis. Synchronous
-    ** for the calling thread; asynchronous with respect to the network.
+    ** for the calling thread; asynchronous with respect to the network. Note
+    ** that player ID's inside the GameEvent struct are overwritten based on
+    ** the player's socket, so it is safe to send any kind of event from the
+    ** client side.
     **
     ** Internal: Returns the contents of the _eventQueue, removing them from
     ** the queue.
@@ -58,7 +74,7 @@ public:
     ** fill an internal queue. Synchronous for the calling thread;
     ** asynchronous with respect to the network.
     **
-	** Internal: Add events to the _updateQueue(), to be sent by
+	** Internal: Add events to the _updateQueue, to be sent by
     ** socketHandler().
 	*/
 	void sendUpdates(std::vector<std::shared_ptr<BaseState>>);
@@ -83,11 +99,6 @@ private:
     ** active player connections. Does NOT handle dead connections.
 	*/
     void socketWriteHandler();
-
-    /*
-    ** Removes player session with playerId from _sessions.
-    */
-    void closePlayerSession(uint32_t playerId);
 
 	// Event queue and mutex
 	std::unique_ptr<std::queue<std::shared_ptr<GameEvent>>> _eventQueue;

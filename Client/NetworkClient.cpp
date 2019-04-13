@@ -19,7 +19,6 @@ NetworkClient::~NetworkClient()
 
 uint32_t NetworkClient::connect(std::string address, std::string port)
 {
-	// TODO: connect to IP and port, create socket and spawn socketHandler()
 	SOCKET clientSock = INVALID_SOCKET;
 
 	// Address information
@@ -147,7 +146,7 @@ uint32_t NetworkClient::connect(std::string address, std::string port)
 void NetworkClient::socketReadHandler()
 {
 	// Buffer for recv
-	char readBuf[DEFAULT_BUFLEN];
+	char readBuf[RECV_BUFSIZE];
 
 	// Iterate until thread interrupted
 	while (_isAlive)
@@ -210,7 +209,7 @@ void NetworkClient::socketReadHandler()
 		std::stringstream ss;
 
 		// Deserialize the object
-		ss.write(readBuf, DEFAULT_BUFLEN);
+		ss.write(readBuf, RECV_BUFSIZE);
 		cereal::BinaryInputArchive iarchive(ss);
 		std::shared_ptr<BaseState> statePtr;
 		iarchive(statePtr);

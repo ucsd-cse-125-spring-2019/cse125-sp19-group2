@@ -3,7 +3,6 @@
 #include <vector>
 #include <memory>
 #include <iostream>
-
 #include <winsock2.h>
 #include <ws2tcpip.h>
 #include <stdlib.h>
@@ -13,18 +12,25 @@
 #include "Shared/GameEvent.hpp"
 #include "Shared/BlockingQueue.hpp"
 
-#define DEFAULT_BUFLEN 8192
+#define RECV_BUFSIZE 8192
 
+/*
+** Class to interact with a server over the network. Public documentation
+** marked with "API".
+*/
 class NetworkClient
 {
 public:
 	/*
-	** Initialize queues.
+	** API: This will initialize the internal structures of the client. Be sure
+    ** to call before connect().
+    **
+    ** Internal: Initialize queues.
 	*/
 	NetworkClient();
 
 	/*
-	** Destroy queues and any other allocated structures.
+	** Internal: Destroy queues and any other allocated structures.
 	*/
 	~NetworkClient();
 

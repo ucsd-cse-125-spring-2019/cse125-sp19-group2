@@ -242,6 +242,7 @@ void NetworkServer::socketReadHandler()
 
         if (select(0, &readSet, NULL, &exceptSet, timeout) == SOCKET_ERROR)
         {
+            // Debug
             std::cerr << "WARNING: Select returned error in read thread: "
                     << WSAGetLastError() << std::endl;
         }
@@ -308,6 +309,7 @@ void NetworkServer::socketReadHandler()
                         // Otherwise we had a miscellaneous error. Mark as dead.
                         if (WSAGetLastError() != WSAEWOULDBLOCK)
                         {
+                            // Debug
                             std::cerr << "Encountered error while reading socket for player "
                                     << session.playerId << " with code " << WSAGetLastError()
                                     << ". Closing player session." << std::endl;
@@ -322,6 +324,7 @@ void NetworkServer::socketReadHandler()
                     // Mark socket as dead 
                     if (WSAGetLastError() != WSAEWOULDBLOCK)
                     {
+                        // Debug
                         std::cerr << "Encountered error while reading socket for player "
                                 << session.playerId << " with code " << WSAGetLastError()
                                 << ". Closing player session." << std::endl;
@@ -407,6 +410,7 @@ void NetworkServer::socketWriteHandler()
 				}
 				else if (sendResult == SOCKET_ERROR && WSAGetLastError() != WSAEWOULDBLOCK)
 				{
+                    // Debug
 					std::cerr << "Encountered error while writing socket for player "
 						<< session.playerId << " with code " << WSAGetLastError()
 						<< std::endl;
@@ -417,29 +421,6 @@ void NetworkServer::socketWriteHandler()
         free(databuf);
     }
     return;
-}
-
-
-void NetworkServer::closePlayerSession(uint32_t playerId)
-{
-    std::unique_lock<std::shared_mutex> lock(_sessionMutex);
-
-    // Get a copy of the session that we're going to close
-    auto result = _sessions.find(playerId);
-
-    // If found, close the socket and remove from the map.
-    if (result != _sessions.end())
-    {
-        std::cerr << "Closing session for player " << playerId
-                << std::endl;
-        closesocket(result->second.socket);
-        _sessions.erase(result);
-    }
-    else
-    {
-        std::cerr << "Failed to find session for player " << playerId
-                << std::endl;
-    }
 }
 
 
@@ -455,6 +436,39 @@ std::vector<uint32_t> NetworkServer::getPlayerList()
     }
 
     return list;
+}
+
+
+void NetworkServer::closePlayerSession(uint32_t playerId)
+{
+    std::unique_lock<std::shared_mutex> lock(_sessionMutex);
+
+    // Get a copy of the session that we're going to close
+    auto result = _sessions.find(playerId);
+
+    // If found, close the socket and remove from the map.
+    if (result != _sessions.end())
+    {
+        // Debug
+        std::cerr << "Closing session for player " << playerId
+                << std::endl;
+        closesocket(result->second.socket);
+        _sessions.erase(result);
+    }
+    else
+    {
+        // If this isn't the read thread, throw an exception
+        if (std::this_thread::get_id() != _readThread.get_id())
+        {
+            throw(std::runtime_error("Failed to find session for player " + playerId));
+        }
+        else
+        {
+            // Otherwise it isn't safe to throw an exception, so just print
+            std::cerr << "Failed to find session for player " << playerId
+                    << std::endl;
+        }
+    }
 }
 
 
