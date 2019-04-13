@@ -14,7 +14,7 @@ NetworkServer::NetworkServer(std::string port)
 	_sessions = std::unordered_map<uint32_t, SocketState>();
 
 	// Start listener thread
-	_listener = std::thread(
+	_listenerThread = std::thread(
 			&NetworkServer::connectionListener,
 			this,
 			port,
@@ -441,6 +441,22 @@ void NetworkServer::closePlayerSession(uint32_t playerId)
                 << std::endl;
     }
 }
+
+
+std::vector<uint32_t> NetworkServer::getPlayerList()
+{
+    auto list = std::vector<uint32_t>();
+
+    // Acquire read lock on session map and build list
+    std::shared_lock<std::shared_mutex> lock(_sessionMutex);
+    for (auto& session : _sessions)
+    {
+        list.push_back(session.first);
+    }
+
+    return list;
+}
+
 
 std::vector<std::shared_ptr<GameEvent>> NetworkServer::receiveEvents()
 {

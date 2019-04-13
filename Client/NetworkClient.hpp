@@ -4,28 +4,80 @@
 #include <memory>
 #include <iostream>
 
-#define WIN32_LEAN_AND_MEAN
-
-#include <windows.h>
 #include <winsock2.h>
 #include <ws2tcpip.h>
 #include <stdlib.h>
 #include <stdio.h>
 
-
-// Need to link with Ws2_32.lib, Mswsock.lib, and Advapi32.lib
-#pragma comment (lib, "Ws2_32.lib")
-#pragma comment (lib, "Mswsock.lib")
-#pragma comment (lib, "AdvApi32.lib")
-
-#define DEFAULT_BUFLEN 8192
-
 #include "Shared/BaseState.hpp"
 #include "Shared/GameEvent.hpp"
 #include "Shared/BlockingQueue.hpp"
 
+#define DEFAULT_BUFLEN 8192
+
 class NetworkClient
 {
+public:
+	/*
+	** Initialize queues.
+	*/
+	NetworkClient();
+
+	/*
+	** Destroy queues and any other allocated structures.
+	*/
+	~NetworkClient();
+
+	/*
+    ** API: Call with address and port to connect to server, returns a player
+    ** ID. After this call, the closeConnection(), sendEvents(), and
+    ** receiveUpdates() functions can be called on the client. Synchronous.
+    **
+	** Throws: std::runtime_error if connection to server fails
+    **
+	** Internal: Called from the main thread in client. Connects to server,
+    ** creates a socket, spawns a thread with connect(), and returns a player
+    ** ID.
+	*/
+	uint32_t connect(std::string address, std::string port);
+
+	/*
+    ** API: Call this function to disconnect from the server. After this call,
+    ** the only valid function to call on the client is connect(). Synchronous.
+    **
+    ** Note that this function is called automatically if the server goes down
+    ** or there are other socket errors. It is therefore imperative to use
+    ** try-catch blocks on the sendEvents() and receiveUpdates() functions to
+    ** ensure that the client smoothly rides through a disconnect.
+    **
+	** Internal: Shuts down internal I/O threads, clears queues, and closes
+    ** the connected socket.
+	*/
+	void closeConnection();
+
+	/*
+    ** API: Send events to the server. Events will be queued internally and
+    ** sent on a different thread. Synchronous for the calling thread;
+    ** asynchronous with respect to the network.
+    **
+    ** Throws: std::runtime_error if not connected to server
+    **
+	** Internal: Add events to the _eventQueue, to be sent by socketHandler().
+    **
+	*/
+	void sendEvents(std::vector<std::shared_ptr<GameEvent>> events);
+
+	/*
+    ** API: Receive updates from the server. Synchronous for the calling
+    ** thread; asynchronous with respect to the network.
+    **
+    ** Throws: std::runtime_error if not connected to server
+    **
+	** Internal: Return contents of _updateQueue as a vector, removing them
+    ** from the queue.
+	*/
+	std::vector<std::shared_ptr<BaseState>> receiveUpdates();
+
 private:
 	/*
 	** Runs in its own thread; adds updates to _updateQueue from socket.
@@ -54,46 +106,7 @@ private:
 	// Lock for socket, used in closeConnection() and public-facing API funcs
 	std::mutex _socketMutex;
 
-	// Threads for reading and writing
+	// I/O threads
 	std::thread _readThread, _writeThread;
-
-public:
-	/*
-	** Initialize queues.
-	*/
-	NetworkClient();
-
-	/*
-	** Destroy queues and any other allocated structures.
-	*/
-	~NetworkClient();
-
-	/*
-	** Called from the main thread in client. Connects to server, creates a
-	** socket, spawns a thread with connect(), and returns a player ID.
-	**
-	** Throws: std::runtime_error if connection fails
-	*/
-	uint32_t connect(std::string address, std::string port);
-
-	/*
-	** Close active connection and cleanup.
-	*/
-	void closeConnection();
-
-	/*
-	** Add events to the _eventQueue, to be sent by socketHandler().
-    **
-    ** Throws: std::runtime_error if not connected to server
-	*/
-	void sendEvents(std::vector<std::shared_ptr<GameEvent>> events);
-
-	/*
-	** Return contents of _updateQueue as a vector, removing them from the
-	** queue.
-    **
-    ** Throws: std::runtime_error if not connected to server
-	*/
-	std::vector<std::shared_ptr<BaseState>> receiveUpdates();
 };
 

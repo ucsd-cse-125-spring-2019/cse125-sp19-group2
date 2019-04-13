@@ -9,7 +9,6 @@
 #include <iostream>
 #include <shared_mutex>
 
-
 #include "Shared/BaseState.hpp"
 #include "Shared/GameEvent.hpp"
 #include "Shared/BlockingQueue.hpp"
@@ -22,6 +21,48 @@
 
 class NetworkServer
 {
+public:
+	/*
+    ** API: This will initialize the network server and start listening for new
+    ** connections.
+    **
+	** Internal: Initialize queues, spawn a thread with connectionListener()
+    ** to listen for new player connections.
+	*/
+	NetworkServer(std::string port);
+
+	/*
+	** Internal: Close connections and destroy queues.
+	*/
+	~NetworkServer();
+
+    /*
+    ** API: Returns a vector of active player IDs. Synchronous.
+    */
+    std::vector<uint32_t> getPlayerList();
+
+	/*
+    ** API: receive events from all clients. No guarantees on client order, but
+    ** events should be received in order on a per-client basis. Synchronous
+    ** for the calling thread; asynchronous with respect to the network.
+    **
+    ** Internal: Returns the contents of the _eventQueue, removing them from
+    ** the queue.
+	*/
+	std::vector<std::shared_ptr<GameEvent>> receiveEvents();
+
+	/*
+    ** API: Send updates to all clients. No guarantees on client order, but
+    ** updates will be sent in order on a per-client basis. Try to avoid
+    ** calling this function when no clients are connected, as updates will
+    ** fill an internal queue. Synchronous for the calling thread;
+    ** asynchronous with respect to the network.
+    **
+	** Internal: Add events to the _updateQueue(), to be sent by
+    ** socketHandler().
+	*/
+	void sendUpdates(std::vector<std::shared_ptr<BaseState>>);
+
 private:
 	/*
 	** Runs in its own thread; created by by the constructor. Accepts new
@@ -55,9 +96,13 @@ private:
     // Blocking update queue
 	std::unique_ptr<BlockingQueue<std::shared_ptr<BaseState>>> _updateQueue;
 	
-	// Network threads
-	std::thread _listener, _readThread, _writeThread;
+	// I/O threads
+	std::thread _listenerThread, _readThread, _writeThread;
 
+    /*
+    ** Basic private struct to keep track of internal state on a per-client
+    ** basis.
+    */
 	struct SocketState
 	{
 		uint32_t playerId;
@@ -73,32 +118,8 @@ private:
 		std::vector<char> writeBuf;
 	};
 
-	// client session state map from player id to session
+	// Client session state map from player id to session
 	std::unordered_map<uint32_t, SocketState> _sessions;
 	mutable std::shared_mutex _sessionMutex;
-
-public:
-	/*
-	** Initialize queues, spawn a thread with connectionListener() to listen
-	** for new player connections.
-	**
-	** TODO: write and pass in IDGenerator
-	*/
-	NetworkServer(std::string port);
-
-	/*
-	** Close connections and destroy queues.
-	*/
-	~NetworkServer();
-
-	/*
-	** Returns the contents of the _eventQueue, removing them from the queue.
-	*/
-	std::vector<std::shared_ptr<GameEvent>> receiveEvents();
-
-	/*
-	** Add events to the _updateQueue(), to be sent by socketHandler()
-	*/
-	void sendUpdates(std::vector<std::shared_ptr<BaseState>>);
 };
 

@@ -51,25 +51,22 @@ uint32_t NetworkClient::connect(std::string address, std::string port)
 	hints.ai_flags = AI_PASSIVE;
 
 	// Get address info from hints
-	OutputDebugString("Attempt to Get address info\n");
-	// TODO: change default port to port
 	if ((iResult = getaddrinfo(address.c_str(), port.c_str(), &hints, &result) != 0))
 	{
 		WSACleanup();
         throw std::runtime_error("getAddrInfo failed with error: " + iResult);
 	}
-	OutputDebugString("Attempt to connect\n");
+
 	// Attempt to connect to an address until one succeeds
 	for (ptr = result; ptr != NULL; ptr = ptr->ai_next) 
 	{
 		// Create a SOCKET for connecting to server
 		clientSock = socket(ptr->ai_family, ptr->ai_socktype,
-			ptr->ai_protocol);
+    			ptr->ai_protocol);
 		if (clientSock == INVALID_SOCKET) 
 		{
-			std::cerr << "Socket creation failed with error: " << WSAGetLastError() << std::endl;
 			WSACleanup();
-			return 1;
+            throw std::runtime_error("Socket creation failed with error: " + WSAGetLastError());
 		}
 
 		// Connect to server.
@@ -138,14 +135,13 @@ uint32_t NetworkClient::connect(std::string address, std::string port)
 				&NetworkClient::socketWriteHandler,
 				this);
 
+        // Debug statement, may be removed if necessary
         std::cerr << "Successfully connected to " << address << ":" << port
                 << " with playerId " << (uint32_t)*playerId << std::endl;
 
 		// Return player ID
 		return (uint32_t)*playerId;
 	}
-	// thread
-	return 1;
 }
 
 void NetworkClient::socketReadHandler()
@@ -173,6 +169,7 @@ void NetworkClient::socketReadHandler()
 			}
 			else if (!recvResult || recvResult == SOCKET_ERROR)
 			{
+                // Debug statement, may be removed as necessary
 				std::cerr << "Failed to read from socket, "
 					<< "shutting down read thread." << std::endl;
 				closeConnection();
@@ -201,6 +198,7 @@ void NetworkClient::socketReadHandler()
 			}
 			else if (!recvResult || recvResult == SOCKET_ERROR)
 			{
+                // Debug statement, may be removed as necessary
 				std::cerr << "Failed to read from socket, "
 						<< "shutting down read thread." << std::endl;
 				closeConnection();
@@ -268,6 +266,7 @@ void NetworkClient::socketWriteHandler()
 			}
 			else if (!sendResult || sendResult == SOCKET_ERROR)
 			{
+                // Debug statement, may be removed as necessary
 				std::cerr << "Failed to write to socket, "
 						<< "shutting down write thread." << std::endl;
 				closeConnection();
@@ -292,6 +291,7 @@ void NetworkClient::closeConnection()
 
 	if (_socket != INVALID_SOCKET)
 	{
+        // Debug
 		std::cerr << "Closing connection to server" << std::endl;
 
 		// Shutdown threads
@@ -331,6 +331,7 @@ void NetworkClient::closeConnection()
 		WSACleanup(); // If issues, remove this
 		_socket = INVALID_SOCKET;
 
+        // Debug
         std::cerr << "Successfully disconnected from server" << std::endl;
 	}
 }
