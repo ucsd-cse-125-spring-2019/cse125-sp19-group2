@@ -1,11 +1,11 @@
 ﻿#include "InputManager.h"
 
-InputManager& InputManager::GetInstance() {
+InputManager& InputManager::getInstance() {
   static InputManager inputManager;
   return inputManager;
 }
 
-std::unique_ptr<Key> const& InputManager::Register(int keycode) {
+std::unique_ptr<Key> const& InputManager::getKey(int keycode) {
   auto result = _keyList.find(keycode);
   if (result == _keyList.end()) {
     return _keyList.insert({keycode, std::make_unique<Key>(keycode)}).first->second;
@@ -15,19 +15,19 @@ std::unique_ptr<Key> const& InputManager::Register(int keycode) {
   }
 }
 
-void InputManager::Fire(int keycode, KeyState keyState) {
+void InputManager::fire(int keycode, KeyState keyState) {
   lock.lock();
   _inputQueue.push_back(std::make_tuple(keycode, keyState));
   lock.unlock();
 }
 
-void InputManager::Repeat(int keycode) {
+void InputManager::repeat(int keycode) {
   lock.lock();
   _repeatQueue.push_back(std::make_tuple(keycode, KeyState::None));
   lock.unlock();
 }
 
-void InputManager::Update() {
+void InputManager::update() {
 
   std::vector<std::tuple<int, KeyState>> local;
   lock.lock();
@@ -40,7 +40,7 @@ void InputManager::Update() {
   for (const auto [keycode, keyState] : local) {
     auto result = _keyList.find(keycode);
     if (result != _keyList.end()) {
-      result->second->Update(keyState);
+      result->second->update(keyState);
     };
   }
 

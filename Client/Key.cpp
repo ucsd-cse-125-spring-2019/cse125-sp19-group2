@@ -9,7 +9,7 @@ Key::~Key() {
 
 }
 
-void Key::Update(KeyState const keyState) {
+void Key::update(KeyState const keyState) {
 
   // on release
   if ((keyState & KeyState::Release)) {
@@ -29,7 +29,7 @@ void Key::Update(KeyState const keyState) {
     }
 
     // send None event to repeat
-    RepeatInput();
+    repeatInput();
   }
 
   // on press
@@ -41,11 +41,11 @@ void Key::Update(KeyState const keyState) {
     _keyState |= KeyState::Repeat;
 
     // send None event to repeat
-    RepeatInput();
+    repeatInput();
   }
 
 }
 
-void Key::RepeatInput() {
-  InputManager::GetInstance().Repeat(_keycode);
+void Key::repeatInput() {
+  InputManager::getInstance().repeat(_keycode);
 }

@@ -8,7 +8,7 @@
 
 class InputManager {
 public:
-  static InputManager& GetInstance();
+  static InputManager& getInstance();
 
   /**
    * \brief 
@@ -17,13 +17,13 @@ public:
    * });
    * \param scancode GLFW Keycode
    */
-  std::unique_ptr<Key> const& Register(int keycode);
+  std::unique_ptr<Key> const& getKey(int keycode);
 
-  void Fire(int keycode, KeyState keyState);
+  void fire(int keycode, KeyState keyState);
 
-  void Repeat(int keycode);
+  void repeat(int keycode);
 
-  void Update();
+  void update();
 
 private:
   InputManager();;

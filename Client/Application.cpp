@@ -62,12 +62,12 @@ void Application::Setup() {
   _quadShader->RegisterUniform("rgbTexture");
 
   // Test input
-  InputManager::GetInstance().Register(GLFW_KEY_G)->OnPress([&]
+  InputManager::getInstance().getKey(GLFW_KEY_G)->onPress([&]
   {
     std::cout << "Hello World!" << this->count << std::endl;
   });
 
-  InputManager::GetInstance().Register(GLFW_KEY_K)->OnRepeat([&]
+  InputManager::getInstance().getKey(GLFW_KEY_K)->onRepeat([&]
   {
     this->count += 1;
     std::cout << this->count << std::endl;
@@ -121,7 +121,7 @@ void Application::Run() {
 
 void Application::Update()
 {
-  InputManager::GetInstance().Update();
+  InputManager::getInstance().update();
   _camera->Update();
 }
 
@@ -187,10 +187,10 @@ void Application::Resize(int x, int y) {
 void Application::Keyboard(int key, int scancode, int action, int mods) {
   if (action == GLFW_PRESS) {
     if (mods == GLFW_MOD_SHIFT) {
-      InputManager::GetInstance().Fire(key, KeyState::Press | KeyState::Shift);
+      InputManager::getInstance().fire(key, KeyState::Press | KeyState::Shift);
     }
     else {
-      InputManager::GetInstance().Fire(key, KeyState::Press);
+      InputManager::getInstance().fire(key, KeyState::Press);
     }
   }
   else if (action == GLFW_RELEASE) {
@@ -198,7 +198,7 @@ void Application::Keyboard(int key, int scancode, int action, int mods) {
 
     }
     else {
-      InputManager::GetInstance().Fire(key, KeyState::Release);
+      InputManager::getInstance().fire(key, KeyState::Release);
     }
   }
 }

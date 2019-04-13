@@ -27,18 +27,18 @@ public:
   ~Key();
 
   template <typename T>
-  void OnPress(T&& lambda);
+  void onPress(T&& lambda);
 
   template <typename T>
-  void OnRelease(T&& lambda);
+  void onRelease(T&& lambda);
 
   template <typename T>
-  void OnRepeat(T&& lambda);
+  void onRepeat(T&& lambda);
 
-  void Update(KeyState const keyState);
+  void update(KeyState const keyState);
 
 private:
-  void RepeatInput();
+  void repeatInput();
 
   int _keycode;
   KeyState _keyState;
@@ -50,17 +50,17 @@ private:
 };
 
 template <typename T>
-void Key::OnPress(T&& lambda) {
+void Key::onPress(T&& lambda) {
 	_onPress.push_back(lambda);
 }
 
 template <typename T>
-void Key::OnRelease(T&& lambda) {
+void Key::onRelease(T&& lambda) {
 	_onRelease.push_back(lambda);
 }
 
 template <typename T>
-void Key::OnRepeat(T&& lambda) {
+void Key::onRepeat(T&& lambda) {
 	_onRepeat.push_back(lambda);
 }
 
