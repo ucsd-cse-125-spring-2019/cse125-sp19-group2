@@ -130,7 +130,7 @@ void NetworkServer::connectionListener(
 				false, // is reading
 				0, // length (bytes to read)
 				0, // bytes read
-				std::vector<char>(SEND_BUFSIZE) // write buffer
+				std::vector<char>() // write buffer
 			};
 
 			std::cerr << "Accepting new connection with playerId: "
@@ -138,37 +138,49 @@ void NetworkServer::connectionListener(
 
 
 			// Send player ID (4 bytes) at the beginning of connection
-			if (send(tempSock,
-					(char*)(&(clientState.playerId)), 
-					sizeof(uint32_t), 0) == sizeof(uint32_t))
+			int bytesSent = 0;
+			while (bytesSent != sizeof(uint32_t))
 			{
-				// Set socket as non-blocking
-				u_long socketMode = 1;
-				res = ioctlsocket(tempSock, FIONBIO, &socketMode);
+				int sendResult = send(
+						tempSock,
+						(char*)(&(clientState.playerId)),
+						sizeof(uint32_t),
+						0);
 
-				// Check if error setting as non-blocking
-				if (res == SOCKET_ERROR)
+				if (sendResult > 0)
 				{
-					std::cerr << "Failed to set socket as non-blocking. Error code: "
-							<< res << std::endl;
-					closesocket(tempSock);
-					WSACleanup();
-					exit(1);
+					bytesSent += sendResult;
 				}
-
-				// unlocks when out of scope
-				std::unique_lock<std::shared_mutex> lock(_sessionMutex);
-
-				// Add to session map
-				_sessions.insert({clientState.playerId, clientState});
+				else if (!sendResult || sendResult == SOCKET_ERROR)
+				{
+					std::cerr << "Failed to send player ID to new client" << std::endl;
+					closesocket(tempSock);
+					tempSock = INVALID_SOCKET;
+					continue;
+				}
 			}
-			else
+
+			// Set socket as non-blocking
+			u_long socketMode = 1;
+			res = ioctlsocket(tempSock, FIONBIO, &socketMode);
+
+			// Check if error setting as non-blocking
+			if (res == SOCKET_ERROR)
 			{
-				std::cerr << "Failed to send player ID to new client" << std::endl;
+				std::cerr << "Failed to set socket as non-blocking. Error code: "
+						<< res << std::endl;
 				closesocket(tempSock);
+				WSACleanup();
+				exit(1);
 			}
-			tempSock = INVALID_SOCKET;
 
+			// unlocks when out of scope
+			std::unique_lock<std::shared_mutex> lock(_sessionMutex);
+
+			// Add to session map
+			_sessions.insert({clientState.playerId, clientState});
+
+			tempSock = INVALID_SOCKET;
 		}
 		else
 		{
@@ -238,7 +250,7 @@ void NetworkServer::socketReadHandler()
                 {
                     int recvResult = recv(
                             session.socket,
-                            session.readBuf.data(),
+                            session.readBuf.data() + session.bytesRead,
                             (int)session.readBuf.size(),
                             0);
 
@@ -321,15 +333,23 @@ void NetworkServer::socketReadHandler()
 void NetworkServer::socketWriteHandler()
 {
 
-    std::stringstream ss;
     while (true)
     {
+		// If no clients, sleep and restart the loop
+		std::shared_lock<std::shared_mutex> preLock(_sessionMutex);
+		if (!_sessions.size())
+		{
+			preLock.unlock();
+			std::this_thread::sleep_for(std::chrono::seconds(SELECT_TIMEOUT_SEC));
+			continue;
+		}
         // Retreive next item from queue. This will block until an item appears
 		// on the queue.
 		std::shared_ptr<BaseState> nextItem;
 		_updateQueue->pop(nextItem);
 
 		// Create an output archive and serialize the object from the queue
+		std::stringstream ss;
         cereal::BinaryOutputArchive oarchive(ss);
         oarchive(nextItem);
 
@@ -379,8 +399,6 @@ void NetworkServer::socketWriteHandler()
 				}
 			}
         }
-
-        std::cerr << "Bufsize: " << size << std::endl;
          
         free(databuf);
     }
@@ -412,8 +430,17 @@ void NetworkServer::closePlayerSession(uint32_t playerId)
 
 std::vector<std::shared_ptr<GameEvent>> NetworkServer::receiveEvents()
 {
-	// TODO: return contents of event queue
-	return std::vector<std::shared_ptr<GameEvent>>();
+	auto eventList = std::vector<std::shared_ptr<GameEvent>>();
+
+	// Lock and build events from queue
+	std::unique_lock<std::mutex> lock(_eventMutex);
+	while (!_eventQueue->empty())
+	{
+		eventList.push_back(_eventQueue->front());
+		_eventQueue->pop();
+	}
+
+	return eventList;
 }
 
 

@@ -18,8 +18,7 @@
 #pragma comment (lib, "Mswsock.lib")
 #pragma comment (lib, "AdvApi32.lib")
 
-#define DEFAULT_BUFLEN 512
-#define DEFAULT_PORT "27015"
+#define DEFAULT_BUFLEN 8192
 
 #include "Shared/BaseState.hpp"
 #include "Shared/GameEvent.hpp"
@@ -39,12 +38,21 @@ private:
 	*/
 	void socketWriteHandler();
 	
-	// Queues for events and entity updates
+	// Blocking queue for events
 	std::unique_ptr<BlockingQueue<std::shared_ptr<GameEvent>>> _eventQueue;
+
+	// Queue and mutex for updates
 	std::unique_ptr<std::queue<std::shared_ptr<BaseState>>> _updateQueue;
+	std::mutex _updateMutex;
 
 	// Socket to read and write from
 	SOCKET _socket;
+
+	// Status of the current connection
+	volatile bool _isAlive = true;
+
+	// Lock for socket, used only in closeConnection()
+	std::mutex _socketMutex;
 
 	// Threads for reading and writing
 	std::thread _readThread, _writeThread;
@@ -68,9 +76,14 @@ public:
 	uint32_t connect(std::string address, std::string port);
 
 	/*
+	** Close active connection and cleanup.
+	*/
+	void closeConnection();
+
+	/*
 	** Add events to the _eventQueue, to be sent by socketHandler().
 	*/
-	void sendEvents(std::vector<std::shared_ptr<GameEvent>>);
+	void sendEvents(std::vector<std::shared_ptr<GameEvent>> events);
 
 	/*
 	** Return contents of _updateQueue as a vector, removing them from the

@@ -1,8 +1,13 @@
+#include <cereal/archives/binary.hpp>
+#include <cereal/types/memory.hpp>
+#include <cereal/types/string.hpp>
+
 #include "NetworkClient.hpp"
 
 NetworkClient::NetworkClient()
 {
-	// TODO: init queues
+	_updateQueue = std::make_unique<std::queue<std::shared_ptr<BaseState>>>();
+	_eventQueue = std::make_unique<BlockingQueue<std::shared_ptr<GameEvent>>>();
 }
 
 
@@ -142,24 +147,174 @@ uint32_t NetworkClient::connect(std::string address, std::string port)
 
 void NetworkClient::socketReadHandler()
 {
+	// Buffer for recv
+	char readBuf[DEFAULT_BUFLEN];
+
+	// Iterate until thread interrupted
+	// TODO: condition on shared variable
+	while (_isAlive)
+	{
+		uint32_t bytesRead = 0;
+
+		// Get length of object following
+		char lengthBuf[sizeof(uint32_t)];
+		while (bytesRead < sizeof(uint32_t))
+		{
+			int recvResult = recv(
+					_socket,
+					lengthBuf,
+					sizeof(uint32_t),
+					0);
+			if (recvResult > 0)
+			{
+				bytesRead += recvResult;
+			}
+			else if (recvResult == SOCKET_ERROR)
+			{
+				std::cerr << "Failed to read from socket, "
+					<< "shutting down read thread." << std::endl;
+				closeConnection();
+				return;
+			}
+		}
+
+		// Grab length from buffer
+		uint32_t length = *lengthBuf;
+
+		// Grab next "length" bytes
+		bytesRead = 0;
+
+		// Read until we've buffered the expected object
+		while (bytesRead < length)
+		{
+			int recvResult = recv(
+					_socket,
+					readBuf + bytesRead,
+					length - bytesRead,
+					0);
+
+			if (recvResult > 0)
+			{
+				bytesRead += recvResult;
+			}
+			else if (recvResult == SOCKET_ERROR)
+			{
+				std::cerr << "Failed to read from socket, "
+						<< "shutting down read thread." << std::endl;
+				closeConnection();
+				return;
+			}
+		}
+
+		// Stream for deserialization
+		std::stringstream ss;
+
+		// Deserialize the object
+		ss.write(readBuf, DEFAULT_BUFLEN);
+		cereal::BinaryInputArchive iarchive(ss);
+		std::shared_ptr<BaseState> statePtr;
+		iarchive(statePtr);
+
+		// Lock and add to queue
+		std::unique_lock<std::mutex> lock(_updateMutex);
+		_updateQueue->push(statePtr);
+		lock.unlock();
+	}
+
 	return;
 }
 
 
 void NetworkClient::socketWriteHandler()
 {
+	while (_isAlive)
+	{
+		// Grab item off of event queue. Will block if queue is empty
+		std::shared_ptr<GameEvent> nextItem;
+		_eventQueue->pop(nextItem);
+
+		// Create an output archive and serialize the object from the queue
+		std::stringstream ss;
+		cereal::BinaryOutputArchive oarchive(ss);
+		oarchive(nextItem);
+
+		// Get the size of the serialized object
+		ss.seekg(0, std::ios::end);
+		uint32_t size = (uint32_t)ss.tellg();
+		ss.seekg(0, std::ios::beg);
+
+		// Copy into char buffer
+		char * databuf = (char*)malloc(size + sizeof(uint32_t));
+
+		// Size of serialized object first, then object itself
+		memcpy(databuf, &size, sizeof(uint32_t));
+		ss.read(databuf + sizeof(uint32_t), size);
+
+		// Send raw data to the socket
+		int bytesSent = 0;
+		while (bytesSent != size + sizeof(uint32_t))
+		{
+			int sendResult = send(
+				_socket,
+				databuf + bytesSent,
+				size + sizeof(uint32_t) - bytesSent,
+				0);
+
+			if (sendResult > 0)
+			{
+				bytesSent += sendResult;
+			}
+			else if (!sendResult || sendResult == SOCKET_ERROR)
+			{
+				std::cerr << "Failed to write to socket, "
+						<< "shutting down write thread." << std::endl;
+				closeConnection();
+				return;
+			}
+		}
+
+		free(databuf);
+	}
 	return;
 }
 
 
-void NetworkClient::sendEvents(std::vector<std::shared_ptr<GameEvent>>)
+void NetworkClient::closeConnection()
 {
-	// TODO: add to event queue
+	std::unique_lock<std::mutex> lock(_socketMutex);
+
+	if (_socket != INVALID_SOCKET)
+	{
+		// Shutdown threads
+		_isAlive = false;
+		std::cerr << "Closing connection to server" << std::endl;
+		closesocket(_socket);
+		WSACleanup(); // If issues, remove this
+		_socket = INVALID_SOCKET;
+	}
+}
+
+
+void NetworkClient::sendEvents(std::vector<std::shared_ptr<GameEvent>> events)
+{
+	for (auto& event : events)
+	{
+		_eventQueue->push(event);
+	}
 }
 
 
 std::vector<std::shared_ptr<BaseState>> NetworkClient::receiveUpdates()
 {
-	// TODO: remove from update queue
-	return std::vector<std::shared_ptr<BaseState>>();
+	auto updateList = std::vector<std::shared_ptr<BaseState>>();
+
+	// Lock and build updates from queue
+	std::unique_lock<std::mutex> lock(_updateMutex);
+	while (!_updateQueue->empty())
+	{
+		updateList.push_back(_updateQueue->front());
+		_updateQueue->pop();
+	}
+
+	return updateList;
 }

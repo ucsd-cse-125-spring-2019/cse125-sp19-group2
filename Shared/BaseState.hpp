@@ -1,6 +1,8 @@
 #pragma once
 
 #include <glm/glm.hpp>
+#include <string>
+#include <iostream>
 
 #include "Shared/Common.hpp"	// GameEntity type enum
 
@@ -46,8 +48,15 @@ struct BaseState
 				scale);
 	};
 
+	virtual void print()
+	{
+		std::cerr << "[type: " << type << ", id: " << id << ", scale: "
+			<< scale << "]" << std::endl;
+	}
+
     // This is silly but it is required for Cereal to recognize this as a
     // polymorphic type. You do not have to implement or call this function.
     virtual uint32_t getId() { return id; }
 };
+
 

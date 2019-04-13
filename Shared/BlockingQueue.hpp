@@ -29,6 +29,12 @@ public:
 		}
 		item = _queue.front();
 		_queue.pop();
-	}
+	};
+
+	bool isEmpty()
+	{
+		std::unique_lock<std::mutex> lock(_mutex);
+		return _queue.empty();
+	};
 };
 
