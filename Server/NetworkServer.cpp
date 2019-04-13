@@ -8,7 +8,7 @@
 NetworkServer::NetworkServer(std::string port)
 {
 	// Initialize queues
-	_updateQueue = std::make_unique<BlockingQueue<std::shared_ptr<BaseState>>>();
+	_updateQueue = std::make_unique<BlockingQueue<std::pair<uint32_t, std::shared_ptr<BaseState>>>>();
 	_eventQueue = std::make_unique<std::queue<std::shared_ptr<GameEvent>>>();
 
 	_sessions = std::unordered_map<uint32_t, SocketState>();
@@ -362,8 +362,12 @@ void NetworkServer::socketWriteHandler()
 
         // Retreive next item from queue. This will block until an item appears
 		// on the queue.
-		std::shared_ptr<BaseState> nextItem;
-		_updateQueue->pop(nextItem);
+		std::pair<uint32_t, std::shared_ptr<BaseState>> nextPair;
+		_updateQueue->pop(nextPair);
+
+        // Grab player ID and shared pointer from pair
+        uint32_t playerId = nextPair.first;
+        std::shared_ptr<BaseState> nextItem = nextPair.second;
 
 		// Create an output archive and serialize the object from the queue
 		std::stringstream ss;
@@ -387,37 +391,42 @@ void NetworkServer::socketWriteHandler()
         for (auto& pair : _sessions)
         {
             SocketState session = pair.second;
-            std::copy(
-					databuf,
-					databuf + size + sizeof(uint32_t),
-					std::back_inserter(session.writeBuf));
 
-			// Loop until write buffer is empty
-			while (session.writeBuf.size())
-			{
-				int sendResult = send(
-						session.socket,
-						session.writeBuf.data(),
-						(int)session.writeBuf.size(),
-						0);
+            // Only send the data if this is the correct playerId or if no
+            // playerId was specified
+            if (!playerId || session.playerId == playerId)
+            {
+                std::copy(
+                    databuf,
+                    databuf + size + sizeof(uint32_t),
+                    std::back_inserter(session.writeBuf));
 
-				// If no error, shrink buffer
-				if (sendResult > 0)
-				{
-					session.writeBuf.erase(
-						session.writeBuf.begin(),
-						session.writeBuf.begin() + sendResult);
-				}
-				else if (sendResult == SOCKET_ERROR && WSAGetLastError() != WSAEWOULDBLOCK)
-				{
-                    // Debug
-					std::cerr << "Encountered error while writing socket for player "
-						<< session.playerId << " with code " << WSAGetLastError()
-						<< std::endl;
-				}
-			}
+                // Loop until write buffer is empty
+                while (session.writeBuf.size())
+                {
+                    int sendResult = send(
+                        session.socket,
+                        session.writeBuf.data(),
+                        (int)session.writeBuf.size(),
+                        0);
+
+                    // If no error, shrink buffer
+                    if (sendResult > 0)
+                    {
+                        session.writeBuf.erase(
+                            session.writeBuf.begin(),
+                            session.writeBuf.begin() + sendResult);
+                    }
+                    else if (sendResult == SOCKET_ERROR && WSAGetLastError() != WSAEWOULDBLOCK)
+                    {
+                        // Debug
+                        std::cerr << "Encountered error while writing socket for player "
+                            << session.playerId << " with code " << WSAGetLastError()
+                            << std::endl;
+                    }
+                }
+            }
         }
-         
         free(databuf);
     }
     return;
@@ -492,6 +501,19 @@ void NetworkServer::sendUpdates(std::vector<std::shared_ptr<BaseState>> updates)
 {
     for (auto& update : updates)
     {
-        _updateQueue->push(update);
+        // We are sending to all players, so use 0 as playerId
+        std::pair<uint32_t, std::shared_ptr<BaseState>> updatePair = std::make_pair(0, update);
+        _updateQueue->push(updatePair);
+    }
+}
+
+
+void NetworkServer::sendUpdates(std::vector<std::shared_ptr<BaseState>> updates, uint32_t playerId)
+{
+    for (auto& update : updates)
+    {
+        // We are sending to just one player
+        std::pair<uint32_t, std::shared_ptr<BaseState>> updatePair = std::make_pair(playerId, update);
+        _updateQueue->push(updatePair);
     }
 }

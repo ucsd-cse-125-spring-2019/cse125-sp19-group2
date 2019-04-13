@@ -8,6 +8,7 @@
 #include <chrono>
 #include <iostream>
 #include <shared_mutex>
+#include <utility>
 
 #include "Shared/BaseState.hpp"
 #include "Shared/GameEvent.hpp"
@@ -15,13 +16,20 @@
 #include "IdGenerator.hpp"
 
 #define MAX_CONNECTIONS 10
-#define SELECT_TIMEOUT_SEC 1
+#define SELECT_TIMEOUT_SEC 1   // Timeout for the select() syscall
 #define RECV_BUFSIZE 8192
 #define SEND_BUFSIZE 8192
 
 /*
 ** Class to interact with clients over the network. Public documentation marked
 ** with "API".
+**
+** Note that there is currently no conversion of endianness to network byte
+** order (and vice versa), because it would be more overhead for little gain.
+** x86 is little endian, and we will not be working with big endian machines.
+**
+** If this changes in the future, we should instead use the functionality in
+** <cereal/archives/binary_portable.hpp>, and tweak the way we send uint32_t's.
 */
 class NetworkServer
 {
@@ -74,10 +82,21 @@ public:
     ** fill an internal queue. Synchronous for the calling thread;
     ** asynchronous with respect to the network.
     **
-	** Internal: Add events to the _updateQueue, to be sent by
-    ** socketHandler().
+	** Internal: Add updates to the _updateQueue, to be sent by
+    ** socketHandler(). PlayerID is set to 0 in the pairs added to the queue.
 	*/
-	void sendUpdates(std::vector<std::shared_ptr<BaseState>>);
+	void sendUpdates(std::vector<std::shared_ptr<BaseState>> updates);
+
+    /*
+    ** API: Send updates to a particular client. Use this if updates need to be
+    ** sent only to a certain player (at login, for example). See the function
+    ** above for other details. Note that if there is no player with the
+    ** specified ID, the updates will be lost.
+    **
+    ** Internal: Works the same way as above, except PlayerIDs in the pairs are
+    ** set to the value that is passed to this function.
+    **/
+    void sendUpdates(std::vector<std::shared_ptr<BaseState>> updates, uint32_t playerId);
 
 private:
 	/*
@@ -104,8 +123,10 @@ private:
 	std::unique_ptr<std::queue<std::shared_ptr<GameEvent>>> _eventQueue;
     std::mutex _eventMutex;
 
-    // Blocking update queue
-	std::unique_ptr<BlockingQueue<std::shared_ptr<BaseState>>> _updateQueue;
+    // Blocking update queue. Stores pairs of playerIDs and BaseState pointers.
+    // If the playerID is zero, the update is sent to all clients; otherwise,
+    // it is sent to the socket mapped to that playerID.
+	std::unique_ptr<BlockingQueue<std::pair<uint32_t, std::shared_ptr<BaseState>>>> _updateQueue;
 	
 	// I/O threads
 	std::thread _listenerThread, _readThread, _writeThread;

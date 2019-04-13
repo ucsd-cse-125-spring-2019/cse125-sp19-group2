@@ -143,10 +143,11 @@ uint32_t NetworkClient::connect(std::string address, std::string port)
 	}
 }
 
+
 void NetworkClient::socketReadHandler()
 {
 	// Buffer for recv
-	char readBuf[RECV_BUFSIZE];
+	char * readBuf = (char*)calloc(1, RECV_BUFSIZE);
 
 	// Iterate until thread interrupted
 	while (_isAlive)
@@ -172,6 +173,7 @@ void NetworkClient::socketReadHandler()
 				std::cerr << "Failed to read from socket, "
 					<< "shutting down read thread." << std::endl;
 				closeConnection();
+                free(readBuf);
 				return;
 			}
 		}
@@ -201,6 +203,7 @@ void NetworkClient::socketReadHandler()
 				std::cerr << "Failed to read from socket, "
 						<< "shutting down read thread." << std::endl;
 				closeConnection();
+                free(readBuf);
 				return;
 			}
 		}
@@ -220,12 +223,16 @@ void NetworkClient::socketReadHandler()
 		lock.unlock();
 	}
 
+    free(readBuf);
 	return;
 }
 
 
 void NetworkClient::socketWriteHandler()
 {
+    // Buffer for send
+    char * sendBuf = (char*)calloc(1, SEND_BUFSIZE);
+
 	while (_isAlive)
 	{
 		// Grab item off of event queue. Will block if queue is empty
@@ -242,12 +249,10 @@ void NetworkClient::socketWriteHandler()
 		uint32_t size = (uint32_t)ss.tellg();
 		ss.seekg(0, std::ios::beg);
 
-		// Copy into char buffer
-		char * databuf = (char*)malloc(size + sizeof(uint32_t));
-
+		// Copy into send buffer
 		// Size of serialized object first, then object itself
-		memcpy(databuf, &size, sizeof(uint32_t));
-		ss.read(databuf + sizeof(uint32_t), size);
+		memcpy(sendBuf, &size, sizeof(uint32_t));
+		ss.read(sendBuf + sizeof(uint32_t), size);
 
 		// Send raw data to the socket
 		int bytesSent = 0;
@@ -255,7 +260,7 @@ void NetworkClient::socketWriteHandler()
 		{
 			int sendResult = send(
 				_socket,
-				databuf + bytesSent,
+				sendBuf + bytesSent,
 				size + sizeof(uint32_t) - bytesSent,
 				0);
 
@@ -269,12 +274,13 @@ void NetworkClient::socketWriteHandler()
 				std::cerr << "Failed to write to socket, "
 						<< "shutting down write thread." << std::endl;
 				closeConnection();
+                free(sendBuf);
 				return;
 			}
 		}
-
-		free(databuf);
 	}
+
+    free(sendBuf);
 	return;
 }
 

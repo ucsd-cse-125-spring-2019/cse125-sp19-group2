@@ -13,6 +13,7 @@
 #include "Shared/BlockingQueue.hpp"
 
 #define RECV_BUFSIZE 8192
+#define SEND_BUFSIZE 8192
 
 /*
 ** Class to interact with a server over the network. Public documentation
