@@ -294,6 +294,9 @@ void NetworkServer::socketReadHandler()
                             std::shared_ptr<GameEvent> eventPtr;
                             iarchive(eventPtr);
 
+                            // Enforce correct player ID
+                            eventPtr->playerId = session.playerId;
+
                             // Lock and add to queue
                             std::unique_lock<std::mutex> eventLock(_eventMutex);
                             _eventQueue->push(eventPtr);

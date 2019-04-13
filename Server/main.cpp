@@ -45,15 +45,27 @@ int main(int argc, char ** argv)
     testState->id = 5;
     testState->scale = 2.5;
 
-	testState->print();
+    std::shared_ptr<ExampleState> exampleState = std::make_shared<ExampleState>();
+    exampleState->extraVar = 1234;
 
-    for (int i = 0; i < 5; i++)
+    // Receive events in a loop
+    while (true)
     {
-        std::vector<std::shared_ptr<BaseState>> states = std::vector<std::shared_ptr<BaseState>>();
-        states.push_back(testState);
-        server->sendUpdates(states);
-    }
+        auto vec = server->receiveEvents();
+        for (auto& item : vec)
+        {
+            std::cerr << "[" << item->playerId << "] " << item->type << std::endl;
+        }
 
+        // Send update
+        auto updates = std::vector<std::shared_ptr<BaseState>>();
+        updates.push_back(testState);
+        updates.push_back(exampleState);
+        server->sendUpdates(updates);
+
+        std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+    }
+    
     std::cout << "Hello World!" << std::endl;
 	fgetc(stdin);
 }

@@ -17,6 +17,12 @@ struct ExampleState : BaseState
     {
         archive(cereal::base_class<BaseState>(this), extraVar);
     }
+
+    // Bad example of print overload, just here for example 
+    void print()
+    {
+        std::cerr << extraVar << std::endl;
+    }
 };
 
 // Register the polymorphic struct with cereal

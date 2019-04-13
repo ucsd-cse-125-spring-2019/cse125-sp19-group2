@@ -35,7 +35,7 @@ struct GameEvent
     template<class Archive>
     void serialize(Archive & archive)
     {
-        archive(playerId, playerName);
+        archive(type, playerId, playerName);
     }
 };
 

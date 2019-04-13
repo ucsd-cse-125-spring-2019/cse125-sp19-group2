@@ -54,6 +54,50 @@ int main(int argc, char ** argv)
         std::cerr << e.what() << std::endl;
     }
 
+    // Send events in a loop
+    while (true)
+    {
+        std::shared_ptr<GameEvent> eventPtr1 = std::make_shared<GameEvent>();
+        std::shared_ptr<GameEvent> eventPtr2 = std::make_shared<GameEvent>();
+        eventPtr1->playerId = res;
+        eventPtr1->playerName = "Chris";
+        eventPtr1->type = EVENT_PLAYER_MOVE_FORWARD;
+        eventPtr2->playerId = res;
+        eventPtr2->playerName = "Chris";
+        eventPtr2->type = EVENT_PLAYER_MOVE_RIGHT;
+        auto vec = std::vector <std::shared_ptr<GameEvent>>();
+        vec.push_back(eventPtr1);
+        vec.push_back(eventPtr2);
+        try
+        {
+            newClient->sendEvents(vec);
+        }
+        catch (std::runtime_error e)
+        {
+            std::cerr << e.what() << std::endl;
+            fgetc(stdin);
+            return 1;
+        }
+
+        // Get updates
+        try
+        {
+            auto updates = newClient->receiveUpdates();
+            for (auto& update : updates)
+            {
+                update->print();
+            }
+        }
+        catch (std::runtime_error e)
+        {
+            std::cerr << e.what() << std::endl;
+            fgetc(stdin);
+            return 1;
+        }
+
+        std::this_thread::sleep_for(std::chrono::milliseconds(500));
+    }
+
 	Application * app = new Application("ProjectBone", argc, argv);
 	app->Run();
 }
