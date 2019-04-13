@@ -361,7 +361,7 @@ void NetworkServer::socketWriteHandler()
 				int sendResult = send(
 						session.socket,
 						session.writeBuf.data(),
-						session.writeBuf.size(),
+						(int)session.writeBuf.size(),
 						0);
 
 				// If no error, shrink buffer

@@ -44,6 +44,7 @@ int main(int argc, char ** argv)
     testState->id = 5;
     testState->scale = 2.5;
 
+	/*
     for (int i = 0; i < 5; i++)
     {
         std::vector<std::shared_ptr<BaseState>> states = std::vector<std::shared_ptr<BaseState>>();
@@ -51,6 +52,7 @@ int main(int argc, char ** argv)
         server->sendUpdates(states);
         std::this_thread::sleep_for(std::chrono::seconds(5));
     }
+	*/
 
     std::cout << "Hello World!" << std::endl;
 	fgetc(stdin);

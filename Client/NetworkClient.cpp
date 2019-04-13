@@ -12,12 +12,7 @@ NetworkClient::~NetworkClient()
 }
 
 
-void NetworkClient::socketHandler(SOCKET socket)
-{
-	// TODO: add to update queue, remove from event queue
-}
-
-uint32_t NetworkClient::connect(std::string address, uint8_t port)
+uint32_t NetworkClient::connect(std::string address, std::string port)
 {
 	// TODO: connect to IP and port, create socket and spawn socketHandler()
 	SOCKET clientSock = INVALID_SOCKET;
@@ -43,14 +38,6 @@ uint32_t NetworkClient::connect(std::string address, uint8_t port)
 		OutputDebugString( "WSAStartup failed with error: " + iResult);
 	}
 
-	// Setup Winsock communication code here 
-
-	// When your application is finished call WSACleanup
-	if (WSACleanup() == SOCKET_ERROR)
-	{
-		printf("WSACleanup failed with error %d\n", WSAGetLastError());
-	}
-
 	// Fill addr info struct
 	ZeroMemory(&hints, sizeof(hints));
 	hints.ai_family = AF_INET;
@@ -58,14 +45,14 @@ uint32_t NetworkClient::connect(std::string address, uint8_t port)
 	hints.ai_protocol = IPPROTO_TCP;
 	hints.ai_flags = AI_PASSIVE;
 
-
 	// Get address info from hints
 	OutputDebugString("Attempt to Get address info\n");
 	// TODO: change default port to port
-	if ((iResult = getaddrinfo(address.c_str(), "8080", &hints, &result) != 0))
+	if ((iResult = getaddrinfo(address.c_str(), port.c_str(), &hints, &result) != 0))
 	{
 		OutputDebugString("getaddrinfo failed with error: " + iResult);
 		WSACleanup();
+		return 1;
 	}
 	OutputDebugString("Attempt to connect\n");
 	// Attempt to connect to an address until one succeeds
@@ -94,20 +81,74 @@ uint32_t NetworkClient::connect(std::string address, uint8_t port)
 	if (clientSock == INVALID_SOCKET) 
 	{
 		OutputDebugString("failed to connect to any port");
+		return 1;
 	}
 	else
 	{
-		if (ptr->ai_family == AF_INET)
+		/*if (ptr->ai_family == AF_INET)
 		{
-			OutputDebugString("connected to the port" + ((struct sockaddr_in*)ptr)->sin_port);
+			std::cerr << "Connected to server at "
+					<< ptr->ai_addrlen << " on port " << port
+					<< std::endl;
 		}
 		else 
 		{
 			OutputDebugString("connected to the port" + ((struct sockaddr_in6*)ptr)->sin6_port);
+		}*/
+
+		// Assign socket
+		_socket = clientSock;
+
+		// Get player id from socket
+		int bytesRead = 0;
+		char playerId[sizeof(uint32_t)];
+		while (bytesRead < sizeof(uint32_t))
+		{
+			int recvResult = recv(
+					_socket,
+					playerId,
+					sizeof(playerId),
+					0);
+
+			// We got data
+			if (recvResult > 0)
+			{
+				bytesRead += recvResult;
+			}
+			else
+			{
+				// Otherwise we had an error
+				std::cerr << "Error when receiving playerId" << std::endl;
+				closesocket(_socket);
+				_socket = INVALID_SOCKET;
+				return 1;
+			}
 		}
+
+		// Spawn threads for server I/O
+		_readThread = std::thread(
+				&NetworkClient::socketReadHandler,
+				this);
+		_writeThread = std::thread(
+				&NetworkClient::socketWriteHandler,
+				this);
+
+		// Return player ID
+		return (uint32_t)*playerId;
 	}
 	// thread
-	return 0;
+	return 1;
+}
+
+void NetworkClient::socketReadHandler()
+{
+	return;
+}
+
+
+void NetworkClient::socketWriteHandler()
+{
+	return;
 }
 
 

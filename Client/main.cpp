@@ -10,7 +10,9 @@ int main(int argc, char ** argv)
 {
 	OutputDebugString("start\n");
 	NetworkClient* newClient = new NetworkClient();
-	auto res = newClient->connect("localhost", 3000);
+	auto res = newClient->connect("localhost", PORTNUM);
+	std::cerr << "Our player ID is " << res << std::endl;
+
     // Sample client-side object. Remove as you wish. You probably want these
     // kinds of objects inside Application.cpp, but it's here for reference.
     // Unique_ptr's might also make more sense as well.

@@ -29,16 +29,25 @@ class NetworkClient
 {
 private:
 	/*
-	** Runs in its own thread; created by connect(). Pulls from server socket
-	** and adds to the _updateQueue, sends to server socket and removes
-	** from the _eventQueue.
+	** Runs in its own thread; adds updates to _updateQueue from socket.
 	*/
-	void socketHandler(SOCKET socket);
+	void socketReadHandler();
+
+	/*
+	** Runs in its own thread; pulls events from _eventQueue and sends them
+	** to the socket.
+	*/
+	void socketWriteHandler();
 	
 	// Queues for events and entity updates
 	std::unique_ptr<BlockingQueue<std::shared_ptr<GameEvent>>> _eventQueue;
 	std::unique_ptr<std::queue<std::shared_ptr<BaseState>>> _updateQueue;
 
+	// Socket to read and write from
+	SOCKET _socket;
+
+	// Threads for reading and writing
+	std::thread _readThread, _writeThread;
 public:
 	/*
 	** Initialize queues.
@@ -56,7 +65,7 @@ public:
 	**
 	** TODO: exceptions
 	*/
-	uint32_t connect(std::string address, uint8_t port);
+	uint32_t connect(std::string address, std::string port);
 
 	/*
 	** Add events to the _eventQueue, to be sent by socketHandler().
