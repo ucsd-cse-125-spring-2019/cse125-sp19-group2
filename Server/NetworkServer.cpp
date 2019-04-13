@@ -76,6 +76,7 @@ void NetworkServer::connectionListener(
 		exit(1);
 	}
 
+    // Create connection listener socket
 	listenSock = socket(result->ai_family, result->ai_socktype, result->ai_protocol);
 
 	if (listenSock == INVALID_SOCKET)
@@ -86,6 +87,7 @@ void NetworkServer::connectionListener(
 		exit(1);
 	}
 
+    // Bind to address and port
 	res = bind(listenSock, result->ai_addr, (int)result->ai_addrlen);
 
 	if (res == SOCKET_ERROR)
@@ -97,6 +99,7 @@ void NetworkServer::connectionListener(
 		exit(1);
 	}
 
+    // Put the socket in listening mode
 	res = listen(listenSock, SOMAXCONN);
 
 	if (res == SOCKET_ERROR)
@@ -107,10 +110,15 @@ void NetworkServer::connectionListener(
 		exit(1);
 	}
 
+    // While the server is running, we want to be accepting new connections.
+    // There is currently no cleanup logic, but it might be nice to have at
+    // some point.
 	while (true)
 	{
+        // This blocks until we get an incoming connection
 		tempSock = accept(listenSock, NULL, NULL);
 
+        // Reject connection if we are already at maxConnections.
 		std::unique_lock<std::shared_mutex> lock(_sessionMutex);
 		if (_sessions.size() >= maxConnections)
 		{
@@ -118,6 +126,8 @@ void NetworkServer::connectionListener(
 			continue;
 		}
 		lock.unlock();
+
+        // Otherwise create a player session for the new socket
 		if (tempSock != INVALID_SOCKET)
 		{
 			char value = 1;
@@ -135,7 +145,6 @@ void NetworkServer::connectionListener(
 
 			std::cerr << "Accepting new connection with playerId: "
 					<< clientState.playerId << std::endl;
-
 
 			// Send player ID (4 bytes) at the beginning of connection
 			int bytesSent = 0;
@@ -343,6 +352,8 @@ void NetworkServer::socketWriteHandler()
 			std::this_thread::sleep_for(std::chrono::seconds(SELECT_TIMEOUT_SEC));
 			continue;
 		}
+        preLock.unlock();
+
         // Retreive next item from queue. This will block until an item appears
 		// on the queue.
 		std::shared_ptr<BaseState> nextItem;

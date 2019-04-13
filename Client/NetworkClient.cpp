@@ -40,7 +40,7 @@ uint32_t NetworkClient::connect(std::string address, std::string port)
 		// why it failed. Instead we can rely on the return 
 		// status of WSAStartup.
 
-		OutputDebugString( "WSAStartup failed with error: " + iResult);
+        throw std::runtime_error("WSAStartup failed with error: " + iResult);
 	}
 
 	// Fill addr info struct
@@ -55,9 +55,8 @@ uint32_t NetworkClient::connect(std::string address, std::string port)
 	// TODO: change default port to port
 	if ((iResult = getaddrinfo(address.c_str(), port.c_str(), &hints, &result) != 0))
 	{
-		OutputDebugString("getaddrinfo failed with error: " + iResult);
 		WSACleanup();
-		return 1;
+        throw std::runtime_error("getAddrInfo failed with error: " + iResult);
 	}
 	OutputDebugString("Attempt to connect\n");
 	// Attempt to connect to an address until one succeeds
@@ -68,7 +67,7 @@ uint32_t NetworkClient::connect(std::string address, std::string port)
 			ptr->ai_protocol);
 		if (clientSock == INVALID_SOCKET) 
 		{
-			printf("socket failed with error: %ld\n", WSAGetLastError());
+			std::cerr << "Socket creation failed with error: " << WSAGetLastError() << std::endl;
 			WSACleanup();
 			return 1;
 		}
@@ -85,8 +84,7 @@ uint32_t NetworkClient::connect(std::string address, std::string port)
 	}
 	if (clientSock == INVALID_SOCKET) 
 	{
-		OutputDebugString("failed to connect to any port");
-		return 1;
+        throw std::runtime_error("Failed to connect to server");
 	}
 	else
 	{
@@ -123,12 +121,14 @@ uint32_t NetworkClient::connect(std::string address, std::string port)
 			else
 			{
 				// Otherwise we had an error
-				std::cerr << "Error when receiving playerId" << std::endl;
 				closesocket(_socket);
 				_socket = INVALID_SOCKET;
-				return 1;
+                throw(std::runtime_error("Error when receiving playerId"));
 			}
 		}
+
+        // Threads are dependent on this variable to run
+        _isAlive = true;
 
 		// Spawn threads for server I/O
 		_readThread = std::thread(
@@ -137,6 +137,9 @@ uint32_t NetworkClient::connect(std::string address, std::string port)
 		_writeThread = std::thread(
 				&NetworkClient::socketWriteHandler,
 				this);
+
+        std::cerr << "Successfully connected to " << address << ":" << port
+                << " with playerId " << (uint32_t)*playerId << std::endl;
 
 		// Return player ID
 		return (uint32_t)*playerId;
@@ -151,7 +154,6 @@ void NetworkClient::socketReadHandler()
 	char readBuf[DEFAULT_BUFLEN];
 
 	// Iterate until thread interrupted
-	// TODO: condition on shared variable
 	while (_isAlive)
 	{
 		uint32_t bytesRead = 0;
@@ -169,7 +171,7 @@ void NetworkClient::socketReadHandler()
 			{
 				bytesRead += recvResult;
 			}
-			else if (recvResult == SOCKET_ERROR)
+			else if (!recvResult || recvResult == SOCKET_ERROR)
 			{
 				std::cerr << "Failed to read from socket, "
 					<< "shutting down read thread." << std::endl;
@@ -197,7 +199,7 @@ void NetworkClient::socketReadHandler()
 			{
 				bytesRead += recvResult;
 			}
-			else if (recvResult == SOCKET_ERROR)
+			else if (!recvResult || recvResult == SOCKET_ERROR)
 			{
 				std::cerr << "Failed to read from socket, "
 						<< "shutting down read thread." << std::endl;
@@ -281,40 +283,101 @@ void NetworkClient::socketWriteHandler()
 
 void NetworkClient::closeConnection()
 {
-	std::unique_lock<std::mutex> lock(_socketMutex);
+	std::unique_lock<std::mutex> lock(_socketMutex, std::defer_lock);
+
+    if (!lock.try_lock())
+    {
+        return;
+    }
 
 	if (_socket != INVALID_SOCKET)
 	{
+		std::cerr << "Closing connection to server" << std::endl;
+
 		// Shutdown threads
 		_isAlive = false;
-		std::cerr << "Closing connection to server" << std::endl;
+
+        // Shutdown socket
+        shutdown(_socket, SD_BOTH);
+
+        // Add dummy item to event queue to unblock write thread
+        auto dummyPtr = std::make_shared<GameEvent>();
+        _eventQueue->push(dummyPtr);
+
+        // Wait for threads to shutdown
+        if (std::this_thread::get_id() != _readThread.get_id())
+        {
+            _readThread.join();
+        }
+        if (std::this_thread::get_id() != _writeThread.get_id())
+        {
+            _writeThread.join();
+        }
+
+        // Empty queues
+        while (!_eventQueue->isEmpty())
+        {
+            std::shared_ptr<GameEvent> eventPtr;
+            _eventQueue->pop(eventPtr);
+        }
+        std::unique_lock<std::mutex> queueLock(_updateMutex);
+        while (!_updateQueue->empty())
+        {
+            _updateQueue->pop();
+        }
+
+        // Close socket and clean up winsock env
 		closesocket(_socket);
 		WSACleanup(); // If issues, remove this
 		_socket = INVALID_SOCKET;
+
+        std::cerr << "Successfully disconnected from server" << std::endl;
 	}
 }
 
 
 void NetworkClient::sendEvents(std::vector<std::shared_ptr<GameEvent>> events)
 {
-	for (auto& event : events)
-	{
-		_eventQueue->push(event);
-	}
+    // Check to see if connection is active, throw exception if it is not
+    std::unique_lock<std::mutex> socketLock(_socketMutex);
+    if (_socket == INVALID_SOCKET)
+    {
+        socketLock.unlock();
+        throw(std::runtime_error("Not connected to a server"));
+    }
+    else
+    {
+        socketLock.unlock();
+        for (auto& event : events)
+        {
+            _eventQueue->push(event);
+        }
+    }
 }
 
 
 std::vector<std::shared_ptr<BaseState>> NetworkClient::receiveUpdates()
 {
-	auto updateList = std::vector<std::shared_ptr<BaseState>>();
+    // Check to see if connection is active, throw exception if it is not
+    std::unique_lock<std::mutex> socketLock(_socketMutex);
+    if (_socket == INVALID_SOCKET)
+    {
+        socketLock.unlock();
+        throw(std::runtime_error("Not connected to a server"));
+    }
+    else
+    {
+        socketLock.unlock();
 
-	// Lock and build updates from queue
-	std::unique_lock<std::mutex> lock(_updateMutex);
-	while (!_updateQueue->empty())
-	{
-		updateList.push_back(_updateQueue->front());
-		_updateQueue->pop();
-	}
+        auto updateList = std::vector<std::shared_ptr<BaseState>>();
 
-	return updateList;
+        // Lock and build updates from queue
+        std::unique_lock<std::mutex> lock(_updateMutex);
+        while (!_updateQueue->empty())
+        {
+            updateList.push_back(_updateQueue->front());
+            _updateQueue->pop();
+        }
+        return updateList;
+    }
 }

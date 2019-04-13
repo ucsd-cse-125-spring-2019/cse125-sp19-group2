@@ -8,10 +8,20 @@
 
 int main(int argc, char ** argv)
 {
-	OutputDebugString("start\n");
+    uint32_t res;
 	NetworkClient* newClient = new NetworkClient();
-	auto res = newClient->connect("localhost", PORTNUM);
-	std::cerr << "Our player ID is " << res << std::endl;
+
+    // Attempt connection
+    try
+    {
+        res = newClient->connect("localhost", PORTNUM);
+    }
+    catch (std::runtime_error e)
+    {
+        std::cerr << e.what() << std::endl;
+        fgetc(stdin);
+        return 1;
+    }
 
 	/*
 	std::this_thread::sleep_for(std::chrono::seconds(5));
@@ -28,18 +38,21 @@ int main(int argc, char ** argv)
     // matches our exampleEntity, we update it:
     std::shared_ptr<BaseState> baseStatePtr = std::make_shared<ExampleState>();
     exampleEntity->updateState(baseStatePtr);
-
-
-	std::this_thread::sleep_for(std::chrono::seconds(5));
-	for (auto& item : newClient->receiveUpdates()) {
-		item->print();
-	}
-
-	newClient->closeConnection();
-
+     
+    // Try to get updates from the server
 	std::this_thread::sleep_for(std::chrono::seconds(5));
 
-	newClient->connect("localhost", PORTNUM);
+    try
+    {
+        for (auto& item : newClient->receiveUpdates()) {
+            item->print();
+        }
+    }
+    catch (std::runtime_error e)
+    {
+        // Not connected to the server
+        std::cerr << e.what() << std::endl;
+    }
 
 	Application * app = new Application("ProjectBone", argc, argv);
 	app->Run();

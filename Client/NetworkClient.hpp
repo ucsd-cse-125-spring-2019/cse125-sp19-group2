@@ -48,14 +48,15 @@ private:
 	// Socket to read and write from
 	SOCKET _socket;
 
-	// Status of the current connection
+	// Status of the current connection, used to control I/O threads
 	volatile bool _isAlive = true;
 
-	// Lock for socket, used only in closeConnection()
+	// Lock for socket, used in closeConnection() and public-facing API funcs
 	std::mutex _socketMutex;
 
 	// Threads for reading and writing
 	std::thread _readThread, _writeThread;
+
 public:
 	/*
 	** Initialize queues.
@@ -71,7 +72,7 @@ public:
 	** Called from the main thread in client. Connects to server, creates a
 	** socket, spawns a thread with connect(), and returns a player ID.
 	**
-	** TODO: exceptions
+	** Throws: std::runtime_error if connection fails
 	*/
 	uint32_t connect(std::string address, std::string port);
 
@@ -82,12 +83,16 @@ public:
 
 	/*
 	** Add events to the _eventQueue, to be sent by socketHandler().
+    **
+    ** Throws: std::runtime_error if not connected to server
 	*/
 	void sendEvents(std::vector<std::shared_ptr<GameEvent>> events);
 
 	/*
 	** Return contents of _updateQueue as a vector, removing them from the
 	** queue.
+    **
+    ** Throws: std::runtime_error if not connected to server
 	*/
 	std::vector<std::shared_ptr<BaseState>> receiveUpdates();
 };
