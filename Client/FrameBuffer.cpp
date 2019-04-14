@@ -24,10 +24,10 @@ FrameBuffer::FrameBuffer(int width, int height) {
   glGenFramebuffers(1, &frameBufferID);
   glBindFramebuffer(GL_FRAMEBUFFER, frameBufferID);
 
-  glGenTextures(1, &rgbTexture);
+  glGenTextures(1, &rgbaTexture);
 
   // "Bind" the newly created texture : all future texture functions will modify this texture
-  glBindTexture(GL_TEXTURE_2D, rgbTexture);
+  glBindTexture(GL_TEXTURE_2D, rgbaTexture);
 
   // Give an empty image to OpenGL ( the last "0" )
   glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, this->width, this->height, 0, GL_RGBA, GL_UNSIGNED_BYTE, 0);
@@ -55,7 +55,7 @@ FrameBuffer::FrameBuffer(int width, int height) {
   glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, color);
 
   // Set "renderedTexture" as our colour attachement #0
-  glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, rgbTexture, 0);
+  glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, rgbaTexture, 0);
   glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, depthTexture, 0);
 
   // Set the list of draw buffers.
@@ -105,7 +105,7 @@ void FrameBuffer::drawQuad(std::unique_ptr<Shader> const &quadShader, unsigned i
   // Bind our texture in Texture Unit 0
   glActiveTexture(GL_TEXTURE0);
   if (externalTexture == -1) {
-    glBindTexture(GL_TEXTURE_2D, rgbTexture);
+    glBindTexture(GL_TEXTURE_2D, rgbaTexture);
   }
   else {
     glBindTexture(GL_TEXTURE_2D, externalTexture);
@@ -119,8 +119,8 @@ void FrameBuffer::drawQuad(std::unique_ptr<Shader> const &quadShader, unsigned i
   glBindVertexArray(0);
 }
 
-unsigned FrameBuffer::getRGB() {
-  return rgbTexture;
+unsigned FrameBuffer::getRGBA() {
+  return rgbaTexture;
 }
 
 unsigned FrameBuffer::getDepth() {
