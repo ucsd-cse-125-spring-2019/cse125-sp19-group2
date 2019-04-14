@@ -2,10 +2,10 @@
 #include <iostream>
 
 #include "Shared/GameEvent.hpp"
-#include "NetworkServer.hpp"
+#include "GameServer.hpp"
 
 int main(int argc, char ** argv)
 {
-    std::cout << "Hello World!" << std::endl;
-	fgetc(stdin);
+    GameServer * server = new GameServer();
+    server->start();
 }

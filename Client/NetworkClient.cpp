@@ -8,6 +8,7 @@ NetworkClient::NetworkClient()
 {
 	_updateQueue = std::make_unique<std::queue<std::shared_ptr<BaseState>>>();
 	_eventQueue = std::make_unique<BlockingQueue<std::shared_ptr<GameEvent>>>();
+    _socket = INVALID_SOCKET;
 }
 
 

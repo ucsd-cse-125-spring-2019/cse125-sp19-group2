@@ -124,9 +124,16 @@ void Application::Run() {
 void Application::Update()
 {
     // Get updates from the server
-    for (auto& update : _networkClient->receiveUpdates())
+    try
     {
-        // TODO: update logic
+        for (auto& update : _networkClient->receiveUpdates())
+        {
+            // TODO: update logic
+        }
+    }
+    catch (std::runtime_error e)
+    {
+        // Disconnected from the server
     }
 
 	_camera->Update();
