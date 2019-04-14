@@ -108,6 +108,12 @@
     <None Include="Resources\Shaders\quad.vert">
       <Filter>Resource Files</Filter>
     </None>
+    <None Include="Resources\Shaders\basic.frag">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="Resources\Shaders\basic.vert">
+      <Filter>Resource Files</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Header Files">

@@ -159,6 +159,8 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
+    <None Include="Resources\Shaders\basic.frag" />
+    <None Include="Resources\Shaders\basic.vert" />
     <None Include="Resources\Shaders\pano.frag" />
     <None Include="Resources\Shaders\pano.vert" />
     <None Include="Resources\Shaders\quad.frag" />

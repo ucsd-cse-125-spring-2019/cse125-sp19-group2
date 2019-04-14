@@ -33,70 +33,79 @@ Application::Application(const char* windowTitle, int argc, char** argv) {
       Logger::getInstance()->error(e.what());
   }
 
-  // Initialize GLFW
-  if (!glfwInit()) {
-    Logger::getInstance()->fatal("Failed to initialize GLFW");
-    fgetc(stdin);
-    return;
-  }
+	// Initialize GLFW
+	if (!glfwInit()) {
+		std::cerr << "Failed to initialize GLFW\n" << std::endl;
+		return;
+	}
 
-  glfwSetErrorCallback(StaticError);
+	glfwSetErrorCallback(StaticError);
 }
 
 Application::~Application() {
-  if (_window != nullptr) DestroyWindow();
-  glfwTerminate();
+	if (_window != nullptr) DestroyWindow();
+	glfwTerminate();
 }
 
 void Application::Setup() {
-  // Background color
-  glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-  glEnable(GL_DEPTH_TEST);
-  glDepthFunc(GL_LEQUAL);
-  glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-  glEnable(GL_CULL_FACE);
+	// Background color
+	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+	glEnable(GL_DEPTH_TEST);
+	glDepthFunc(GL_LEQUAL);
+	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+	glEnable(GL_CULL_FACE);
 
-  // Initialize pointers
-  _testShader = std::make_unique<Shader>();
-  _quadShader = std::make_unique<Shader>();
+	// Initialize pointers
+	_testShader = std::make_unique<Shader>();
+	_quadShader = std::make_unique<Shader>();
+	_cubeShader = std::make_unique<Shader>();
 
-  _camera = std::make_unique<Camera>();
-  _frameBuffer = std::make_unique<FrameBuffer>(800, 600);
-  _quadFrameBuffer = std::make_unique<FrameBuffer>(800, 600);
+	_camera = std::make_unique<Camera>();
+	_frameBuffer = std::make_unique<FrameBuffer>(800, 600);
+	_quadFrameBuffer = std::make_unique<FrameBuffer>(800, 600);
 
-  // Set up testing shader program
-  _testShader->LoadFromFile(GL_VERTEX_SHADER, "./Resources/Shaders/pano.vert");
-  _testShader->LoadFromFile(GL_FRAGMENT_SHADER, "./Resources/Shaders/pano.frag");
-  _testShader->CreateProgram();
-  _testShader->RegisterUniform("rgbTexture");
+	// Set up testing shader program
+	_testShader->LoadFromFile(GL_VERTEX_SHADER, "./Resources/Shaders/pano.vert");
+	_testShader->LoadFromFile(GL_FRAGMENT_SHADER, "./Resources/Shaders/pano.frag");
+	_testShader->CreateProgram();
+	_testShader->RegisterUniform("rgbTexture");
 
-  // quad pass through shader
-  _quadShader->LoadFromFile(GL_VERTEX_SHADER, "./Resources/Shaders/quad.vert");
-  _quadShader->LoadFromFile(GL_FRAGMENT_SHADER, "./Resources/Shaders/quad.frag");
-  _quadShader->CreateProgram();
-  _quadShader->RegisterUniform("rgbTexture");
+	// quad pass through shader
+	_quadShader->LoadFromFile(GL_VERTEX_SHADER, "./Resources/Shaders/quad.vert");
+	_quadShader->LoadFromFile(GL_FRAGMENT_SHADER, "./Resources/Shaders/quad.frag");
+	_quadShader->CreateProgram();
+	_quadShader->RegisterUniform("rgbTexture");
 
-  // Test input
-  InputManager::getInstance().getKey(GLFW_KEY_G)->onPress([&]
-  {
-    std::cout << "Hello World!" << this->count << std::endl;
-  });
+	// Basic model shader
+	_cubeShader->LoadFromFile(GL_VERTEX_SHADER, "./Resources/Shaders/basic.vert");
+	_cubeShader->LoadFromFile(GL_FRAGMENT_SHADER, "./Resources/Shaders/basic.frag");
+	_cubeShader->CreateProgram();
+	_cubeShader->RegisterUniformList({ "u_projection", "u_view", "u_model", "u_objCol" });
 
-  InputManager::getInstance().getKey(GLFW_KEY_K)->onRepeat([&]
-  {
-    this->count += 1;
-    std::cout << this->count << std::endl;
-  });
+	// Create cube model
+	_cube = std::make_unique<Model>("./Resources/Models/cube.obj");
+
+	// Test input
+	InputManager::getInstance().getKey(GLFW_KEY_G)->onPress([&]
+	{
+		std::cout << "Hello World!" << this->count << std::endl;
+	});
+
+	InputManager::getInstance().getKey(GLFW_KEY_K)->onRepeat([&]
+	{
+		this->count += 1;
+		std::cout << this->count << std::endl;
+	});
 }
 
 void Application::Cleanup() {
 }
 
 void Application::Run() {
-  PreCreate();
+	PreCreate();
 
-  // Create the GLFW window
-  _window = glfwCreateWindow(_win_width, _win_height, _win_title, NULL, NULL);
+	// Create the GLFW window
+	_window = glfwCreateWindow(_win_width, _win_height, _win_title, NULL, NULL);
 
   // Check if the window could not be created
   if (!_window) {
@@ -108,7 +117,7 @@ void Application::Run() {
     return;
   }
 
-  PostCreate();
+	PostCreate();
 
   // Load GLAD
   if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
@@ -117,24 +126,24 @@ void Application::Run() {
     return;
   }
 
-  Setup();
+	Setup();
 
-  glfwSwapInterval(1);
-  glfwGetFramebufferSize(_window, &_win_width, &_win_height);
-  StaticResize(_window, _win_width, _win_height);
+	glfwSwapInterval(1);
+	glfwGetFramebufferSize(_window, &_win_width, &_win_height);
+	StaticResize(_window, _win_width, _win_height);
 
   while (!glfwWindowShouldClose(_window)) {
     float current_frame = static_cast<float>(glfwGetTime());
     _delta_time = current_frame - _last_frame;
     _last_frame = current_frame;
 
-    glfwPollEvents();
-    Update();
-    Draw();
-    glfwSwapBuffers(_window);
-  }
+		glfwPollEvents();
+		Update();
+		Draw();
+		glfwSwapBuffers(_window);
+	}
 
-  Cleanup();
+	Cleanup();
 }
 
 void Application::Update()
@@ -158,62 +167,66 @@ void Application::Update()
 }
 
 void Application::Draw() {
-  // Begin drawing scene
-  glViewport(0, 0, _win_width, _win_height);
-  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	// Begin drawing scene
+	glViewport(0, 0, _win_width, _win_height);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-  // Test FBO
-  _quadFrameBuffer->renderScene([this]
-  {
-    // render scene
-    _frameBuffer->drawQuad(_testShader);
-  });
+	// Test FBO
+	_quadFrameBuffer->renderScene([this] {
+		// render scene
+		//_frameBuffer->drawQuad(_testShader);
+		_cubeShader->Use();
+		_cubeShader->set_uniform("u_projection", _camera->projection_matrix());
+		_cubeShader->set_uniform("u_view", _camera->view_matrix());
+		_cubeShader->set_uniform("u_objCol", glm::vec3(1.0f, 0.0f, 0.0f));
+		_cube->Draw(_cubeShader);
+	});
 
-  // Render _frameBuffer Quad
-  _quadFrameBuffer->drawQuad(_quadShader);
+	// Render _frameBuffer Quad
+	_quadFrameBuffer->drawQuad(_quadShader);
 
-  // Finish drawing scene
-  glFinish();
+	// Finish drawing scene
+	glFinish();
 }
 
 void Application::Reset() {
 }
 
 void Application::StaticError(int error, const char* description) {
-  std::cerr << description << std::endl;
+	std::cerr << description << std::endl;
 }
 
 void Application::StaticResize(GLFWwindow* window, int x, int y) {
-  Application* instance = (Application *)glfwGetWindowUserPointer(window);
-  instance->Resize(x, y);
+	Application* instance = (Application *)glfwGetWindowUserPointer(window);
+	instance->Resize(x, y);
 }
 
 void Application::StaticKeyboard(GLFWwindow* window,
-                                 int key, int scancode, int action, int mods) {
-  Application* instance = (Application *)glfwGetWindowUserPointer(window);
-  instance->Keyboard(key, scancode, action, mods);
+	int key, int scancode, int action, int mods) {
+	Application* instance = (Application *)glfwGetWindowUserPointer(window);
+	instance->Keyboard(key, scancode, action, mods);
 }
 
 void Application::StaticMouseButton(GLFWwindow* window, int btn, int action, int mods) {
-  Application* instance = (Application *)glfwGetWindowUserPointer(window);
-  instance->MouseButton(btn, action, mods);
+	Application* instance = (Application *)glfwGetWindowUserPointer(window);
+	instance->MouseButton(btn, action, mods);
 }
 
 void Application::StaticMouseMotion(GLFWwindow* window, double x, double y) {
-  Application* instance = (Application *)glfwGetWindowUserPointer(window);
-  instance->MouseMotion(x, y);
+	Application* instance = (Application *)glfwGetWindowUserPointer(window);
+	instance->MouseMotion(x, y);
 }
 
 void Application::StaticMouseScroll(GLFWwindow* window, double x, double y) {
-  Application* instance = (Application *)glfwGetWindowUserPointer(window);
-  instance->MouseScroll(x, y);
+	Application* instance = (Application *)glfwGetWindowUserPointer(window);
+	instance->MouseScroll(x, y);
 }
 
 void Application::Resize(int x, int y) {
-  glfwGetFramebufferSize(_window, &x, &y);
-  _win_width = x;
-  _win_height = y;
-  glViewport(0, 0, x, y);
+	glfwGetFramebufferSize(_window, &x, &y);
+	_win_width = x;
+	_win_height = y;
+	glViewport(0, 0, x, y);
 }
 
 void Application::Keyboard(int key, int scancode, int action, int mods) {
@@ -245,27 +258,27 @@ void Application::MouseScroll(double x, double y) {
 }
 
 void Application::PreCreate() {
-  glfwWindowHint(GLFW_SAMPLES, 4);
-  glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
-  glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 1);
-  glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-  glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
+	glfwWindowHint(GLFW_SAMPLES, 4);
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 4);
+	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 }
 
 void Application::PostCreate() {
-  glfwSetWindowUserPointer(_window, this); // Keep track of Application instance
-  glfwSetKeyCallback(_window, StaticKeyboard);
-  glfwSetMouseButtonCallback(_window, StaticMouseButton);
-  glfwSetCursorPosCallback(_window, StaticMouseMotion);
-  glfwSetScrollCallback(_window, StaticMouseScroll);
-  glfwSetFramebufferSizeCallback(_window, StaticResize);
-  glfwMakeContextCurrent(_window);
+	glfwSetWindowUserPointer(_window, this); // Keep track of Application instance
+	glfwSetKeyCallback(_window, StaticKeyboard);
+	glfwSetMouseButtonCallback(_window, StaticMouseButton);
+	glfwSetCursorPosCallback(_window, StaticMouseMotion);
+	glfwSetScrollCallback(_window, StaticMouseScroll);
+	glfwSetFramebufferSizeCallback(_window, StaticResize);
+	glfwMakeContextCurrent(_window);
 }
 
 void Application::DestroyWindow() {
-  glfwSetKeyCallback(_window, nullptr);
-  glfwSetMouseButtonCallback(_window, nullptr);
-  glfwSetCursorPosCallback(_window, nullptr);
-  glfwSetFramebufferSizeCallback(_window, nullptr);
-  glfwDestroyWindow(_window);
+	glfwSetKeyCallback(_window, nullptr);
+	glfwSetMouseButtonCallback(_window, nullptr);
+	glfwSetCursorPosCallback(_window, nullptr);
+	glfwSetFramebufferSizeCallback(_window, nullptr);
+	glfwDestroyWindow(_window);
 }

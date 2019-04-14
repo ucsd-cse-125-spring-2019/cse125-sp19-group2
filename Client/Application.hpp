@@ -12,6 +12,7 @@
 #include "Camera.hpp"
 #include "FrameBuffer.h"
 #include "NetworkClient.hpp"
+#include "Model.hpp"
 
 class Application {
 public:
@@ -64,19 +65,23 @@ private:
     // Player ID
     uint32_t _playerId;
 
-  // Test Shader
+	// Test Shader
 	std::unique_ptr<Shader> _testShader;
 	std::unique_ptr<Shader> _quadShader;
-  
-  // Test camera
+	std::unique_ptr<Shader> _cubeShader;
+
+	// Test camera
 	std::unique_ptr<Camera> _camera;
 
-  // Test frameBuffer
+	// Test frameBuffer
 	std::unique_ptr<FrameBuffer> _frameBuffer;
 	std::unique_ptr<FrameBuffer> _quadFrameBuffer;
 
-  // Test input capture
+    // Test input capture
 	int count = 0;
+
+	// Test Model
+	std::unique_ptr<Model> _cube;
 };
 
 #endif
