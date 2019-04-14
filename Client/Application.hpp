@@ -61,6 +61,9 @@ private:
     // Network client
     std::unique_ptr<NetworkClient> _networkClient;
 
+    // Player ID
+    uint32_t _playerId;
+
   // Test Shader
 	std::unique_ptr<Shader> _testShader;
 	std::unique_ptr<Shader> _quadShader;

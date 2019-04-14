@@ -302,6 +302,11 @@ void NetworkServer::socketReadHandler()
                             std::unique_lock<std::mutex> eventLock(_eventMutex);
                             _eventQueue->push(eventPtr);
                             eventLock.unlock();
+
+                            // Erase item from beginning of buffer
+                            session.readBuf.erase(session.readBuf.begin(), session.readBuf.begin() + session.length);
+                            session.bytesRead -= session.length;
+                            session.isReading = false;
                         }
                     }
                     else

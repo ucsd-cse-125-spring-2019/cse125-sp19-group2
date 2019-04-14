@@ -24,7 +24,7 @@ Application::Application(const char *windowTitle, int argc, char **argv)
   _networkClient = std::make_unique<NetworkClient>();
   try
   {
-      _networkClient->connect("localhost", PORTNUM);
+      _playerId = _networkClient->connect("localhost", PORTNUM);
   }
   catch (std::runtime_error e)
   {
