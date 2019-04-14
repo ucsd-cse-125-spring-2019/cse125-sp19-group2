@@ -2,12 +2,12 @@
 
 #include <vector>
 #include <memory>
-#include <iostream>
 #include <stdlib.h>
 #include <stdio.h>
 #include <winsock2.h>
 #include <ws2tcpip.h>
 
+#include "Shared/Logger.hpp"
 #include "Shared/BaseState.hpp"
 #include "Shared/GameEvent.hpp"
 #include "Shared/BlockingQueue.hpp"

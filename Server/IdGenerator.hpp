@@ -4,6 +4,8 @@
 #include <iostream>
 #include <mutex>
 
+#include "Shared/Logger.hpp"
+
 /*
 ** ID generator class. Is a singleton, so can be called anywhere from within
 ** the server code. Use it to generate an ID for anything that requires state
@@ -39,8 +41,8 @@ public:
         std::unique_lock<std::mutex> lock(_mutex);
         if ((_nextId + 1) < _nextId)
         {
-            std::cerr << "IDs are starting to wrap around. Shutting down server."
-                    << std::endl;
+            Logger::getInstance()->fatal("IDs are starting to wrap around. " +
+                    std::string("Shutting down server"));
             fgetc(stdin);
             exit(1);
         }

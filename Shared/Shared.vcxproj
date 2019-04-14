@@ -135,9 +135,11 @@
     <ClInclude Include="BaseState.hpp" />
     <ClInclude Include="ExampleState.hpp" />
     <ClInclude Include="GameEvent.hpp" />
+    <ClInclude Include="Logger.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Common.cpp" />
+    <ClCompile Include="Logger.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

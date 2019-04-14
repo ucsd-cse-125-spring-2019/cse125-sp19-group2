@@ -3,6 +3,7 @@
 #include <cereal/types/memory.hpp>
 #include <algorithm>
 
+#include "Shared/Logger.hpp"
 #include "NetworkServer.hpp"
 
 NetworkServer::NetworkServer(std::string port)
@@ -56,7 +57,9 @@ void NetworkServer::connectionListener(
 	int res = WSAStartup(MAKEWORD(2, 2), &wsaData);
 	if (res)
 	{
-		std::cerr << "WSAStartup failed with error: " << res << std::endl;
+        Logger::getInstance()->fatal("WSAStartup failed with error: " +
+                std::to_string(res));
+        fgetc(stdin);
 		exit(1);
 	}
 
@@ -71,8 +74,10 @@ void NetworkServer::connectionListener(
 	res = getaddrinfo(NULL, port.c_str(), &hints, &result);
 	if (res)
 	{
-		std::cerr << "getaddrinfo failed with error: " << res << std::endl;
+        Logger::getInstance()->fatal("getaddrinfo failed with error: " +
+                std::to_string(res));
 		WSACleanup();
+        fgetc(stdin);
 		exit(1);
 	}
 
@@ -81,9 +86,11 @@ void NetworkServer::connectionListener(
 
 	if (listenSock == INVALID_SOCKET)
 	{
-		std::cerr << "socket failed with error: " << WSAGetLastError() << std::endl;
+        Logger::getInstance()->fatal("Failed to create socket with error: " +
+                std::to_string(WSAGetLastError()));
 		freeaddrinfo(result);
 		WSACleanup();
+        fgetc(stdin);
 		exit(1);
 	}
 
@@ -92,10 +99,12 @@ void NetworkServer::connectionListener(
 
 	if (res == SOCKET_ERROR)
 	{
-		std::cerr << "socket failed with error: " << WSAGetLastError() << std::endl;
+        Logger::getInstance()->fatal("Failed to bind socket with error: " +
+                std::to_string(WSAGetLastError()));
 		freeaddrinfo(result);
 		closesocket(listenSock);
 		WSACleanup();
+        fgetc(stdin);
 		exit(1);
 	}
 
@@ -104,11 +113,15 @@ void NetworkServer::connectionListener(
 
 	if (res == SOCKET_ERROR)
 	{
-		std::cerr << "socket failed with error: " << WSAGetLastError() << std::endl;
+        Logger::getInstance()->fatal("Failed to put socket in listening mode " +
+                std::string("with error: ") + std::to_string(WSAGetLastError()));
 		closesocket(listenSock);
 		WSACleanup();
+        fgetc(stdin);
 		exit(1);
 	}
+
+    Logger::getInstance()->info("Server listening for incoming connections on port " + port);
 
     // While the server is running, we want to be accepting new connections.
     // There is currently no cleanup logic, but it might be nice to have at
@@ -122,6 +135,7 @@ void NetworkServer::connectionListener(
 		std::unique_lock<std::shared_mutex> lock(_sessionMutex);
 		if (_sessions.size() >= maxConnections)
 		{
+            Logger::getInstance()->info("Rejecting new connection, server is full");
 			closesocket(tempSock);
 			continue;
 		}
@@ -143,8 +157,8 @@ void NetworkServer::connectionListener(
 				std::vector<char>() // write buffer
 			};
 
-			std::cerr << "Accepting new connection with playerId: "
-					<< clientState.playerId << std::endl;
+            Logger::getInstance()->info("Accepting new connection with playerId: " +
+                    std::to_string(clientState.playerId));
 
 			// Send player ID (4 bytes) at the beginning of connection
 			int bytesSent = 0;
@@ -162,7 +176,7 @@ void NetworkServer::connectionListener(
 				}
 				else if (!sendResult || sendResult == SOCKET_ERROR)
 				{
-					std::cerr << "Failed to send player ID to new client" << std::endl;
+                    Logger::getInstance()->error("Failed to send player ID to new client");
 					closesocket(tempSock);
 					tempSock = INVALID_SOCKET;
 					continue;
@@ -176,8 +190,9 @@ void NetworkServer::connectionListener(
 			// Check if error setting as non-blocking
 			if (res == SOCKET_ERROR)
 			{
-				std::cerr << "Failed to set socket as non-blocking. Error code: "
-						<< res << std::endl;
+                Logger::getInstance()->fatal(
+                        "Failed to set socket as non-blocking. Error code: " +
+                        std::to_string(res));
 				closesocket(tempSock);
 				WSACleanup();
 				exit(1);
@@ -193,7 +208,9 @@ void NetworkServer::connectionListener(
 		}
 		else
 		{
-			std::cerr << "client connection failed :( " << WSAGetLastError() << std::endl;
+            Logger::getInstance()->error(
+                    "Client connection failed with error: " +
+                    std::to_string(WSAGetLastError()));
 		}
 	}
 }
@@ -242,9 +259,9 @@ void NetworkServer::socketReadHandler()
 
         if (select(0, &readSet, NULL, &exceptSet, timeout) == SOCKET_ERROR)
         {
-            // Debug
-            std::cerr << "WARNING: Select returned error in read thread: "
-                    << WSAGetLastError() << std::endl;
+            Logger::getInstance()->warn(
+                    "select() returned error in read thread: " +
+                    std::to_string(WSAGetLastError()));
         }
         else
         {
@@ -314,10 +331,11 @@ void NetworkServer::socketReadHandler()
                         // Otherwise we had a miscellaneous error. Mark as dead.
                         if (WSAGetLastError() != WSAEWOULDBLOCK)
                         {
-                            // Debug
-                            std::cerr << "Encountered error while reading socket for player "
-                                    << session.playerId << " with code " << WSAGetLastError()
-                                    << ". Closing player session." << std::endl;
+                            Logger::getInstance()->info(
+                                    "Encountered error while reading socket for player " +
+                                    std::to_string(session.playerId) + " with code " +
+                                    std::to_string(WSAGetLastError()));
+
                             sessionsToKill.push(session.playerId);
                         }
                     }
@@ -329,10 +347,11 @@ void NetworkServer::socketReadHandler()
                     // Mark socket as dead 
                     if (WSAGetLastError() != WSAEWOULDBLOCK)
                     {
-                        // Debug
-                        std::cerr << "Encountered error while reading socket for player "
-                                << session.playerId << " with code " << WSAGetLastError()
-                                << ". Closing player session." << std::endl;
+                        Logger::getInstance()->info(
+                                "Encountered error while reading socket for player " +
+                                std::to_string(session.playerId) + " with code " +
+                                std::to_string(WSAGetLastError()));
+
                         sessionsToKill.push(session.playerId);
                     }
                 }
@@ -425,9 +444,10 @@ void NetworkServer::socketWriteHandler()
                     else if (sendResult == SOCKET_ERROR && WSAGetLastError() != WSAEWOULDBLOCK)
                     {
                         // Debug
-                        std::cerr << "Encountered error while writing socket for player "
-                            << session.playerId << " with code " << WSAGetLastError()
-                            << std::endl;
+                        Logger::getInstance()->info(
+                                "Encountered error while writing socket for player " +
+                                std::to_string(session.playerId) + " with code " +
+                                std::to_string(WSAGetLastError()));
                     }
                 }
             }
@@ -463,24 +483,23 @@ void NetworkServer::closePlayerSession(uint32_t playerId)
     // If found, close the socket and remove from the map.
     if (result != _sessions.end())
     {
-        // Debug
-        std::cerr << "Closing session for player " << playerId
-                << std::endl;
+        Logger::getInstance()->info(
+                "Closing session for player " +
+                std::to_string(playerId));
+
         closesocket(result->second.socket);
         _sessions.erase(result);
     }
     else
     {
+        Logger::getInstance()->info(
+                "Failed to find session for player " +
+                std::to_string(playerId));
+
         // If this isn't the read thread, throw an exception
         if (std::this_thread::get_id() != _readThread.get_id())
         {
             throw(std::runtime_error("Failed to find session for player " + playerId));
-        }
-        else
-        {
-            // Otherwise it isn't safe to throw an exception, so just print
-            std::cerr << "Failed to find session for player " << playerId
-                    << std::endl;
         }
     }
 }

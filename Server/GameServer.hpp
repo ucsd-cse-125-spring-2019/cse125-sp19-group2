@@ -3,6 +3,7 @@
 #include <memory>
 #include <unordered_map>
 
+#include "Shared/Logger.hpp"
 #include "NetworkServer.hpp"
 #include "SBaseEntity.hpp"
 

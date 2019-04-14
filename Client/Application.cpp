@@ -5,6 +5,7 @@
 #include "Application.hpp"
 #include <iostream>
 #include "Camera.hpp"
+#include "Shared/Logger.hpp"
 
 Application::Application(const char *windowTitle, int argc, char **argv)
 {
@@ -15,7 +16,8 @@ Application::Application(const char *windowTitle, int argc, char **argv)
   if (argc == 1) {
   }
   else {
-    std::cerr << "Invalid number of arguments" << std::endl;
+    Logger::getInstance()->fatal("Invalid number of arguments");
+    fgetc(stdin);
     return;
   }
 
@@ -28,12 +30,13 @@ Application::Application(const char *windowTitle, int argc, char **argv)
   }
   catch (std::runtime_error e)
   {
-      std::cerr << e.what() << std::endl;
+      Logger::getInstance()->error(e.what());
   }
 
   // Initialize GLFW
   if (!glfwInit()) {
-    std::cerr << "Failed to initialize GLFW\n" << std::endl;
+    Logger::getInstance()->fatal("Failed to initialize GLFW");
+    fgetc(stdin);
     return;
   }
 
@@ -86,8 +89,11 @@ void Application::Run() {
   // Check if the window could not be created
   if (!_window) {
     std::cerr << "Failed to open GLFW window." << std::endl;
-    std::cerr << "Either GLFW is not installed or your graphics card does not support modern OpenGL." << std::endl;
+    Logger::getInstance()->fatal("Failed to open GLFW window");
+    Logger::getInstance()->fatal("Either GLFW is not installed or your " +
+            std::string("graphics card does not support OpenGL"));
     glfwTerminate();
+    fgetc(stdin);
     return;
   }
 
@@ -96,6 +102,8 @@ void Application::Run() {
   // Load GLAD
   if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
     std::cerr << "Failed to initialize GLAD" << std::endl;
+    Logger::getInstance()->fatal("Failed to initialize GLAD");
+    fgetc(stdin);
     return;
   }
 

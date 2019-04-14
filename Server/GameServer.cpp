@@ -1,3 +1,6 @@
+#include <ctime>
+#include <time.h>
+
 #include "GameServer.hpp"
 
 GameServer::GameServer()
@@ -45,6 +48,7 @@ void GameServer::update()
         // TODO: game logic and physics simulation (if any) go here.
   
 
+
         // Send updates to clients. To be optimized
         auto updates = std::vector<std::shared_ptr<BaseState>>();
         for (auto& entityPair : _entityMap)
@@ -68,9 +72,9 @@ void GameServer::update()
         // Warn if server is overloaded
         if (tick(elapsed).count() > 1)
         {
-            std::cerr << "WARNING! Update loop took longer than a tick ("
-                    << std::chrono::duration_cast<std::chrono::milliseconds>(elapsed).count()
-                    << "ms)" << std::endl;
+            Logger::getInstance()->warn("Update loop took longer than a tick (" +
+                    std::to_string(std::chrono::duration_cast<std::chrono::milliseconds>(elapsed).count()) +
+                    "ms)");
         }
         else
         {
