@@ -6,23 +6,46 @@
 #include <iterator>
 #include <mutex>
 
+/**
+ * \brief A singleton class that receives and processes keyboard inputs
+ */
 class InputManager {
 public:
+
+	/**
+	 * \brief The singleton getter of InputManager (create one if not exist)
+	 * \return InputManager&: An InputManager Object
+	 */
   static InputManager& getInstance();
 
   /**
-   * \brief 
-   * Usage: Register(GLFW_KEY_G)->OnPress([]{
-   *   Something ...
+   * \brief Get the reference of the Key object
+   * \verbatim
+   * Usage: getKey(GLFW_KEY_G)->onPress([&]{
+   *   do something ...
    * });
-   * \param scancode GLFW Keycode
+   * \endverbatim
+   * \param keycode(int) GLFW Keycode
+   * \return std::unique_ptr<Key> const&: Key reference to the corresponding keycode.
    */
   std::unique_ptr<Key> const& getKey(int keycode);
-
+  
+  /**
+   * \brief Send the input-related event to InputManager's queue
+   * \param keycode(int) GLFW Keycode
+   * \param keyState(KeyState) KeyState of the event [KeyState::Press | KeyState::Release]
+   */
   void fire(int keycode, KeyState keyState);
 
+  /**
+   * \brief Send the input-related event to InputManager's queue for repeat event
+   * \param keycode(int) keycode GLFW Keycode
+   */
   void repeat(int keycode);
 
+  /**
+   * \brief Process all input events inside the queue
+   */
   void update();
 
 private:
