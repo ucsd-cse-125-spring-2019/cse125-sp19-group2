@@ -19,6 +19,18 @@ Application::Application(const char *windowTitle, int argc, char **argv)
     return;
   }
 
+  // Create network client and connect to server. The connect logic should
+  // eventually be moved into the main game loop, but we're not there yet
+  _networkClient = std::make_unique<NetworkClient>();
+  try
+  {
+      _networkClient->connect("localhost", PORTNUM);
+  }
+  catch (std::runtime_error e)
+  {
+      std::cerr << e.what() << std::endl;
+  }
+
   // Initialize GLFW
   if (!glfwInit()) {
     std::cerr << "Failed to initialize GLFW\n" << std::endl;
@@ -111,6 +123,12 @@ void Application::Run() {
 
 void Application::Update()
 {
+    // Get updates from the server
+    for (auto& update : _networkClient->receiveUpdates())
+    {
+        // TODO: update logic
+    }
+
 	_camera->Update();
 }
 

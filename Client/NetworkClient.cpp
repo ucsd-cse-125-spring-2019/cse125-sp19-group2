@@ -11,10 +11,7 @@ NetworkClient::NetworkClient()
 }
 
 
-NetworkClient::~NetworkClient()
-{
-	// TODO: Destroy queues
-}
+NetworkClient::~NetworkClient() {}
 
 
 uint32_t NetworkClient::connect(std::string address, std::string port)
@@ -84,18 +81,7 @@ uint32_t NetworkClient::connect(std::string address, std::string port)
 	}
 	else
 	{
-		/*if (ptr->ai_family == AF_INET)
-		{
-			std::cerr << "Connected to server at "
-					<< ptr->ai_addrlen << " on port " << port
-					<< std::endl;
-		}
-		else 
-		{
-			OutputDebugString("connected to the port" + ((struct sockaddr_in6*)ptr)->sin6_port);
-		}*/
-
-		// Assign socket
+        // Assign socket
 		_socket = clientSock;
 
 		// Get player id from socket

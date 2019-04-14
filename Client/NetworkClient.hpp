@@ -3,10 +3,10 @@
 #include <vector>
 #include <memory>
 #include <iostream>
-#include <winsock2.h>
-#include <ws2tcpip.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <winsock2.h>
+#include <ws2tcpip.h>
 
 #include "Shared/BaseState.hpp"
 #include "Shared/GameEvent.hpp"
