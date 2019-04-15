@@ -5,13 +5,13 @@
 #include "Application.hpp"
 #include <iostream>
 #include "Camera.hpp"
+#include "InputManager.h"
 
-Application::Application(const char *windowTitle, int argc, char **argv)
-{
-	_win_title  = windowTitle;
-	_win_width  = 800;
-	_win_height = 600;
-  
+Application::Application(const char* windowTitle, int argc, char** argv) {
+  _win_title = windowTitle;
+  _win_width = 800;
+  _win_height = 600;
+
   if (argc == 1) {
   }
   else {
@@ -34,32 +34,44 @@ Application::~Application() {
 }
 
 void Application::Setup() {
-	// Background color
-	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-	glEnable(GL_DEPTH_TEST);
-	glDepthFunc(GL_LEQUAL);
-	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-	glEnable(GL_CULL_FACE);
+  // Background color
+  glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+  glEnable(GL_DEPTH_TEST);
+  glDepthFunc(GL_LEQUAL);
+  glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+  glEnable(GL_CULL_FACE);
 
-	// Initialize pointers
-	_testShader = std::make_unique<Shader>();
-	_quadShader = std::make_unique<Shader>();
+  // Initialize pointers
+  _testShader = std::make_unique<Shader>();
+  _quadShader = std::make_unique<Shader>();
 
-	_camera = std::make_unique<Camera>();
-	_frameBuffer = std::make_unique<FrameBuffer>(800, 600);
-	_quadFrameBuffer = std::make_unique<FrameBuffer>(800, 600);
+  _camera = std::make_unique<Camera>();
+  _frameBuffer = std::make_unique<FrameBuffer>(800, 600);
+  _quadFrameBuffer = std::make_unique<FrameBuffer>(800, 600);
 
-	// Set up testing shader program
-	_testShader->LoadFromFile(GL_VERTEX_SHADER, "./Resources/Shaders/pano.vert");
-	_testShader->LoadFromFile(GL_FRAGMENT_SHADER, "./Resources/Shaders/pano.frag");
-	_testShader->CreateProgram();
-	_testShader->RegisterUniform("rgbTexture");
+  // Set up testing shader program
+  _testShader->LoadFromFile(GL_VERTEX_SHADER, "./Resources/Shaders/pano.vert");
+  _testShader->LoadFromFile(GL_FRAGMENT_SHADER, "./Resources/Shaders/pano.frag");
+  _testShader->CreateProgram();
+  _testShader->RegisterUniform("rgbTexture");
 
-	// quad pass through shader
-	_quadShader->LoadFromFile(GL_VERTEX_SHADER, "./Resources/Shaders/quad.vert");
-	_quadShader->LoadFromFile(GL_FRAGMENT_SHADER, "./Resources/Shaders/quad.frag");
-	_quadShader->CreateProgram();
-	_quadShader->RegisterUniform("rgbTexture");
+  // quad pass through shader
+  _quadShader->LoadFromFile(GL_VERTEX_SHADER, "./Resources/Shaders/quad.vert");
+  _quadShader->LoadFromFile(GL_FRAGMENT_SHADER, "./Resources/Shaders/quad.frag");
+  _quadShader->CreateProgram();
+  _quadShader->RegisterUniform("rgbTexture");
+
+  // Test input
+  InputManager::getInstance().getKey(GLFW_KEY_G)->onPress([&]
+  {
+    std::cout << "Hello World!" << this->count << std::endl;
+  });
+
+  InputManager::getInstance().getKey(GLFW_KEY_K)->onRepeat([&]
+  {
+    this->count += 1;
+    std::cout << this->count << std::endl;
+  });
 }
 
 void Application::Cleanup() {
@@ -93,12 +105,10 @@ void Application::Run() {
   glfwGetFramebufferSize(_window, &_win_width, &_win_height);
   StaticResize(_window, _win_width, _win_height);
 
-
-	while (!glfwWindowShouldClose(_window))
-	{
-		float current_frame = static_cast<float>(glfwGetTime());
-		_delta_time = current_frame - _last_frame;
-		_last_frame = current_frame;
+  while (!glfwWindowShouldClose(_window)) {
+    float current_frame = static_cast<float>(glfwGetTime());
+    _delta_time = current_frame - _last_frame;
+    _last_frame = current_frame;
 
     glfwPollEvents();
     Update();
@@ -111,7 +121,8 @@ void Application::Run() {
 
 void Application::Update()
 {
-	_camera->Update();
+  InputManager::getInstance().update();
+  _camera->Update();
 }
 
 void Application::Draw() {
@@ -120,9 +131,10 @@ void Application::Draw() {
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
   // Test FBO
-  _quadFrameBuffer->renderScene([this]{
+  _quadFrameBuffer->renderScene([this]
+  {
     // render scene
-	  _frameBuffer->drawQuad(_testShader);
+    _frameBuffer->drawQuad(_testShader);
   });
 
   // Render _frameBuffer Quad
@@ -175,10 +187,10 @@ void Application::Resize(int x, int y) {
 void Application::Keyboard(int key, int scancode, int action, int mods) {
   if (action == GLFW_PRESS) {
     if (mods == GLFW_MOD_SHIFT) {
-
+      InputManager::getInstance().fire(key, KeyState::Press | KeyState::Shift);
     }
     else {
-
+      InputManager::getInstance().fire(key, KeyState::Press);
     }
   }
   else if (action == GLFW_RELEASE) {
@@ -186,7 +198,7 @@ void Application::Keyboard(int key, int scancode, int action, int mods) {
 
     }
     else {
-
+      InputManager::getInstance().fire(key, KeyState::Release);
     }
   }
 }

@@ -67,6 +67,9 @@ private:
   // Test frameBuffer
 	std::unique_ptr<FrameBuffer> _frameBuffer;
 	std::unique_ptr<FrameBuffer> _quadFrameBuffer;
+
+  // Test input capture
+	int count = 0;
 };
 
 #endif
