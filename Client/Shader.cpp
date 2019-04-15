@@ -50,7 +50,7 @@ void Shader::LoadFromText(GLenum type, const char* code) {
     glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &info_log_len);
     GLchar* info_log = new GLchar[info_log_len];
     glGetShaderInfoLog(shader, info_log_len, nullptr, info_log);
-    //std::cerr << "[ERROR] Shader compilation failed:\n" << info_log << std::endl;
+    std::cerr << "[ERROR] Shader compilation failed:\n" << info_log << std::endl;
     Logger::getInstance()->error("Shader compilation failed");
     delete[] info_log;
   }
@@ -83,7 +83,7 @@ void Shader::CreateProgram() {
     glGetProgramiv(program, GL_INFO_LOG_LENGTH, &info_log_len);
     GLchar* info_log = new GLchar[info_log_len];
     glGetProgramInfoLog(program, info_log_len, nullptr, info_log);
-    //std::cerr << "[ERROR] Program linking failed:\n" << info_log << std::endl;
+    std::cerr << "[ERROR] Program linking failed:\n" << info_log << std::endl;
     Logger::getInstance()->error("Shader program linking failed");
     delete[] info_log;
   }

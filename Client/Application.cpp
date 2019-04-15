@@ -100,7 +100,6 @@ void Application::Run() {
 
   // Check if the window could not be created
   if (!_window) {
-    std::cerr << "Failed to open GLFW window." << std::endl;
     Logger::getInstance()->fatal("Failed to open GLFW window");
     Logger::getInstance()->fatal("Either GLFW is not installed or your " +
             std::string("graphics card does not support OpenGL"));
@@ -113,7 +112,6 @@ void Application::Run() {
 
   // Load GLAD
   if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
-    std::cerr << "Failed to initialize GLAD" << std::endl;
     Logger::getInstance()->fatal("Failed to initialize GLAD");
     fgetc(stdin);
     return;

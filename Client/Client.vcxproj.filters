@@ -10,9 +10,6 @@
     <ClCompile Include="Key.cpp">
       <Filter>Source Files\Input</Filter>
     </ClCompile>
-    <ClCompile Include="NetworkClient.cpp">
-      <Filter>Source Files\Network</Filter>
-    </ClCompile>
     <ClCompile Include="Camera.cpp">
       <Filter>Source Files\Graphics</Filter>
     </ClCompile>
@@ -31,6 +28,9 @@
     <ClCompile Include="NetworkClient.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="NetworkClient.cpp">
+      <Filter>Source Files\Network</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Application.hpp">
@@ -38,12 +38,6 @@
     </ClInclude>
     <ClInclude Include="Key.h">
       <Filter>Header Files\Input</Filter>
-    </ClInclude>
-    <ClInclude Include="CBaseEntity.hpp">
-      <Filter>Header Files\Network</Filter>
-    </ClInclude>
-    <ClInclude Include="CExampleEntity.hpp">
-      <Filter>Header Files\Network</Filter>
     </ClInclude>
     <ClInclude Include="Shader.hpp">
       <Filter>Header Files\Graphics</Filter>
@@ -63,8 +57,14 @@
     <ClInclude Include="CExampleEntity.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="CBaseEntity.hpp">
+      <Filter>Header Files\Entity</Filter>
+    </ClInclude>
+    <ClInclude Include="CExampleEntity.hpp">
+      <Filter>Header Files\Entity</Filter>
+    </ClInclude>
     <ClInclude Include="NetworkClient.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\Network</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -112,6 +112,9 @@
     </Filter>
     <Filter Include="Source Files\Graphics">
       <UniqueIdentifier>{35ea55f7-1c38-4836-8ca2-8dd2a15fc0a9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Entity">
+      <UniqueIdentifier>{d3fa3773-9404-42f8-af5f-8bb345a9e9b2}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>
