@@ -298,16 +298,12 @@ void NetworkServer::socketReadHandler()
                             // Get the first four bytes and store as length
                             memcpy(&(session.length), session.readBuf.data(), sizeof(uint32_t));
                             session.isReading = true;
-
-                            // Remove size from beginning of buffer
-                            session.bytesRead -= sizeof(uint32_t);
-                            session.readBuf.erase(session.readBuf.begin(), session.readBuf.begin() + sizeof(uint32_t));
                         }
 
                         // Deserialize object
                         if (session.isReading && session.bytesRead >= session.length)
                         {
-                            ss.write(session.readBuf.data(), session.length);
+                            ss.write(session.readBuf.data() + sizeof(uint32_t), session.length);
                             cereal::BinaryInputArchive iarchive(ss);
                             std::shared_ptr<GameEvent> eventPtr;
                             iarchive(eventPtr);
@@ -320,9 +316,8 @@ void NetworkServer::socketReadHandler()
                             _eventQueue->push(eventPtr);
                             eventLock.unlock();
 
-                            // Erase item from beginning of buffer
-                            session.readBuf.erase(session.readBuf.begin(), session.readBuf.begin() + session.length);
-                            session.bytesRead -= session.length;
+                            // reset state
+                            session.bytesRead -= (session.length + sizeof(uint32_t));
                             session.isReading = false;
                         }
                     }

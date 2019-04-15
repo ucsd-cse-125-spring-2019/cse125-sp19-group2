@@ -2,6 +2,7 @@
 
 #include <stdint.h>
 #include <string>
+#include "Shared/Logger.hpp"
 
 /*
 ** A few enums outlining the different types of events that could be triggered
@@ -37,5 +38,10 @@ struct GameEvent
     {
         archive(type, playerId, playerName);
     }
+
+	void print()
+	{
+		Logger::getInstance()->debug("[playerEvent type: " + std::to_string(type) + " playerID: " + std::to_string(playerId) + " playerName: " + playerName + "]");
+	}
 };
 
