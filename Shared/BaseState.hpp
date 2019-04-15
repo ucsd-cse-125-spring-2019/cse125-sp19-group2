@@ -29,7 +29,7 @@ namespace cereal
 */
 struct BaseState
 {
-    EntityType type; // Type of object. Nasty but necessary for object creation
+  EntityType type; // Type of object. Nasty but necessary for object creation
 	uint32_t id;     // Object ID
 	glm::vec3 pos;	 // World-coord position of object
 	glm::vec3 up;	 // Up vector of object
@@ -41,7 +41,7 @@ struct BaseState
 	void serialize(Archive & archive)
 	{
 		archive(type,
-                id,
+        id,
 				pos,
 				up,
 				normal,
@@ -54,9 +54,9 @@ struct BaseState
 			<< scale << "]" << std::endl;
 	}
 
-    // This is silly but it is required for Cereal to recognize this as a
-    // polymorphic type. You do not have to implement or call this function.
-    virtual uint32_t getId() { return id; }
+  // This is silly but it is required for Cereal to recognize this as a
+  // polymorphic type. You do not have to implement or call this function.
+  virtual uint32_t getId() { return id; }
 };
 
 

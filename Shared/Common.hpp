@@ -7,7 +7,6 @@
 
 #define PORTNUM "4000"
 
-
 // This is absolutely filthy code but it is necessary when multiple machines
 // enter the picture.
 enum EntityType

@@ -3,6 +3,7 @@
 #include <SOIL.h>
 
 #include "Application.hpp"
+#include "CExampleEntity.hpp"
 
 int main(int argc, char ** argv)
 {
