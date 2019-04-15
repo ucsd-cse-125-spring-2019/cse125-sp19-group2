@@ -89,9 +89,6 @@ void FrameBuffer::setEnable(bool status) {
   if (status) {
     // Render to our framebuffer
     glBindFramebuffer(GL_FRAMEBUFFER, frameBufferID);
-	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
-		std::cerr << "[ERROR] Frame buffer binding failed" << std::endl;
-	}
   }
   else {
     // Render to the screen

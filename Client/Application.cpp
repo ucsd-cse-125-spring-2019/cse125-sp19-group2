@@ -6,22 +6,37 @@
 #include <iostream>
 #include "Camera.hpp"
 #include "InputManager.h"
+#include "Shared/Logger.hpp"
 
 Application::Application(const char* windowTitle, int argc, char** argv) {
   _win_title = windowTitle;
   _win_width = 800;
   _win_height = 600;
-
+  
   if (argc == 1) {
   }
   else {
-    std::cerr << "Invalid number of arguments" << std::endl;
+    Logger::getInstance()->fatal("Invalid number of arguments");
+    fgetc(stdin);
     return;
+  }
+
+  // Create network client and connect to server. The connect logic should
+  // eventually be moved into the main game loop, but we're not there yet
+  _networkClient = std::make_unique<NetworkClient>();
+  try
+  {
+      _playerId = _networkClient->connect("localhost", PORTNUM);
+  }
+  catch (std::runtime_error e)
+  {
+      Logger::getInstance()->error(e.what());
   }
 
   // Initialize GLFW
   if (!glfwInit()) {
-    std::cerr << "Failed to initialize GLFW\n" << std::endl;
+    Logger::getInstance()->fatal("Failed to initialize GLFW");
+    fgetc(stdin);
     return;
   }
 
@@ -85,9 +100,11 @@ void Application::Run() {
 
   // Check if the window could not be created
   if (!_window) {
-    std::cerr << "Failed to open GLFW window." << std::endl;
-    std::cerr << "Either GLFW is not installed or your graphics card does not support modern OpenGL." << std::endl;
+    Logger::getInstance()->fatal("Failed to open GLFW window");
+    Logger::getInstance()->fatal("Either GLFW is not installed or your " +
+            std::string("graphics card does not support OpenGL"));
     glfwTerminate();
+    fgetc(stdin);
     return;
   }
 
@@ -95,7 +112,8 @@ void Application::Run() {
 
   // Load GLAD
   if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
-    std::cerr << "Failed to initialize GLAD" << std::endl;
+    Logger::getInstance()->fatal("Failed to initialize GLAD");
+    fgetc(stdin);
     return;
   }
 
@@ -121,8 +139,22 @@ void Application::Run() {
 
 void Application::Update()
 {
+    // Get updates from the server
+    try
+    {
+        for (auto& update : _networkClient->receiveUpdates())
+        {
+            // TODO: update logic
+        }
+    }
+    catch (std::runtime_error e)
+    {
+        // Disconnected from the server
+    }
+
   InputManager::getInstance().update();
-  _camera->Update();
+ 	_camera->Update();
+
 }
 
 void Application::Draw() {

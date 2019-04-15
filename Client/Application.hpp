@@ -11,6 +11,7 @@
 #include "Shader.hpp"
 #include "Camera.hpp"
 #include "FrameBuffer.h"
+#include "NetworkClient.hpp"
 
 class Application {
 public:
@@ -56,6 +57,12 @@ private:
 	// Frame management
 	float _delta_time = 0;
 	float _last_frame = 0;
+
+    // Network client
+    std::unique_ptr<NetworkClient> _networkClient;
+
+    // Player ID
+    uint32_t _playerId;
 
   // Test Shader
 	std::unique_ptr<Shader> _testShader;
