@@ -53,7 +53,7 @@ void Application::Setup() {
   glEnable(GL_DEPTH_TEST);
   glDepthFunc(GL_LEQUAL);
   glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-  glEnable(GL_CULL_FACE);
+  //glEnable(GL_CULL_FACE);
 
   // Initialize pointers
   _testShader = std::make_unique<Shader>();
@@ -61,6 +61,7 @@ void Application::Setup() {
   _cubeShader = std::make_unique<Shader>();
 
   _camera = std::make_unique<Camera>();
+  _camera->set_position(0, 0, 10.0f);
   _frameBuffer = std::make_unique<FrameBuffer>(1024*2, 768 * 2);
   _quadFrameBuffer = std::make_unique<FrameBuffer>(1024, 768);
 
@@ -77,13 +78,16 @@ void Application::Setup() {
   _quadShader->RegisterUniform("rgbTexture");
 
   // Basic model shader
-  _cubeShader->LoadFromFile(GL_VERTEX_SHADER, "./Resources/Shaders/basic.vert");
-  _cubeShader->LoadFromFile(GL_FRAGMENT_SHADER, "./Resources/Shaders/basic.frag");
+  _cubeShader->LoadFromFile(GL_VERTEX_SHADER, "./Resources/Shaders/basiclight.vert");
+  _cubeShader->LoadFromFile(GL_FRAGMENT_SHADER, "./Resources/Shaders/basiclight.frag");
   _cubeShader->CreateProgram();
-  _cubeShader->RegisterUniformList({"u_projection", "u_view", "u_model", "u_objCol"});
+  _cubeShader->RegisterUniformList({"u_projection", "u_view", "u_model",
+	  "u_light.position", "u_light.ambient", "u_light.diffuse", "u_light.specular", "u_light.constant", "u_light.constant", "u_light.linear", "u_light.quadratic",
+	  "u_objMat.diffuse", "u_objMat.specular", "u_objMat.shininess"
+	  });
 
   // Create cube model
-  _cube = std::make_unique<Model>("./Resources/Models/cube.obj");
+  _cube = std::make_unique<Model>("./Resources/Models/SimpleTexture.obj");
 
   // Test input
   InputManager::getInstance().getKey(GLFW_KEY_G)->onPress([&]
@@ -180,7 +184,14 @@ void Application::Draw() {
     _cubeShader->set_uniform("u_view", _camera->view_matrix());
     _cubeShader->set_uniform("u_model", glm::translate(glm::mat4(1.0f), glm::vec3(0, 0.1, -3.0f)) *
                              glm::rotate(glm::mat4(1.0f), glm::radians(15.0f), glm::vec3(0.5, 0.5, 0.5)));
-    _cubeShader->set_uniform("u_objCol", glm::vec3(1.0f, 0.0f, 0.0f));
+	_cubeShader->set_uniform("u_objMat.shininess", 0.6f);
+	_cubeShader->set_uniform("u_light.position", glm::vec3(-3.0f, 3.0f, -3.0f));
+	_cubeShader->set_uniform("u_light.ambient", glm::vec3(0.05f, 0.05f, 0.05f));
+	_cubeShader->set_uniform("u_light.diffuse", glm::vec3(0.8f, 0.8f, 0.8f));
+	_cubeShader->set_uniform("u_light.specular", glm::vec3(1.0f, 1.0f, 1.0f));
+	_cubeShader->set_uniform("u_light.constant", 1.0f);
+	_cubeShader->set_uniform("u_light.linear", 0.09f);
+	_cubeShader->set_uniform("u_light.quadratic", 0.032f);
     _cube->Draw(_cubeShader);
   });
 
