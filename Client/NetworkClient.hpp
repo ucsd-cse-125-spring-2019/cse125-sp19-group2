@@ -75,6 +75,11 @@ public:
 	void sendEvents(std::vector<std::shared_ptr<GameEvent>> events);
 
 	/*
+	** Same as above, except with only a single event.
+	*/
+	void sendEvent(std::shared_ptr<GameEvent> event);
+
+	/*
     ** API: Receive updates from the server. Synchronous for the calling
     ** thread; asynchronous with respect to the network.
     **

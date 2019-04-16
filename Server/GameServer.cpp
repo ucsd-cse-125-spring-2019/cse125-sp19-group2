@@ -30,7 +30,6 @@ void GameServer::start()
 
 void GameServer::update()
 {
-    int counter = 0;
     while (true)
     {
         auto timerStart = std::chrono::steady_clock::now();

@@ -150,7 +150,7 @@ void NetworkServer::connectionListener(
 			{
 				IdGenerator::getInstance()->getNextId(), // create a new player id
 				tempSock, // socket
-				std::vector<char>(RECV_BUFSIZE), // read buffer
+				(char*)calloc(1, RECV_BUFSIZE), // read buffer
 				false, // is reading
 				0, // length (bytes to read)
 				0, // bytes read
@@ -177,6 +177,7 @@ void NetworkServer::connectionListener(
 				else if (!sendResult || sendResult == SOCKET_ERROR)
 				{
                     Logger::getInstance()->error("Failed to send player ID to new client");
+					free(clientState.readBuf);
 					closesocket(tempSock);
 					tempSock = INVALID_SOCKET;
 					continue;
@@ -193,6 +194,7 @@ void NetworkServer::connectionListener(
                 Logger::getInstance()->fatal(
                         "Failed to set socket as non-blocking. Error code: " +
                         std::to_string(res));
+				free(clientState.readBuf);
 				closesocket(tempSock);
 				WSACleanup();
 				exit(1);
@@ -270,56 +272,66 @@ void NetworkServer::socketReadHandler()
             // Iterate over sessions
             for (auto& pair : _sessions)
             {
-                SocketState session = pair.second;
+                SocketState * session = &(pair.second);
 
                 // If in the read set, recv and push to buffer
-                if (FD_ISSET(session.socket, &readSet))
+                if (FD_ISSET(session->socket, &readSet))
                 {
                     int recvResult = recv(
-                            session.socket,
-                            session.readBuf.data() + session.bytesRead,
-                            (int)session.readBuf.size(),
+                            session->socket,
+                            session->readBuf + session->bytesRead,
+                            RECV_BUFSIZE - session->bytesRead,
                             0);
 
                     // If zero, we had a clean disconnect, so mark as dead
                     if (!recvResult)
                     {
                         // Mark socket as dead
-                        sessionsToKill.push(session.playerId);
+                        sessionsToKill.push(session->playerId);
                     }
                     else if (recvResult != SOCKET_ERROR)
                     {
-                        session.bytesRead += recvResult;
+                        session->bytesRead += recvResult;
 
-                        // If we're not in reading mode and received at least
-                        // four bytes, store length and go into reading mode.
-                        if (!session.isReading && session.bytesRead >= sizeof(uint32_t))
-                        {
-                            // Get the first four bytes and store as length
-                            memcpy(&(session.length), session.readBuf.data(), sizeof(uint32_t));
-                            session.isReading = true;
-                        }
+						while ((session->isReading && (session->length + sizeof(uint32_t)) <= session->bytesRead) ||
+								(!session->isReading && session->bytesRead >= sizeof(uint32_t)))
+						{
+							// If we're not in reading mode and received at least
+							// four bytes, store length and go into reading mode.
+							if (!session->isReading && session->bytesRead >= sizeof(uint32_t))
+							{
+								// Get the first four bytes and store as length
+								memcpy(&(session->length), session->readBuf, sizeof(uint32_t));
+								session->isReading = true;
+							}
 
-                        // Deserialize object
-                        if (session.isReading && session.bytesRead >= session.length)
-                        {
-                            ss.write(session.readBuf.data() + sizeof(uint32_t), session.length);
-                            cereal::BinaryInputArchive iarchive(ss);
-                            std::shared_ptr<GameEvent> eventPtr;
-                            iarchive(eventPtr);
+							// Deserialize object
+							if (session->isReading && session->bytesRead >= (session->length + sizeof(uint32_t)))
+							{
+								ss.write(session->readBuf + sizeof(uint32_t), session->length);
+								cereal::BinaryInputArchive iarchive(ss);
+								std::shared_ptr<GameEvent> eventPtr;
+								iarchive(eventPtr);
 
-                            // Enforce correct player ID
-                            eventPtr->playerId = session.playerId;
+								// Enforce correct player ID
+								eventPtr->playerId = session->playerId;
 
-                            // Lock and add to queue
-                            std::unique_lock<std::mutex> eventLock(_eventMutex);
-                            _eventQueue->push(eventPtr);
-                            eventLock.unlock();
+								// Lock and add to queue
+								std::unique_lock<std::mutex> eventLock(_eventMutex);
+								_eventQueue->push(eventPtr);
+								eventLock.unlock();
 
-                            // reset state
-                            session.bytesRead -= (session.length + sizeof(uint32_t));
-                            session.isReading = false;
-                        }
+								// reset state
+								session->bytesRead -= (session->length + sizeof(uint32_t));
+								session->isReading = false;
+
+								// Effectively "remove" length and item from buffer
+								memmove(
+										session->readBuf,
+										session->readBuf + session->length + sizeof(uint32_t), 
+										RECV_BUFSIZE - (session->length + sizeof(uint32_t)));
+							}
+						}
                     }
                     else
                     {
@@ -328,26 +340,26 @@ void NetworkServer::socketReadHandler()
                         {
                             Logger::getInstance()->info(
                                     "Encountered error while reading socket for player " +
-                                    std::to_string(session.playerId) + " with code " +
+                                    std::to_string(session->playerId) + " with code " +
                                     std::to_string(WSAGetLastError()));
 
-                            sessionsToKill.push(session.playerId);
+                            sessionsToKill.push(session->playerId);
                         }
                     }
                 }
 
                 // If in the exception set, mark session as dead.
-                if (FD_ISSET(session.socket, &exceptSet))
+                if (FD_ISSET(session->socket, &exceptSet))
                 {
                     // Mark socket as dead 
                     if (WSAGetLastError() != WSAEWOULDBLOCK)
                     {
                         Logger::getInstance()->info(
                                 "Encountered error while reading socket for player " +
-                                std::to_string(session.playerId) + " with code " +
+                                std::to_string(session->playerId) + " with code " +
                                 std::to_string(WSAGetLastError()));
 
-                        sessionsToKill.push(session.playerId);
+                        sessionsToKill.push(session->playerId);
                     }
                 }
             }
@@ -366,6 +378,9 @@ void NetworkServer::socketReadHandler()
 
 void NetworkServer::socketWriteHandler()
 {
+
+    // List of dead sockets to kill
+    std::queue<uint32_t> sessionsToKill = std::queue<uint32_t>();
 
     while (true)
     {
@@ -443,11 +458,22 @@ void NetworkServer::socketWriteHandler()
                                 "Encountered error while writing socket for player " +
                                 std::to_string(session.playerId) + " with code " +
                                 std::to_string(WSAGetLastError()));
+
+						sessionsToKill.push(session.playerId);
+						break;
                     }
                 }
             }
         }
         free(databuf);
+
+		// Kill sessions marked for death
+		lock.unlock();
+		while (!sessionsToKill.empty())
+		{
+			closePlayerSession(sessionsToKill.front());
+			sessionsToKill.pop();
+		}
     }
     return;
 }
@@ -482,6 +508,7 @@ void NetworkServer::closePlayerSession(uint32_t playerId)
                 "Closing session for player " +
                 std::to_string(playerId));
 
+		free(result->second.readBuf);
         closesocket(result->second.socket);
         _sessions.erase(result);
     }
@@ -520,10 +547,16 @@ void NetworkServer::sendUpdates(std::vector<std::shared_ptr<BaseState>> updates)
 {
     for (auto& update : updates)
     {
-        // We are sending to all players, so use 0 as playerId
-        std::pair<uint32_t, std::shared_ptr<BaseState>> updatePair = std::make_pair(0, update);
-        _updateQueue->push(updatePair);
+		sendUpdate(update);
     }
+}
+
+
+void NetworkServer::sendUpdate(std::shared_ptr<BaseState> update)
+{
+	// We are sending to all players, so use 0 as playerId
+	std::pair<uint32_t, std::shared_ptr<BaseState>> updatePair = std::make_pair(0, update);
+	_updateQueue->push(updatePair);
 }
 
 
@@ -531,8 +564,14 @@ void NetworkServer::sendUpdates(std::vector<std::shared_ptr<BaseState>> updates,
 {
     for (auto& update : updates)
     {
-        // We are sending to just one player
-        std::pair<uint32_t, std::shared_ptr<BaseState>> updatePair = std::make_pair(playerId, update);
-        _updateQueue->push(updatePair);
+		sendUpdate(update, playerId);
     }
+}
+
+
+void NetworkServer::sendUpdate(std::shared_ptr<BaseState> update, uint32_t playerId)
+{
+	// We are sending to just one player
+	std::pair<uint32_t, std::shared_ptr<BaseState>> updatePair = std::make_pair(playerId, update);
+	_updateQueue->push(updatePair);
 }

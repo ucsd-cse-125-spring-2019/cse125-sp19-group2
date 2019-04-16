@@ -147,7 +147,7 @@ void NetworkClient::socketReadHandler()
 		{
 			int recvResult = recv(
 					_socket,
-					lengthBuf,
+					lengthBuf + bytesRead,
 					sizeof(uint32_t),
 					0);
 			if (recvResult > 0)
@@ -348,6 +348,23 @@ void NetworkClient::sendEvents(std::vector<std::shared_ptr<GameEvent>> events)
         {
             _eventQueue->push(event);
         }
+    }
+}
+
+
+void NetworkClient::sendEvent(std::shared_ptr<GameEvent> event)
+{
+    // Check to see if connection is active, throw exception if it is not
+    std::unique_lock<std::mutex> socketLock(_socketMutex);
+    if (_socket == INVALID_SOCKET)
+    {
+        socketLock.unlock();
+        throw(std::runtime_error("Not connected to a server"));
+    }
+    else
+    {
+        socketLock.unlock();
+		_eventQueue->push(event);
     }
 }
 
