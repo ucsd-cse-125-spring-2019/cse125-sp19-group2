@@ -444,8 +444,6 @@ void NetworkServer::socketWriteHandler()
                         (int)session.writeBuf.size(),
                         0);
 
-					std::this_thread::sleep_for(std::chrono::milliseconds(50));
-
                     // If no error, shrink buffer
                     if (sendResult > 0)
                     {
@@ -465,8 +463,6 @@ void NetworkServer::socketWriteHandler()
 						break;
                     }
                 }
-
-				Logger::getInstance()->debug("Finished sending 1 object");
             }
         }
         free(databuf);
