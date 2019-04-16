@@ -29,12 +29,14 @@ namespace cereal
 */
 struct BaseState
 {
-  EntityType type; // Type of object. Nasty but necessary for object creation
-	uint32_t id;     // Object ID
-	glm::vec3 pos;	 // World-coord position of object
-	glm::vec3 up;	 // Up vector of object
-	glm::vec3 normal;// Normal vector of object
-	double scale;	 // Scale of object
+    EntityType type;	// Type of object. Nasty but necessary for object creation
+	uint32_t id;		// Object ID
+	glm::vec3 pos;		// World-coord position of object
+	glm::vec3 up;		// Up vector of object
+	glm::vec3 normal;	// Normal vector of object
+	glm::vec3 scale;	// Scale of object
+	double width;		// Width of object in X-axis
+	double depth;		// Depth of object in Z-axis
 
 	// Serialization for Cereal
 	template<class Archive>
@@ -51,7 +53,7 @@ struct BaseState
 	virtual void print()
 	{
 		std::cerr << "[type: " << type << ", id: " << id << ", scale: "
-			<< scale << "]" << std::endl;
+			<< "]" << std::endl;
 	}
 
   // This is silly but it is required for Cereal to recognize this as a

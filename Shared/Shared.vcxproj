@@ -136,10 +136,12 @@
     <ClInclude Include="ExampleState.hpp" />
     <ClInclude Include="GameEvent.hpp" />
     <ClInclude Include="Logger.hpp" />
+    <ClInclude Include="QuadTree.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Common.cpp" />
     <ClCompile Include="Logger.cpp" />
+    <ClCompile Include="QuadTree.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
