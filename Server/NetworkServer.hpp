@@ -87,6 +87,11 @@ public:
 	*/
 	void sendUpdates(std::vector<std::shared_ptr<BaseState>> updates);
 
+	/*
+	** Same as above, except it sends a single update only.
+	*/
+	void sendUpdate(std::shared_ptr<BaseState> update);
+
     /*
     ** API: Send updates to a particular client. Use this if updates need to be
     ** sent only to a certain player (at login, for example). See the function
@@ -97,6 +102,12 @@ public:
     ** set to the value that is passed to this function.
     **/
     void sendUpdates(std::vector<std::shared_ptr<BaseState>> updates, uint32_t playerId);
+
+	/*
+	** Same as above, except it sends a single update only.
+	*/
+	void sendUpdate(std::shared_ptr<BaseState> update, uint32_t playerId);
+
 
 private:
 	/*
@@ -141,7 +152,7 @@ private:
 		SOCKET socket;
 
         // Read stuff
-		std::vector<char> readBuf;
+		char* readBuf;
 		bool isReading;
 		uint32_t length;
 		uint32_t bytesRead;
