@@ -26,7 +26,7 @@ struct PointLight
 
 // Lighting
 uniform PointLight u_light;
-uniform Material   u_objMat;
+uniform Material   u_material;
 uniform vec3       u_viewPos;
 
 // Output
@@ -35,17 +35,17 @@ out vec4 out_color;
 vec3 CalcPointLight(PointLight light, vec3 normal, vec3 fragPos, vec3 viewDir)
 {
   // Ambient
-  vec3 ambient = light.ambient * texture(u_objMat.diffuse, pass_uv).rgb;
+  vec3 ambient = light.ambient * texture(u_material.diffuse, pass_uv).rgb;
   
   // Diffuse
   vec3 lightDir = normalize(light.position - fragPos);
   float diffAmt = max(dot(normal, lightDir), 0);
-  vec3 diffuse = light.diffuse * diffAmt * texture(u_objMat.diffuse, pass_uv).rgb;
+  vec3 diffuse = light.diffuse * diffAmt * texture(u_material.diffuse, pass_uv).rgb;
   
   // Specular
   vec3 reflectDir = reflect(-lightDir, normal);
-  float specAmt = pow(max(dot(viewDir, reflectDir), 0), u_objMat.shininess);
-  vec3 specular = light.specular * specAmt * texture(u_objMat.specular, pass_uv).rgb;
+  float specAmt = pow(max(dot(viewDir, reflectDir), 0), u_material.shininess);
+  vec3 specular = light.specular * specAmt * texture(u_material.specular, pass_uv).rgb;
   
   // Attenuation
   float dist = length(light.position - fragPos);

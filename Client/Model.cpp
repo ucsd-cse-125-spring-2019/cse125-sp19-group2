@@ -11,6 +11,15 @@ Model::Model(const char *path)
   LoadModel(path);
 }
 
+Model::~Model()
+{
+  for (Texture t : _textures)
+  {
+    glDeleteTextures(1, &t.id);
+    t.id = 0;
+  }
+}
+
 void Model::Draw(std::unique_ptr<Shader> const &shader)
 {
   for (Mesh mesh : _meshes) mesh.Draw(shader);

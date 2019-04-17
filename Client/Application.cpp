@@ -83,7 +83,7 @@ void Application::Setup() {
   _cubeShader->CreateProgram();
   _cubeShader->RegisterUniformList({ "u_projection", "u_view", "u_model",
     "u_light.position", "u_light.ambient", "u_light.diffuse", "u_light.specular", "u_light.constant", "u_light.constant", "u_light.linear", "u_light.quadratic",
-    "u_objMat.diffuse", "u_objMat.specular", "u_objMat.shininess"
+    "u_material.diffuse", "u_material.specular", "u_material.shininess"
     });
 
   // Create cube model

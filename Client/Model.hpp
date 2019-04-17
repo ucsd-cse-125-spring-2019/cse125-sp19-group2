@@ -21,6 +21,8 @@ public:
   // Creates a model from a file.
   Model(const char *path);
 
+  ~Model();
+
   void Draw(std::unique_ptr<Shader> const &shader);
 
 private:
