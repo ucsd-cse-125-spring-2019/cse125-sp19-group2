@@ -61,7 +61,7 @@ void Application::Setup() {
   _cubeShader = std::make_unique<Shader>();
 
   _camera = std::make_unique<Camera>();
-  _camera->set_position(0, 0, 10.0f);
+  _camera->set_position(0, 0, 3.0f);
   _frameBuffer = std::make_unique<FrameBuffer>(800, 600);
   _quadFrameBuffer = std::make_unique<FrameBuffer>(800, 600);
 
@@ -185,7 +185,7 @@ void Application::Draw() {
     _cubeShader->set_uniform("u_view", _camera->view_matrix());
     _cubeShader->set_uniform("u_model", glm::translate(glm::mat4(1.0f), glm::vec3(0, 0.1, -3.0f)) *
       glm::rotate(glm::mat4(1.0f), glm::radians(15.0f), glm::vec3(0.5, 0.5, 0.5)));
-    _cubeShader->set_uniform("u_objMat.shininess", 0.6f);
+    _cubeShader->set_uniform("u_material.shininess", 0.6f);
     _cubeShader->set_uniform("u_light.position", glm::vec3(-3.0f, 3.0f, -3.0f));
     _cubeShader->set_uniform("u_light.ambient", glm::vec3(0.05f, 0.05f, 0.05f));
     _cubeShader->set_uniform("u_light.diffuse", glm::vec3(0.8f, 0.8f, 0.8f));
