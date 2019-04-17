@@ -34,7 +34,7 @@ void Shader::LoadFromFile(GLenum type, const char* path) {
   }
   catch (std::ifstream::failure e) {
     Logger::getInstance()->error("Shader file could not be found at: " +
-            std::string(path));
+      std::string(path));
   }
 }
 
@@ -115,8 +115,8 @@ void Shader::set_uniform(const char* uniform, GLint value) {
   auto u_elem = _uniforms.find(uniform);
   if (u_elem == _uniforms.end()) {
     Logger::getInstance()->error(
-            "Attempting to set unregistered uniform: " +
-            std::string(uniform));
+      "Attempting to set unregistered uniform: " +
+      std::string(uniform));
     return;
   }
   glUniform1iv(_uniforms.at(uniform), 1, &value);
@@ -126,8 +126,8 @@ void Shader::set_uniform(const char* uniform, GLuint value) {
   auto u_elem = _uniforms.find(uniform);
   if (u_elem == _uniforms.end()) {
     Logger::getInstance()->error(
-            "Attempting to set unregistered uniform: " +
-            std::string(uniform));
+      "Attempting to set unregistered uniform: " +
+      std::string(uniform));
     return;
   }
   glUniform1uiv(_uniforms.at(uniform), 1, &value);
@@ -137,8 +137,8 @@ void Shader::set_uniform(const char* uniform, GLfloat value) {
   auto u_elem = _uniforms.find(uniform);
   if (u_elem == _uniforms.end()) {
     Logger::getInstance()->error(
-            "Attempting to set unregistered uniform: " +
-            std::string(uniform));
+      "Attempting to set unregistered uniform: " +
+      std::string(uniform));
     return;
   }
   glUniform1fv(_uniforms.at(uniform), 1, &value);
@@ -148,8 +148,8 @@ void Shader::set_uniform(const char* uniform, const glm::vec2& values) {
   auto u_elem = _uniforms.find(uniform);
   if (u_elem == _uniforms.end()) {
     Logger::getInstance()->error(
-            "Attempting to set unregistered uniform: " +
-            std::string(uniform));
+      "Attempting to set unregistered uniform: " +
+      std::string(uniform));
     return;
   }
   glUniform2fv(_uniforms.at(uniform), 1, &values[0]);
@@ -159,8 +159,8 @@ void Shader::set_uniform(const char* uniform, const glm::vec3& values) {
   auto u_elem = _uniforms.find(uniform);
   if (u_elem == _uniforms.end()) {
     Logger::getInstance()->error(
-            "Attempting to set unregistered uniform: " +
-            std::string(uniform));
+      "Attempting to set unregistered uniform: " +
+      std::string(uniform));
     return;
   }
   glUniform3fv(_uniforms.at(uniform), 1, &values[0]);
@@ -170,8 +170,8 @@ void Shader::set_uniform(const char* uniform, const glm::vec4& values) {
   auto u_elem = _uniforms.find(uniform);
   if (u_elem == _uniforms.end()) {
     Logger::getInstance()->error(
-            "Attempting to set unregistered uniform: " +
-            std::string(uniform));
+      "Attempting to set unregistered uniform: " +
+      std::string(uniform));
     return;
   }
   glUniform4fv(_uniforms.at(uniform), 1, &values[0]);
@@ -181,8 +181,8 @@ void Shader::set_uniform(const char* uniform, const glm::mat3& mat) {
   auto u_elem = _uniforms.find(uniform);
   if (u_elem == _uniforms.end()) {
     Logger::getInstance()->error(
-            "Attempting to set unregistered uniform: " +
-            std::string(uniform));
+      "Attempting to set unregistered uniform: " +
+      std::string(uniform));
     return;
   }
   glUniformMatrix3fv(_uniforms.at(uniform), 1, GL_FALSE, &mat[0][0]);
@@ -192,20 +192,20 @@ void Shader::set_uniform(const char* uniform, const glm::mat4& mat) {
   auto u_elem = _uniforms.find(uniform);
   if (u_elem == _uniforms.end()) {
     Logger::getInstance()->error(
-            "Attempting to set unregistered uniform: " +
-            std::string(uniform));
+      "Attempting to set unregistered uniform: " +
+      std::string(uniform));
     return;
   }
   glUniformMatrix4fv(_uniforms.at(uniform), 1, GL_FALSE, &mat[0][0]);
 }
 
 void Shader::set_uniform(const char* uniform, const std::vector<glm::mat4>& mats,
-                         const GLuint count) {
+  const GLuint count) {
   auto u_elem = _uniforms.find(uniform);
   if (u_elem == _uniforms.end()) {
     Logger::getInstance()->error(
-            "Attempting to set unregistered uniform: " +
-            std::string(uniform));
+      "Attempting to set unregistered uniform: " +
+      std::string(uniform));
     return;
   }
   glUniformMatrix4fv(_uniforms.at(uniform), count, GL_FALSE, &mats[0][0][0]);

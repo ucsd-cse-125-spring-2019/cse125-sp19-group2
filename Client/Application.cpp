@@ -12,7 +12,7 @@ Application::Application(const char* windowTitle, int argc, char** argv) {
   _win_title = windowTitle;
   _win_width = 800;
   _win_height = 600;
-  
+
   if (argc == 1) {
   }
   else {
@@ -26,16 +26,16 @@ Application::Application(const char* windowTitle, int argc, char** argv) {
   _networkClient = std::make_unique<NetworkClient>();
   try
   {
-      _playerId = _networkClient->connect("localhost", PORTNUM);
+    _playerId = _networkClient->connect("localhost", PORTNUM);
   }
   catch (std::runtime_error e)
   {
-      Logger::getInstance()->error(e.what());
+    Logger::getInstance()->error(e.what());
   }
 
   // Initialize GLFW
   if (!glfwInit()) {
-    std::cerr << "Failed to initialize GLFW\n" << std::endl;
+    Logger::getInstance()->fatal("Failed to initialize GLFW");
     return;
   }
 
@@ -62,7 +62,7 @@ void Application::Setup() {
 
   _camera = std::make_unique<Camera>();
   _camera->set_position(0, 0, 10.0f);
-  _frameBuffer = std::make_unique<FrameBuffer>(1024*2, 768 * 2);
+  _frameBuffer = std::make_unique<FrameBuffer>(1024 * 2, 768 * 2);
   _quadFrameBuffer = std::make_unique<FrameBuffer>(1024, 768);
 
   // Set up testing shader program
@@ -81,10 +81,10 @@ void Application::Setup() {
   _cubeShader->LoadFromFile(GL_VERTEX_SHADER, "./Resources/Shaders/basiclight.vert");
   _cubeShader->LoadFromFile(GL_FRAGMENT_SHADER, "./Resources/Shaders/basiclight.frag");
   _cubeShader->CreateProgram();
-  _cubeShader->RegisterUniformList({"u_projection", "u_view", "u_model",
-	  "u_light.position", "u_light.ambient", "u_light.diffuse", "u_light.specular", "u_light.constant", "u_light.constant", "u_light.linear", "u_light.quadratic",
-	  "u_objMat.diffuse", "u_objMat.specular", "u_objMat.shininess"
-	  });
+  _cubeShader->RegisterUniformList({ "u_projection", "u_view", "u_model",
+    "u_light.position", "u_light.ambient", "u_light.diffuse", "u_light.specular", "u_light.constant", "u_light.constant", "u_light.linear", "u_light.quadratic",
+    "u_objMat.diffuse", "u_objMat.specular", "u_objMat.shininess"
+    });
 
   // Create cube model
   _cube = std::make_unique<Model>("./Resources/Models/SimpleTexture.obj");
@@ -92,13 +92,13 @@ void Application::Setup() {
   // Test input
   InputManager::getInstance().getKey(GLFW_KEY_G)->onPress([&]
   {
-	  std::cout << "Hello World!" << this->count << std::endl;
+    std::cout << "Hello World!" << this->count << std::endl;
   });
 
   InputManager::getInstance().getKey(GLFW_KEY_K)->onRepeat([&]
   {
-	  this->count += 1;
-	  std::cout << this->count << std::endl;
+    this->count += 1;
+    std::cout << this->count << std::endl;
   });
 }
 
@@ -115,7 +115,7 @@ void Application::Run() {
   if (!_window) {
     Logger::getInstance()->fatal("Failed to open GLFW window");
     Logger::getInstance()->fatal("Either GLFW is not installed or your " +
-            std::string("graphics card does not support OpenGL"));
+      std::string("graphics card does not support OpenGL"));
     glfwTerminate();
     fgetc(stdin);
     return;
@@ -152,21 +152,21 @@ void Application::Run() {
 
 void Application::Update()
 {
-    // Get updates from the server
-    try
+  // Get updates from the server
+  try
+  {
+    for (auto& update : _networkClient->receiveUpdates())
     {
-        for (auto& update : _networkClient->receiveUpdates())
-        {
-            // TODO: update logic
-        }
+      // TODO: update logic
     }
-    catch (std::runtime_error e)
-    {
-        // Disconnected from the server
-    }
+  }
+  catch (std::runtime_error e)
+  {
+    // Disconnected from the server
+  }
 
-	InputManager::getInstance().update();
-	_camera->Update();
+  InputManager::getInstance().update();
+  _camera->Update();
 }
 
 void Application::Draw() {
@@ -183,15 +183,15 @@ void Application::Draw() {
     _cubeShader->set_uniform("u_projection", _camera->projection_matrix());
     _cubeShader->set_uniform("u_view", _camera->view_matrix());
     _cubeShader->set_uniform("u_model", glm::translate(glm::mat4(1.0f), glm::vec3(0, 0.1, -3.0f)) *
-                             glm::rotate(glm::mat4(1.0f), glm::radians(15.0f), glm::vec3(0.5, 0.5, 0.5)));
-	_cubeShader->set_uniform("u_objMat.shininess", 0.6f);
-	_cubeShader->set_uniform("u_light.position", glm::vec3(-3.0f, 3.0f, -3.0f));
-	_cubeShader->set_uniform("u_light.ambient", glm::vec3(0.05f, 0.05f, 0.05f));
-	_cubeShader->set_uniform("u_light.diffuse", glm::vec3(0.8f, 0.8f, 0.8f));
-	_cubeShader->set_uniform("u_light.specular", glm::vec3(1.0f, 1.0f, 1.0f));
-	_cubeShader->set_uniform("u_light.constant", 1.0f);
-	_cubeShader->set_uniform("u_light.linear", 0.09f);
-	_cubeShader->set_uniform("u_light.quadratic", 0.032f);
+      glm::rotate(glm::mat4(1.0f), glm::radians(15.0f), glm::vec3(0.5, 0.5, 0.5)));
+    _cubeShader->set_uniform("u_objMat.shininess", 0.6f);
+    _cubeShader->set_uniform("u_light.position", glm::vec3(-3.0f, 3.0f, -3.0f));
+    _cubeShader->set_uniform("u_light.ambient", glm::vec3(0.05f, 0.05f, 0.05f));
+    _cubeShader->set_uniform("u_light.diffuse", glm::vec3(0.8f, 0.8f, 0.8f));
+    _cubeShader->set_uniform("u_light.specular", glm::vec3(1.0f, 1.0f, 1.0f));
+    _cubeShader->set_uniform("u_light.constant", 1.0f);
+    _cubeShader->set_uniform("u_light.linear", 0.09f);
+    _cubeShader->set_uniform("u_light.quadratic", 0.032f);
     _cube->Draw(_cubeShader);
   });
 
@@ -215,7 +215,7 @@ void Application::StaticResize(GLFWwindow* window, int x, int y) {
 }
 
 void Application::StaticKeyboard(GLFWwindow* window,
-                                 int key, int scancode, int action, int mods) {
+  int key, int scancode, int action, int mods) {
   Application* instance = (Application *)glfwGetWindowUserPointer(window);
   instance->Keyboard(key, scancode, action, mods);
 }

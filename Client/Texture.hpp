@@ -15,15 +15,15 @@
 
 enum class TextureType : unsigned char
 {
-	DIFFUSE,
-	SPECULAR
+  DIFFUSE,
+  SPECULAR
 };
 
 struct Texture
 {
-	unsigned int id;
-	TextureType type;
-	std::string path;
+  unsigned int id;
+  TextureType type;
+  std::string path;
 };
 
 GLuint LoadTextureFromFile(const char *path, const std::string &directory);
