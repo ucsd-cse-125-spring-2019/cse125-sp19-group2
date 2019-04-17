@@ -62,8 +62,8 @@ void Application::Setup() {
 
   _camera = std::make_unique<Camera>();
   _camera->set_position(0, 0, 10.0f);
-  _frameBuffer = std::make_unique<FrameBuffer>(1024 * 2, 768 * 2);
-  _quadFrameBuffer = std::make_unique<FrameBuffer>(1024, 768);
+  _frameBuffer = std::make_unique<FrameBuffer>(800, 600);
+  _quadFrameBuffer = std::make_unique<FrameBuffer>(800, 600);
 
   // Set up testing shader program
   _testShader->LoadFromFile(GL_VERTEX_SHADER, "./Resources/Shaders/pano.vert");
@@ -179,6 +179,7 @@ void Application::Draw() {
   {
     // render scene
     //_frameBuffer->drawQuad(_testShader);
+	  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     _cubeShader->Use();
     _cubeShader->set_uniform("u_projection", _camera->projection_matrix());
     _cubeShader->set_uniform("u_view", _camera->view_matrix());
