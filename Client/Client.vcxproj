@@ -150,6 +150,8 @@
     <ClCompile Include="glad.c" />
     <ClCompile Include="InputManager.cpp" />
     <ClCompile Include="Key.cpp" />
+    <ClCompile Include="Light.cpp" />
+    <ClCompile Include="PointLight.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="NetworkClient.cpp" />
     <ClCompile Include="Mesh.cpp" />
@@ -174,6 +176,8 @@
     <ClInclude Include="CBaseEntity.hpp" />
     <ClInclude Include="CExampleEntity.hpp" />
     <ClInclude Include="FrameBuffer.h" />
+    <ClInclude Include="Light.hpp" />
+    <ClInclude Include="PointLight.hpp" />
     <ClInclude Include="NetworkClient.hpp" />
     <ClInclude Include="InputManager.h" />
     <ClInclude Include="Key.h" />

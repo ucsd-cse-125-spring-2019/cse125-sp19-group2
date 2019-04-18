@@ -90,6 +90,15 @@ void Application::Setup() {
   // Create cube model
   _cube = std::make_unique<Model>("./Resources/Models/simpleobject2.obj");
 
+  // Create light
+  _light = std::make_unique<PointLight>(
+    PointLight{ "u_light",
+    { { 0.05f, 0.05f, 0.05f }, { 0.8f, 0.8f, 0.8f }, { 1.0f, 1.0f, 1.0f } },
+    { -3.0f, 3.0f, -3.0f },
+    { 1.0f, 0.09f, 0.032f }
+    }
+  );
+
   // Test input
   InputManager::getInstance().getKey(GLFW_KEY_G)->onPress([&]
   {
@@ -187,13 +196,8 @@ void Application::Draw() {
     _cubeShader->set_uniform("u_model", glm::translate(glm::mat4(1.0f), glm::vec3(0, 0.1, -3.0f)) *
       glm::rotate(glm::mat4(1.0f), glm::radians(60.0f), glm::vec3(0.1, 0.0, 0.0)));
     _cubeShader->set_uniform("u_material.shininess", 0.6f);
-    _cubeShader->set_uniform("u_light.position", glm::vec3(-3.0f, 3.0f, -3.0f));
-    _cubeShader->set_uniform("u_light.ambient", glm::vec3(0.05f, 0.05f, 0.05f));
-    _cubeShader->set_uniform("u_light.diffuse", glm::vec3(0.8f, 0.8f, 0.8f));
-    _cubeShader->set_uniform("u_light.specular", glm::vec3(1.0f, 1.0f, 1.0f));
-    _cubeShader->set_uniform("u_light.constant", 1.0f);
-    _cubeShader->set_uniform("u_light.linear", 0.09f);
-    _cubeShader->set_uniform("u_light.quadratic", 0.032f);
+
+    _light->setUniforms(_cubeShader);
     _cube->Draw(_cubeShader);
   });
 

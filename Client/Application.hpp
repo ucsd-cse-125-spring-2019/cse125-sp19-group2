@@ -13,6 +13,7 @@
 #include "FrameBuffer.h"
 #include "NetworkClient.hpp"
 #include "Model.hpp"
+#include "PointLight.hpp"
 
 class Application {
 public:
@@ -82,6 +83,9 @@ private:
 
   // Test Model
   std::unique_ptr<Model> _cube;
+
+  // Test Lights
+  std::unique_ptr<PointLight> _light;
 };
 
 #endif
