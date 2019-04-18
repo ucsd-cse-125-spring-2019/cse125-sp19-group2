@@ -5,19 +5,9 @@
 #ifndef POINT_LIGHT_HPP
 #define POINT_LIGHT_HPP
 
-#include <glad/glad.h>
-#include <glm/glm.hpp>
-#include <glm/gtx/transform.hpp>
-#include <string>
 #include "Light.hpp"
-#include "Shader.hpp"
 
-struct LightAttenuation
-{
-  GLfloat constant;
-  GLfloat linear;
-  GLfloat quadratic;
-};
+#include <glm/gtx/transform.hpp>
 
 class PointLight : public Light
 {
@@ -32,8 +22,8 @@ class PointLight : public Light
   
   glm::vec3 position() const;
  
-  void set_name(const std::string & name);
-  void set_position(const glm::vec3 & position);
+  void set_name(const std::string &name);
+  void set_position(const glm::vec3 &position);
   void set_position(float x, float y, float z);
   void set_attenuation(const LightAttenuation &attenuation);
   void set_constant_attenuation(GLfloat value);

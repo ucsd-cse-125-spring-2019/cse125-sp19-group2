@@ -83,7 +83,9 @@ void Application::Setup() {
   _cubeShader->LoadFromFile(GL_FRAGMENT_SHADER, "./Resources/Shaders/basiclight.frag");
   _cubeShader->CreateProgram();
   _cubeShader->RegisterUniformList({ "u_projection", "u_view", "u_model",
-    "u_light.position", "u_light.ambient", "u_light.diffuse", "u_light.specular", "u_light.constant", "u_light.constant", "u_light.linear", "u_light.quadratic",
+    "u_numdirlights", "u_numpointlights",
+    "u_pointlight.position", "u_pointlight.ambient", "u_pointlight.diffuse", "u_pointlight.specular", "u_pointlight.constant", "u_pointlight.constant", "u_pointlight.linear", "u_pointlight.quadratic",
+    "u_dirlight.direction", "u_dirlight.ambient", "u_dirlight.diffuse", "u_dirlight.specular",
     "u_material.diffuse", "u_material.specular", "u_material.shininess"
     });
 
@@ -91,11 +93,19 @@ void Application::Setup() {
   _cube = std::make_unique<Model>("./Resources/Models/simpleobject2.obj");
 
   // Create light
-  _light = std::make_unique<PointLight>(
-    PointLight{ "u_light",
-    { { 0.05f, 0.05f, 0.05f }, { 0.8f, 0.8f, 0.8f }, { 1.0f, 1.0f, 1.0f } },
-    { -3.0f, 3.0f, -3.0f },
-    { 1.0f, 0.09f, 0.032f }
+  _point_light = std::make_unique<PointLight>(
+    PointLight{
+      "u_pointlight",
+      { { 0.05f, 0.05f, 0.05f }, { 0.8f, 0.8f, 0.8f }, { 1.0f, 1.0f, 1.0f } },
+      { -3.0f, 3.0f, -3.0f },
+      { 1.0f, 0.09f, 0.032f }
+    }
+  );
+  _dir_light = std::make_unique<DirectionalLight>(
+    DirectionalLight{
+      "u_dirlight",
+      { { 0.05f, 0.01f, 0.01f }, { 0.8f, 0.3f, 0.3f }, { 1.0f, 0.5f, 0.5f } },
+      { -1.0f, -1.0f, 0.0f }
     }
   );
 
@@ -197,7 +207,14 @@ void Application::Draw() {
       glm::rotate(glm::mat4(1.0f), glm::radians(60.0f), glm::vec3(0.1, 0.0, 0.0)));
     _cubeShader->set_uniform("u_material.shininess", 0.6f);
 
-    _light->setUniforms(_cubeShader);
+    // Lights
+    _cubeShader->set_uniform("u_numdirlights", static_cast<GLuint>(1));
+    _cubeShader->set_uniform("u_numpointlights", static_cast<GLuint>(0));
+
+    _point_light->setUniforms(_cubeShader);
+    _dir_light->setUniforms(_cubeShader);
+
+    // Cube
     _cube->Draw(_cubeShader);
   });
 

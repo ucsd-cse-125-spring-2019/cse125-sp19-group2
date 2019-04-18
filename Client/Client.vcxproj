@@ -146,6 +146,7 @@
   <ItemGroup>
     <ClCompile Include="Application.cpp" />
     <ClCompile Include="Camera.cpp" />
+    <ClCompile Include="DirectionalLight.cpp" />
     <ClCompile Include="FrameBuffer.cpp" />
     <ClCompile Include="glad.c" />
     <ClCompile Include="InputManager.cpp" />
@@ -175,6 +176,7 @@
     <ClInclude Include="Application.hpp" />
     <ClInclude Include="CBaseEntity.hpp" />
     <ClInclude Include="CExampleEntity.hpp" />
+    <ClInclude Include="DirectionalLight.hpp" />
     <ClInclude Include="FrameBuffer.h" />
     <ClInclude Include="Light.hpp" />
     <ClInclude Include="PointLight.hpp" />

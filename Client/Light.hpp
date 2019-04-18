@@ -15,6 +15,13 @@ struct LightIntensity
   glm::vec3 specular;
 };
 
+struct LightAttenuation
+{
+  GLfloat constant;
+  GLfloat linear;
+  GLfloat quadratic;
+};
+
 class Light
 {
 public:
