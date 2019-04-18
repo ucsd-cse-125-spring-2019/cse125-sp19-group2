@@ -51,6 +51,19 @@ void GameServer::update()
 			stateVec.push_back(state);
 		}
 
+		auto state = std::make_shared<BaseState>();
+		state->pos = glm::vec3(40, 40, 40);
+		state->width = 5;
+		state->depth = 5;
+		stateVec.push_back(state);
+
+		auto state2 = std::make_shared<BaseState>();
+		state2->pos = glm::vec3(42, 42, 42);
+		state2->width = 5;
+		state2->depth = 5;
+		stateVec.push_back(state2);
+
+
         auto timerStart = std::chrono::steady_clock::now();
 
 		BoundingBox box;
@@ -62,6 +75,8 @@ void GameServer::update()
 		{
 			tree->insert(state.get());
 		}
+
+		auto testResults = tree->query(std::vector<BaseState*>(), state.get());
 
         /*** Begin Loop ***/
 
@@ -96,7 +111,6 @@ void GameServer::update()
         auto elapsed = timerEnd - timerStart;
 
 		std::cerr << std::chrono::duration_cast<std::chrono::milliseconds>(elapsed).count() << std::endl;
-		exit(1);
 
         // Warn if server is overloaded
         if (tick(elapsed).count() > 1)

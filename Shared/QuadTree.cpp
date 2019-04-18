@@ -117,7 +117,7 @@ std::vector<BaseState*> QuadTree::query(std::vector<BaseState*> objectsInRange, 
 	int index = getIndex(state);
 	if (index != -1 && _nw)
 	{
-		_quads[index]->query(objectsInRange, state);
+		objectsInRange = _quads[index]->query(objectsInRange, state);
 	}
 
 	objectsInRange.insert(objectsInRange.end(), _objects.begin(), _objects.end());
