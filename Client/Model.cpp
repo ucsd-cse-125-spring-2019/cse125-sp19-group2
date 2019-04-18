@@ -130,6 +130,19 @@ std::vector<Texture> Model::LoadMaterialTextures(aiMaterial *material,
 {
   std::vector<Texture> textures;
 
+  // no texture
+  if (material->GetTextureCount(ai_tex_type) == 0)
+  {
+	  // Create and store texture
+	  Texture texture;
+	  texture.id = LoadTextureFromFile("blank.jpg", "./Resources/Models");
+	  texture.type = tex_type;
+	  texture.path = "blank.jpg";
+
+	  textures.push_back(texture);
+	  _textures.push_back(texture);
+  }
+
   for (unsigned int i = 0; i < material->GetTextureCount(ai_tex_type); i++)
   {
     aiString path;
