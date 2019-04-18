@@ -92,10 +92,10 @@ void QuadTree::divide()
 	BoundingBox neBoundary = BoundingBox();
 	BoundingBox swBoundary = BoundingBox();
 	BoundingBox seBoundary = BoundingBox();
-	nwBoundary.pos = glm::vec2(_boundary.pos.x - (_boundary.halfWidth / 2), _boundary.pos.y - (_boundary.halfWidth / 2));
-	neBoundary.pos = glm::vec2(_boundary.pos.x + (_boundary.halfWidth / 2), _boundary.pos.y - (_boundary.halfWidth / 2));
-	swBoundary.pos = glm::vec2(_boundary.pos.x - (_boundary.halfWidth / 2), _boundary.pos.y + (_boundary.halfWidth / 2));
-	seBoundary.pos = glm::vec2(_boundary.pos.x + (_boundary.halfWidth / 2), _boundary.pos.y + (_boundary.halfWidth / 2));
+	nwBoundary.pos = glm::vec2(_boundary.pos.x - (_boundary.halfWidth / 2), _boundary.pos.y + (_boundary.halfWidth / 2));
+	neBoundary.pos = glm::vec2(_boundary.pos.x + (_boundary.halfWidth / 2), _boundary.pos.y + (_boundary.halfWidth / 2));
+	swBoundary.pos = glm::vec2(_boundary.pos.x - (_boundary.halfWidth / 2), _boundary.pos.y - (_boundary.halfWidth / 2));
+	seBoundary.pos = glm::vec2(_boundary.pos.x + (_boundary.halfWidth / 2), _boundary.pos.y - (_boundary.halfWidth / 2));
 	nwBoundary.halfWidth = _boundary.halfWidth / 2;
 	neBoundary.halfWidth = _boundary.halfWidth / 2;
 	swBoundary.halfWidth = _boundary.halfWidth / 2;
