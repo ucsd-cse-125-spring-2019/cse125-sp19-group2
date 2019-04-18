@@ -57,6 +57,7 @@ public:
 	void clear();
 	void divide();
 	int getIndex(BaseState * state);
+	bool intersects(BaseState * state);
 	std::vector<BaseState*> query(std::vector<BaseState*> objectsInRange, BaseState * state);
 
 private:

@@ -8,11 +8,21 @@ QuadTree::~QuadTree()
 int QuadTree::getIndex(BaseState * state)
 {
 	int index = -1;
+	float objBottom = (state->pos.z - state->depth / 2);
+	float objTop = (state->pos.z + state->depth / 2);
+	float objLeft = (state->pos.x - state->width / 2);
+	float objRight = (state->pos.x + state->width / 2);
+	float quadBottom = _boundary.pos.y - _boundary.halfWidth;
+	float quadHorizMid = _boundary.pos.y;
+	float quadTop = _boundary.pos.y + _boundary.halfWidth;
+	float quadLeft = _boundary.pos.x - _boundary.halfWidth;
+	float quadVertMid = _boundary.pos.x;
+	float quadRight = _boundary.pos.x + _boundary.halfWidth;
 
-	bool inTopQuad = ((state->pos.z - state->depth / 2) < _boundary.pos.y) && ((state->pos.z + state->depth / 2) < _boundary.pos.y);
-	bool inBottomQuad = ((state->pos.z - state->depth / 2) > _boundary.pos.y);
-	bool inLeftQuad = ((state->pos.x - state->width / 2) < _boundary.pos.x) && ((state->pos.x + state->width / 2) < _boundary.pos.x);
-	bool inRightQuad = ((state->pos.x - state->width / 2) > _boundary.pos.x);
+	bool inBottomQuad = (objBottom > quadBottom) && (objTop < quadHorizMid);
+	bool inTopQuad = (objBottom > quadHorizMid) && (objTop < quadTop);
+	bool inLeftQuad = (objLeft > quadLeft) && (objRight < quadVertMid);
+	bool inRightQuad = (objLeft > quadVertMid) && (objRight < quadRight);
 
 	if (inLeftQuad)
 	{
@@ -119,8 +129,17 @@ std::vector<BaseState*> QuadTree::query(std::vector<BaseState*> objectsInRange, 
 	{
 		objectsInRange = _quads[index]->query(objectsInRange, state);
 	}
+	else if (index == -1 && _ne)
+	{
+		
+	}
 
 	objectsInRange.insert(objectsInRange.end(), _objects.begin(), _objects.end());
 
 	return objectsInRange;
+}
+
+bool QuadTree::intersects(BaseState * state)
+{
+	return _boundary.intersects(state);
 }
