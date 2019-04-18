@@ -67,7 +67,7 @@ void QuadTree::insert(BaseState * state)
 			if (index != -1)
 			{
 				_quads[index]->insert(_objects[i]);
-				_objects.erase(_objects.begin() + index);
+				_objects.erase(_objects.begin() + i);
 			}
 			else
 			{
