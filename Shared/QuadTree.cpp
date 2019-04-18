@@ -40,7 +40,7 @@ int QuadTree::getIndex(BaseState * state)
 	return index;
 }
 
-bool QuadTree::insert(BaseState * state)
+void QuadTree::insert(BaseState * state)
 {
 	if (_nw)
 	{

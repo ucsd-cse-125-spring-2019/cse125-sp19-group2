@@ -53,7 +53,7 @@ public:
 
 	~QuadTree();
 
-	bool insert(BaseState * state);
+	void insert(BaseState * state);
 	void clear();
 	void divide();
 	int getIndex(BaseState * state);
