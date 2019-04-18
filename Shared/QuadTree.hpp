@@ -6,6 +6,8 @@
 
 #define QUADTREE_NODE_CAPACITY 4
 
+// "borrowed" from https://gamedevelopment.tutsplus.com/tutorials/quick-tip-use-quadtrees-to-detect-likely-collisions-in-2d-space--gamedev-374
+
 // Internal representation of a square, axis-aligned bounding box
 struct BoundingBox
 {
@@ -43,28 +45,31 @@ struct BoundingBox
 class QuadTree
 {
 public:
-	QuadTree();
 	QuadTree(BoundingBox boundary)
 	{
-		this->boundary = boundary;
+		this->_boundary = boundary;
+		_quads = (QuadTree**)malloc(sizeof(QuadTree*) * 4);
 	}
 
 	~QuadTree();
 
-	void insert(BaseState * state);
+	bool insert(BaseState * state);
+	void clear();
 	void divide();
-	std::vector<BaseState*> query(BaseState * state);
+	int getIndex(BaseState * state);
+	std::vector<BaseState*> query(std::vector<BaseState*> objectsInRange, BaseState * state);
 
 private:
 	// Square bounding box defining this node's area
-	BoundingBox boundary;
+	BoundingBox _boundary;
 
 	// Objects in this node
-	std::vector<BaseState*> objects;
+	std::vector<BaseState*> _objects;
 
 	// Subtrees
 	QuadTree * _nw;
 	QuadTree * _ne;
 	QuadTree * _sw;
 	QuadTree * _se;
+	QuadTree ** _quads;
 };
