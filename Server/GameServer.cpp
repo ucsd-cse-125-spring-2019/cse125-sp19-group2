@@ -1,6 +1,10 @@
 #include <ctime>
 #include <time.h>
+#include <random>
+#include <glm/glm.hpp>
 
+#include "Shared/QuadTree.hpp"
+#include "SExampleEntity.hpp"
 #include "GameServer.hpp"
 
 GameServer::GameServer()
@@ -21,8 +25,6 @@ void GameServer::start()
     // Initialize object map
     _entityMap = std::unordered_map<uint32_t, std::shared_ptr<SBaseEntity>>();
 
-    // TODO: create initial world, objects here
-
     // Start update loop
     this->update();
 }
@@ -32,9 +34,49 @@ void GameServer::update()
 {
     while (true)
     {
+		// Random distribution
+		std::random_device rd;
+		std::mt19937 gen(rd());
+		std::uniform_int_distribution<> dis(0, 100);
+
+		// TODO: create initial world, objects here
+		// Random, test objects
+		auto stateVec = std::vector<std::shared_ptr<BaseState>>();
+		for (int i = 0; i < 100; i++)
+		{
+			auto state = std::make_shared<BaseState>();
+			state->pos = glm::vec3(dis(gen), 0, dis(gen));
+			state->width = 1;
+			state->depth = 1;
+			stateVec.push_back(state);
+		}
+
+		auto state = std::make_shared<BaseState>();
+		state->pos = glm::vec3(40, 40, 40);
+		state->width = 5;
+		state->depth = 5;
+		stateVec.push_back(state);
+
+		auto state2 = std::make_shared<BaseState>();
+		state2->pos = glm::vec3(42, 42, 42);
+		state2->width = 5;
+		state2->depth = 5;
+		stateVec.push_back(state2);
+
+
         auto timerStart = std::chrono::steady_clock::now();
 
+		BoundingBox box;
+		box.pos = glm::vec2(50, 50);
+		box.halfWidth = 50;
+		QuadTree * tree = new QuadTree(box);
 
+		for (auto& state : stateVec)
+		{
+			tree->insert(state.get());
+		}
+
+		auto testResults = tree->query(std::vector<BaseState*>(), state2.get());
 
         /*** Begin Loop ***/
 
@@ -67,6 +109,8 @@ void GameServer::update()
 
         // Elapsed time in nanoseconds
         auto elapsed = timerEnd - timerStart;
+
+		std::cerr << std::chrono::duration_cast<std::chrono::milliseconds>(elapsed).count() << std::endl;
 
         // Warn if server is overloaded
         if (tick(elapsed).count() > 1)
