@@ -87,7 +87,7 @@ void Application::Setup() {
     });
 
   // Create cube model
-  _cube = std::make_unique<Model>("./Resources/Models/sphere.obj");
+  _cube = std::make_unique<Model>("./Resources/Models/cube.obj");
 
   // Test input
   InputManager::getInstance().getKey(GLFW_KEY_G)->onPress([&]
