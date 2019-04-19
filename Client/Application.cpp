@@ -53,6 +53,7 @@ void Application::Setup() {
   glEnable(GL_DEPTH_TEST);
   glDepthFunc(GL_LEQUAL);
   glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+  glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
   //glEnable(GL_CULL_FACE);
 
   // Initialize pointers
@@ -87,7 +88,7 @@ void Application::Setup() {
     });
 
   // Create cube model
-  _cube = std::make_unique<Model>("./Resources/Models/sphere.obj");
+  _cube = std::make_unique<Model>("./Resources/Models/simpleobject2.obj");
 
   // Test input
   InputManager::getInstance().getKey(GLFW_KEY_G)->onPress([&]
