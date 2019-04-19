@@ -3,6 +3,8 @@
 #include <memory>
 
 #include "Shared/BaseState.hpp"
+#include "Shared/GameEvent.hpp"
+#include "Shared/QuadTree.hpp"
 
 /*
 ** As with CBaseEntity, this is an abstract class, and cannot be instantiated.
@@ -15,16 +17,23 @@
 */
 class SBaseEntity
 {
-private:
-	// TODO: server-specific state goes here
-
 public:
 	// Update function, called every tick
-	virtual void update() = 0;
+	virtual void update(
+			QuadTree * gameMap,
+			std::vector<std::shared_ptr<GameEvent>> events) = 0;
 
-    // All server objects must have a state to send to the client
-    virtual std::shared_ptr<BaseState> getState() = 0;
+    // All server objects must have a state to send to the client.
+	// By default, this function should return the state object only if it was
+	// changed. Otherwise it returns null. If ignoreUpdateStatus is set to true,
+	// this should return the state object regardless.
+    virtual std::shared_ptr<BaseState> getState(bool ignoreUpdateStatus = false) = 0;
 
 	// TODO: add more server-specific functions that are object-agnostic
+
+protected:
+	// TODO: server-specific state goes here
+	bool _isStatic;		// Whether the object's state can be changed
+	bool _hasChanged;	// If object state has changed during the last iteration
 };
 

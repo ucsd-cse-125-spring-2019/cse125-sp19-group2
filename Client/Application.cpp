@@ -27,6 +27,15 @@ Application::Application(const char* windowTitle, int argc, char** argv) {
   try
   {
     _playerId = _networkClient->connect("localhost", PORTNUM);
+
+	// First thing we do is create a player join event with player name
+	auto joinEvent = std::make_shared<GameEvent>();
+	joinEvent->playerId = _playerId;
+	joinEvent->type = EVENT_PLAYER_JOIN;
+
+	// TODO: change this to player-specified name
+	joinEvent->playerName = "Player" + std::to_string(_playerId);
+	_networkClient->sendEvent(joinEvent);
   }
   catch (std::runtime_error e)
   {
@@ -158,6 +167,7 @@ void Application::Update()
     for (auto& update : _networkClient->receiveUpdates())
     {
       // TODO: update logic
+		update->print();
     }
   }
   catch (std::runtime_error e)

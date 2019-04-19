@@ -11,6 +11,7 @@
 // enter the picture.
 enum EntityType
 {
-    ENTITY_EXAMPLE
+    ENTITY_EXAMPLE,
+	ENTITY_PLAYER
 	// TODO: add new types here, e.g. ENTITY_DOGBONE
 };

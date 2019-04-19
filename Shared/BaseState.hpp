@@ -43,7 +43,7 @@ struct BaseState
 	void serialize(Archive & archive)
 	{
 		archive(type,
-        id,
+				id,
 				pos,
 				up,
 				normal,

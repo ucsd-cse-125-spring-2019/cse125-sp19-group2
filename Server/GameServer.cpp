@@ -5,6 +5,7 @@
 
 #include "Shared/QuadTree.hpp"
 #include "SExampleEntity.hpp"
+#include "SPlayerEntity.hpp"
 #include "GameServer.hpp"
 
 GameServer::GameServer()
@@ -25,6 +26,9 @@ void GameServer::start()
     // Initialize object map
     _entityMap = std::unordered_map<uint32_t, std::shared_ptr<SBaseEntity>>();
 
+	// TODO: create initial world, objects here
+
+
     // Start update loop
     this->update();
 }
@@ -34,71 +38,62 @@ void GameServer::update()
 {
     while (true)
     {
-		// Random distribution
-		std::random_device rd;
-		std::mt19937 gen(rd());
-		std::uniform_int_distribution<> dis(0, 100);
-
-		// TODO: create initial world, objects here
-		// Random, test objects
-		auto stateVec = std::vector<std::shared_ptr<BaseState>>();
-		for (int i = 0; i < 100; i++)
-		{
-			auto state = std::make_shared<BaseState>();
-			state->pos = glm::vec3(dis(gen), 0, dis(gen));
-			state->width = 1;
-			state->depth = 1;
-			stateVec.push_back(state);
-		}
-
-		auto state = std::make_shared<BaseState>();
-		state->pos = glm::vec3(40, 40, 40);
-		state->width = 5;
-		state->depth = 5;
-		stateVec.push_back(state);
-
-		auto state2 = std::make_shared<BaseState>();
-		state2->pos = glm::vec3(42, 42, 42);
-		state2->width = 5;
-		state2->depth = 5;
-		stateVec.push_back(state2);
-
-
         auto timerStart = std::chrono::steady_clock::now();
-
-		BoundingBox box;
-		box.pos = glm::vec2(50, 50);
-		box.halfWidth = 50;
-		QuadTree * tree = new QuadTree(box);
-
-		for (auto& state : stateVec)
-		{
-			tree->insert(state.get());
-		}
-
-		auto testResults = tree->query(std::vector<BaseState*>(), state2.get());
 
         /*** Begin Loop ***/
 
         // Loop over player events
         for (auto& playerEvent : _networkInterface->receiveEvents())
         {
-            // TODO
+			// If the player just joined, create a player entity and send the
+			// state of every object on the server
+			if (playerEvent->type == EVENT_PLAYER_JOIN)
+			{
+				Logger::getInstance()->debug(
+						std::string("\"") + playerEvent->playerName +
+						std::string("\" joined the server!"));
+
+				// Make player entity
+				auto playerEntity = std::make_shared<SPlayerEntity>(playerEvent->playerId);
+
+				// Throw it into server-wide map
+				_entityMap.insert(std::pair<uint32_t,
+						std::shared_ptr<SBaseEntity>>(playerEntity->getState()->id, playerEntity));
+
+				// Generate a vector of all object states
+				auto updateVec = std::vector<std::shared_ptr<BaseState>>();
+				for (auto& entityPair : _entityMap)
+				{
+					updateVec.push_back(entityPair.second->getState(true));
+				}
+
+				// Send updates to this player only
+				_networkInterface->sendUpdates(updateVec, playerEvent->playerId);
+			}
+
+			// If a player has left, destroy their entity
+			if (playerEvent->type == EVENT_PLAYER_LEAVE)
+			{
+				// TODO
+			}
         }
 
         // TODO: game logic and physics simulation (if any) go here.
   
 
 
-        // Send updates to clients. To be optimized
+        // Send updates to clients
         auto updates = std::vector<std::shared_ptr<BaseState>>();
         for (auto& entityPair : _entityMap)
         {
             uint32_t id = entityPair.first;
             std::shared_ptr<SBaseEntity> entity = entityPair.second;
 
-            // TODO: check to see if we should send this update first
-            updates.push_back(entity->getState());
+            // Add to vector only if there is an update available
+			if (entity->getState())
+			{
+				updates.push_back(entity->getState());
+			}
         }
 
         /*** End Loop ***/
@@ -109,8 +104,6 @@ void GameServer::update()
 
         // Elapsed time in nanoseconds
         auto elapsed = timerEnd - timerStart;
-
-		std::cerr << std::chrono::duration_cast<std::chrono::milliseconds>(elapsed).count() << std::endl;
 
         // Warn if server is overloaded
         if (tick(elapsed).count() > 1)
