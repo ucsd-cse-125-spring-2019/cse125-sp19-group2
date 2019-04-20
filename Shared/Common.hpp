@@ -7,6 +7,9 @@
 
 #define PORTNUM "4000"
 
+// Not needed in client but many server-side objects need access to this def.
+#define TICKS_PER_SEC 30  // 33.3 ms per update() loop
+
 // This is absolutely filthy code but it is necessary when multiple machines
 // enter the picture.
 enum EntityType

@@ -99,6 +99,67 @@ void Application::Setup() {
   _cube = std::make_unique<Model>("./Resources/Models/sphere.obj");
 
   // Test input
+
+  // Player move forward event
+  InputManager::getInstance().getKey(GLFW_KEY_W)->onRepeat([&]
+	  {
+		  auto event = std::make_shared<GameEvent>();
+		  event->playerId = _playerId;
+		  event->type = EVENT_PLAYER_MOVE_FORWARD;
+
+		  // Try sending the update
+		  try
+		  {
+			  _networkClient->sendEvent(event);
+		  }
+		  catch (std::runtime_error e) {};
+	  });
+
+  // Player move backward event
+  InputManager::getInstance().getKey(GLFW_KEY_S)->onRepeat([&]
+	  {
+		  auto event = std::make_shared<GameEvent>();
+		  event->playerId = _playerId;
+		  event->type = EVENT_PLAYER_MOVE_BACKWARD;
+
+		  // Try sending the update
+		  try
+		  {
+			  _networkClient->sendEvent(event);
+		  }
+		  catch (std::runtime_error e) {};
+	  });
+
+  // Player move left event
+  InputManager::getInstance().getKey(GLFW_KEY_A)->onRepeat([&]
+	  {
+		  auto event = std::make_shared<GameEvent>();
+		  event->playerId = _playerId;
+		  event->type = EVENT_PLAYER_MOVE_LEFT;
+
+		  // Try sending the update
+		  try
+		  {
+			  _networkClient->sendEvent(event);
+		  }
+		  catch (std::runtime_error e) {};
+	  });
+
+  // Player move right event
+  InputManager::getInstance().getKey(GLFW_KEY_D)->onRepeat([&]
+	  {
+		  auto event = std::make_shared<GameEvent>();
+		  event->playerId = _playerId;
+		  event->type = EVENT_PLAYER_MOVE_RIGHT;
+
+		  // Try sending the update
+		  try
+		  {
+			  _networkClient->sendEvent(event);
+		  }
+		  catch (std::runtime_error e) {};
+	  });
+
   InputManager::getInstance().getKey(GLFW_KEY_G)->onPress([&]
   {
     std::cout << "Hello World!" << this->count << std::endl;
@@ -166,8 +227,8 @@ void Application::Update()
   {
     for (auto& update : _networkClient->receiveUpdates())
     {
-      // TODO: update logic
-		update->print();
+        // TODO: update logic
+		//update->print();
     }
   }
   catch (std::runtime_error e)
