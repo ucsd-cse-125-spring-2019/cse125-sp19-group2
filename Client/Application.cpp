@@ -98,8 +98,6 @@ void Application::Setup() {
   // Create cube model
   _cube = std::make_unique<Model>("./Resources/Models/sphere.obj");
 
-  // Test input
-
   // Player move forward event
   InputManager::getInstance().getKey(GLFW_KEY_W)->onRepeat([&]
 	  {
@@ -159,6 +157,8 @@ void Application::Setup() {
 		  }
 		  catch (std::runtime_error e) {};
 	  });
+
+  // Test input; to be removed
 
   InputManager::getInstance().getKey(GLFW_KEY_G)->onPress([&]
   {

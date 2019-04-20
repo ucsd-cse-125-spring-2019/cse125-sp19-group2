@@ -74,7 +74,7 @@ public:
 			// If any events left, process them
 			if (filteredEvents.size())
 			{
-				Logger::getInstance()->debug("Received " + std::to_string(filteredEvents.size()) + " events");
+				//Logger::getInstance()->debug("Received " + std::to_string(filteredEvents.size()) + " events");
 
 				// Overall direction of player
 				glm::vec3 dir = glm::vec3(0);
