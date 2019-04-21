@@ -44,6 +44,16 @@ std::shared_ptr<CBaseEntity> EntityManager::getEntity(std::shared_ptr<BaseState>
 }
 
 void EntityManager::update(std::shared_ptr<BaseState> const& state) {
+	// First check if marked as destroyed
+	if (state->isDestroyed) {
+		// Find in map and destroy if it exists
+		auto result = entityList.find(state->id);
+		if (result != entityList.end()) {
+			entityList.erase(result);
+		}
+		return;
+	}
+
     auto entity = getEntity(state);
     entity->updateState(state);
 }

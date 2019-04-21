@@ -75,6 +75,11 @@ LocalPlayer::LocalPlayer(uint32_t playerId, std::unique_ptr<NetworkClient> const
 void LocalPlayer::update() {
     if (!_playerEntity) {
         _playerEntity = std::dynamic_pointer_cast<CPlayerEntity>(EntityManager::getInstance().getEntity(_playerId));
+
+		// Break out if player entity does not yet exist
+		if (!_playerEntity) {
+			return;
+		}
 		_playerEntity->setLocal(true);
     }
     _camera->set_position(_playerEntity->getState()->pos + _distance * _offset);

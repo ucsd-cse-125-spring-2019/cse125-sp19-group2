@@ -74,6 +74,11 @@ void GameServer::update()
 
 				// Send updates to this player only
 				_networkInterface->sendUpdates(updateVec, playerEvent->playerId);
+
+				// Also send this player entity to everyone. Results in a
+				// duplicate update for the player who joined, but is cleaner
+				// than a boolean check inside update()
+				_networkInterface->sendUpdate(playerEntity->getState(true));
 			}
 
 			// If a player has left, destroy their entity
