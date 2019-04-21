@@ -48,13 +48,13 @@ Application::~Application() {
 }
 
 void Application::Setup() {
-  // Background color
+  // OpenGL Graphics Setup
   glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
   glEnable(GL_DEPTH_TEST);
   glDepthFunc(GL_LEQUAL);
   glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
   glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-  //glEnable(GL_CULL_FACE);
+  glEnable(GL_CULL_FACE);
 
   // Initialize pointers
   _testShader = std::make_unique<Shader>();
@@ -70,22 +70,16 @@ void Application::Setup() {
   _testShader->LoadFromFile(GL_VERTEX_SHADER, "./Resources/Shaders/pano.vert");
   _testShader->LoadFromFile(GL_FRAGMENT_SHADER, "./Resources/Shaders/pano.frag");
   _testShader->CreateProgram();
-  _testShader->RegisterUniform("rgbTexture");
 
   // quad pass through shader
   _quadShader->LoadFromFile(GL_VERTEX_SHADER, "./Resources/Shaders/quad.vert");
   _quadShader->LoadFromFile(GL_FRAGMENT_SHADER, "./Resources/Shaders/quad.frag");
   _quadShader->CreateProgram();
-  _quadShader->RegisterUniform("rgbTexture");
 
   // Basic model shader
   _cubeShader->LoadFromFile(GL_VERTEX_SHADER, "./Resources/Shaders/basiclight.vert");
   _cubeShader->LoadFromFile(GL_FRAGMENT_SHADER, "./Resources/Shaders/basiclight.frag");
   _cubeShader->CreateProgram();
-  _cubeShader->RegisterUniformList({ "u_projection", "u_view", "u_model",
-    "u_light.position", "u_light.ambient", "u_light.diffuse", "u_light.specular", "u_light.constant", "u_light.constant", "u_light.linear", "u_light.quadratic",
-    "u_material.diffuse", "u_material.specular", "u_material.shininess"
-    });
 
   // Create cube model
   _cube = std::make_unique<Model>("./Resources/Models/simpleobject2.obj");
@@ -208,7 +202,7 @@ void Application::Reset() {
 }
 
 void Application::StaticError(int error, const char* description) {
-  std::cerr << description << std::endl;
+  Logger::getInstance()->error(std::string(description));
 }
 
 void Application::StaticResize(GLFWwindow* window, int x, int y) {

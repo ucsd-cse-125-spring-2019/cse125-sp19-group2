@@ -65,8 +65,8 @@ void main(void)
   vec3 normal = normalize(pass_normal);
   vec3 viewDir = normalize(u_viewPos - pass_fragPos);
   
-  //vec3 resultCol = CalcPointLight(u_light, normal, pass_fragPos, viewDir);
-  vec3 resultCol = texture(u_material.diffuse, pass_uv).rgb;
+  vec3 resultCol = CalcPointLight(u_light, normal, pass_fragPos, viewDir);
+  //vec3 resultCol = texture(u_material.diffuse, pass_uv).rgb;
   
   out_color = vec4(resultCol, 1.0f);
 }
