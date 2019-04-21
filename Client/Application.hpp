@@ -71,6 +71,7 @@ private:
   std::unique_ptr<Shader> _testShader;
   std::unique_ptr<Shader> _quadShader;
   std::unique_ptr<Shader> _cubeShader;
+  std::unique_ptr<Shader> _debuglightShader;
 
   // Test camera
   std::unique_ptr<Camera> _camera;

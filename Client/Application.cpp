@@ -60,9 +60,10 @@ void Application::Setup() {
   _testShader = std::make_unique<Shader>();
   _quadShader = std::make_unique<Shader>();
   _cubeShader = std::make_unique<Shader>();
+  _debuglightShader = std::make_unique<Shader>();
 
   _camera = std::make_unique<Camera>();
-  _camera->set_position(0, 0, 1.0f);
+  _camera->set_position(0, 0, 3.0f);
   _frameBuffer = std::make_unique<FrameBuffer>(800, 600);
   _quadFrameBuffer = std::make_unique<FrameBuffer>(800, 600);
 
@@ -89,6 +90,12 @@ void Application::Setup() {
     "u_material.diffuse", "u_material.specular", "u_material.shininess"
     });
 
+  // Debugging shader for rendering lights
+  _debuglightShader->LoadFromFile(GL_VERTEX_SHADER, "./Resources/Shaders/debuglight.vert");
+  _debuglightShader->LoadFromFile(GL_FRAGMENT_SHADER, "./Resources/Shaders/debuglight.frag");
+  _debuglightShader->CreateProgram();
+  _debuglightShader->RegisterUniformList({ "u_projection", "u_view", "u_model", "u_color" });
+
   // Create cube model
   _cube = std::make_unique<Model>("./Resources/Models/simpleobject2.obj");
 
@@ -97,7 +104,7 @@ void Application::Setup() {
     PointLight{
       "u_pointlight",
       { { 0.05f, 0.05f, 0.05f }, { 0.8f, 0.8f, 0.8f }, { 1.0f, 1.0f, 1.0f } },
-      { -3.0f, 3.0f, -3.0f },
+      { -1.0f, 0.0f, 0.0f },
       { 1.0f, 0.09f, 0.032f }
     }
   );
@@ -187,6 +194,7 @@ void Application::Update()
 
   InputManager::getInstance().update();
   _camera->Update();
+  _point_light->update();
 }
 
 void Application::Draw() {
@@ -209,13 +217,19 @@ void Application::Draw() {
 
     // Lights
     _cubeShader->set_uniform("u_numdirlights", static_cast<GLuint>(1));
-    _cubeShader->set_uniform("u_numpointlights", static_cast<GLuint>(0));
+    _cubeShader->set_uniform("u_numpointlights", static_cast<GLuint>(1));
 
     _point_light->setUniforms(_cubeShader);
     _dir_light->setUniforms(_cubeShader);
 
     // Cube
     _cube->Draw(_cubeShader);
+
+	// Debug Shader
+	_debuglightShader->Use();
+	_debuglightShader->set_uniform("u_projection", _camera->projection_matrix());
+	_debuglightShader->set_uniform("u_view", _camera->view_matrix());
+	_point_light->draw(_debuglightShader);
   });
 
   // Render _frameBuffer Quad

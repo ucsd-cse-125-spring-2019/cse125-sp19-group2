@@ -4,6 +4,8 @@
 
 #include "PointLight.hpp"
 
+static const GLfloat quad_vertex_data[] = {0.0f, 0.0f, 0.0f};
+
 PointLight::PointLight()
 {
 }
@@ -14,6 +16,17 @@ PointLight::PointLight(const std::string & name, const LightIntensity & intensit
   set_intensity(intensity);
   set_position(position);
   set_attenuation(attenuation);
+
+  glGenVertexArrays(1, &_vao);
+  glGenBuffers(1, &_vbo);
+  glBindVertexArray(_vao);
+  glBindBuffer(GL_ARRAY_BUFFER, _vbo);
+  glBufferData(GL_ARRAY_BUFFER, sizeof(quad_vertex_data), quad_vertex_data, GL_STATIC_DRAW);
+
+  glEnableVertexAttribArray(0);
+  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (GLvoid*)0);
+  glBindBuffer(GL_ARRAY_BUFFER, 0);
+  glBindVertexArray(0);
 }
 
 PointLight::~PointLight() {}
@@ -35,6 +48,11 @@ void PointLight::update()
 void PointLight::draw(std::unique_ptr<Shader> const &shader)
 {
   shader->set_uniform("u_model", _world_mtx);
+
+  glBindVertexArray(_vao);
+  glPointSize(5.0f);
+  glDrawArrays(GL_POINTS, 0, 1);
+  glBindVertexArray(0);
 }
 
 glm::vec3 PointLight::position() const

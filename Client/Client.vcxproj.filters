@@ -138,6 +138,12 @@
     <None Include="Resources\Shaders\basiclight.vert">
       <Filter>Resource Files</Filter>
     </None>
+    <None Include="Resources\Shaders\debuglight.frag">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="Resources\Shaders\debuglight.vert">
+      <Filter>Resource Files</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Header Files">

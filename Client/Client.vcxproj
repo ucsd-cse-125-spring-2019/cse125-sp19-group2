@@ -167,6 +167,8 @@
     <None Include="Resources\Shaders\basic.vert" />
     <None Include="Resources\Shaders\basiclight.frag" />
     <None Include="Resources\Shaders\basiclight.vert" />
+    <None Include="Resources\Shaders\debuglight.frag" />
+    <None Include="Resources\Shaders\debuglight.vert" />
     <None Include="Resources\Shaders\pano.frag" />
     <None Include="Resources\Shaders\pano.vert" />
     <None Include="Resources\Shaders\quad.frag" />

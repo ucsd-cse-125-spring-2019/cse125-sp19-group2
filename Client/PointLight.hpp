@@ -6,6 +6,7 @@
 #define POINT_LIGHT_HPP
 
 #include "Light.hpp"
+#include "Model.hpp"
 
 #include <glm/gtx/transform.hpp>
 
@@ -40,6 +41,9 @@ class PointLight : public Light
   // Light properties
   glm::vec3 _position;
   LightAttenuation _attenuation;
+
+  // Light representation (For debugging purposes)
+  GLuint _vao, _vbo;
 };
 
 #endif /* POINT_LIGHT_HPP */

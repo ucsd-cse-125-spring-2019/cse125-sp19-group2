@@ -1,4 +1,4 @@
-#version 410 core
+#version 440 core
 
 in vec3 pass_fragPos;
 in vec3 pass_normal;
