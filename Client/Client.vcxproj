@@ -146,10 +146,12 @@
   <ItemGroup>
     <ClCompile Include="Application.cpp" />
     <ClCompile Include="Camera.cpp" />
+    <ClCompile Include="EntityManager.cpp" />
     <ClCompile Include="FrameBuffer.cpp" />
     <ClCompile Include="glad.c" />
     <ClCompile Include="InputManager.cpp" />
     <ClCompile Include="Key.cpp" />
+    <ClCompile Include="LocalPlayer.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="NetworkClient.cpp" />
     <ClCompile Include="Mesh.cpp" />
@@ -173,7 +175,10 @@
     <ClInclude Include="Application.hpp" />
     <ClInclude Include="CBaseEntity.hpp" />
     <ClInclude Include="CExampleEntity.hpp" />
+    <ClInclude Include="CPlayerEntity.hpp" />
+    <ClInclude Include="EntityManager.hpp" />
     <ClInclude Include="FrameBuffer.h" />
+    <ClInclude Include="LocalPlayer.hpp" />
     <ClInclude Include="NetworkClient.hpp" />
     <ClInclude Include="InputManager.h" />
     <ClInclude Include="Key.h" />

@@ -7,6 +7,7 @@
 #include "Camera.hpp"
 #include "InputManager.h"
 #include "Shared/Logger.hpp"
+#include "EntityManager.hpp"
 
 Application::Application(const char* windowTitle, int argc, char** argv) {
   _win_title = windowTitle;
@@ -26,16 +27,18 @@ Application::Application(const char* windowTitle, int argc, char** argv) {
   _networkClient = std::make_unique<NetworkClient>();
   try
   {
-    _playerId = _networkClient->connect("localhost", PORTNUM);
+    uint32_t playerId = _networkClient->connect("localhost", PORTNUM);
 
 	// First thing we do is create a player join event with player name
 	auto joinEvent = std::make_shared<GameEvent>();
-	joinEvent->playerId = _playerId;
+	joinEvent->playerId = playerId;
 	joinEvent->type = EVENT_PLAYER_JOIN;
 
 	// TODO: change this to player-specified name
-	joinEvent->playerName = "Player" + std::to_string(_playerId);
+	joinEvent->playerName = "Player" + std::to_string(playerId);
 	_networkClient->sendEvent(joinEvent);
+
+	_localPlayer = std::make_unique<LocalPlayer>(playerId, _networkClient);
   }
   catch (std::runtime_error e)
   {
@@ -97,66 +100,6 @@ void Application::Setup() {
 
   // Create cube model
   _cube = std::make_unique<Model>("./Resources/Models/sphere.obj");
-
-  // Player move forward event
-  InputManager::getInstance().getKey(GLFW_KEY_W)->onRepeat([&]
-	  {
-		  auto event = std::make_shared<GameEvent>();
-		  event->playerId = _playerId;
-		  event->type = EVENT_PLAYER_MOVE_FORWARD;
-
-		  // Try sending the update
-		  try
-		  {
-			  _networkClient->sendEvent(event);
-		  }
-		  catch (std::runtime_error e) {};
-	  });
-
-  // Player move backward event
-  InputManager::getInstance().getKey(GLFW_KEY_S)->onRepeat([&]
-	  {
-		  auto event = std::make_shared<GameEvent>();
-		  event->playerId = _playerId;
-		  event->type = EVENT_PLAYER_MOVE_BACKWARD;
-
-		  // Try sending the update
-		  try
-		  {
-			  _networkClient->sendEvent(event);
-		  }
-		  catch (std::runtime_error e) {};
-	  });
-
-  // Player move left event
-  InputManager::getInstance().getKey(GLFW_KEY_A)->onRepeat([&]
-	  {
-		  auto event = std::make_shared<GameEvent>();
-		  event->playerId = _playerId;
-		  event->type = EVENT_PLAYER_MOVE_LEFT;
-
-		  // Try sending the update
-		  try
-		  {
-			  _networkClient->sendEvent(event);
-		  }
-		  catch (std::runtime_error e) {};
-	  });
-
-  // Player move right event
-  InputManager::getInstance().getKey(GLFW_KEY_D)->onRepeat([&]
-	  {
-		  auto event = std::make_shared<GameEvent>();
-		  event->playerId = _playerId;
-		  event->type = EVENT_PLAYER_MOVE_RIGHT;
-
-		  // Try sending the update
-		  try
-		  {
-			  _networkClient->sendEvent(event);
-		  }
-		  catch (std::runtime_error e) {};
-	  });
 
   // Test input; to be removed
 
@@ -225,17 +168,20 @@ void Application::Update()
   // Get updates from the server
   try
   {
-    for (auto& update : _networkClient->receiveUpdates())
+    for (auto& state : _networkClient->receiveUpdates())
     {
         // TODO: update logic
-		//update->print();
+		state->print();
+		EntityManager::getInstance().update(state);
     }
   }
   catch (std::runtime_error e)
   {
     // Disconnected from the server
   }
-
+  if (_localPlayer) {
+	  _localPlayer->update();
+  }
   InputManager::getInstance().update();
   _camera->Update();
 }
@@ -252,8 +198,8 @@ void Application::Draw() {
     //_frameBuffer->drawQuad(_testShader);
 	  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     _cubeShader->Use();
-    _cubeShader->set_uniform("u_projection", _camera->projection_matrix());
-    _cubeShader->set_uniform("u_view", _camera->view_matrix());
+    _cubeShader->set_uniform("u_projection", _localPlayer->getCamera()->projection_matrix());
+    _cubeShader->set_uniform("u_view", _localPlayer->getCamera()->view_matrix());
     _cubeShader->set_uniform("u_model", glm::translate(glm::mat4(1.0f), glm::vec3(0, 0.1, -3.0f)) *
       glm::rotate(glm::mat4(1.0f), glm::radians(60.0f), glm::vec3(0.1, 0.0, 0.0)));
     _cubeShader->set_uniform("u_material.shininess", 0.6f);
@@ -265,6 +211,8 @@ void Application::Draw() {
     _cubeShader->set_uniform("u_light.linear", 0.09f);
     _cubeShader->set_uniform("u_light.quadratic", 0.032f);
     _cube->Draw(_cubeShader);
+
+	EntityManager::getInstance().render(_localPlayer->getCamera());
   });
 
   // Render _frameBuffer Quad

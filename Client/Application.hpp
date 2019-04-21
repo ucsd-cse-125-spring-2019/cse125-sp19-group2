@@ -13,6 +13,7 @@
 #include "FrameBuffer.h"
 #include "NetworkClient.hpp"
 #include "Model.hpp"
+#include "LocalPlayer.hpp"
 
 class Application {
 public:
@@ -82,6 +83,9 @@ private:
 
   // Test Model
   std::unique_ptr<Model> _cube;
+
+  // Local player
+  std::unique_ptr<LocalPlayer> _localPlayer;
 };
 
 #endif

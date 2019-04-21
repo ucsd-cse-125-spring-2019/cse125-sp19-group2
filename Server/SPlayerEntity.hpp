@@ -33,7 +33,7 @@ public:
 		// As of now, just use the same velocity for all players. In the future
 		// we might want some arguments in the constructor to determine whether
 		// this is a dog or a dog catcher.
-		_velocity = 0.1f;
+		_velocity = 0.5f;
 
 		// Players are not static
 		_isStatic = false;
@@ -84,10 +84,10 @@ public:
 					switch (event->type)
 					{
 					case EVENT_PLAYER_MOVE_FORWARD:
-						dir += glm::vec3(0, 0, 1);
+						dir += glm::vec3(0, 0, -1);
 						break;
 					case EVENT_PLAYER_MOVE_BACKWARD:
-						dir += glm::vec3(0, 0, -1);
+						dir += glm::vec3(0, 0, 1);
 						break;
 					case EVENT_PLAYER_MOVE_LEFT:
 						dir += glm::vec3(-1, 0, 0);

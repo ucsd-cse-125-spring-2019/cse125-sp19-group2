@@ -49,7 +49,7 @@ public:
   void update();
 
 private:
-  InputManager();;
+  InputManager();
 
   std::unordered_map<int, std::unique_ptr<Key>> _keyList;
   std::vector<std::tuple<int, KeyState>> _inputQueue;

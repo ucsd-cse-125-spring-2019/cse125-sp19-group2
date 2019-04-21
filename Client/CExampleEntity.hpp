@@ -15,7 +15,7 @@ private:
     ExampleState _state;
 
 public:
-    void render() { return; }
+    void render(std::unique_ptr<Camera> const & camera) { return; }
 
     void updateState(std::shared_ptr<BaseState> state)
     {
