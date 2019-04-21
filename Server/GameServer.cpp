@@ -76,7 +76,7 @@ void GameServer::update()
 			tree->insert(state.get());
 		}
 
-		auto testResults = tree->query(std::vector<BaseState*>(), state2.get());
+		auto testResults = tree->query(state2.get());
 
         /*** Begin Loop ***/
 

@@ -122,20 +122,20 @@ void QuadTree::divide()
 	_quads[3] = _se;
 }
 
-std::vector<BaseState*> QuadTree::query(std::vector<BaseState*> objectsInRange, BaseState * state)
+std::vector<BaseState*> QuadTree::query(BaseState * state)
 {
-	int index = getIndex(state);
-	if (index != -1 && _nw)
+	std::vector<BaseState*> objectsInRange;
+	for (int i = 0; i < 4; i++)
 	{
-		objectsInRange = _quads[index]->query(objectsInRange, state);
-	}
-	else if (index == -1 && _ne)
-	{
-		
+		if (_quads[i] && _quads[i]->intersects(state))
+		{
+			std::vector<BaseState*> subQuadObjects;
+			subQuadObjects = _quads[i]->query(state);
+			objectsInRange.insert(objectsInRange.end(), subQuadObjects.begin(), subQuadObjects.end());
+		}
 	}
 
 	objectsInRange.insert(objectsInRange.end(), _objects.begin(), _objects.end());
-
 	return objectsInRange;
 }
 

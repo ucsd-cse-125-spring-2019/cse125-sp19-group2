@@ -48,7 +48,7 @@ public:
 	QuadTree(BoundingBox boundary)
 	{
 		this->_boundary = boundary;
-		_quads = (QuadTree**)malloc(sizeof(QuadTree*) * 4);
+		_quads = (QuadTree**)calloc(4, sizeof(QuadTree*));
 	}
 
 	~QuadTree();
@@ -58,7 +58,7 @@ public:
 	void divide();
 	int getIndex(BaseState * state);
 	bool intersects(BaseState * state);
-	std::vector<BaseState*> query(std::vector<BaseState*> objectsInRange, BaseState * state);
+	std::vector<BaseState*> query(BaseState * state);
 
 private:
 	// Square bounding box defining this node's area
