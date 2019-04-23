@@ -108,7 +108,7 @@ void Application::Setup() {
   // Create cube model
   _cube = std::make_unique<Model>("./Resources/Models/simpleobject2.obj");
 
-  _skybox = std::make_unique<Skybox>("test");
+  _skybox = std::make_unique<Skybox>("thefog");
 
   // Create light
   _point_light = std::make_unique<PointLight>(
@@ -223,6 +223,13 @@ void Application::Draw() {
     // render scene
     //_frameBuffer->drawQuad(_testShader);
 	  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	// Render Skybox
+	_skyboxShader->Use();
+	_skyboxShader->set_uniform("u_projection", _localPlayer->getCamera()->projection_matrix());
+	_skyboxShader->set_uniform("u_view", _localPlayer->getCamera()->view_matrix() * glm::scale(glm::mat4(1.0f), glm::vec3(6,6,6)));
+      //glm::mat4(glm::mat3(_localPlayer->getCamera()->view_matrix()))
+	_skybox->draw(_skyboxShader);
+
     _cubeShader->Use();
     _cubeShader->set_uniform("u_projection", _localPlayer->getCamera()->projection_matrix());
     _cubeShader->set_uniform("u_view", _localPlayer->getCamera()->view_matrix());
@@ -244,15 +251,10 @@ void Application::Draw() {
 
 	  // Debug Shader
     _debuglightShader->Use();
-    _debuglightShader->set_uniform("u_projection", _camera->projection_matrix());
-    _debuglightShader->set_uniform("u_view", _camera->view_matrix());
+    _debuglightShader->set_uniform("u_projection", _localPlayer->getCamera()->projection_matrix());
+    _debuglightShader->set_uniform("u_view", _localPlayer->getCamera()->view_matrix());
     _point_light->draw(_debuglightShader);
     
-    // Render Skybox
-    _skyboxShader->Use();
-    _skyboxShader->set_uniform("u_projection", _camera->projection_matrix());
-    _skyboxShader->set_uniform("u_view", glm::mat4(glm::mat3(_camera->view_matrix())));
-    _skybox->draw(_skyboxShader);
   });
 
   // Render _frameBuffer Quad
