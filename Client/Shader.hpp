@@ -25,13 +25,6 @@ public:
 
   void Use() const;
 
-  /**
-   * @brief Finds and stores the specified uniform location of the shader.
-   */
-  void RegisterUniform(const char* uniform);
-
-  void RegisterUniformList(std::initializer_list<const char*> uniforms);
-
   void set_uniform(const char *uniform, GLint value);
   void set_uniform(const char *uniform, GLuint value);
 
@@ -56,7 +49,17 @@ private:
   GLuint _fragment_shader;
 
   // Map of uniform names to locations
-  std::unordered_map<std::string, GLuint> _uniforms;
+  std::unordered_map<std::string, GLint> _uniforms;
+
+  /**
+   * \brief Finds and stores the specified uniform variable's location in the shader program.
+   */
+  void RegisterUniform(const char* uniform);
+
+  /**
+   * \brief Automatically finds all uniform variables for the shader program.
+   */
+  void AutoRegisterUniforms();
 };
 
 #endif /* SHADER_HPP */

@@ -66,6 +66,7 @@ void Shader::LoadFromText(GLenum type, const char* code) {
 }
 
 void Shader::CreateProgram() {
+  // Create program, attach shaders, and link program
   GLuint program = glCreateProgram();
 
   if (_vertex_shader != 0)
@@ -75,6 +76,7 @@ void Shader::CreateProgram() {
 
   glLinkProgram(program);
 
+  // Check for successful program linkage
   GLint success;
   glGetProgramiv(program, GL_LINK_STATUS, &success);
   if (!success) {
@@ -86,6 +88,7 @@ void Shader::CreateProgram() {
     delete[] info_log;
   }
 
+  // Detach shaders
   glDetachShader(program, _vertex_shader);
   glDetachShader(program, _fragment_shader);
   glDeleteShader(_vertex_shader);
@@ -94,19 +97,13 @@ void Shader::CreateProgram() {
   _fragment_shader = 0;
 
   _program = program;
+
+  // Register uniform variables
+  AutoRegisterUniforms();
 }
 
 void Shader::Use() const {
   glUseProgram(_program);
-}
-
-void Shader::RegisterUniform(const char* uniform) {
-  GLuint uniform_loc = glGetUniformLocation(_program, uniform);
-  _uniforms[uniform] = uniform_loc;
-}
-
-void Shader::RegisterUniformList(std::initializer_list<const char *> uniforms) {
-  for (const char* uniform : uniforms) RegisterUniform(uniform);
 }
 
 void Shader::set_uniform(const char* uniform, GLint value) {
@@ -220,4 +217,49 @@ void Shader::CleanUp() {
 
 GLuint Shader::program() {
   return _program;
+}
+
+void Shader::RegisterUniform(const char* uniform) {
+  GLint uniform_loc = glGetUniformLocation(_program, static_cast<const GLchar *>(uniform));
+
+  if (uniform_loc == -1)
+  {
+    Logger::getInstance()->error("For program " + std::to_string(_program) + ": \""
+      + std::string(uniform)
+      + "\" does not correspond to an active uniform variable OR"
+      + " start with reserved prefix \"gl_\" OR"
+      + "is associated with an atomic counter or a named uniform block.");
+  }
+  else
+  {
+    _uniforms.emplace(std::string(uniform), uniform_loc);
+    Logger::getInstance()->info("For program " + std::to_string(_program) + ": \""
+      + std::string(uniform) + "\" registered.");
+  }
+}
+
+void Shader::AutoRegisterUniforms()
+{
+  GLint uniform_name_max_len;
+  GLint num_uniforms;
+
+  // Get max uniform name length and number of uniforms for shader program
+  glGetProgramiv(_program, GL_ACTIVE_UNIFORM_MAX_LENGTH, &uniform_name_max_len);
+  glGetProgramiv(_program, GL_ACTIVE_UNIFORMS, &num_uniforms);
+  Logger::getInstance()->info("For program " + std::to_string(_program) + ": "
+    + std::to_string(num_uniforms) + " uniforms.");
+
+  // Uniform info
+  GLsizei length;
+  GLint size;
+  GLenum type;
+  std::vector<GLchar>name(uniform_name_max_len, 0);
+
+  // Get all uniforms
+  for (GLint i = 0; i < num_uniforms; i++)
+  {
+    glGetActiveUniform(_program, static_cast<GLuint>(i), uniform_name_max_len,
+      &length, &size, &type, name.data());
+    RegisterUniform(name.data());
+  }
 }

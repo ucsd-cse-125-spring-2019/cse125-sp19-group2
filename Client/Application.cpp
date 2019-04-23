@@ -60,20 +60,22 @@ Application::~Application() {
 }
 
 void Application::Setup() {
-  // Background color
+  // OpenGL Graphics Setup
   glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
   glEnable(GL_DEPTH_TEST);
   glDepthFunc(GL_LEQUAL);
   glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-  //glEnable(GL_CULL_FACE);
+  glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+  glEnable(GL_CULL_FACE);
 
   // Initialize pointers
   _testShader = std::make_unique<Shader>();
   _quadShader = std::make_unique<Shader>();
   _cubeShader = std::make_unique<Shader>();
+  _debuglightShader = std::make_unique<Shader>();
 
   _camera = std::make_unique<Camera>();
-  _camera->set_position(0, 0, 1.0f);
+  _camera->set_position(0, 0, 3.0f);
   _frameBuffer = std::make_unique<FrameBuffer>(800, 600);
   _quadFrameBuffer = std::make_unique<FrameBuffer>(800, 600);
 
@@ -81,25 +83,41 @@ void Application::Setup() {
   _testShader->LoadFromFile(GL_VERTEX_SHADER, "./Resources/Shaders/pano.vert");
   _testShader->LoadFromFile(GL_FRAGMENT_SHADER, "./Resources/Shaders/pano.frag");
   _testShader->CreateProgram();
-  _testShader->RegisterUniform("rgbTexture");
 
   // quad pass through shader
   _quadShader->LoadFromFile(GL_VERTEX_SHADER, "./Resources/Shaders/quad.vert");
   _quadShader->LoadFromFile(GL_FRAGMENT_SHADER, "./Resources/Shaders/quad.frag");
   _quadShader->CreateProgram();
-  _quadShader->RegisterUniform("rgbTexture");
 
   // Basic model shader
   _cubeShader->LoadFromFile(GL_VERTEX_SHADER, "./Resources/Shaders/basiclight.vert");
   _cubeShader->LoadFromFile(GL_FRAGMENT_SHADER, "./Resources/Shaders/basiclight.frag");
   _cubeShader->CreateProgram();
-  _cubeShader->RegisterUniformList({ "u_projection", "u_view", "u_model",
-    "u_light.position", "u_light.ambient", "u_light.diffuse", "u_light.specular", "u_light.constant", "u_light.constant", "u_light.linear", "u_light.quadratic",
-    "u_material.diffuse", "u_material.specular", "u_material.shininess"
-    });
+
+  // Debugging shader for rendering lights
+  _debuglightShader->LoadFromFile(GL_VERTEX_SHADER, "./Resources/Shaders/debuglight.vert");
+  _debuglightShader->LoadFromFile(GL_FRAGMENT_SHADER, "./Resources/Shaders/debuglight.frag");
+  _debuglightShader->CreateProgram();
 
   // Create cube model
-  _cube = std::make_unique<Model>("./Resources/Models/sphere.obj");
+  _cube = std::make_unique<Model>("./Resources/Models/simpleobject2.obj");
+
+  // Create light
+  _point_light = std::make_unique<PointLight>(
+    PointLight{
+      "u_pointlight",
+      { { 0.05f, 0.05f, 0.05f }, { 0.8f, 0.8f, 0.8f }, { 1.0f, 1.0f, 1.0f } },
+      { -1.0f, 0.0f, 0.0f },
+      { 1.0f, 0.09f, 0.032f }
+    }
+  );
+  _dir_light = std::make_unique<DirectionalLight>(
+    DirectionalLight{
+      "u_dirlight",
+      { { 0.05f, 0.01f, 0.01f }, { 0.8f, 0.3f, 0.3f }, { 1.0f, 0.5f, 0.5f } },
+      { -1.0f, -1.0f, 0.0f }
+    }
+  );
 
   // Test input; to be removed
 
@@ -184,6 +202,7 @@ void Application::Update()
   }
   InputManager::getInstance().update();
   _camera->Update();
+  _point_light->update();
 }
 
 void Application::Draw() {
@@ -203,16 +222,24 @@ void Application::Draw() {
     _cubeShader->set_uniform("u_model", glm::translate(glm::mat4(1.0f), glm::vec3(0, 0.1, -3.0f)) *
       glm::rotate(glm::mat4(1.0f), glm::radians(60.0f), glm::vec3(0.1, 0.0, 0.0)));
     _cubeShader->set_uniform("u_material.shininess", 0.6f);
-    _cubeShader->set_uniform("u_light.position", glm::vec3(-3.0f, 3.0f, -3.0f));
-    _cubeShader->set_uniform("u_light.ambient", glm::vec3(0.05f, 0.05f, 0.05f));
-    _cubeShader->set_uniform("u_light.diffuse", glm::vec3(0.8f, 0.8f, 0.8f));
-    _cubeShader->set_uniform("u_light.specular", glm::vec3(1.0f, 1.0f, 1.0f));
-    _cubeShader->set_uniform("u_light.constant", 1.0f);
-    _cubeShader->set_uniform("u_light.linear", 0.09f);
-    _cubeShader->set_uniform("u_light.quadratic", 0.032f);
+
+    // Lights
+    _cubeShader->set_uniform("u_numdirlights", static_cast<GLuint>(1));
+    _cubeShader->set_uniform("u_numpointlights", static_cast<GLuint>(1));
+
+    _point_light->setUniforms(_cubeShader);
+    _dir_light->setUniforms(_cubeShader);
+
+    // Cube
     _cube->Draw(_cubeShader);
 
 	EntityManager::getInstance().render(_localPlayer->getCamera());
+
+	// Debug Shader
+	_debuglightShader->Use();
+	_debuglightShader->set_uniform("u_projection", _camera->projection_matrix());
+	_debuglightShader->set_uniform("u_view", _camera->view_matrix());
+	_point_light->draw(_debuglightShader);
   });
 
   // Render _frameBuffer Quad
@@ -226,7 +253,7 @@ void Application::Reset() {
 }
 
 void Application::StaticError(int error, const char* description) {
-  std::cerr << description << std::endl;
+  Logger::getInstance()->error(std::string(description));
 }
 
 void Application::StaticResize(GLFWwindow* window, int x, int y) {
