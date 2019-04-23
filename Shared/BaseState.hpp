@@ -29,25 +29,37 @@ namespace cereal
 */
 struct BaseState
 {
+	// General object state
     EntityType type;	// Type of object. Nasty but necessary for object creation
 	uint32_t id;		// Object ID
+
+	// Spatial information
 	glm::vec3 pos;		// World-coord position of object
 	glm::vec3 up;		// Up vector of object
-	glm::vec3 normal;	// Normal vector of object
+	glm::vec3 forward;	// Forward vector of object
 	glm::vec3 scale;	// Scale of object
+
+	// Bounding box stuff
 	double width;		// Width of object in X-axis
 	double depth;		// Depth of object in Z-axis
+	double height;		// Height of object in Y-axis
+
+	// Object lifetime info
+	bool isDestroyed;	// Object has been deleted on the server
 
 	// Serialization for Cereal
 	template<class Archive>
 	void serialize(Archive & archive)
 	{
 		archive(type,
-        id,
+				id,
 				pos,
 				up,
-				normal,
-				scale);
+				forward,
+				scale,
+				width,
+				depth,
+				isDestroyed);
 	};
 
 	virtual void print()

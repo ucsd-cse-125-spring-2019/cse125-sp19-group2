@@ -136,6 +136,25 @@ void Camera::set_position(float x, float y, float z)
   _position.z = z;
 }
 
+void Camera::set_pitch(float pitch, bool constrain_pitch) {
+	_pitch = pitch;
+	if (constrain_pitch)
+	{
+		if (_pitch > 89.0f)
+		{
+			_pitch = 89.0f;
+		}
+		else if (_pitch < -89.0f)
+		{
+			_pitch = -89.0f;
+		}
+	}
+}
+
+void Camera::set_yaw(float yaw) {
+	_yaw = yaw;
+}
+
 void Camera::set_aspect(float aspect)
 {
   _aspect = aspect;

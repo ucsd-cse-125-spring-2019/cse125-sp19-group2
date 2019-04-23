@@ -7,12 +7,13 @@
 #include "Camera.hpp"
 #include "InputManager.h"
 #include "Shared/Logger.hpp"
+#include "EntityManager.hpp"
 
 Application::Application(const char* windowTitle, int argc, char** argv) {
   _win_title = windowTitle;
   _win_width = 800;
   _win_height = 600;
-  
+
   if (argc == 1) {
   }
   else {
@@ -26,17 +27,27 @@ Application::Application(const char* windowTitle, int argc, char** argv) {
   _networkClient = std::make_unique<NetworkClient>();
   try
   {
-      _playerId = _networkClient->connect("localhost", PORTNUM);
+    uint32_t playerId = _networkClient->connect("localhost", PORTNUM);
+
+	// First thing we do is create a player join event with player name
+	auto joinEvent = std::make_shared<GameEvent>();
+	joinEvent->playerId = playerId;
+	joinEvent->type = EVENT_PLAYER_JOIN;
+
+	// TODO: change this to player-specified name
+	joinEvent->playerName = "Player" + std::to_string(playerId);
+	_networkClient->sendEvent(joinEvent);
+
+	_localPlayer = std::make_unique<LocalPlayer>(playerId, _networkClient);
   }
   catch (std::runtime_error e)
   {
-      Logger::getInstance()->error(e.what());
+    Logger::getInstance()->error(e.what());
   }
 
   // Initialize GLFW
   if (!glfwInit()) {
     Logger::getInstance()->fatal("Failed to initialize GLFW");
-    fgetc(stdin);
     return;
   }
 
@@ -49,18 +60,22 @@ Application::~Application() {
 }
 
 void Application::Setup() {
-  // Background color
+  // OpenGL Graphics Setup
   glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
   glEnable(GL_DEPTH_TEST);
   glDepthFunc(GL_LEQUAL);
   glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+  glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
   glEnable(GL_CULL_FACE);
 
   // Initialize pointers
   _testShader = std::make_unique<Shader>();
   _quadShader = std::make_unique<Shader>();
+  _cubeShader = std::make_unique<Shader>();
+  _debuglightShader = std::make_unique<Shader>();
 
   _camera = std::make_unique<Camera>();
+  _camera->set_position(0, 0, 3.0f);
   _frameBuffer = std::make_unique<FrameBuffer>(800, 600);
   _quadFrameBuffer = std::make_unique<FrameBuffer>(800, 600);
 
@@ -68,15 +83,44 @@ void Application::Setup() {
   _testShader->LoadFromFile(GL_VERTEX_SHADER, "./Resources/Shaders/pano.vert");
   _testShader->LoadFromFile(GL_FRAGMENT_SHADER, "./Resources/Shaders/pano.frag");
   _testShader->CreateProgram();
-  _testShader->RegisterUniform("rgbTexture");
 
   // quad pass through shader
   _quadShader->LoadFromFile(GL_VERTEX_SHADER, "./Resources/Shaders/quad.vert");
   _quadShader->LoadFromFile(GL_FRAGMENT_SHADER, "./Resources/Shaders/quad.frag");
   _quadShader->CreateProgram();
-  _quadShader->RegisterUniform("rgbTexture");
 
-  // Test input
+  // Basic model shader
+  _cubeShader->LoadFromFile(GL_VERTEX_SHADER, "./Resources/Shaders/basiclight.vert");
+  _cubeShader->LoadFromFile(GL_FRAGMENT_SHADER, "./Resources/Shaders/basiclight.frag");
+  _cubeShader->CreateProgram();
+
+  // Debugging shader for rendering lights
+  _debuglightShader->LoadFromFile(GL_VERTEX_SHADER, "./Resources/Shaders/debuglight.vert");
+  _debuglightShader->LoadFromFile(GL_FRAGMENT_SHADER, "./Resources/Shaders/debuglight.frag");
+  _debuglightShader->CreateProgram();
+
+  // Create cube model
+  _cube = std::make_unique<Model>("./Resources/Models/simpleobject2.obj");
+
+  // Create light
+  _point_light = std::make_unique<PointLight>(
+    PointLight{
+      "u_pointlight",
+      { { 0.05f, 0.05f, 0.05f }, { 0.8f, 0.8f, 0.8f }, { 1.0f, 1.0f, 1.0f } },
+      { -1.0f, 0.0f, 0.0f },
+      { 1.0f, 0.09f, 0.032f }
+    }
+  );
+  _dir_light = std::make_unique<DirectionalLight>(
+    DirectionalLight{
+      "u_dirlight",
+      { { 0.05f, 0.01f, 0.01f }, { 0.8f, 0.3f, 0.3f }, { 1.0f, 0.5f, 0.5f } },
+      { -1.0f, -1.0f, 0.0f }
+    }
+  );
+
+  // Test input; to be removed
+
   InputManager::getInstance().getKey(GLFW_KEY_G)->onPress([&]
   {
     std::cout << "Hello World!" << this->count << std::endl;
@@ -102,7 +146,7 @@ void Application::Run() {
   if (!_window) {
     Logger::getInstance()->fatal("Failed to open GLFW window");
     Logger::getInstance()->fatal("Either GLFW is not installed or your " +
-            std::string("graphics card does not support OpenGL"));
+      std::string("graphics card does not support OpenGL"));
     glfwTerminate();
     fgetc(stdin);
     return;
@@ -139,22 +183,26 @@ void Application::Run() {
 
 void Application::Update()
 {
-    // Get updates from the server
-    try
+  // Get updates from the server
+  try
+  {
+    for (auto& state : _networkClient->receiveUpdates())
     {
-        for (auto& update : _networkClient->receiveUpdates())
-        {
-            // TODO: update logic
-        }
+        // TODO: update logic
+		state->print();
+		EntityManager::getInstance().update(state);
     }
-    catch (std::runtime_error e)
-    {
-        // Disconnected from the server
-    }
-
+  }
+  catch (std::runtime_error e)
+  {
+    // Disconnected from the server
+  }
+  if (_localPlayer) {
+	  _localPlayer->update();
+  }
   InputManager::getInstance().update();
- 	_camera->Update();
-
+  _camera->Update();
+  _point_light->update();
 }
 
 void Application::Draw() {
@@ -166,7 +214,32 @@ void Application::Draw() {
   _quadFrameBuffer->renderScene([this]
   {
     // render scene
-    _frameBuffer->drawQuad(_testShader);
+    //_frameBuffer->drawQuad(_testShader);
+	  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    _cubeShader->Use();
+    _cubeShader->set_uniform("u_projection", _localPlayer->getCamera()->projection_matrix());
+    _cubeShader->set_uniform("u_view", _localPlayer->getCamera()->view_matrix());
+    _cubeShader->set_uniform("u_model", glm::translate(glm::mat4(1.0f), glm::vec3(0, 0.1, -3.0f)) *
+      glm::rotate(glm::mat4(1.0f), glm::radians(60.0f), glm::vec3(0.1, 0.0, 0.0)));
+    _cubeShader->set_uniform("u_material.shininess", 0.6f);
+
+    // Lights
+    _cubeShader->set_uniform("u_numdirlights", static_cast<GLuint>(1));
+    _cubeShader->set_uniform("u_numpointlights", static_cast<GLuint>(1));
+
+    _point_light->setUniforms(_cubeShader);
+    _dir_light->setUniforms(_cubeShader);
+
+    // Cube
+    _cube->Draw(_cubeShader);
+
+	EntityManager::getInstance().render(_localPlayer->getCamera());
+
+	// Debug Shader
+	_debuglightShader->Use();
+	_debuglightShader->set_uniform("u_projection", _camera->projection_matrix());
+	_debuglightShader->set_uniform("u_view", _camera->view_matrix());
+	_point_light->draw(_debuglightShader);
   });
 
   // Render _frameBuffer Quad
@@ -180,7 +253,7 @@ void Application::Reset() {
 }
 
 void Application::StaticError(int error, const char* description) {
-  std::cerr << description << std::endl;
+  Logger::getInstance()->error(std::string(description));
 }
 
 void Application::StaticResize(GLFWwindow* window, int x, int y) {
@@ -189,7 +262,7 @@ void Application::StaticResize(GLFWwindow* window, int x, int y) {
 }
 
 void Application::StaticKeyboard(GLFWwindow* window,
-                                 int key, int scancode, int action, int mods) {
+  int key, int scancode, int action, int mods) {
   Application* instance = (Application *)glfwGetWindowUserPointer(window);
   instance->Keyboard(key, scancode, action, mods);
 }
@@ -247,7 +320,7 @@ void Application::MouseScroll(double x, double y) {
 void Application::PreCreate() {
   glfwWindowHint(GLFW_SAMPLES, 4);
   glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
-  glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 1);
+  glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 4);
   glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
   glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 }
