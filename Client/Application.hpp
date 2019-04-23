@@ -13,6 +13,8 @@
 #include "FrameBuffer.h"
 #include "NetworkClient.hpp"
 #include "Model.hpp"
+#include "PointLight.hpp"
+#include "DirectionalLight.hpp"
 
 class Application {
 public:
@@ -69,6 +71,7 @@ private:
   std::unique_ptr<Shader> _testShader;
   std::unique_ptr<Shader> _quadShader;
   std::unique_ptr<Shader> _cubeShader;
+  std::unique_ptr<Shader> _debuglightShader;
 
   // Test camera
   std::unique_ptr<Camera> _camera;
@@ -82,6 +85,10 @@ private:
 
   // Test Model
   std::unique_ptr<Model> _cube;
+
+  // Test Lights
+  std::unique_ptr<PointLight> _point_light;
+  std::unique_ptr<DirectionalLight> _dir_light;
 };
 
 #endif

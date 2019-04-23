@@ -146,10 +146,13 @@
   <ItemGroup>
     <ClCompile Include="Application.cpp" />
     <ClCompile Include="Camera.cpp" />
+    <ClCompile Include="DirectionalLight.cpp" />
     <ClCompile Include="FrameBuffer.cpp" />
     <ClCompile Include="glad.c" />
     <ClCompile Include="InputManager.cpp" />
     <ClCompile Include="Key.cpp" />
+    <ClCompile Include="Light.cpp" />
+    <ClCompile Include="PointLight.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="NetworkClient.cpp" />
     <ClCompile Include="Mesh.cpp" />
@@ -164,6 +167,8 @@
     <None Include="Resources\Shaders\basic.vert" />
     <None Include="Resources\Shaders\basiclight.frag" />
     <None Include="Resources\Shaders\basiclight.vert" />
+    <None Include="Resources\Shaders\debuglight.frag" />
+    <None Include="Resources\Shaders\debuglight.vert" />
     <None Include="Resources\Shaders\pano.frag" />
     <None Include="Resources\Shaders\pano.vert" />
     <None Include="Resources\Shaders\quad.frag" />
@@ -173,7 +178,10 @@
     <ClInclude Include="Application.hpp" />
     <ClInclude Include="CBaseEntity.hpp" />
     <ClInclude Include="CExampleEntity.hpp" />
+    <ClInclude Include="DirectionalLight.hpp" />
     <ClInclude Include="FrameBuffer.h" />
+    <ClInclude Include="Light.hpp" />
+    <ClInclude Include="PointLight.hpp" />
     <ClInclude Include="NetworkClient.hpp" />
     <ClInclude Include="InputManager.h" />
     <ClInclude Include="Key.h" />
