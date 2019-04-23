@@ -29,7 +29,11 @@ public:
 	// changed. Otherwise it returns null. If ignoreUpdateStatus is set to true,
 	// this should return the state object regardless.
     virtual std::shared_ptr<BaseState> getState(bool ignoreUpdateStatus = false) = 0;
-	virtual bool isColliding(QuadTree & tree) = 0;
+
+	virtual bool isColliding(QuadTree & tree)
+	{
+		return _collider->isColliding(tree);
+	}
 
 	// TODO: add more server-specific functions that are object-agnostic
 
@@ -37,6 +41,6 @@ protected:
 	// TODO: server-specific state goes here
 	bool _isStatic;		// Whether the object's state can be changed
 	bool _hasChanged;	// If object state has changed during the last iteration
-	Collider * _collider; // bounding box state info
+	std::unique_ptr<Collider> _collider; // bounding box state info
 };
 

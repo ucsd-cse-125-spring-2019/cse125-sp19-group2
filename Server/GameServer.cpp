@@ -43,6 +43,10 @@ void GameServer::update()
 
 		// build quadtree
 		auto tree = new QuadTree({glm::vec2(0), MAP_WIDTH/2});
+		for (auto& entityPair : _entityMap)
+		{
+			tree->insert(entityPair.second->getState(true).get());
+		}
 
 		// Get events from clients
 		auto playerEvents = _networkInterface->receiveEvents();
@@ -115,7 +119,6 @@ void GameServer::update()
 		for (auto& entityPair : _entityMap)
 		{
 			entityPair.second->update(*tree, playerEvents);
-			Logger::getInstance()->debug("sending update");
 		}
 
         // Send updates to clients
@@ -137,7 +140,7 @@ void GameServer::update()
 
         /*** End Loop ***/
 
-
+		delete tree;
 
         auto timerEnd = std::chrono::steady_clock::now();
 

@@ -30,7 +30,9 @@ public:
 
 		_state->isDestroyed = false;
 
-		
+		// collider to track collision info idk
+		_collider = std::make_unique<Collider>(_state.get());
+
 		// As of now, just use the same velocity for all players. In the future
 		// we might want some arguments in the constructor to determine whether
 		// this is a dog or a dog catcher.
@@ -108,15 +110,18 @@ public:
 					_state->forward = dir / glm::length(dir);
 
 					// Move player by (direction * velocity) / ticks_per_sec
+					auto oldPos = _state->pos;
 					_state->pos = _state->pos + ((_state->forward * _velocity) / (float)TICKS_PER_SEC);
+
+					// dont allow movement if colliding
+					if (isColliding(tree))
+					{
+						_state->pos = oldPos;
+						_hasChanged = false;
+					}
 				}
 			}
 		}
-	}
-
-	bool isColliding(QuadTree & tree)
-	{
-		return false;
 	}
 
 	std::shared_ptr<BaseState> getState(bool ignoreUpdateStatus = false)
