@@ -48,13 +48,13 @@ Application::~Application() {
 }
 
 void Application::Setup() {
-  // Background color
+  // OpenGL Graphics Setup
   glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
   glEnable(GL_DEPTH_TEST);
   glDepthFunc(GL_LEQUAL);
   glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
   glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-  //glEnable(GL_CULL_FACE);
+  glEnable(GL_CULL_FACE);
 
   // Initialize pointers
   _testShader = std::make_unique<Shader>();
@@ -71,24 +71,16 @@ void Application::Setup() {
   _testShader->LoadFromFile(GL_VERTEX_SHADER, "./Resources/Shaders/pano.vert");
   _testShader->LoadFromFile(GL_FRAGMENT_SHADER, "./Resources/Shaders/pano.frag");
   _testShader->CreateProgram();
-  _testShader->RegisterUniform("rgbTexture");
 
   // quad pass through shader
   _quadShader->LoadFromFile(GL_VERTEX_SHADER, "./Resources/Shaders/quad.vert");
   _quadShader->LoadFromFile(GL_FRAGMENT_SHADER, "./Resources/Shaders/quad.frag");
   _quadShader->CreateProgram();
-  _quadShader->RegisterUniform("rgbTexture");
 
   // Basic model shader
   _cubeShader->LoadFromFile(GL_VERTEX_SHADER, "./Resources/Shaders/basiclight.vert");
   _cubeShader->LoadFromFile(GL_FRAGMENT_SHADER, "./Resources/Shaders/basiclight.frag");
   _cubeShader->CreateProgram();
-  _cubeShader->RegisterUniformList({ "u_projection", "u_view", "u_model",
-    "u_numdirlights", "u_numpointlights",
-    "u_pointlight.position", "u_pointlight.ambient", "u_pointlight.diffuse", "u_pointlight.specular", "u_pointlight.constant", "u_pointlight.constant", "u_pointlight.linear", "u_pointlight.quadratic",
-    "u_dirlight.direction", "u_dirlight.ambient", "u_dirlight.diffuse", "u_dirlight.specular",
-    "u_material.diffuse", "u_material.specular", "u_material.shininess"
-    });
 
   // Debugging shader for rendering lights
   _debuglightShader->LoadFromFile(GL_VERTEX_SHADER, "./Resources/Shaders/debuglight.vert");
@@ -243,7 +235,7 @@ void Application::Reset() {
 }
 
 void Application::StaticError(int error, const char* description) {
-  std::cerr << description << std::endl;
+  Logger::getInstance()->error(std::string(description));
 }
 
 void Application::StaticResize(GLFWwindow* window, int x, int y) {
