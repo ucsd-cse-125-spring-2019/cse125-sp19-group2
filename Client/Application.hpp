@@ -14,6 +14,9 @@
 #include "NetworkClient.hpp"
 #include "Model.hpp"
 #include "Skybox.hpp"
+#include "LocalPlayer.hpp"
+#include "PointLight.hpp"
+#include "DirectionalLight.hpp"
 
 class Application {
 public:
@@ -71,6 +74,7 @@ private:
   std::unique_ptr<Shader> _quadShader;
   std::unique_ptr<Shader> _cubeShader;
   std::unique_ptr<Shader> _skyboxShader;
+  std::unique_ptr<Shader> _debuglightShader;
 
   // Test camera
   std::unique_ptr<Camera> _camera;
@@ -87,6 +91,13 @@ private:
 
   // Test Skybox
   std::unique_ptr<Skybox> _skybox;
+  
+  // Local player
+  std::unique_ptr<LocalPlayer> _localPlayer;
+
+  // Test Lights
+  std::unique_ptr<PointLight> _point_light;
+  std::unique_ptr<DirectionalLight> _dir_light;
 };
 
 #endif

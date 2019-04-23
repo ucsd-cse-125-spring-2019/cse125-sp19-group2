@@ -511,6 +511,15 @@ void NetworkServer::closePlayerSession(uint32_t playerId)
 		free(result->second.readBuf);
         closesocket(result->second.socket);
         _sessions.erase(result);
+
+		// Create a PLAYER_LEAVE event for the person that was DC'd
+		auto leaveEvent = std::make_shared<GameEvent>();
+		leaveEvent->playerId = playerId;
+		leaveEvent->type = EVENT_PLAYER_LEAVE;
+
+		// Lock and push to event queue
+		std::unique_lock<std::mutex> eventLock(_eventMutex);
+		_eventQueue->push(leaveEvent);
     }
     else
     {

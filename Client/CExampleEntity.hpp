@@ -15,7 +15,7 @@ private:
     ExampleState _state;
 
 public:
-    void render() { return; }
+    void render(std::unique_ptr<Camera> const & camera) { return; }
 
     void updateState(std::shared_ptr<BaseState> state)
     {
@@ -24,7 +24,7 @@ public:
 
         // This is a little messy, so in the future we might want a copy
         // constructor inside the struct (if that's possible)
-        _state.normal = castState->normal;
+        _state.forward = castState->forward;
         _state.up = castState->up;
         _state.pos = castState->pos;
         _state.scale = castState->scale;

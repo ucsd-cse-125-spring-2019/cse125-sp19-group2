@@ -7,8 +7,6 @@
 #include "NetworkServer.hpp"
 #include "SBaseEntity.hpp"
 
-#define TICKS_PER_SEC 30  // 33.3 ms per update() loop
-
 using tick = std::chrono::duration<double, std::ratio<1, TICKS_PER_SEC>>;
 
 class GameServer

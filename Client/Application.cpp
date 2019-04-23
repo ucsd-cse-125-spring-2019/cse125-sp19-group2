@@ -7,6 +7,7 @@
 #include "Camera.hpp"
 #include "InputManager.h"
 #include "Shared/Logger.hpp"
+#include "EntityManager.hpp"
 
 Application::Application(const char* windowTitle, int argc, char** argv) {
   _win_title = windowTitle;
@@ -26,7 +27,18 @@ Application::Application(const char* windowTitle, int argc, char** argv) {
   _networkClient = std::make_unique<NetworkClient>();
   try
   {
-    _playerId = _networkClient->connect("localhost", PORTNUM);
+    uint32_t playerId = _networkClient->connect("localhost", PORTNUM);
+
+	// First thing we do is create a player join event with player name
+	auto joinEvent = std::make_shared<GameEvent>();
+	joinEvent->playerId = playerId;
+	joinEvent->type = EVENT_PLAYER_JOIN;
+
+	// TODO: change this to player-specified name
+	joinEvent->playerName = "Player" + std::to_string(playerId);
+	_networkClient->sendEvent(joinEvent);
+
+	_localPlayer = std::make_unique<LocalPlayer>(playerId, _networkClient);
   }
   catch (std::runtime_error e)
   {
@@ -61,9 +73,10 @@ void Application::Setup() {
   _quadShader = std::make_unique<Shader>();
   _cubeShader = std::make_unique<Shader>();
   _skyboxShader = std::make_unique<Shader>();
+  _debuglightShader = std::make_unique<Shader>();
 
   _camera = std::make_unique<Camera>();
-  _camera->set_position(0, 0, 1.0f);
+  _camera->set_position(0, 0, 3.0f);
   _frameBuffer = std::make_unique<FrameBuffer>(800, 600);
   _quadFrameBuffer = std::make_unique<FrameBuffer>(800, 600);
 
@@ -86,13 +99,35 @@ void Application::Setup() {
   _skyboxShader->LoadFromFile(GL_VERTEX_SHADER, "./Resources/Shaders/skybox.vert");
   _skyboxShader->LoadFromFile(GL_FRAGMENT_SHADER, "./Resources/Shaders/skybox.frag");
   _skyboxShader->CreateProgram();
+  
+  // Debugging shader for rendering lights
+  _debuglightShader->LoadFromFile(GL_VERTEX_SHADER, "./Resources/Shaders/debuglight.vert");
+  _debuglightShader->LoadFromFile(GL_FRAGMENT_SHADER, "./Resources/Shaders/debuglight.frag");
+  _debuglightShader->CreateProgram();
 
   // Create cube model
   _cube = std::make_unique<Model>("./Resources/Models/simpleobject2.obj");
 
   _skybox = std::make_unique<Skybox>("test");
 
-  // Test input
+  // Create light
+  _point_light = std::make_unique<PointLight>(
+    PointLight{
+      "u_pointlight",
+      { { 0.05f, 0.05f, 0.05f }, { 0.8f, 0.8f, 0.8f }, { 1.0f, 1.0f, 1.0f } },
+      { -1.0f, 0.0f, 0.0f },
+      { 1.0f, 0.09f, 0.032f }
+    }
+  );
+  _dir_light = std::make_unique<DirectionalLight>(
+    DirectionalLight{
+      "u_dirlight",
+      { { 0.05f, 0.01f, 0.01f }, { 0.8f, 0.3f, 0.3f }, { 1.0f, 0.5f, 0.5f } },
+      { -1.0f, -1.0f, 0.0f }
+    }
+  );
+
+  // Test input; to be removed
   InputManager::getInstance().getKey(GLFW_KEY_G)->onPress([&]
   {
     std::cout << "Hello World!" << this->count << std::endl;
@@ -158,18 +193,23 @@ void Application::Update()
   // Get updates from the server
   try
   {
-    for (auto& update : _networkClient->receiveUpdates())
+    for (auto& state : _networkClient->receiveUpdates())
     {
-      // TODO: update logic
+        // TODO: update logic
+		state->print();
+		EntityManager::getInstance().update(state);
     }
   }
   catch (std::runtime_error e)
   {
     // Disconnected from the server
   }
-
+  if (_localPlayer) {
+	  _localPlayer->update();
+  }
   InputManager::getInstance().update();
   _camera->Update();
+  _point_light->update();
 }
 
 void Application::Draw() {
@@ -184,24 +224,35 @@ void Application::Draw() {
     //_frameBuffer->drawQuad(_testShader);
 	  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     _cubeShader->Use();
-    _cubeShader->set_uniform("u_projection", _camera->projection_matrix());
-    _cubeShader->set_uniform("u_view", _camera->view_matrix());
+    _cubeShader->set_uniform("u_projection", _localPlayer->getCamera()->projection_matrix());
+    _cubeShader->set_uniform("u_view", _localPlayer->getCamera()->view_matrix());
     _cubeShader->set_uniform("u_model", glm::translate(glm::mat4(1.0f), glm::vec3(0, 0.1, -3.0f)) *
       glm::rotate(glm::mat4(1.0f), glm::radians(60.0f), glm::vec3(0.1, 0.0, 0.0)));
     _cubeShader->set_uniform("u_material.shininess", 0.6f);
-    _cubeShader->set_uniform("u_light.position", glm::vec3(-3.0f, 3.0f, -3.0f));
-    _cubeShader->set_uniform("u_light.ambient", glm::vec3(0.05f, 0.05f, 0.05f));
-    _cubeShader->set_uniform("u_light.diffuse", glm::vec3(0.8f, 0.8f, 0.8f));
-    _cubeShader->set_uniform("u_light.specular", glm::vec3(1.0f, 1.0f, 1.0f));
-    _cubeShader->set_uniform("u_light.constant", 1.0f);
-    _cubeShader->set_uniform("u_light.linear", 0.09f);
-    _cubeShader->set_uniform("u_light.quadratic", 0.032f);
-    _cube->Draw(_cubeShader);
 
-	_skyboxShader->Use();
-	_skyboxShader->set_uniform("u_projection", _camera->projection_matrix());
-	_skyboxShader->set_uniform("u_view", glm::mat4(glm::mat3(_camera->view_matrix())));
-	_skybox->draw(_skyboxShader);
+    // Lights
+    _cubeShader->set_uniform("u_numdirlights", static_cast<GLuint>(1));
+    _cubeShader->set_uniform("u_numpointlights", static_cast<GLuint>(1));
+
+    _point_light->setUniforms(_cubeShader);
+    _dir_light->setUniforms(_cubeShader);
+
+    // Cube
+    _cube->Draw(_cubeShader);
+    
+    EntityManager::getInstance().render(_localPlayer->getCamera());
+
+	  // Debug Shader
+    _debuglightShader->Use();
+    _debuglightShader->set_uniform("u_projection", _camera->projection_matrix());
+    _debuglightShader->set_uniform("u_view", _camera->view_matrix());
+    _point_light->draw(_debuglightShader);
+    
+    // Render Skybox
+    _skyboxShader->Use();
+    _skyboxShader->set_uniform("u_projection", _camera->projection_matrix());
+    _skyboxShader->set_uniform("u_view", glm::mat4(glm::mat3(_camera->view_matrix())));
+    _skybox->draw(_skyboxShader);
   });
 
   // Render _frameBuffer Quad
