@@ -102,7 +102,11 @@ Skybox::Skybox(const std::string& dir) {
   texture = loadCubemap(dir);
 }
 
-Skybox::~Skybox() = default;
+Skybox::~Skybox() {
+	glDeleteTextures(1, &texture);
+	glDeleteBuffers(1, &VBO);
+	glDeleteBuffers(1, &VAO);
+}
 
 void Skybox::draw(std::unique_ptr<Shader> const& shader) const {
   glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
