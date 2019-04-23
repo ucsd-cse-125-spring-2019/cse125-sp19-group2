@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <ClCompile Include="Application.cpp">
@@ -42,6 +42,12 @@
     </ClCompile>
     <ClCompile Include="Texture.cpp">
       <Filter>Source Files\Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="EntityManager.cpp">
+      <Filter>Source Files\Entity</Filter>
+    </ClCompile>
+    <ClCompile Include="LocalPlayer.cpp">
+      <Filter>Source Files\Entity</Filter>
     </ClCompile>
     <ClCompile Include="PointLight.cpp">
       <Filter>Source Files\Graphics</Filter>
@@ -101,6 +107,15 @@
     </ClInclude>
     <ClInclude Include="stb_image.h">
       <Filter>Header Files\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="CPlayerEntity.hpp">
+      <Filter>Header Files\Entity</Filter>
+    </ClInclude>
+    <ClInclude Include="EntityManager.hpp">
+      <Filter>Header Files\Entity</Filter>
+    </ClInclude>
+    <ClInclude Include="LocalPlayer.hpp">
+      <Filter>Header Files\Entity</Filter>
     </ClInclude>
     <ClInclude Include="PointLight.hpp">
       <Filter>Header Files\Graphics</Filter>
@@ -178,6 +193,9 @@
     </Filter>
     <Filter Include="Header Files\Entity">
       <UniqueIdentifier>{d3fa3773-9404-42f8-af5f-8bb345a9e9b2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Entity">
+      <UniqueIdentifier>{79653582-c2b6-4e10-9395-a602bb9b7a2e}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

@@ -241,6 +241,10 @@ _Pvt_Extensions
 #
 # gitignore contributors: remember to update Global/Xcode.gitignore, Objective-C.gitignore & Swift.gitignore
 
+## Allow anything under Library/
+!Library/lib/x86/
+!Library/lib/x64/
+
 ## Build generated
 build/
 DerivedData/

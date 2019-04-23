@@ -19,8 +19,8 @@ public:
         _state->id = 1;
         _state->pos = glm::vec3(1);
         _state->up = glm::vec3(2);
-        _state->normal = glm::vec3(3);
-        _state->scale = 0.5;
+        _state->forward = glm::vec3(3);
+		_state->scale = glm::vec3(1);
         _state->extraVar = 123; // State specific to ExampleState
     };
     ~SExampleEntity() {};

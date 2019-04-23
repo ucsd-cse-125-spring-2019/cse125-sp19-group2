@@ -59,6 +59,9 @@
     <ClInclude Include="IdGenerator.hpp">
       <Filter>Header Files\Util</Filter>
     </ClInclude>
+    <ClInclude Include="SPlayerEntity.hpp">
+      <Filter>Header Files\Entity</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

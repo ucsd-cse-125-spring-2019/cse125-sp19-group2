@@ -13,6 +13,7 @@
 #include "FrameBuffer.h"
 #include "NetworkClient.hpp"
 #include "Model.hpp"
+#include "LocalPlayer.hpp"
 #include "PointLight.hpp"
 #include "DirectionalLight.hpp"
 
@@ -85,6 +86,9 @@ private:
 
   // Test Model
   std::unique_ptr<Model> _cube;
+
+  // Local player
+  std::unique_ptr<LocalPlayer> _localPlayer;
 
   // Test Lights
   std::unique_ptr<PointLight> _point_light;
