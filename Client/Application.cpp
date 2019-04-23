@@ -86,7 +86,6 @@ void Application::Setup() {
   _debuglightShader->LoadFromFile(GL_VERTEX_SHADER, "./Resources/Shaders/debuglight.vert");
   _debuglightShader->LoadFromFile(GL_FRAGMENT_SHADER, "./Resources/Shaders/debuglight.frag");
   _debuglightShader->CreateProgram();
-  _debuglightShader->RegisterUniformList({ "u_projection", "u_view", "u_model", "u_color" });
 
   // Create cube model
   _cube = std::make_unique<Model>("./Resources/Models/simpleobject2.obj");
