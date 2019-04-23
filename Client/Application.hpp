@@ -13,6 +13,7 @@
 #include "FrameBuffer.h"
 #include "NetworkClient.hpp"
 #include "Model.hpp"
+#include "Skybox.hpp"
 
 class Application {
 public:
@@ -69,6 +70,7 @@ private:
   std::unique_ptr<Shader> _testShader;
   std::unique_ptr<Shader> _quadShader;
   std::unique_ptr<Shader> _cubeShader;
+  std::unique_ptr<Shader> _skyboxShader;
 
   // Test camera
   std::unique_ptr<Camera> _camera;
@@ -82,6 +84,9 @@ private:
 
   // Test Model
   std::unique_ptr<Model> _cube;
+
+  // Test Skybox
+  std::unique_ptr<Skybox> _skybox;
 };
 
 #endif

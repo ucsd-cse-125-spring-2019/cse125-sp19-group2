@@ -60,6 +60,7 @@ void Application::Setup() {
   _testShader = std::make_unique<Shader>();
   _quadShader = std::make_unique<Shader>();
   _cubeShader = std::make_unique<Shader>();
+  _skyboxShader = std::make_unique<Shader>();
 
   _camera = std::make_unique<Camera>();
   _camera->set_position(0, 0, 1.0f);
@@ -81,8 +82,15 @@ void Application::Setup() {
   _cubeShader->LoadFromFile(GL_FRAGMENT_SHADER, "./Resources/Shaders/basiclight.frag");
   _cubeShader->CreateProgram();
 
+  // Skybox shader
+  _skyboxShader->LoadFromFile(GL_VERTEX_SHADER, "./Resources/Shaders/skybox.vert");
+  _skyboxShader->LoadFromFile(GL_FRAGMENT_SHADER, "./Resources/Shaders/skybox.frag");
+  _skyboxShader->CreateProgram();
+
   // Create cube model
   _cube = std::make_unique<Model>("./Resources/Models/simpleobject2.obj");
+
+  _skybox = std::make_unique<Skybox>("test");
 
   // Test input
   InputManager::getInstance().getKey(GLFW_KEY_G)->onPress([&]
@@ -189,6 +197,11 @@ void Application::Draw() {
     _cubeShader->set_uniform("u_light.linear", 0.09f);
     _cubeShader->set_uniform("u_light.quadratic", 0.032f);
     _cube->Draw(_cubeShader);
+
+	_skyboxShader->Use();
+	_skyboxShader->set_uniform("u_projection", _camera->projection_matrix());
+	_skyboxShader->set_uniform("u_view", glm::mat4(glm::mat3(_camera->view_matrix())));
+	_skybox->draw(_skyboxShader);
   });
 
   // Render _frameBuffer Quad
