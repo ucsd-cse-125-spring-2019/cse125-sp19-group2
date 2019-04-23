@@ -7,6 +7,9 @@
 
 #define PORTNUM "4000"
 
+#define MAP_WIDTH 100
+#define MAP_HEIGHT 100
+
 // Not needed in client but many server-side objects need access to this def.
 #define TICKS_PER_SEC 30  // 33.3 ms per update() loop
 

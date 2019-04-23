@@ -55,7 +55,6 @@ public:
 	~QuadTree();
 
 	void insert(BaseState * state);
-	void clear();
 	void divide();
 	int getIndex(BaseState * state);
 	bool intersects(BaseState * state);

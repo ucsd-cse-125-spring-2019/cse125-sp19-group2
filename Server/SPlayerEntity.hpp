@@ -30,6 +30,7 @@ public:
 
 		_state->isDestroyed = false;
 
+		
 		// As of now, just use the same velocity for all players. In the future
 		// we might want some arguments in the constructor to determine whether
 		// this is a dog or a dog catcher.
@@ -42,7 +43,7 @@ public:
 	~SPlayerEntity() {};
 
 	void update(
-			QuadTree * gameMap,
+			QuadTree & tree,
 			std::vector<std::shared_ptr<GameEvent>> events)
 	{
 		_hasChanged = false;
@@ -111,6 +112,11 @@ public:
 				}
 			}
 		}
+	}
+
+	bool isColliding(QuadTree & tree)
+	{
+		return false;
 	}
 
 	std::shared_ptr<BaseState> getState(bool ignoreUpdateStatus = false)
