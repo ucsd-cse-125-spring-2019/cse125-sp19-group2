@@ -27,6 +27,9 @@ public:
 		_state->scale = glm::vec3(1);
 
 		// TODO: Set bounding box parameters (width, height, depth, etc)
+		_state->width = 0.1;
+		_state->height = 0.1;
+		_state->depth = 0.1;
 
 		_state->isDestroyed = false;
 
