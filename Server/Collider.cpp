@@ -24,5 +24,13 @@ std::vector<BaseState*> Collider::broadPhase(QuadTree & tree)
 
 bool Collider::narrowPhase(std::vector<BaseState*> candidates)
 {
-	return false; // TODO
+	// using 2D sphere-sphere collision for now since there is no rotation or height changing to players
+	double r1 = std::fmax(_state->width, _state->depth) / 2;
+	for (auto curCandidate : candidates) {
+		double r2 = std::fmax(curCandidate->width, curCandidate->depth) / 2;
+		double dist = std::sqrt(std::pow(_state->pos.x - curCandidate->pos.x, 2) + std::pow(_state->pos.z - curCandidate->pos.z, 2));
+		if (dist <= r1 + r2)
+			return true;
+	}
+	return false;
 }
