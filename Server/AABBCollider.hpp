@@ -2,17 +2,14 @@
 
 #include "BaseCollider.hpp"
 
-class CapsuleCollider : public BaseCollider
+class AABBCollider : public BaseCollider
 {
 public:
-	CapsuleCollider(BaseState* state) : BaseCollider(state) {};
-	~CapsuleCollider() {};
+	AABBCollider(BaseState* state) : BaseCollider(state) {};
+	~AABBCollider() {};
 
 	bool narrowPhase(std::vector<BaseState*> candidates)
 	{
-		// using 2D sphere-sphere collision for now since there is no rotation or height changing to players
-		double r1 = std::fmax(_state->width, _state->depth) / 2;
-
 		// Run narrow phase check on every possible candidate
 		for (auto curCandidate : candidates)
 		{
@@ -25,12 +22,7 @@ public:
 				// Case 1: candidate is also a capsule collider
 				case COLLIDER_CAPSULE:
 				{
-					double r2 = std::fmax(curCandidate->width, curCandidate->depth) / 2;
-					double dist = std::sqrt(std::pow(_state->pos.x - curCandidate->pos.x, 2) + std::pow(_state->pos.z - curCandidate->pos.z, 2));
-					if (dist <= r1 + r2)
-					{
-						return true;
-					}
+					// TODO
 					break;
 				}
 

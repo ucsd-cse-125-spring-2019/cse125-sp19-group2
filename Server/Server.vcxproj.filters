@@ -71,6 +71,9 @@
     <ClInclude Include="CapsuleCollider.hpp">
       <Filter>Header Files\Collider</Filter>
     </ClInclude>
+    <ClInclude Include="AABBCollider.hpp">
+      <Filter>Header Files\Collider</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

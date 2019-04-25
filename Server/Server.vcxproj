@@ -153,6 +153,7 @@
     <ClCompile Include="IdGenerator.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="AABBCollider.hpp" />
     <ClInclude Include="BaseCollider.hpp" />
     <ClInclude Include="CapsuleCollider.hpp" />
     <ClInclude Include="GameServer.hpp" />
