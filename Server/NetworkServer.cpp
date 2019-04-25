@@ -144,8 +144,8 @@ void NetworkServer::connectionListener(
         // Otherwise create a player session for the new socket
 		if (tempSock != INVALID_SOCKET)
 		{
-			char value = 1;
-			setsockopt(tempSock, IPPROTO_TCP, TCP_NODELAY, &value, sizeof(value));
+			char one = 1;
+			setsockopt(tempSock, IPPROTO_TCP, TCP_NODELAY, &one, sizeof(one));
 			SocketState clientState =
 			{
 				IdGenerator::getInstance()->getNextId(), // create a new player id
@@ -166,8 +166,8 @@ void NetworkServer::connectionListener(
 			{
 				int sendResult = send(
 						tempSock,
-						(char*)(&(clientState.playerId)),
-						sizeof(uint32_t),
+						(char*)(&(clientState.playerId)) + bytesSent,
+						sizeof(uint32_t) - bytesSent,
 						0);
 
 				if (sendResult > 0)
