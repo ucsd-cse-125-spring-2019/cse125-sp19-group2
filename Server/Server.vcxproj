@@ -147,14 +147,14 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="Collider.cpp" />
     <ClCompile Include="GameServer.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="NetworkServer.cpp" />
     <ClCompile Include="IdGenerator.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Collider.hpp" />
+    <ClInclude Include="BaseCollider.hpp" />
+    <ClInclude Include="CapsuleCollider.hpp" />
     <ClInclude Include="GameServer.hpp" />
     <ClInclude Include="IdGenerator.hpp" />
     <ClInclude Include="NetworkServer.hpp" />

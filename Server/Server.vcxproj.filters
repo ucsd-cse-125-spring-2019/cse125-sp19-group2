@@ -28,6 +28,9 @@
     <Filter Include="Source Files\Util">
       <UniqueIdentifier>{72980280-738a-4a30-b406-5afbf995fa9c}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Collider">
+      <UniqueIdentifier>{83400ed4-8600-4689-8643-3dfea0c57b07}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -41,9 +44,6 @@
     </ClCompile>
     <ClCompile Include="IdGenerator.cpp">
       <Filter>Source Files\Util</Filter>
-    </ClCompile>
-    <ClCompile Include="Collider.cpp">
-      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -65,8 +65,11 @@
     <ClInclude Include="SPlayerEntity.hpp">
       <Filter>Header Files\Entity</Filter>
     </ClInclude>
-    <ClInclude Include="Collider.hpp">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="BaseCollider.hpp">
+      <Filter>Header Files\Collider</Filter>
+    </ClInclude>
+    <ClInclude Include="CapsuleCollider.hpp">
+      <Filter>Header Files\Collider</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

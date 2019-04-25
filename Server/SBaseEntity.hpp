@@ -5,7 +5,7 @@
 #include "Shared/BaseState.hpp"
 #include "Shared/GameEvent.hpp"
 #include "Shared/QuadTree.hpp"
-#include "Collider.hpp"
+#include "BaseCollider.hpp"
 
 /*
 ** As with CBaseEntity, this is an abstract class, and cannot be instantiated.
@@ -41,6 +41,6 @@ protected:
 	// TODO: server-specific state goes here
 	bool _isStatic;		// Whether the object's state can be changed
 	bool _hasChanged;	// If object state has changed during the last iteration
-	std::unique_ptr<Collider> _collider; // bounding box state info
+	std::unique_ptr<BaseCollider> _collider; // bounding box state info
 };
 

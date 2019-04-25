@@ -43,6 +43,7 @@ struct BaseState
 	double width;		// Width of object in X-axis
 	double depth;		// Depth of object in Z-axis
 	double height;		// Height of object in Y-axis
+	ColliderType colliderType;
 
 	// Object lifetime info
 	bool isDestroyed;	// Object has been deleted on the server
@@ -59,6 +60,8 @@ struct BaseState
 				scale,
 				width,
 				depth,
+				height,
+				colliderType,
 				isDestroyed);
 	};
 

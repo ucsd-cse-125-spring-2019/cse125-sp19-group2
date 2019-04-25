@@ -2,6 +2,7 @@
 
 #include "IdGenerator.hpp"
 #include "SBaseEntity.hpp"
+#include "CapsuleCollider.hpp"
 
 class SPlayerEntity : public SBaseEntity
 {
@@ -26,15 +27,16 @@ public:
 		// Default scale is 1
 		_state->scale = glm::vec3(1);
 
-		// TODO: Set bounding box parameters (width, height, depth, etc)
+		// Collider stuff
 		_state->width = 0.1;
 		_state->height = 0.1;
 		_state->depth = 0.1;
+		_state->colliderType = COLLIDER_CAPSULE;
 
 		_state->isDestroyed = false;
 
 		// collider to track collision info idk
-		_collider = std::make_unique<Collider>(_state.get());
+		_collider = std::make_unique<CapsuleCollider>(_state.get());
 
 		// As of now, just use the same velocity for all players. In the future
 		// we might want some arguments in the constructor to determine whether
