@@ -19,15 +19,15 @@ public:
 				switch (curCandidate->colliderType)
 				{
 
-				// Case 1: candidate is also a capsule collider
-				case COLLIDER_CAPSULE:
+				// Case 1: candidate is also a box collider
+				case COLLIDER_AABB:
 				{
 					// TODO
 					break;
 				}
 
-				// Case 2: candidate is a box collider
-				case COLLIDER_AABB:
+				// Case 2: candidate is a capsule collider
+				case COLLIDER_CAPSULE:
 				{
 					// TODO
 					break;
