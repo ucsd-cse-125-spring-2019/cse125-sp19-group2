@@ -2,47 +2,45 @@
 
 #include "BaseCollider.hpp"
 
+// At the moment this is NOT a capsule collider, but a 2D circle collider. For
+// players this seems to get the job done.
 class CapsuleCollider : public BaseCollider
 {
 public:
 	CapsuleCollider(BaseState* state) : BaseCollider(state) {};
 	~CapsuleCollider() {};
 
-	bool narrowPhase(std::vector<BaseState*> candidates)
+	bool narrowPhase(BaseState* candidate)
 	{
 		// using 2D sphere-sphere collision for now since there is no rotation or height changing to players
 		double r1 = std::fmax(_state->width, _state->depth) / 2;
 
-		// Run narrow phase check on every possible candidate
-		for (auto curCandidate : candidates)
+		// Only check the candidate if it's not itself
+		if (candidate->id != _state->id)
 		{
-			// Only check the candidate if it's not itself
-			if (curCandidate->id != _state->id)
+			switch (candidate->colliderType)
 			{
-				switch (curCandidate->colliderType)
-				{
 
-				// Case 1: candidate is also a capsule collider
-				case COLLIDER_CAPSULE:
+			// Case 1: candidate is also a capsule collider
+			case COLLIDER_CAPSULE:
+			{
+				double r2 = std::fmax(candidate->width, candidate->depth) / 2;
+				double dist = std::sqrt(std::pow(_state->pos.x - candidate->pos.x, 2) + std::pow(_state->pos.z - candidate->pos.z, 2));
+				if (dist <= r1 + r2)
 				{
-					double r2 = std::fmax(curCandidate->width, curCandidate->depth) / 2;
-					double dist = std::sqrt(std::pow(_state->pos.x - curCandidate->pos.x, 2) + std::pow(_state->pos.z - curCandidate->pos.z, 2));
-					if (dist <= r1 + r2)
-					{
-						return true;
-					}
-					break;
+					return true;
 				}
-
-				// Case 2: candidate is a box collider
-				case COLLIDER_AABB:
-				{
-					// TODO
-					break;
-				}
-
-				} // switch
+				break;
 			}
+
+			// Case 2: candidate is a box collider
+			case COLLIDER_AABB:
+			{
+				// TODO
+				break;
+			}
+
+			} // switch
 		}
 		return false;
 	}
