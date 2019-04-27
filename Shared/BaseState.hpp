@@ -48,6 +48,9 @@ struct BaseState
 	// Object lifetime info
 	bool isDestroyed;	// Object has been deleted on the server
 
+	// Whether or not the object can move
+	bool isStatic;
+
 	// Serialization for Cereal
 	template<class Archive>
 	void serialize(Archive & archive)
@@ -62,7 +65,8 @@ struct BaseState
 				depth,
 				height,
 				colliderType,
-				isDestroyed);
+				isDestroyed,
+				isStatic);
 	};
 
 	virtual void print()

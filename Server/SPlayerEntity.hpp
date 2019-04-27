@@ -34,6 +34,7 @@ public:
 		_state->colliderType = COLLIDER_CAPSULE;
 
 		_state->isDestroyed = false;
+		_state->isStatic = false;
 
 		// collider to track collision info idk
 		_collider = std::make_unique<CapsuleCollider>(_state.get());
@@ -43,20 +44,16 @@ public:
 		// this is a dog or a dog catcher.
 		_velocity = 0.5f;
 
-		// Players are not static
-		_isStatic = false;
-		_hasChanged = false;
+		hasChanged = false;
 	};
 	~SPlayerEntity() {};
 
-	void update(
-			QuadTree & tree,
-			std::vector<std::shared_ptr<GameEvent>> events)
+	void update(std::vector<std::shared_ptr<GameEvent>> events)
 	{
-		_hasChanged = false;
+		hasChanged = false;
 
 		// Only change attributes of this object if not static
-		if (!_isStatic)
+		if (!_state->isStatic)
 		{
 			// Filter events for this player only
 			std::vector<std::shared_ptr<GameEvent>> filteredEvents;
@@ -111,19 +108,12 @@ public:
 				// Update forward vector with unit direction only if it was modified
 				if (dir != glm::vec3(0))
 				{
-					_hasChanged = true;
+					hasChanged = true;
 					_state->forward = dir / glm::length(dir);
 
 					// Move player by (direction * velocity) / ticks_per_sec
 					auto oldPos = _state->pos;
 					_state->pos = _state->pos + ((_state->forward * _velocity) / (float)TICKS_PER_SEC);
-
-					// dont allow movement if colliding
-					if (isColliding(tree))
-					{
-						_state->pos = oldPos;
-						_hasChanged = false;
-					}
 				}
 			}
 		}
@@ -131,7 +121,7 @@ public:
 
 	std::shared_ptr<BaseState> getState(bool ignoreUpdateStatus = false)
 	{
-		if (ignoreUpdateStatus || _hasChanged)
+		if (ignoreUpdateStatus || hasChanged)
 		{
 			return _state;
 		}

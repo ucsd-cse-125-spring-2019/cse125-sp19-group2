@@ -2,6 +2,7 @@
 
 #include <memory>
 #include <unordered_map>
+#include <unordered_set>
 
 #include "Shared/Logger.hpp"
 #include "NetworkServer.hpp"
@@ -27,5 +28,14 @@ private:
 
     // Map of all game entities
     std::unordered_map<uint32_t, std::shared_ptr<SBaseEntity>> _entityMap;
+
+	// Resolve collisions
+	void handleCollisions();
+
+	// AABB collision resolution
+	void handleAABB(BaseState* stateA, BaseState* stateB);
+
+	// Capsule collision resolution
+	void handleCapsule(BaseState* stateA, BaseState* stateB);
 };
 

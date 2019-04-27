@@ -4,6 +4,8 @@
 #include "Shared/QuadTree.hpp"
 #include "Shared/BaseState.hpp"
 
+#define COLLISION_THRESHOLD 0.001
+
 class BaseCollider
 {
 public:

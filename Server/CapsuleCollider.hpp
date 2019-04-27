@@ -26,7 +26,7 @@ public:
 			{
 				double r2 = std::fmax(candidate->width, candidate->depth) / 2;
 				double dist = std::sqrt(std::pow(_state->pos.x - candidate->pos.x, 2) + std::pow(_state->pos.z - candidate->pos.z, 2));
-				if (dist <= r1 + r2)
+				if (dist <= r1 + r2 - COLLISION_THRESHOLD)
 				{
 					return true;
 				}

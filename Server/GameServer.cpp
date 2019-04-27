@@ -4,9 +4,21 @@
 #include <glm/glm.hpp>
 
 #include "Shared/QuadTree.hpp"
-#include "SExampleEntity.hpp"
 #include "SPlayerEntity.hpp"
 #include "GameServer.hpp"
+
+// Allow pairs inside unordered_set
+struct PairHash
+{
+	template <class T1, class T2>
+	std::size_t operator () (std::pair<T1, T2> const &pair) const
+	{
+		std::size_t h1 = std::hash<T1>()(pair.first);
+		std::size_t h2 = std::hash<T2>()(pair.second);
+
+		return h1 ^ h2;
+	}
+};
 
 GameServer::GameServer()
 {
@@ -40,13 +52,6 @@ void GameServer::update()
     {
         auto timerStart = std::chrono::steady_clock::now();
         /*** Begin Loop ***/
-
-		// build quadtree
-		auto tree = new QuadTree({glm::vec2(0), MAP_WIDTH/2});
-		for (auto& entityPair : _entityMap)
-		{
-			tree->insert(entityPair.second->getState(true).get());
-		}
 
 		// Get events from clients
 		auto playerEvents = _networkInterface->receiveEvents();
@@ -118,8 +123,11 @@ void GameServer::update()
 		// we need to update ALL objects on the server before sending updates
 		for (auto& entityPair : _entityMap)
 		{
-			entityPair.second->update(*tree, playerEvents);
+			entityPair.second->update(playerEvents);
 		}
+
+		// Collision resolution
+		handleCollisions();
 
         // Send updates to clients
         auto updates = std::vector<std::shared_ptr<BaseState>>();
@@ -139,8 +147,6 @@ void GameServer::update()
 		_networkInterface->sendUpdates(updates);
 
         /*** End Loop ***/
-
-		delete tree;
 
         auto timerEnd = std::chrono::steady_clock::now();
 
@@ -163,3 +169,127 @@ void GameServer::update()
         }
     }
 }
+
+void GameServer::handleCollisions()
+{
+	// Build quadtree
+	auto tree = new QuadTree({ glm::vec2(0), MAP_WIDTH / 2 });
+	for (auto& entityPair : _entityMap)
+	{
+		tree->insert(entityPair.second->getState(true).get());
+	}
+
+	auto collisionSet = std::unordered_set<std::pair<BaseState*, BaseState*>, PairHash>();
+
+	// Build set of pairs of collisions
+	for (auto& entityPair : _entityMap)
+	{
+		auto entity = entityPair.second;
+
+		// Only run collision check if not static
+		if (!entity->getState(true)->isStatic)
+		{
+			for (auto& collidingEntity : entity->getColliding(*tree))
+			{
+				collisionSet.insert({ entity->getState(true).get(), collidingEntity });
+			}
+		}
+	}
+
+	// Iterate until no collisions
+	while (!collisionSet.empty())
+	{
+		auto collisionPair = (collisionSet.begin());
+		auto objectA = collisionPair->first;
+		auto objectB = collisionPair->second;
+
+		// Erase from beginning
+		collisionSet.erase(collisionPair);
+
+		// We know that A is a player (capsule collider), so switch on b only
+		switch (objectB->colliderType)
+		{
+		case COLLIDER_CAPSULE:
+		{
+			handleCapsule(objectA, objectB);
+			break;
+		}
+
+		case COLLIDER_AABB:
+		{
+			handleAABB(objectA, objectB);
+			break;
+		}
+
+		} // switch
+
+		// Remove duplicates (e.g. <A,B> vs <B,A> if both players)
+		if (!objectB->isStatic)
+		{
+			collisionSet.erase({ objectB, objectA });
+
+			// Mark as changed
+			auto result = _entityMap.find(objectB->id);
+
+			if (result != _entityMap.end())
+			{
+				result->second->hasChanged = true;
+			}
+		}
+
+		// Find entity for object A
+		auto result = _entityMap.find(objectA->id);
+
+		if (result == _entityMap.end())
+		{
+			std::runtime_error("Could not find entity in handleCollisions()");
+		}
+
+		auto entity = result->second;
+		entity->hasChanged = true;
+
+		// Re-check for colliding
+		for (auto& collidingEntity : entity->getColliding(*tree))
+		{
+			collisionSet.insert({ entity->getState(true).get(), collidingEntity });
+		}
+	}
+
+	delete tree;
+}
+
+
+void GameServer::handleAABB(BaseState* stateA, BaseState* stateB)
+{
+	// TODO
+}
+
+
+void GameServer::handleCapsule(BaseState* stateA, BaseState* stateB)
+{
+	float rA = (float)std::fmax(stateA->width, stateA->depth) / 2;
+	float rB = (float)std::fmax(stateB->width, stateB->depth) / 2;
+
+	// Vector from B to A
+	glm::vec3 diff = stateA->pos - stateB->pos;
+
+	// How much the circles overlap, and the ratio of overlap to distance
+	// between circles
+	float overlap = rA + rB - glm::length(diff);
+	float ratio = overlap / glm::length(diff);
+
+	glm::vec3 correctionVec = diff * ratio;
+
+	// If two movable objects, only move halfway
+	if (!stateB->isStatic)
+	{
+		correctionVec /= 2.0f;
+
+		// Apply to B
+		stateB->pos -= correctionVec;
+	}
+
+	// Apply to A
+	stateA->pos += correctionVec;
+}
+
