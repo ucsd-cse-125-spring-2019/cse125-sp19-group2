@@ -9,7 +9,7 @@ class CPlayerEntity : public CBaseEntity {
 public:
     CPlayerEntity() {
         // Allocate member variables
-        _playerModel = std::make_unique<Model>("./Resources/Models/sphere.obj");
+        _playerModel = std::make_unique<Model>("./Resources/Models/human.fbx");
         _playerShader = std::make_unique<Shader>();
         _state = std::make_shared<BaseState>();
 
@@ -57,6 +57,7 @@ public:
 
         // Rotation
         _state->forward = state->forward;
+	_state->forward.z = -_state->forward.z;
         _state->up = state->up;
 
         // Scale
