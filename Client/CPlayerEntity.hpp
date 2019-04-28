@@ -9,7 +9,7 @@ class CPlayerEntity : public CBaseEntity {
 public:
     CPlayerEntity() {
         // Allocate member variables
-        _playerModel = std::make_unique<Model>("./Resources/Models/dog.fbx");
+        _playerModel = std::make_unique<Model>("./Resources/Models/human.fbx");
         _playerShader = std::make_unique<Shader>();
         _state = std::make_shared<BaseState>();
 
