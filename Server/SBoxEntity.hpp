@@ -8,7 +8,7 @@
 class SBoxEntity : public SBaseEntity
 {
 public:
-	SBoxEntity(glm::vec3 pos, double width, double depth, double height)
+	SBoxEntity(glm::vec3 pos, float width, float depth, float height)
 	{
 		// Allocate a state struct and initialize. Modify as necessary for more
 		// sane defaults

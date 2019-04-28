@@ -28,9 +28,9 @@ public:
 		_state->scale = glm::vec3(0.1f);
 
 		// Collider stuff
-		_state->width = 0.1;
-		_state->height = 0.1;
-		_state->depth = 0.1;
+		_state->width = 0.1f;
+		_state->height = 0.1f;
+		_state->depth = 0.1f;
 		_state->colliderType = COLLIDER_CAPSULE;
 
 		_state->isDestroyed = false;

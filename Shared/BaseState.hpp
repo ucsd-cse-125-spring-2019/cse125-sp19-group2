@@ -40,9 +40,9 @@ struct BaseState
 	glm::vec3 scale;	// Scale of object
 
 	// Bounding box stuff
-	double width;		// Width of object in X-axis
-	double depth;		// Depth of object in Z-axis
-	double height;		// Height of object in Y-axis
+	float width;		// Width of object in X-axis
+	float depth;		// Depth of object in Z-axis
+	float height;		// Height of object in Y-axis
 	ColliderType colliderType;
 
 	// Object lifetime info

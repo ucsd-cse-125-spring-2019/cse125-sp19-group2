@@ -42,10 +42,10 @@ void GameServer::start()
 	// TODO: create initial world, objects here
 	// Create dummy box
 	auto box = std::make_shared<SBoxEntity>(
-		glm::vec3(0,0.5f,1.4f), // Position
-		1, // width
-		1, // depth
-		1  // height
+		glm::vec3(0,0.05f,1), // Position
+		0.5f, // width
+		0.5f, // depth
+		0.1f  // height
 	);
 	_entityMap.insert({ box->getState()->id, box });
 
@@ -273,10 +273,10 @@ void GameServer::handleAABB(BaseState* stateA, BaseState* stateB)
 
 	// Check which side of box the collision happens on
 	float dists[4];
-	dists[0] = (float)((stateB->pos.x - stateB->width / 2) - stateA->pos.x); // West
-	dists[1] = (float)(stateA->pos.x - (stateB->pos.x + stateB->width / 2)); // East
-	dists[2] = (float)(stateA->pos.z - (stateB->pos.z + stateB->depth / 2)); // North
-	dists[3] = (float)((stateB->pos.z - stateB->depth / 2) - stateA->pos.z); // South
+	dists[0] = (stateB->pos.x - stateB->width / 2) - stateA->pos.x; // West
+	dists[1] = stateA->pos.x - (stateB->pos.x + stateB->width / 2); // East
+	dists[2] = stateA->pos.z - (stateB->pos.z + stateB->depth / 2); // North
+	dists[3] = (stateB->pos.z - stateB->depth / 2) - stateA->pos.z; // South
 
 	// Check if collision happens at corner
 	glm::vec3 cornerPos = stateB->pos;
@@ -337,18 +337,48 @@ void GameServer::handleAABB(BaseState* stateA, BaseState* stateB)
 		int minIndex = -1;
 		float min = FLT_MAX;
 
+		// Vector to allow sorting
+		auto distances = std::vector<std::pair<int, float>>();
 
-		// TODO: problem in checking which edge it is on for corner
+		// Throw into vector
 		for (int i = 0; i < 4; i++)
 		{
-			float dist = std::abs(dists[i]);
-			if (dist < min)
+			distances.push_back({ i, std::abs(dists[i]) });
+		}
+
+		// Sort distances and indices
+		std::sort(distances.begin(), distances.end(),
+			[](const std::pair<int, float> & a, const std::pair<int, float> & b) -> bool
+		{
+			return a.second < b.second;
+		});
+
+		minIndex = distances[0].first;
+
+ 		// If second edge is within one radius, we need to correct the closest edge
+		if (distances[1].second <= rA + COLLISION_THRESHOLD)
+		{
+			// Our edge detection gets wonky near the corners, so manually check
+			if (minIndex <= 1) // East or west
 			{
-				minIndex = i;
-				min = dist;
+				// Check Z
+				if (stateA->pos.z < stateB->pos.z - stateB->depth / 2 ||
+					stateA->pos.z > stateB->pos.z + stateB->depth / 2)
+				{
+					minIndex = distances[1].first;
+				}
+			}
+			else if (minIndex > 1) // North or south
+			{
+				// Check X
+				if (stateA->pos.x < stateB->pos.x - stateB->width / 2 ||
+					stateA->pos.x > stateB->pos.x + stateB->width / 2)
+				{
+					minIndex = distances[1].first;
+				}
 			}
 		}
-		
+
 		glm::vec3 correctionVec = glm::vec3(0);
 		switch (minIndex)
 		{
