@@ -24,8 +24,8 @@ public:
 		_state->forward = glm::vec3(0, 0, 1);
 		_state->up = glm::vec3(0, 1, 0);
 
-		// Default scale is 1
-		_state->scale = glm::vec3(1);
+		// Smaller spheres
+		_state->scale = glm::vec3(0.1f);
 
 		// Collider stuff
 		_state->width = 0.1;
@@ -48,7 +48,7 @@ public:
 	};
 	~SPlayerEntity() {};
 
-	void update(std::vector<std::shared_ptr<GameEvent>> events)
+	virtual void update(std::vector<std::shared_ptr<GameEvent>> events) override
 	{
 		hasChanged = false;
 
@@ -119,14 +119,9 @@ public:
 		}
 	}
 
-	std::shared_ptr<BaseState> getState(bool ignoreUpdateStatus = false)
+	virtual std::shared_ptr<BaseState> getState() override
 	{
-		if (ignoreUpdateStatus || hasChanged)
-		{
-			return _state;
-		}
-		
-		return NULL;
+		return _state;
 	}
 
 private:

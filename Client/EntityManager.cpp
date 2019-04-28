@@ -1,5 +1,7 @@
 ﻿#include "EntityManager.hpp"
 #include "CPlayerEntity.hpp"
+#include "CBoxEntity.hpp"
+#include "Shared/Logger.hpp"
 #include <algorithm>
 
 EntityManager::EntityManager() {
@@ -39,6 +41,10 @@ std::shared_ptr<CBaseEntity> EntityManager::getEntity(std::shared_ptr<BaseState>
     case ENTITY_PLAYER:
         entity = std::make_shared<CPlayerEntity>();
         break;
+	case ENTITY_BOX:
+		Logger::getInstance()->debug("Creating box");
+		entity = std::make_shared<CBoxEntity>();
+		break;
     }
     entityList.insert({id, entity});
     return entity;

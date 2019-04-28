@@ -25,10 +25,7 @@ public:
 	virtual void update(std::vector<std::shared_ptr<GameEvent>> events) = 0;
 
     // All server objects must have a state to send to the client.
-	// By default, this function should return the state object only if it was
-	// changed. Otherwise it returns null. If ignoreUpdateStatus is set to true,
-	// this should return the state object regardless.
-    virtual std::shared_ptr<BaseState> getState(bool ignoreUpdateStatus = false) = 0;
+    virtual std::shared_ptr<BaseState> getState() = 0;
 
 	// Wrappers for colliders
 	bool isColliding(QuadTree & tree)

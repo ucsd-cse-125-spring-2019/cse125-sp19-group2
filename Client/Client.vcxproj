@@ -254,6 +254,7 @@
   <ItemGroup>
     <ClInclude Include="Application.hpp" />
     <ClInclude Include="CBaseEntity.hpp" />
+    <ClInclude Include="CBoxEntity.hpp" />
     <ClInclude Include="CExampleEntity.hpp" />
     <ClInclude Include="CPlayerEntity.hpp" />
     <ClInclude Include="EntityManager.hpp" />

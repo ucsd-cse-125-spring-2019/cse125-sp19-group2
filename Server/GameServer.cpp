@@ -5,6 +5,7 @@
 
 #include "Shared/QuadTree.hpp"
 #include "SPlayerEntity.hpp"
+#include "SBoxEntity.hpp"
 #include "GameServer.hpp"
 
 // Allow pairs inside unordered_set
@@ -39,7 +40,14 @@ void GameServer::start()
     _entityMap = std::unordered_map<uint32_t, std::shared_ptr<SBaseEntity>>();
 
 	// TODO: create initial world, objects here
-
+	// Create dummy box
+	auto box = std::make_shared<SBoxEntity>(
+		glm::vec3(0,0.5f,1.4f), // Position
+		1, // width
+		1, // depth
+		1  // height
+	);
+	_entityMap.insert({ box->getState()->id, box });
 
     // Start update loop
     this->update();
@@ -74,13 +82,13 @@ void GameServer::update()
 				// Throw it into server-wide map
 				_entityMap.insert(std::pair<uint32_t,
 						std::shared_ptr<SBaseEntity>>(
-						playerEntity->getState(true)->id, playerEntity));
+						playerEntity->getState()->id, playerEntity));
 
 				// Generate a vector of all object states
 				auto updateVec = std::vector<std::shared_ptr<BaseState>>();
 				for (auto& entityPair : _entityMap)
 				{
-					updateVec.push_back(entityPair.second->getState(true));
+					updateVec.push_back(entityPair.second->getState());
 				}
 
 				// Send updates to this player only
@@ -89,7 +97,7 @@ void GameServer::update()
 				// Also send this player entity to everyone. Results in a
 				// duplicate update for the player who joined, but is cleaner
 				// than a boolean check inside update()
-				_networkInterface->sendUpdate(playerEntity->getState(true));
+				_networkInterface->sendUpdate(playerEntity->getState());
 			}
 
 			// If a player has left, destroy their entity
@@ -102,8 +110,8 @@ void GameServer::update()
 					auto playerEntity = it->second;
 
 					// Send an update with deleted flag set to true
-					playerEntity->getState(true)->isDestroyed = true;
-					_networkInterface->sendUpdate(playerEntity->getState(true));
+					playerEntity->getState()->isDestroyed = true;
+					_networkInterface->sendUpdate(playerEntity->getState());
 
 					// Remove the entity from the map
 					_entityMap.erase(it);
@@ -137,7 +145,7 @@ void GameServer::update()
             std::shared_ptr<SBaseEntity> entity = entityPair.second;
 
             // Add to vector only if there is an update available
-			if (entity->getState())
+			if (entity->hasChanged)
 			{
 				updates.push_back(entity->getState());
 			}
@@ -176,7 +184,7 @@ void GameServer::handleCollisions()
 	auto tree = new QuadTree({ glm::vec2(0), MAP_WIDTH / 2 });
 	for (auto& entityPair : _entityMap)
 	{
-		tree->insert(entityPair.second->getState(true).get());
+		tree->insert(entityPair.second->getState().get());
 	}
 
 	auto collisionSet = std::unordered_set<std::pair<BaseState*, BaseState*>, PairHash>();
@@ -187,11 +195,11 @@ void GameServer::handleCollisions()
 		auto entity = entityPair.second;
 
 		// Only run collision check if not static
-		if (!entity->getState(true)->isStatic)
+		if (!entity->getState()->isStatic)
 		{
 			for (auto& collidingEntity : entity->getColliding(*tree))
 			{
-				collisionSet.insert({ entity->getState(true).get(), collidingEntity });
+				collisionSet.insert({ entity->getState().get(), collidingEntity });
 			}
 		}
 	}
@@ -251,7 +259,7 @@ void GameServer::handleCollisions()
 		// Re-check for colliding
 		for (auto& collidingEntity : entity->getColliding(*tree))
 		{
-			collisionSet.insert({ entity->getState(true).get(), collidingEntity });
+			collisionSet.insert({ entity->getState().get(), collidingEntity });
 		}
 	}
 
@@ -261,7 +269,52 @@ void GameServer::handleCollisions()
 
 void GameServer::handleAABB(BaseState* stateA, BaseState* stateB)
 {
-	// TODO
+	Logger::getInstance()->debug("Handling AABB collision");
+	float rA = (float)std::fmax(stateA->width, stateA->depth) / 2;
+
+	// Check if collision happens at corner
+
+	// Check which side of box the collision happens on
+	float dists[4];
+	dists[0] = (float)((stateB->pos.x - stateB->width / 2) - stateA->pos.x); // West
+	dists[1] = (float)(stateA->pos.x - (stateB->pos.x + stateB->width / 2)); // East
+	dists[2] = (float)(stateA->pos.z - (stateB->pos.z + stateB->depth / 2)); // North
+	dists[3] = (float)((stateB->pos.z - stateB->depth / 2) - stateA->pos.z); // South
+
+	int minIndex = -1;
+	float min = FLT_MAX;
+
+	for (int i = 0; i < 4; i++)
+	{
+		float dist = std::abs(dists[i]);
+		if (dist < min)
+		{
+			minIndex = i;
+			min = dist;
+		}
+	}
+	Logger::getInstance()->debug(std::to_string(min));
+	glm::vec3 correctionVec = glm::vec3(0);
+	switch (minIndex)
+	{
+	case 0: // West
+		correctionVec.x = -(rA - dists[0]);
+		break;
+	case 1: // East
+		correctionVec.x = rA - dists[1];
+		break;
+	case 2: // North
+		correctionVec.z = rA - dists[2];
+		break;
+	case 3: // South
+		correctionVec.z = -(rA - dists[3]);
+		break;
+	}
+
+	Logger::getInstance()->debug(std::to_string(stateA->pos.x) + "," + std::to_string(stateA->pos.y) + "," + std::to_string(stateA->pos.z));
+
+	stateA->pos += correctionVec;
+
 }
 
 

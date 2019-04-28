@@ -74,6 +74,9 @@
     <ClInclude Include="AABBCollider.hpp">
       <Filter>Header Files\Collider</Filter>
     </ClInclude>
+    <ClInclude Include="SBoxEntity.hpp">
+      <Filter>Header Files\Entity</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

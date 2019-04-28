@@ -19,6 +19,7 @@ enum EntityType
 {
     ENTITY_EXAMPLE,
 	ENTITY_PLAYER,
+	ENTITY_BOX,
 	ENTITY_WALL
 	// TODO: add new types here, e.g. ENTITY_DOGBONE
 };

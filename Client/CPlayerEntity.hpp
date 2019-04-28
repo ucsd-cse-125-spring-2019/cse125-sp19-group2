@@ -31,7 +31,7 @@ public:
         // Compute model matrix based on state: t * r * s
         const auto t = glm::translate(glm::mat4(1.0f), _state->pos);
 		const auto r = glm::lookAt(glm::vec3(0.0f),_state->forward, _state->up);
-        const auto s = glm::scale(glm::mat4(1.0f), glm::vec3(0.1f)); 
+        const auto s = glm::scale(glm::mat4(1.0f), _state->scale); 
         
 		auto model = t * r * s;
         // Pass model matrix into shader
