@@ -72,6 +72,7 @@ void Application::Setup() {
   _testShader = std::make_unique<Shader>();
   _quadShader = std::make_unique<Shader>();
   _cubeShader = std::make_unique<Shader>();
+  _skyboxShader = std::make_unique<Shader>();
   _debuglightShader = std::make_unique<Shader>();
 
   _camera = std::make_unique<Camera>();
@@ -94,6 +95,11 @@ void Application::Setup() {
   _cubeShader->LoadFromFile(GL_FRAGMENT_SHADER, "./Resources/Shaders/basiclight.frag");
   _cubeShader->CreateProgram();
 
+  // Skybox shader
+  _skyboxShader->LoadFromFile(GL_VERTEX_SHADER, "./Resources/Shaders/skybox.vert");
+  _skyboxShader->LoadFromFile(GL_FRAGMENT_SHADER, "./Resources/Shaders/skybox.frag");
+  _skyboxShader->CreateProgram();
+  
   // Debugging shader for rendering lights
   _debuglightShader->LoadFromFile(GL_VERTEX_SHADER, "./Resources/Shaders/debuglight.vert");
   _debuglightShader->LoadFromFile(GL_FRAGMENT_SHADER, "./Resources/Shaders/debuglight.frag");
@@ -101,6 +107,8 @@ void Application::Setup() {
 
   // Create cube model
   _cube = std::make_unique<Model>("./Resources/Models/simpleobject2.obj");
+
+  _skybox = std::make_unique<Skybox>("thefog");
 
   // Create light
   _point_light = std::make_unique<PointLight>(
@@ -120,7 +128,6 @@ void Application::Setup() {
   );
 
   // Test input; to be removed
-
   InputManager::getInstance().getKey(GLFW_KEY_G)->onPress([&]
   {
     std::cout << "Hello World!" << this->count << std::endl;
@@ -216,6 +223,13 @@ void Application::Draw() {
     // render scene
     //_frameBuffer->drawQuad(_testShader);
 	  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	// Render Skybox
+	_skyboxShader->Use();
+	_skyboxShader->set_uniform("u_projection", _localPlayer->getCamera()->projection_matrix());
+	_skyboxShader->set_uniform("u_view", _localPlayer->getCamera()->view_matrix() * glm::scale(glm::mat4(1.0f), glm::vec3(6,6,6)));
+      //glm::mat4(glm::mat3(_localPlayer->getCamera()->view_matrix()))
+	_skybox->draw(_skyboxShader);
+
     _cubeShader->Use();
     _cubeShader->set_uniform("u_projection", _localPlayer->getCamera()->projection_matrix());
     _cubeShader->set_uniform("u_view", _localPlayer->getCamera()->view_matrix());
@@ -232,14 +246,15 @@ void Application::Draw() {
 
     // Cube
     _cube->Draw(_cubeShader);
+    
+    EntityManager::getInstance().render(_localPlayer->getCamera());
 
-	EntityManager::getInstance().render(_localPlayer->getCamera());
-
-	// Debug Shader
-	_debuglightShader->Use();
-	_debuglightShader->set_uniform("u_projection", _camera->projection_matrix());
-	_debuglightShader->set_uniform("u_view", _camera->view_matrix());
-	_point_light->draw(_debuglightShader);
+	  // Debug Shader
+    _debuglightShader->Use();
+    _debuglightShader->set_uniform("u_projection", _localPlayer->getCamera()->projection_matrix());
+    _debuglightShader->set_uniform("u_view", _localPlayer->getCamera()->view_matrix());
+    _point_light->draw(_debuglightShader);
+    
   });
 
   // Render _frameBuffer Quad
