@@ -269,10 +269,7 @@ void GameServer::handleCollisions()
 
 void GameServer::handleAABB(BaseState* stateA, BaseState* stateB)
 {
-	Logger::getInstance()->debug("Handling AABB collision");
 	float rA = (float)std::fmax(stateA->width, stateA->depth) / 2;
-
-	// Check if collision happens at corner
 
 	// Check which side of box the collision happens on
 	float dists[4];
@@ -281,40 +278,96 @@ void GameServer::handleAABB(BaseState* stateA, BaseState* stateB)
 	dists[2] = (float)(stateA->pos.z - (stateB->pos.z + stateB->depth / 2)); // North
 	dists[3] = (float)((stateB->pos.z - stateB->depth / 2) - stateA->pos.z); // South
 
-	int minIndex = -1;
-	float min = FLT_MAX;
-
-	for (int i = 0; i < 4; i++)
-	{
-		float dist = std::abs(dists[i]);
-		if (dist < min)
-		{
-			minIndex = i;
-			min = dist;
+	// Check if collision happens at corner
+	glm::vec3 cornerPos = stateB->pos;
+	bool inCorner = false;
+	if (dists[0] > 0) {
+		cornerPos.x -= stateB->width / 2;
+		if (dists[2] > 0) {
+			cornerPos.z += stateB->depth / 2;
+			inCorner = true;
+		}
+		else if (dists[3] > 0) {
+			cornerPos.z -= stateB->depth / 2;
+			inCorner = true;
+		}
+	} else if (dists[1] > 0) {
+		cornerPos.x += stateB->width / 2;
+		if (dists[2] > 0) {
+			cornerPos.z += stateB->depth / 2;
+			inCorner = true;
+		}
+		else if (dists[3] > 0) {
+			cornerPos.z -= stateB->depth / 2;
+			inCorner = true;
 		}
 	}
-	Logger::getInstance()->debug(std::to_string(min));
-	glm::vec3 correctionVec = glm::vec3(0);
-	switch (minIndex)
-	{
-	case 0: // West
-		correctionVec.x = -(rA - dists[0]);
-		break;
-	case 1: // East
-		correctionVec.x = rA - dists[1];
-		break;
-	case 2: // North
-		correctionVec.z = rA - dists[2];
-		break;
-	case 3: // South
-		correctionVec.z = -(rA - dists[3]);
-		break;
+
+	// Collision happens at corner, 
+	if (inCorner) {
+		// Vector from corner to A
+		glm::vec3 diff = stateA->pos - cornerPos;
+		
+		// We don't considerate height
+		diff.y = 0;
+
+		float overlap = rA - glm::length(diff);
+
+		// Vector to move circles by
+		glm::vec3 correctionVec;
+
+		// Normal case: some displacement between circles
+		if (glm::length(diff))
+		{
+			// How much the circles overlap, and the ratio of overlap to distance
+			// between circles
+			float ratio = overlap / glm::length(diff);
+			correctionVec = diff * ratio;
+		}
+		// Edge case: objects directly on top each other
+		else
+		{
+			correctionVec = glm::vec3(1, 0, 0) * overlap;
+		}
+
+		// Apply to A
+		stateA->pos += correctionVec;
 	}
+	else {
+		int minIndex = -1;
+		float min = FLT_MAX;
 
-	Logger::getInstance()->debug(std::to_string(stateA->pos.x) + "," + std::to_string(stateA->pos.y) + "," + std::to_string(stateA->pos.z));
 
-	stateA->pos += correctionVec;
+		// TODO: problem in checking which edge it is on for corner
+		for (int i = 0; i < 4; i++)
+		{
+			float dist = std::abs(dists[i]);
+			if (dist < min)
+			{
+				minIndex = i;
+				min = dist;
+			}
+		}
+		
+		glm::vec3 correctionVec = glm::vec3(0);
+		switch (minIndex)
+		{
+		case 0: // West
+			correctionVec.x = -(rA - dists[0]);
+			break;
+		case 1: // East
+			correctionVec.x = rA - dists[1];
+			break;
+		case 2: // North
+			correctionVec.z = rA - dists[2];
+			break;
+		case 3: // South
+			correctionVec.z = -(rA - dists[3]);
+			break;
+		}
 
+		stateA->pos += correctionVec;
+	}
 }
 
 

@@ -50,13 +50,12 @@ public:
 				if ((distX <= candidate->width / 2) ||
 					(distZ <= candidate->depth / 2))
 				{
-					Logger::getInstance()->debug("distz: " + std::to_string(distZ));
 					return true;
 				}
 
 				// Corners
 				if (std::sqrtf((float)(std::pow(distX - candidate->width / 2, 2) +
-					std::pow(distZ - candidate->depth / 2, 2))) <= r1)
+					std::pow(distZ - candidate->depth / 2, 2))) <= r1 - COLLISION_THRESHOLD)
 				{
 					return true;
 				}
