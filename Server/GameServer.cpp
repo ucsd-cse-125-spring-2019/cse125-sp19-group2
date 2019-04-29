@@ -337,45 +337,19 @@ void GameServer::handleAABB(BaseState* stateA, BaseState* stateB)
 		int minIndex = -1;
 		float min = FLT_MAX;
 
-		// Vector to allow sorting
-		auto distances = std::vector<std::pair<int, float>>();
-
-		// Throw into vector
+		// Get closest edge
 		for (int i = 0; i < 4; i++)
 		{
-			distances.push_back({ i, std::abs(dists[i]) });
-		}
-
-		// Sort distances and indices
-		std::sort(distances.begin(), distances.end(),
-			[](const std::pair<int, float> & a, const std::pair<int, float> & b) -> bool
-		{
-			return a.second < b.second;
-		});
-
-		minIndex = distances[0].first;
-
- 		// If second edge is within one radius, we need to correct the closest edge
-		if (distances[1].second <= rA + COLLISION_THRESHOLD)
-		{
-			// Our edge detection gets wonky near the corners, so manually check
-			if (minIndex <= 1) // East or west
+			if (dists[i] > 0)
 			{
-				// Check Z
-				if (stateA->pos.z < stateB->pos.z - stateB->depth / 2 ||
-					stateA->pos.z > stateB->pos.z + stateB->depth / 2)
-				{
-					minIndex = distances[1].first;
-				}
+				minIndex = i;
+				break;
 			}
-			else if (minIndex > 1) // North or south
+			
+			if (dists[i] < min)
 			{
-				// Check X
-				if (stateA->pos.x < stateB->pos.x - stateB->width / 2 ||
-					stateA->pos.x > stateB->pos.x + stateB->width / 2)
-				{
-					minIndex = distances[1].first;
-				}
+				min = dists[i];
+				minIndex = i;
 			}
 		}
 
