@@ -7,6 +7,11 @@ LocalPlayer::LocalPlayer(uint32_t playerId, std::unique_ptr<NetworkClient> const
 
     _playerId = playerId;
 
+	// Spawn threads for server I/O
+	_readThread = std::thread(
+		&LocalPlayer::inputReadHandler,
+		this);
+
     // Player move forward event
     InputManager::getInstance().getKey(GLFW_KEY_W)->onRepeat([&]
     {
@@ -85,7 +90,42 @@ void LocalPlayer::update() {
     _camera->set_position(_playerEntity->getState()->pos + _distance * _offset);
     _camera->Update();
 }
+void LocalPlayer::inputReadHandler()
+{
+	GamePadXbox* pad = new GamePadXbox(GamePadIndex_One);
 
+	while (1)
+	{
+		if (pad->is_connected())
+		{
+
+			pad->update();
+			if (pad->State._buttons[GamePad_Button_DPAD_LEFT] == true) {
+				//Logger::getInstance()->debug("left pressed");
+				InputManager::getInstance().fire(GLFW_KEY_A, KeyState::Press);
+				pad->State._buttons[GamePad_Button_DPAD_LEFT] = false;
+			}
+			
+			if (pad->State._buttons[GamePad_Button_DPAD_RIGHT] == true) {
+				//Logger::getInstance()->debug("right pressed");
+				InputManager::getInstance().fire(GLFW_KEY_D, KeyState::Press);
+				pad->State._buttons[GamePad_Button_DPAD_RIGHT] = false;
+
+			}
+			if (pad->State._buttons[GamePad_Button_DPAD_UP] == true) {
+				//Logger::getInstance()->debug("up pressed");
+				InputManager::getInstance().fire(GLFW_KEY_W, KeyState::Press);
+				pad->State._buttons[GamePad_Button_DPAD_UP] = false;
+			}
+			if (pad->State._buttons[GamePad_Button_DPAD_DOWN] == true) {
+				//Logger::getInstance()->debug("down pressed");
+				InputManager::getInstance().fire(GLFW_KEY_S, KeyState::Press);
+				pad->State._buttons[GamePad_Button_DPAD_DOWN] = false;
+			}
+		}
+	}
+	delete pad;
+}
 std::unique_ptr<Camera> const& LocalPlayer::getCamera() {
     return _camera;
 }
