@@ -3,7 +3,6 @@
 #include <random>
 #include <glm/glm.hpp>
 
-#include "Shared/QuadTree.hpp"
 #include "SDogEntity.hpp"
 #include "SHumanEntity.hpp"
 #include "SBoxEntity.hpp"
@@ -41,14 +40,72 @@ void GameServer::start()
     _entityMap = std::unordered_map<uint32_t, std::shared_ptr<SBaseEntity>>();
 
 	// TODO: create initial world, objects here
-	// Create dummy box
-	auto box = std::make_shared<SBoxEntity>(
-		glm::vec3(0,0.05f,1), // Position
-		0.5f, // width
-		0.5f, // depth
-		0.1f  // height
-	);
-	_entityMap.insert({ box->getState()->id, box });
+
+	// Borders of map; TODO: change to walls
+	auto northWall = std::make_shared<SBoxEntity>(
+		glm::vec3(0, 0.5f, 5.0f),
+		10.0f,
+		0.2f,
+		1.0f
+		);
+	_entityMap.insert({ northWall->getState()->id, northWall });
+
+	auto southWall = std::make_shared<SBoxEntity>(
+		glm::vec3(0, 0.5f, -5.0f),
+		10.0f,
+		0.2f,
+		1.0f
+		);
+	_entityMap.insert({ southWall->getState()->id, southWall });
+
+	auto westWall = std::make_shared<SBoxEntity>(
+		glm::vec3(-5.0f, 0.5f, 0),
+		0.2f,
+		10.0f,
+		1.0f
+		);
+	_entityMap.insert({ westWall->getState()->id, westWall });
+
+	auto eastWall = std::make_shared<SBoxEntity>(
+		glm::vec3(5.0f, 0.5f, 0),
+		0.2f,
+		10.0f,
+		1.0f
+		);
+	_entityMap.insert({ eastWall->getState()->id, eastWall });
+
+	// Make a "prison" in the middle of the map
+	auto northJail = std::make_shared<SBoxEntity>(
+		glm::vec3(0, 0.15f, 0.5f),
+		1.0f,
+		0.05f,
+		0.3f
+		);
+	_entityMap.insert({ northJail->getState()->id, northJail });
+
+	auto southJail = std::make_shared<SBoxEntity>(
+		glm::vec3(0, 0.15f, -0.5f),
+		1.0f,
+		0.05f,
+		0.3f
+		);
+	_entityMap.insert({ southJail->getState()->id, southJail });
+
+	auto westJail = std::make_shared<SBoxEntity>(
+		glm::vec3(-0.5f, 0.15f, 0),
+		0.05f,
+		1.0f,
+		0.3f
+		);
+	_entityMap.insert({ westJail->getState()->id, westJail });
+
+	auto eastJail = std::make_shared<SBoxEntity>(
+		glm::vec3(0.5f, 0.15f, 0),
+		0.05f,
+		1.0f,
+		0.3f
+		);
+	_entityMap.insert({ eastJail->getState()->id, eastJail });
 
     // Start update loop
     this->update();
@@ -83,11 +140,13 @@ void GameServer::update()
 				{
 					playerEntity = std::make_shared<SHumanEntity>(playerEvent->playerId);
 					playerEntity->getState()->pos = glm::vec3(2.0f, 0, 0);
+					_humans.push_back(playerEntity);
 				}
 				else
 				{
 					playerEntity = std::make_shared<SDogEntity>(playerEvent->playerId);
 					playerEntity->getState()->pos = glm::vec3(-2.0f, 0, 0);
+					_dogs.push_back(playerEntity);
 				}
 
 				// Throw it into server-wide map
@@ -109,6 +168,13 @@ void GameServer::update()
 				// duplicate update for the player who joined, but is cleaner
 				// than a boolean check inside update()
 				_networkInterface->sendUpdate(playerEntity->getState());
+
+				// If we now have two players, start the game
+				if (_humans.size() + _dogs.size() == 2)
+				{
+					_gameStarted = true;
+					Logger::getInstance()->debug("Game Started!");
+				}
 			}
 
 			// If a player has left, destroy their entity
@@ -148,6 +214,26 @@ void GameServer::update()
 		// Collision resolution
 		handleCollisions();
 
+		// Update state of the game
+		bool dogsCaught = true;
+		for (auto& dog : _dogs)
+		{
+			dogsCaught &= std::static_pointer_cast<SDogEntity>(dog)->isCaught;
+		}
+
+		if (_gameStarted && dogsCaught)
+		{
+			_gameStarted = false;
+			_gameOver = true;
+			Logger::getInstance()->debug("Humans won!");
+		}
+		else if (_gameStarted && _gameDuration > MAX_GAME_LENGTH)
+		{
+			_gameStarted = false;
+			_gameOver = true;
+			Logger::getInstance()->debug("Dogs won!");
+		}
+
         // Send updates to clients
         auto updates = std::vector<std::shared_ptr<BaseState>>();
         for (auto& entityPair : _entityMap)
@@ -172,7 +258,7 @@ void GameServer::update()
         // Elapsed time in nanoseconds
         auto elapsed = timerEnd - timerStart;
 
-		//Logger::getInstance()->debug("Elapsed time: " + std::to_string(std::chrono::duration_cast<std::chrono::milliseconds>(elapsed).count()));
+		//Logger::getInstance()->debug("Elapsed time: " + std::to_string(std::chrono::duration_cast<std::chrono::microseconds>(elapsed).count()));
 
         // Warn if server is overloaded
         if (tick(elapsed).count() > 1)
@@ -186,6 +272,12 @@ void GameServer::update()
             // Sleep for the difference
             std::this_thread::sleep_for(tick(1) - elapsed);
         }
+
+		// If game is running, increment timer
+		if (_gameStarted)
+		{
+			_gameDuration += (std::chrono::steady_clock::now() - timerStart);
+		}
     }
 }
 
@@ -224,6 +316,18 @@ void GameServer::handleCollisions()
 
 		// Erase from beginning
 		collisionSet.erase(collisionPair);
+
+		if (objectA->type == ENTITY_DOG && objectB->type == ENTITY_HUMAN)
+		{
+			handleDogCaught(objectA, objectB, collisionSet, tree);
+			continue;
+		}
+
+		if (objectA->type == ENTITY_HUMAN && objectB->type == ENTITY_DOG)
+		{
+			handleDogCaught(objectB, objectA, collisionSet, tree);
+			continue;
+		}
 
 		// We know that A is a player (capsule collider), so switch on b only
 		switch (objectB->colliderType)
@@ -426,3 +530,33 @@ void GameServer::handleCapsule(BaseState* stateA, BaseState* stateB)
 	stateA->pos += correctionVec;
 }
 
+void GameServer::handleDogCaught(
+	BaseState* dog,
+	BaseState* human,
+	std::unordered_set<std::pair<BaseState*, BaseState*>, PairHash> & collisionSet,
+	QuadTree * tree)
+{
+	// Find entity for dog
+	auto result = _entityMap.find(dog->id);
+
+	if (result == _entityMap.end())
+	{
+		std::runtime_error("Could not find entity in handleCollisions()");
+	}
+
+	auto entity = result->second;
+	entity->hasChanged = true;
+
+	// Cast as dog entity and mark as caught
+	auto dogEntity = std::static_pointer_cast<SDogEntity>(entity);
+	dogEntity->isCaught = true;
+
+	// Removing all colliding with dog
+	for (auto& collidingEntity : entity->getColliding(*tree))
+	{
+		collisionSet.erase({ entity->getState().get(), collidingEntity });
+		collisionSet.erase({ collidingEntity, entity->getState().get() });
+	}
+
+	dog->pos = glm::vec3(0,0,0);
+}

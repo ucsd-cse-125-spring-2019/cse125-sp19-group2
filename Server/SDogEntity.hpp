@@ -20,5 +20,7 @@ public:
 	};
 
 	~SDogEntity() {};
+
+	bool isCaught = false;
 };
 
