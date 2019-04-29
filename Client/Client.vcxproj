@@ -259,7 +259,9 @@
     <ClInclude Include="Application.hpp" />
     <ClInclude Include="CBaseEntity.hpp" />
     <ClInclude Include="CBoxEntity.hpp" />
+    <ClInclude Include="CDogEntity.hpp" />
     <ClInclude Include="CExampleEntity.hpp" />
+    <ClInclude Include="CHumanEntity.hpp" />
     <ClInclude Include="CPlayerEntity.hpp" />
     <ClInclude Include="EntityManager.hpp" />
     <ClInclude Include="FrameBuffer.h" />

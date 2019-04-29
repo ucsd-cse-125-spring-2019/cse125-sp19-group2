@@ -4,7 +4,8 @@
 #include <glm/glm.hpp>
 
 #include "Shared/QuadTree.hpp"
-#include "SPlayerEntity.hpp"
+#include "SDogEntity.hpp"
+#include "SHumanEntity.hpp"
 #include "SBoxEntity.hpp"
 #include "GameServer.hpp"
 
@@ -75,9 +76,19 @@ void GameServer::update()
 						std::string("\"") + playerEvent->playerName +
 						std::string("\" joined the server!"));
 
-				// Make player entity
-				std::shared_ptr<SBaseEntity> playerEntity =
-						std::make_shared<SPlayerEntity>(playerEvent->playerId);
+				std::shared_ptr<SBaseEntity> playerEntity;
+
+				// Make player entity; for now, even numbers are human, odd are dogs
+				if (playerEvent->playerId % 2)
+				{
+					playerEntity = std::make_shared<SHumanEntity>(playerEvent->playerId);
+					playerEntity->getState()->pos = glm::vec3(2.0f, 0, 0);
+				}
+				else
+				{
+					playerEntity = std::make_shared<SDogEntity>(playerEvent->playerId);
+					playerEntity->getState()->pos = glm::vec3(-2.0f, 0, 0);
+				}
 
 				// Throw it into server-wide map
 				_entityMap.insert(std::pair<uint32_t,

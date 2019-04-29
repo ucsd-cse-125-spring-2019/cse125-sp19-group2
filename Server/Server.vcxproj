@@ -162,7 +162,9 @@
     <ClInclude Include="NetworkServer.hpp" />
     <ClInclude Include="SBaseEntity.hpp" />
     <ClInclude Include="SBoxEntity.hpp" />
+    <ClInclude Include="SDogEntity.hpp" />
     <ClInclude Include="SExampleEntity.hpp" />
+    <ClInclude Include="SHumanEntity.hpp" />
     <ClInclude Include="SPlayerEntity.hpp" />
   </ItemGroup>
   <ItemGroup>

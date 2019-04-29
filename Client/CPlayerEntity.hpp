@@ -9,7 +9,6 @@ class CPlayerEntity : public CBaseEntity {
 public:
     CPlayerEntity() {
         // Allocate member variables
-        _playerModel = std::make_unique<Model>("./Resources/Models/human.fbx");
         _playerShader = std::make_unique<Shader>();
         _state = std::make_shared<BaseState>();
 
@@ -57,7 +56,7 @@ public:
 
         // Rotation
         _state->forward = state->forward;
-	_state->forward.z = -_state->forward.z;
+		_state->forward.z = -_state->forward.z;
         _state->up = state->up;
 
         // Scale
@@ -73,10 +72,13 @@ public:
     void setLocal(bool flag) {
 		_isLocal = flag;
     }
+
+protected:
+    std::unique_ptr<Model> _playerModel;
+
 private:
 	bool _isLocal = false;
 
     std::shared_ptr<BaseState> _state;
-    std::unique_ptr<Model> _playerModel;
     std::unique_ptr<Shader> _playerShader;
 };

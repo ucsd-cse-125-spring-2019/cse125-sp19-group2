@@ -15,7 +15,6 @@ public:
 
 		// ID and type
 		_state->id = playerId;
-		_state->type = ENTITY_PLAYER;
 
 		// At origin by default
 		_state->pos = glm::vec3(0);
@@ -24,13 +23,9 @@ public:
 		_state->forward = glm::vec3(0, 0, 1);
 		_state->up = glm::vec3(0, 1, 0);
 
-		// Smaller spheres
+		// Standard scale
 		_state->scale = glm::vec3(0.1f);
 
-		// Collider stuff
-		_state->width = 0.1f;
-		_state->height = 0.1f;
-		_state->depth = 0.1f;
 		_state->colliderType = COLLIDER_CAPSULE;
 
 		_state->isDestroyed = false;
@@ -38,11 +33,6 @@ public:
 
 		// collider to track collision info idk
 		_collider = std::make_unique<CapsuleCollider>(_state.get());
-
-		// As of now, just use the same velocity for all players. In the future
-		// we might want some arguments in the constructor to determine whether
-		// this is a dog or a dog catcher.
-		_velocity = 0.5f;
 
 		hasChanged = false;
 	};
@@ -124,7 +114,7 @@ public:
 		return _state;
 	}
 
-private:
+protected:
 	// TODO: change this to PlayerState or some such
 	std::shared_ptr<BaseState> _state;
 
