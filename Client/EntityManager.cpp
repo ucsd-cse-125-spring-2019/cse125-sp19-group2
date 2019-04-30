@@ -1,5 +1,8 @@
 ﻿#include "EntityManager.hpp"
-#include "CPlayerEntity.hpp"
+#include "CDogEntity.hpp"
+#include "CHumanEntity.hpp"
+#include "CBoxEntity.hpp"
+#include "Shared/Logger.hpp"
 #include <algorithm>
 
 EntityManager::EntityManager() {
@@ -36,9 +39,15 @@ std::shared_ptr<CBaseEntity> EntityManager::getEntity(std::shared_ptr<BaseState>
     switch (type) {
     case ENTITY_EXAMPLE:
         break;
-    case ENTITY_PLAYER:
-        entity = std::make_shared<CPlayerEntity>();
+    case ENTITY_DOG:
+        entity = std::make_shared<CDogEntity>();
         break;
+	case ENTITY_HUMAN:
+		entity = std::make_shared<CHumanEntity>();
+		break;
+	case ENTITY_BOX:
+		entity = std::make_shared<CBoxEntity>();
+		break;
     }
     entityList.insert({id, entity});
     return entity;

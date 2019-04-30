@@ -2,22 +2,26 @@
 
 QuadTree::~QuadTree()
 {
-	clear();
+	_objects.clear();
+	if (_nw) delete _nw;
+	if (_ne) delete _ne;
+	if (_sw) delete _sw;
+	if (_se) delete _se;
 }
 
 int QuadTree::getIndex(BaseState * state)
 {
 	int index = -1;
-	float objBottom = (state->pos.z - state->depth / 2);
-	float objTop = (state->pos.z + state->depth / 2);
-	float objLeft = (state->pos.x - state->width / 2);
-	float objRight = (state->pos.x + state->width / 2);
-	float quadBottom = _boundary.pos.y - _boundary.halfWidth;
-	float quadHorizMid = _boundary.pos.y;
-	float quadTop = _boundary.pos.y + _boundary.halfWidth;
-	float quadLeft = _boundary.pos.x - _boundary.halfWidth;
-	float quadVertMid = _boundary.pos.x;
-	float quadRight = _boundary.pos.x + _boundary.halfWidth;
+	double objBottom = (state->pos.z - state->depth / 2);
+	double objTop = (state->pos.z + state->depth / 2);
+	double objLeft = (state->pos.x - state->width / 2);
+	double objRight = (state->pos.x + state->width / 2);
+	double quadBottom = _boundary.pos.y - _boundary.halfWidth;
+	double quadHorizMid = _boundary.pos.y;
+	double quadTop = _boundary.pos.y + _boundary.halfWidth;
+	double quadLeft = _boundary.pos.x - _boundary.halfWidth;
+	double quadVertMid = _boundary.pos.x;
+	double quadRight = _boundary.pos.x + _boundary.halfWidth;
 
 	bool inBottomQuad = (objBottom > quadBottom) && (objTop < quadHorizMid);
 	bool inTopQuad = (objBottom > quadHorizMid) && (objTop < quadTop);
@@ -87,15 +91,6 @@ void QuadTree::insert(BaseState * state)
 	}
 }
 
-void QuadTree::clear()
-{
-	_objects.clear();
-	if (_nw) delete _nw;
-	if (_ne) delete _ne;
-	if (_sw) delete _sw;
-	if (_se) delete _se;
-}
-
 void QuadTree::divide()
 {
 	BoundingBox nwBoundary = BoundingBox();
@@ -122,20 +117,20 @@ void QuadTree::divide()
 	_quads[3] = _se;
 }
 
-std::vector<BaseState*> QuadTree::query(std::vector<BaseState*> objectsInRange, BaseState * state)
+std::vector<BaseState*> QuadTree::query(BaseState * state)
 {
-	int index = getIndex(state);
-	if (index != -1 && _nw)
+	std::vector<BaseState*> objectsInRange;
+	for (int i = 0; i < 4; i++)
 	{
-		objectsInRange = _quads[index]->query(objectsInRange, state);
-	}
-	else if (index == -1 && _ne)
-	{
-		
+		if (_quads[i] && _quads[i]->intersects(state))
+		{
+			std::vector<BaseState*> subQuadObjects;
+			subQuadObjects = _quads[i]->query(state);
+			objectsInRange.insert(objectsInRange.end(), subQuadObjects.begin(), subQuadObjects.end());
+		}
 	}
 
 	objectsInRange.insert(objectsInRange.end(), _objects.begin(), _objects.end());
-
 	return objectsInRange;
 }
 

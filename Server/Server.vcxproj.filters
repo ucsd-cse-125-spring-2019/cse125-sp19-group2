@@ -28,6 +28,9 @@
     <Filter Include="Source Files\Util">
       <UniqueIdentifier>{72980280-738a-4a30-b406-5afbf995fa9c}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Collider">
+      <UniqueIdentifier>{83400ed4-8600-4689-8643-3dfea0c57b07}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -60,6 +63,24 @@
       <Filter>Header Files\Util</Filter>
     </ClInclude>
     <ClInclude Include="SPlayerEntity.hpp">
+      <Filter>Header Files\Entity</Filter>
+    </ClInclude>
+    <ClInclude Include="BaseCollider.hpp">
+      <Filter>Header Files\Collider</Filter>
+    </ClInclude>
+    <ClInclude Include="CapsuleCollider.hpp">
+      <Filter>Header Files\Collider</Filter>
+    </ClInclude>
+    <ClInclude Include="AABBCollider.hpp">
+      <Filter>Header Files\Collider</Filter>
+    </ClInclude>
+    <ClInclude Include="SBoxEntity.hpp">
+      <Filter>Header Files\Entity</Filter>
+    </ClInclude>
+    <ClInclude Include="SDogEntity.hpp">
+      <Filter>Header Files\Entity</Filter>
+    </ClInclude>
+    <ClInclude Include="SHumanEntity.hpp">
       <Filter>Header Files\Entity</Filter>
     </ClInclude>
   </ItemGroup>
