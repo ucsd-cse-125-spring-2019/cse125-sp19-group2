@@ -43,6 +43,9 @@
     <ClCompile Include="Texture.cpp">
       <Filter>Source Files\Graphics</Filter>
     </ClCompile>
+    <ClCompile Include="Skybox.cpp">
+      <Filter>Source Files\Graphics</Filter>
+    </ClCompile>
     <ClCompile Include="EntityManager.cpp">
       <Filter>Source Files\Entity</Filter>
     </ClCompile>
@@ -111,6 +114,9 @@
     <ClInclude Include="stb_image.h">
       <Filter>Header Files\Graphics</Filter>
     </ClInclude>
+    <ClInclude Include="Skybox.hpp">
+      <Filter>Header Files\Graphics</Filter>
+    </ClInclude>
     <ClInclude Include="CPlayerEntity.hpp">
       <Filter>Header Files\Entity</Filter>
     </ClInclude>
@@ -131,6 +137,15 @@
     </ClInclude>
     <ClInclude Include="GamePadXbox.hpp">
       <Filter>Header Files\Input</Filter>
+    </ClInclude>
+    <ClInclude Include="CBoxEntity.hpp">
+      <Filter>Header Files\Entity</Filter>
+    </ClInclude>
+    <ClInclude Include="CDogEntity.hpp">
+      <Filter>Header Files\Entity</Filter>
+    </ClInclude>
+    <ClInclude Include="CHumanEntity.hpp">
+      <Filter>Header Files\Entity</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -157,6 +172,12 @@
       <Filter>Resource Files</Filter>
     </None>
     <None Include="Resources\Shaders\basiclight.vert">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="Resources\Shaders\skybox.frag">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="Resources\Shaders\skybox.vert">
       <Filter>Resource Files</Filter>
     </None>
     <None Include="Resources\Shaders\debuglight.frag">

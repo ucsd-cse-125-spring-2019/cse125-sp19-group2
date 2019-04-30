@@ -98,7 +98,6 @@ void LocalPlayer::inputReadHandler()
 	{
 		if (pad->is_connected())
 		{
-
 			pad->update();
 			if (pad->State._buttons[GamePad_Button_DPAD_LEFT] == true) {
 				//Logger::getInstance()->debug("left pressed");

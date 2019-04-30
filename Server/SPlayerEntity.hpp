@@ -2,6 +2,7 @@
 
 #include "IdGenerator.hpp"
 #include "SBaseEntity.hpp"
+#include "CapsuleCollider.hpp"
 
 class SPlayerEntity : public SBaseEntity
 {
@@ -14,7 +15,6 @@ public:
 
 		// ID and type
 		_state->id = playerId;
-		_state->type = ENTITY_PLAYER;
 
 		// At origin by default
 		_state->pos = glm::vec3(0);
@@ -23,32 +23,27 @@ public:
 		_state->forward = glm::vec3(0, 0, 1);
 		_state->up = glm::vec3(0, 1, 0);
 
-		// Default scale is 1
-		_state->scale = glm::vec3(1);
+		// Standard scale
+		_state->scale = glm::vec3(0.1f);
 
-		// TODO: Set bounding box parameters (width, height, depth, etc)
+		_state->colliderType = COLLIDER_CAPSULE;
 
 		_state->isDestroyed = false;
+		_state->isStatic = false;
 
-		// As of now, just use the same velocity for all players. In the future
-		// we might want some arguments in the constructor to determine whether
-		// this is a dog or a dog catcher.
-		_velocity = 0.5f;
+		// collider to track collision info idk
+		_collider = std::make_unique<CapsuleCollider>(_state.get());
 
-		// Players are not static
-		_isStatic = false;
-		_hasChanged = false;
+		hasChanged = false;
 	};
 	~SPlayerEntity() {};
 
-	void update(
-			QuadTree * gameMap,
-			std::vector<std::shared_ptr<GameEvent>> events)
+	virtual void update(std::vector<std::shared_ptr<GameEvent>> events) override
 	{
-		_hasChanged = false;
+		hasChanged = false;
 
 		// Only change attributes of this object if not static
-		if (!_isStatic)
+		if (!_state->isStatic)
 		{
 			// Filter events for this player only
 			std::vector<std::shared_ptr<GameEvent>> filteredEvents;
@@ -103,27 +98,23 @@ public:
 				// Update forward vector with unit direction only if it was modified
 				if (dir != glm::vec3(0))
 				{
-					_hasChanged = true;
+					hasChanged = true;
 					_state->forward = dir / glm::length(dir);
 
 					// Move player by (direction * velocity) / ticks_per_sec
+					auto oldPos = _state->pos;
 					_state->pos = _state->pos + ((_state->forward * _velocity) / (float)TICKS_PER_SEC);
 				}
 			}
 		}
 	}
 
-	std::shared_ptr<BaseState> getState(bool ignoreUpdateStatus = false)
+	virtual std::shared_ptr<BaseState> getState() override
 	{
-		if (ignoreUpdateStatus || _hasChanged)
-		{
-			return _state;
-		}
-		
-		return NULL;
+		return _state;
 	}
 
-private:
+protected:
 	// TODO: change this to PlayerState or some such
 	std::shared_ptr<BaseState> _state;
 

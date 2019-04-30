@@ -9,7 +9,6 @@ class CPlayerEntity : public CBaseEntity {
 public:
     CPlayerEntity() {
         // Allocate member variables
-        _playerModel = std::make_unique<Model>("./Resources/Models/sphere.obj");
         _playerShader = std::make_unique<Shader>();
         _state = std::make_shared<BaseState>();
 
@@ -31,7 +30,7 @@ public:
         // Compute model matrix based on state: t * r * s
         const auto t = glm::translate(glm::mat4(1.0f), _state->pos);
 		const auto r = glm::lookAt(glm::vec3(0.0f),_state->forward, _state->up);
-        const auto s = glm::scale(glm::mat4(1.0f), glm::vec3(0.1f)); 
+        const auto s = glm::scale(glm::mat4(1.0f), _state->scale); 
         
 		auto model = t * r * s;
         // Pass model matrix into shader
@@ -57,6 +56,7 @@ public:
 
         // Rotation
         _state->forward = state->forward;
+		_state->forward.z = -_state->forward.z;
         _state->up = state->up;
 
         // Scale
@@ -72,10 +72,13 @@ public:
     void setLocal(bool flag) {
 		_isLocal = flag;
     }
+
+protected:
+    std::unique_ptr<Model> _playerModel;
+
 private:
 	bool _isLocal = false;
 
     std::shared_ptr<BaseState> _state;
-    std::unique_ptr<Model> _playerModel;
     std::unique_ptr<Shader> _playerShader;
 };
