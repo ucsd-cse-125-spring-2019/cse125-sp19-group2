@@ -5,9 +5,10 @@
 #include <unordered_set>
 
 #include "Shared/Logger.hpp"
+#include "Shared/QuadTree.hpp"
 #include "NetworkServer.hpp"
 #include "SBaseEntity.hpp"
-#include "Shared/QuadTree.hpp"
+#include "LevelParser.hpp"
 
 using tick = std::chrono::duration<double, std::ratio<1, TICKS_PER_SEC>>;
 
@@ -33,6 +34,9 @@ private:
 
     // Interface for client communication
     std::unique_ptr<NetworkServer> _networkInterface;
+
+	// Parser for text or JSON level files
+	std::unique_ptr<LevelParser> _levelParser;
 
     // Map of all game entities
     std::unordered_map<uint32_t, std::shared_ptr<SBaseEntity>> _entityMap;

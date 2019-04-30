@@ -3,6 +3,7 @@
 #include <random>
 #include <glm/glm.hpp>
 
+#include "TextLevelParser.hpp"
 #include "SDogEntity.hpp"
 #include "SHumanEntity.hpp"
 #include "SBoxEntity.hpp"
@@ -38,6 +39,11 @@ void GameServer::start()
 
     // Initialize object map
     _entityMap = std::unordered_map<uint32_t, std::shared_ptr<SBaseEntity>>();
+
+	// Init level parser and load level
+	_levelParser = std::make_unique<TextLevelParser>();
+
+	_levelParser->parseLevelFromFile("Levels/walls_only.txt");
 
 	// TODO: create initial world, objects here
 
