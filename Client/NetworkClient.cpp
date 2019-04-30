@@ -66,6 +66,10 @@ uint32_t NetworkClient::connect(std::string address, std::string port)
             throw std::runtime_error("Socket creation failed with error: " + WSAGetLastError());
 		}
 
+		// Disable nagle's algorithm
+		char one = 1;
+		setsockopt(clientSock, IPPROTO_TCP, TCP_NODELAY, &one, sizeof(one));
+
 		// Connect to server.
 		iResult = ::connect(clientSock, ptr->ai_addr, (int)ptr->ai_addrlen);
 		if (iResult == SOCKET_ERROR) 
@@ -92,8 +96,8 @@ uint32_t NetworkClient::connect(std::string address, std::string port)
 		{
 			int recvResult = recv(
 					_socket,
-					playerId,
-					sizeof(playerId),
+					playerId + bytesRead,
+					sizeof(playerId) - bytesRead,
 					0);
 
 			// We got data
@@ -148,7 +152,7 @@ void NetworkClient::socketReadHandler()
 			int recvResult = recv(
 					_socket,
 					lengthBuf + bytesRead,
-					sizeof(uint32_t),
+					sizeof(uint32_t) - bytesRead,
 					0);
 			if (recvResult > 0)
 			{
