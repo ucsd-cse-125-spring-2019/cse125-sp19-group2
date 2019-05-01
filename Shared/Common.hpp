@@ -25,13 +25,15 @@ enum EntityType
 	ENTITY_DOG,
 	ENTITY_HUMAN,
 	ENTITY_BOX,
-	ENTITY_WALL
+	ENTITY_WALL,
+	ENTITY_JAIL
 	// TODO: add new types here, e.g. ENTITY_DOGBONE
 };
 
 // Types of narrow-phase colliders
 enum ColliderType
 {
+	COLLIDER_NONE,
 	COLLIDER_AABB,
 	COLLIDER_CAPSULE
 };

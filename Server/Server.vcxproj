@@ -231,6 +231,7 @@
     <ClInclude Include="SDogEntity.hpp" />
     <ClInclude Include="SExampleEntity.hpp" />
     <ClInclude Include="SHumanEntity.hpp" />
+    <ClInclude Include="SJailEntity.hpp" />
     <ClInclude Include="SPlayerEntity.hpp" />
     <ClInclude Include="TextLevelParser.hpp" />
   </ItemGroup>

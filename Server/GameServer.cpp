@@ -40,50 +40,26 @@ void GameServer::start()
     // Initialize object map
     _entityMap = std::unordered_map<uint32_t, std::shared_ptr<SBaseEntity>>();
 
+	// Init spawn point queues and jail location queues
+	_jails = std::queue<glm::vec2>();
+	_humanSpawns = std::queue<glm::vec2>();
+	_dogSpawns = std::queue<glm::vec2>();
+
 	// Init level parser and load level
 	_levelParser = std::make_unique<TextLevelParser>();
 
 	// Map initialization
-	auto entities = _levelParser->parseLevelFromFile("Levels/basic_map.txt");
+	auto entities = _levelParser->parseLevelFromFile(
+		"Levels/basic_map.txt",
+		_jails,
+		_humanSpawns,
+		_dogSpawns);
 
 	// Insert generated entities into global map
 	for (auto& entity : entities)
 	{
 		_entityMap.insert({ entity->getState()->id, entity });
 	}
-
-	// Make a "prison" in the middle of the map
-	auto northJail = std::make_shared<SBoxEntity>(
-		glm::vec3(0, 0.15f, 0.5f),
-		1.0f,
-		0.05f,
-		0.3f
-		);
-	_entityMap.insert({ northJail->getState()->id, northJail });
-
-	auto southJail = std::make_shared<SBoxEntity>(
-		glm::vec3(0, 0.15f, -0.5f),
-		1.0f,
-		0.05f,
-		0.3f
-		);
-	_entityMap.insert({ southJail->getState()->id, southJail });
-
-	auto westJail = std::make_shared<SBoxEntity>(
-		glm::vec3(-0.5f, 0.15f, 0),
-		0.05f,
-		1.0f,
-		0.3f
-		);
-	_entityMap.insert({ westJail->getState()->id, westJail });
-
-	auto eastJail = std::make_shared<SBoxEntity>(
-		glm::vec3(0.5f, 0.15f, 0),
-		0.05f,
-		1.0f,
-		0.3f
-		);
-	_entityMap.insert({ eastJail->getState()->id, eastJail });
 
     // Start update loop
     this->update();
@@ -116,14 +92,26 @@ void GameServer::update()
 				// Make player entity; for now, even numbers are human, odd are dogs
 				if (playerEvent->playerId % 2)
 				{
+					// Get first element from human spawn locations and push it back
+					glm::vec2 humanSpawn = _humanSpawns.front();
+					_humanSpawns.pop();
+					_humanSpawns.push(humanSpawn);
+
+					// Create player entity at position
 					playerEntity = std::make_shared<SHumanEntity>(playerEvent->playerId);
-					playerEntity->getState()->pos = glm::vec3(2.0f, 0, 0);
+					playerEntity->getState()->pos = glm::vec3(humanSpawn.x, 0, humanSpawn.y);
 					_humans.push_back(playerEntity);
 				}
 				else
 				{
+					// Get first element from dog spawn locations and push it back
+					glm::vec2 dogSpawn = _dogSpawns.front();
+					_dogSpawns.pop();
+					_dogSpawns.push(dogSpawn);
+
+					// Create player entity at position
 					playerEntity = std::make_shared<SDogEntity>(playerEvent->playerId);
-					playerEntity->getState()->pos = glm::vec3(-2.0f, 0, 0);
+					playerEntity->getState()->pos = glm::vec3(dogSpawn.x, 0, dogSpawn.y);
 					_dogs.push_back(playerEntity);
 				}
 
@@ -536,5 +524,10 @@ void GameServer::handleDogCaught(
 		collisionSet.erase({ collidingEntity, entity->getState().get() });
 	}
 
-	dog->pos = glm::vec3(0,0,0);
+	// Get jail location from queue
+	glm::vec2 jailPos = _jails.front();
+	_jails.pop();
+	_jails.push(jailPos);
+
+	dog->pos = glm::vec3(jailPos.x, 0, jailPos.y);
 }

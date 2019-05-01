@@ -2,6 +2,7 @@
 #include <algorithm>
 #include "TextLevelParser.hpp"
 #include "SBoxEntity.hpp"
+#include "SJailEntity.hpp"
 
 TextLevelParser::TextLevelParser()
 {
@@ -13,7 +14,11 @@ TextLevelParser::~TextLevelParser()
 }
 
 
-std::vector<std::shared_ptr<SBaseEntity>> TextLevelParser::parseLevelFromFile(std::string path)
+std::vector<std::shared_ptr<SBaseEntity>> TextLevelParser::parseLevelFromFile(
+	std::string path,
+	std::queue<glm::vec2> & jailLocations,
+	std::queue<glm::vec2> & humanSpawns,
+	std::queue<glm::vec2> & dogSpawns)
 {
 	// List containing game objects parsed from level file
 	auto entityList = std::vector<std::shared_ptr<SBaseEntity>>();
@@ -87,6 +92,14 @@ std::vector<std::shared_ptr<SBaseEntity>> TextLevelParser::parseLevelFromFile(st
 		else if (tileType == "jail-tile")
 		{
 			type = TILE_JAIL;
+		}
+		else if (tileType == "human-spawn-tile")
+		{
+			type = TILE_HUMAN_SPAWN;
+		}
+		else if (tileType == "dog-spawn-tile")
+		{
+			type = TILE_DOG_SPAWN;
 		}
 		tile->type = type;
 
@@ -177,9 +190,8 @@ std::vector<std::shared_ptr<SBaseEntity>> TextLevelParser::parseLevelFromFile(st
 						// For now just create a box entity
 						entity = std::make_shared<SBoxEntity>(
 							glm::vec3(avgPos.x, WALL_HEIGHT / 2, avgPos.y),
-							entityWidth,
-							entityDepth,
-							WALL_HEIGHT);
+							aggregatedTiles[0]->forward,
+							glm::vec3(entityWidth, WALL_HEIGHT, entityDepth));
 						break;
 					}
 					case TILE_WALL:
@@ -187,23 +199,36 @@ std::vector<std::shared_ptr<SBaseEntity>> TextLevelParser::parseLevelFromFile(st
 						// Same as above; will be changed eventually
 						entity = std::make_shared<SBoxEntity>(
 							glm::vec3(avgPos.x, WALL_HEIGHT/2, avgPos.y),
-							entityWidth,
-							entityDepth,
-							WALL_HEIGHT);
+							aggregatedTiles[0]->forward,
+							glm::vec3(entityWidth, WALL_HEIGHT, entityDepth));
 						break;
 					}
 					case TILE_JAIL:
 					{
-						// TODO: until I know how we'll be handling the jail
-						// this generator will do nothing for jail tiles
+						entity = std::make_shared<SJailEntity>(
+							glm::vec3(avgPos.x, 0.15f, avgPos.y),
+							aggregatedTiles[0]->forward,
+							glm::vec3(entityWidth, 0.3f, entityDepth));
+						jailLocations.push(avgPos);
+						break;
+					}
+					case TILE_HUMAN_SPAWN:
+					{
+						humanSpawns.push(avgPos);
+						break;
+					}
+					case TILE_DOG_SPAWN:
+					{
+						dogSpawns.push(avgPos);
 						break;
 					}
 				}
 
 				if (entity)
 				{
-					entity->getState()->forward = aggregatedTiles[0]->forward;
 					entityList.push_back(entity);
+					auto children = entity->getChildren();
+					entityList.insert(entityList.begin(), children.begin(), children.end());
 				}
 			}
 		}

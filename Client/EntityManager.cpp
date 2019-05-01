@@ -34,7 +34,7 @@ std::shared_ptr<CBaseEntity> EntityManager::getEntity(std::shared_ptr<BaseState>
     }
 
     // Otherwise create the Entity based on its type
-    std::shared_ptr<CBaseEntity> entity;
+    std::shared_ptr<CBaseEntity> entity = nullptr;
     EntityType type = state->type;
     switch (type) {
     case ENTITY_EXAMPLE:
@@ -49,7 +49,12 @@ std::shared_ptr<CBaseEntity> EntityManager::getEntity(std::shared_ptr<BaseState>
 		entity = std::make_shared<CBoxEntity>();
 		break;
     }
-    entityList.insert({id, entity});
+
+	if (entity)
+	{
+		entityList.insert({ id, entity });
+	}
+
     return entity;
 }
 
@@ -65,7 +70,11 @@ void EntityManager::update(std::shared_ptr<BaseState> const& state) {
     }
 
     auto entity = getEntity(state);
-    entity->updateState(state);
+
+	if (entity)
+	{
+		entity->updateState(state);
+	}
 }
 
 void EntityManager::render(std::unique_ptr<Camera> const& camera) {

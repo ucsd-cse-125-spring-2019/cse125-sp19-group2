@@ -98,6 +98,9 @@
     <ClInclude Include="TextLevelParser.hpp">
       <Filter>Header Files\Level</Filter>
     </ClInclude>
+    <ClInclude Include="SJailEntity.hpp">
+      <Filter>Header Files\Entity</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

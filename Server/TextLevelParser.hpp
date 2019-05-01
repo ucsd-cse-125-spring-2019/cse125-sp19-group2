@@ -1,5 +1,6 @@
 #pragma once
 
+#include <queue>
 #include "LevelParser.hpp"
 
 /**
@@ -12,7 +13,11 @@ public:
 	TextLevelParser();
 	~TextLevelParser();
 
-	std::vector<std::shared_ptr<SBaseEntity>> parseLevelFromFile(std::string path) override;
+	std::vector<std::shared_ptr<SBaseEntity>> parseLevelFromFile(
+		std::string path,
+		std::queue<glm::vec2> & jailLocations,
+		std::queue<glm::vec2> & humanSpawns,
+		std::queue<glm::vec2> & dogSpawns) override;
 
 private:
 	// Different types of tiles
@@ -21,7 +26,9 @@ private:
 		TILE_EMPTY,
 		TILE_JAIL,
 		TILE_WALL,
-		TILE_FENCE
+		TILE_FENCE,
+		TILE_HUMAN_SPAWN,
+		TILE_DOG_SPAWN
 	};
 
 	// Direction of aggregation

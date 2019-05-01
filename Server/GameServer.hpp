@@ -41,6 +41,9 @@ private:
     // Map of all game entities
     std::unordered_map<uint32_t, std::shared_ptr<SBaseEntity>> _entityMap;
 
+	// Locations of jails, human spawns, and dog spawns, respectively
+	std::queue<glm::vec2> _jails, _humanSpawns, _dogSpawns;
+
 	// Game is currently started (not in lobby mode). Note: game starts in
 	// lobby mode
 	bool _gameStarted = false;
