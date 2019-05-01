@@ -43,42 +43,14 @@ void GameServer::start()
 	// Init level parser and load level
 	_levelParser = std::make_unique<TextLevelParser>();
 
-	_levelParser->parseLevelFromFile("Levels/walls_only.txt");
+	// Map initialization
+	auto entities = _levelParser->parseLevelFromFile("Levels/basic_map.txt");
 
-	// TODO: create initial world, objects here
-
-	// Borders of map; TODO: change to walls
-	auto northWall = std::make_shared<SBoxEntity>(
-		glm::vec3(0, 0.5f, 5.0f),
-		10.0f,
-		0.2f,
-		1.0f
-		);
-	_entityMap.insert({ northWall->getState()->id, northWall });
-
-	auto southWall = std::make_shared<SBoxEntity>(
-		glm::vec3(0, 0.5f, -5.0f),
-		10.0f,
-		0.2f,
-		1.0f
-		);
-	_entityMap.insert({ southWall->getState()->id, southWall });
-
-	auto westWall = std::make_shared<SBoxEntity>(
-		glm::vec3(-5.0f, 0.5f, 0),
-		0.2f,
-		10.0f,
-		1.0f
-		);
-	_entityMap.insert({ westWall->getState()->id, westWall });
-
-	auto eastWall = std::make_shared<SBoxEntity>(
-		glm::vec3(5.0f, 0.5f, 0),
-		0.2f,
-		10.0f,
-		1.0f
-		);
-	_entityMap.insert({ eastWall->getState()->id, eastWall });
+	// Insert generated entities into global map
+	for (auto& entity : entities)
+	{
+		_entityMap.insert({ entity->getState()->id, entity });
+	}
 
 	// Make a "prison" in the middle of the map
 	auto northJail = std::make_shared<SBoxEntity>(

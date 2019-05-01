@@ -27,9 +27,10 @@ private:
 	// Direction of aggregation
 	enum Direction
 	{
-		UP, // Only used in walls or fences
-		DOWN,
-		RIGHT // Left is never used
+		DIR_NONE, // Base case in recursion
+		DIR_UP, // Only used in walls or fences
+		DIR_DOWN,
+		DIR_RIGHT // Left is never used
 	};
 
 	// Internal representation of tiles
@@ -38,11 +39,24 @@ private:
 	public:
 		TileType type;
 		glm::vec2 pos;
-		float xIndex;
-		float zIndex;
+		int xIndex;
+		int zIndex;
 		bool isClaimed;
 
-		void aggregateTiles(TileType type, Direction dir, std::vector<Tile*>& aggregatedTiles);
+		void aggregateTiles(
+			Tile*** tiles,
+			TileType type,
+			Direction dir,
+			std::vector<Tile*>& aggregatedTiles,
+			int maxWidth);
 	};
+
+	// Get average position, width, and depth from tiles. All are passed by
+	// reference.
+	void getTileInfo(
+		std::vector<Tile*> & tiles,
+		glm::vec2 & avgPos,
+		float & width,
+		float & depth);
 };
 

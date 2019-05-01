@@ -34,6 +34,9 @@
     <Filter Include="Header Files\Level">
       <UniqueIdentifier>{2808c6b2-fe5b-4358-81af-0697e7466de5}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\Level">
+      <UniqueIdentifier>{f77826ab-e04d-4368-8157-b199c5e536ea}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -49,7 +52,7 @@
       <Filter>Source Files\Util</Filter>
     </ClCompile>
     <ClCompile Include="TextLevelParser.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\Level</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -93,7 +96,7 @@
       <Filter>Header Files\Level</Filter>
     </ClInclude>
     <ClInclude Include="TextLevelParser.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\Level</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
