@@ -105,6 +105,7 @@ void Application::Setup() {
   _debuglightShader->LoadFromFile(GL_FRAGMENT_SHADER, "./Resources/Shaders/debuglight.frag");
   _debuglightShader->CreateProgram();
 
+
   // Create cube model
   _cube = std::make_unique<Model>("./Resources/Models/simpleobject2.obj");
 
@@ -226,7 +227,7 @@ void Application::Draw() {
 	// Render Skybox
 	_skyboxShader->Use();
 	_skyboxShader->set_uniform("u_projection", _localPlayer->getCamera()->projection_matrix());
-	_skyboxShader->set_uniform("u_view", _localPlayer->getCamera()->view_matrix() * glm::scale(glm::mat4(1.0f), glm::vec3(6,6,6)));
+	_skyboxShader->set_uniform("u_view", _localPlayer->getCamera()->view_matrix() * glm::scale(glm::mat4(1.0f), glm::vec3(200,200,200)));
       //glm::mat4(glm::mat3(_localPlayer->getCamera()->view_matrix()))
 	_skybox->draw(_skyboxShader);
 
@@ -246,7 +247,7 @@ void Application::Draw() {
 
     // Cube
     _cube->Draw(_cubeShader);
-    
+
     EntityManager::getInstance().render(_localPlayer->getCamera());
 
 	  // Debug Shader

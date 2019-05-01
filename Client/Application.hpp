@@ -17,6 +17,8 @@
 #include "LocalPlayer.hpp"
 #include "PointLight.hpp"
 #include "DirectionalLight.hpp"
+#include "AnimatedMesh.hpp"
+#include "Animation.hpp"
 
 class Application {
 public:
@@ -98,6 +100,7 @@ private:
   // Test Lights
   std::unique_ptr<PointLight> _point_light;
   std::unique_ptr<DirectionalLight> _dir_light;
+
 };
 
 #endif

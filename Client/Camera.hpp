@@ -30,7 +30,7 @@ namespace cameradefaults
   const float aspect = 1.33f;
   
   const float near_plane = 0.1f;
-  const float far_plane  = 100.0f;
+  const float far_plane  = 1000.0f;
   
   const float move_speed = 1.0f;
   const float mouse_sensitivity = 0.1f;
