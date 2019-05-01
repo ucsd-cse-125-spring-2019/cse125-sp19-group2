@@ -129,19 +129,17 @@ std::vector<std::shared_ptr<SBaseEntity>> TextLevelParser::parseLevelFromFile(st
 				float entityWidth, entityDepth;
 				getTileInfo(aggregatedTiles, avgPos, entityWidth, entityDepth);
 
-				// Single tiles should be 1-tile width and depth
-				if (!entityWidth && !entityDepth)
-				{
-					entityWidth += tileWidth;
-					entityDepth += tileWidth;
-				}
-
 				// For fences and walls, one dimension will be 0
 				if (aggregatedTiles[0]->type == TILE_FENCE ||
 					aggregatedTiles[0]->type == TILE_WALL)
 				{
 					entityWidth += WALL_WIDTH;
 					entityDepth += WALL_WIDTH;
+				}
+				else // For everything else, fit the object tightly to its tiles
+				{
+					entityWidth += tileWidth;
+					entityDepth += tileWidth;
 				}
 
 				// Entity-specific handling
