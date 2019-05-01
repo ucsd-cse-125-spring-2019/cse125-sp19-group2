@@ -12,7 +12,7 @@ public:
         // Allocate member variables
 
         // Read in an animated Mesh
-        _playerModel = std::make_unique<Animation>("./Resources/Models/human.dae");
+        _playerModel = std::make_unique<Animation>("./Resources/Models/dog_animation.fbx");
 		
         // TODO: determine which animation gets played
         _playerModel->animatedMesh->_sequenceIndex = 0;
