@@ -38,6 +38,7 @@ private:
 	{
 	public:
 		TileType type;
+		glm::vec3 forward;
 		glm::vec2 pos;
 		int xIndex;
 		int zIndex;

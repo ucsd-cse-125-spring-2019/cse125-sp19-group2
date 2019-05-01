@@ -60,28 +60,52 @@ std::vector<std::shared_ptr<SBaseEntity>> TextLevelParser::parseLevelFromFile(st
 	int xIndex = 0;
 	int zIndex = 0;
 
+	std::string tileType;
+	int angle; // Angle of tile in degrees
+
 	// Re-init file and loop over tiles
 	levelFile = std::ifstream(path);
 	while (levelFile >> tileString)
 	{
+		tileType = tileString.substr(0, tileString.find(","));
+		tileString.erase(0, tileType.size() + 1);
+		angle = std::stoi(tileString);
+
 		// Create a tile and put it into our 2D array
 		Tile* tile = new Tile();
 
 		// Assign type based on string
 		TileType type = TILE_EMPTY;
-		if (tileString == "wall-tile")
+		if (tileType == "wall-tile")
 		{
 			type = TILE_WALL;
 		}
-		else if (tileString == "fence-tile")
+		else if (tileType == "fence-tile")
 		{
 			type = TILE_FENCE;
 		}
-		else if (tileString == "jail-tile")
+		else if (tileType == "jail-tile")
 		{
 			type = TILE_JAIL;
 		}
 		tile->type = type;
+
+		// Set forward based on angle
+		switch (angle)
+		{
+		case 0:
+			tile->forward = glm::vec3(0, 0, -1);
+			break;
+		case 90:
+			tile->forward = glm::vec3(1, 0, 0);
+			break;
+		case 180:
+			tile->forward = glm::vec3(0, 0, 1);
+			break;
+		case 270:
+			tile->forward = glm::vec3(-1, 0, 0);
+			break;
+		}
 
 		// Other properties
 		tile->isClaimed = false;
@@ -141,6 +165,9 @@ std::vector<std::shared_ptr<SBaseEntity>> TextLevelParser::parseLevelFromFile(st
 					entityWidth += tileWidth;
 					entityDepth += tileWidth;
 				}
+				
+				// Entity to build and add to vector
+				std::shared_ptr<SBaseEntity> entity = nullptr;
 
 				// Entity-specific handling
 				switch (aggregatedTiles[0]->type)
@@ -148,21 +175,21 @@ std::vector<std::shared_ptr<SBaseEntity>> TextLevelParser::parseLevelFromFile(st
 					case TILE_FENCE:
 					{
 						// For now just create a box entity
-						entityList.push_back(std::make_shared<SBoxEntity>(
-							glm::vec3(avgPos.x, WALL_HEIGHT/2, avgPos.y),
+						entity = std::make_shared<SBoxEntity>(
+							glm::vec3(avgPos.x, WALL_HEIGHT / 2, avgPos.y),
 							entityWidth,
 							entityDepth,
-							WALL_HEIGHT));
+							WALL_HEIGHT);
 						break;
 					}
 					case TILE_WALL:
 					{
 						// Same as above; will be changed eventually
-						entityList.push_back(std::make_shared<SBoxEntity>(
+						entity = std::make_shared<SBoxEntity>(
 							glm::vec3(avgPos.x, WALL_HEIGHT/2, avgPos.y),
 							entityWidth,
 							entityDepth,
-							WALL_HEIGHT));
+							WALL_HEIGHT);
 						break;
 					}
 					case TILE_JAIL:
@@ -171,6 +198,12 @@ std::vector<std::shared_ptr<SBaseEntity>> TextLevelParser::parseLevelFromFile(st
 						// this generator will do nothing for jail tiles
 						break;
 					}
+				}
+
+				if (entity)
+				{
+					entity->getState()->forward = aggregatedTiles[0]->forward;
+					entityList.push_back(entity);
 				}
 			}
 		}
