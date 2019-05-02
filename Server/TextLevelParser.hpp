@@ -15,7 +15,7 @@ public:
 
 	std::vector<std::shared_ptr<SBaseEntity>> parseLevelFromFile(
 		std::string path,
-		std::queue<glm::vec2> & jailLocations,
+		std::vector<glm::vec2> & jailLocations,
 		std::queue<glm::vec2> & humanSpawns,
 		std::queue<glm::vec2> & dogSpawns) override;
 

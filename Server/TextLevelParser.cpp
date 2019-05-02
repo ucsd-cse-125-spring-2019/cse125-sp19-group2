@@ -16,7 +16,7 @@ TextLevelParser::~TextLevelParser()
 
 std::vector<std::shared_ptr<SBaseEntity>> TextLevelParser::parseLevelFromFile(
 	std::string path,
-	std::queue<glm::vec2> & jailLocations,
+	std::vector<glm::vec2> & jailLocations,
 	std::queue<glm::vec2> & humanSpawns,
 	std::queue<glm::vec2> & dogSpawns)
 {
@@ -238,7 +238,7 @@ tileType = levelFile.get();
 							glm::vec3(avgPos.x, 0.15f, avgPos.y),
 							aggregatedTiles[0]->forward,
 							glm::vec3(entityWidth, 0.3f, entityDepth));
-						jailLocations.push(avgPos);
+						jailLocations.push_back(avgPos);
 						break;
 					}
 					case TILE_HUMAN_SPAWN:

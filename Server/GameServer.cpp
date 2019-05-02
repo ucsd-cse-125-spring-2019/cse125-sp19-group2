@@ -34,6 +34,9 @@ GameServer::~GameServer()
 
 void GameServer::start()
 {
+	// Seed RNG with current time
+	std::srand(unsigned(std::time(0)));
+
     // Start network server
     _networkInterface = std::make_unique<NetworkServer>(PORTNUM);
 
@@ -41,7 +44,7 @@ void GameServer::start()
     _entityMap = std::unordered_map<uint32_t, std::shared_ptr<SBaseEntity>>();
 
 	// Init spawn point queues and jail location queues
-	_jails = std::queue<glm::vec2>();
+	_jails = std::vector<glm::vec2>();
 	_humanSpawns = std::queue<glm::vec2>();
 	_dogSpawns = std::queue<glm::vec2>();
 
@@ -54,6 +57,24 @@ void GameServer::start()
 		_jails,
 		_humanSpawns,
 		_dogSpawns);
+
+	// Ensure at least one human spawn, dog spawn, and jail
+	// TODO: convert these to exceptions, or find a cleaner way to handle this
+	if (!_jails.size())
+	{
+		Logger::getInstance()->fatal("No jails found in level file");
+		fgetc(stdin);
+	}
+	if (!_humanSpawns.size())
+	{
+		Logger::getInstance()->fatal("No human spawn locations found in level file");
+		fgetc(stdin);
+	}
+	if (!_dogSpawns.size())
+	{
+		Logger::getInstance()->fatal("No dog spawn locations found in level file");
+		fgetc(stdin);
+	}
 
 	// Insert generated entities into global map
 	for (auto& entity : entities)
@@ -331,7 +352,7 @@ void GameServer::handleCollisions()
 
 		if (result == _entityMap.end())
 		{
-			std::runtime_error("Could not find entity in handleCollisions()");
+			throw std::runtime_error("Could not find entity in handleCollisions()");
 		}
 
 		auto entity = result->second;
@@ -524,10 +545,8 @@ void GameServer::handleDogCaught(
 		collisionSet.erase({ collidingEntity, entity->getState().get() });
 	}
 
-	// Get jail location from queue
-	glm::vec2 jailPos = _jails.front();
-	_jails.pop();
-	_jails.push(jailPos);
-
+	// Get a random jail location
+	std::random_shuffle(_jails.begin(), _jails.end());
+	glm::vec2 jailPos = _jails[0];
 	dog->pos = glm::vec3(jailPos.x, 0, jailPos.y);
 }
