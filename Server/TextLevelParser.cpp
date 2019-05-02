@@ -78,48 +78,48 @@ std::vector<std::shared_ptr<SBaseEntity>> TextLevelParser::parseLevelFromFile(
 		// Create a tile and put it into our 2D array
 		Tile* tile = new Tile();
 
-// Cast uint to enum
-tile->type = (TileType)tileType;
+		// Cast uint to enum
+		tile->type = (TileType)tileType;
 
-// Set forward based on angle
-switch (angle)
-{
-case 0:
-	tile->forward = glm::vec3(0, 0, -1);
-	break;
-case 90:
-	tile->forward = glm::vec3(1, 0, 0);
-	break;
-case 180:
-	tile->forward = glm::vec3(0, 0, 1);
-	break;
-case 270:
-	tile->forward = glm::vec3(-1, 0, 0);
-	break;
-}
+		// Set forward based on angle
+		switch (angle)
+		{
+		case 0:
+			tile->forward = glm::vec3(0, 0, -1);
+			break;
+		case 90:
+			tile->forward = glm::vec3(1, 0, 0);
+			break;
+		case 180:
+			tile->forward = glm::vec3(0, 0, 1);
+			break;
+		case 270:
+			tile->forward = glm::vec3(-1, 0, 0);
+			break;
+		}
 
-// Other properties
-tile->isClaimed = false;
-tile->isDoublyClaimed = false;
-tile->xIndex = xIndex;
-tile->zIndex = zIndex;
+		// Other properties
+		tile->isClaimed = false;
+		tile->isDoublyClaimed = false;
+		tile->xIndex = xIndex;
+		tile->zIndex = zIndex;
 
-// Scale positions based on map size and tile count
-float xPos = ((float)xIndex * tileWidth) - (MAP_WIDTH / 2) + tileWidth / 2;
-float zPos = ((float)zIndex * tileWidth) - (MAP_WIDTH / 2) + tileWidth / 2;
-tile->pos = glm::vec2(xPos, zPos);
+		// Scale positions based on map size and tile count
+		float xPos = ((float)xIndex * tileWidth) - (MAP_WIDTH / 2) + tileWidth / 2;
+		float zPos = ((float)zIndex * tileWidth) - (MAP_WIDTH / 2) + tileWidth / 2;
+		tile->pos = glm::vec2(xPos, zPos);
 
-// Toss it into the array
-tiles[zIndex][xIndex] = tile;
+		// Toss it into the array
+		tiles[zIndex][xIndex] = tile;
 
-// Increment indices appropriately
-xIndex = (xIndex + 1) % width;
-if (xIndex == 0)
-{
-	zIndex += 1;
-}
+		// Increment indices appropriately
+		xIndex = (xIndex + 1) % width;
+		if (xIndex == 0)
+		{
+			zIndex += 1;
+		}
 
-tileType = levelFile.get();
+		tileType = levelFile.get();
 	}
 
 	// Iterate over tiles and aggregate them into game entities
