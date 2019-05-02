@@ -50,14 +50,14 @@ public:
 		_walls.push_back(std::make_shared<SBoxEntity>(
 			glm::vec3(pos.x - scale.x / 2 + JAIL_WALL_WIDTH / 2, pos.y, pos.z),
 			glm::vec3(-1, 0, 0),
-			glm::vec3(JAIL_WALL_WIDTH, scale.y, scale.z)
+			glm::vec3(JAIL_WALL_WIDTH, scale.y, scale.z - JAIL_WALL_WIDTH*2)
 		));
 
 		// East wall
 		_walls.push_back(std::make_shared<SBoxEntity>(
 			glm::vec3(pos.x + scale.x / 2 - JAIL_WALL_WIDTH / 2, pos.y, pos.z),
 			glm::vec3(1, 0, 0),
-			glm::vec3(JAIL_WALL_WIDTH, scale.y, scale.z)
+			glm::vec3(JAIL_WALL_WIDTH, scale.y, scale.z - JAIL_WALL_WIDTH*2)
 		));
 	};
 	~SJailEntity() {};

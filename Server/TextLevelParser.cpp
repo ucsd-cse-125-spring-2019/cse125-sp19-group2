@@ -78,47 +78,48 @@ std::vector<std::shared_ptr<SBaseEntity>> TextLevelParser::parseLevelFromFile(
 		// Create a tile and put it into our 2D array
 		Tile* tile = new Tile();
 
-		// Cast uint to enum
-		tile->type = (TileType)tileType;
+// Cast uint to enum
+tile->type = (TileType)tileType;
 
-		// Set forward based on angle
-		switch (angle)
-		{
-		case 0:
-			tile->forward = glm::vec3(0, 0, -1);
-			break;
-		case 90:
-			tile->forward = glm::vec3(1, 0, 0);
-			break;
-		case 180:
-			tile->forward = glm::vec3(0, 0, 1);
-			break;
-		case 270:
-			tile->forward = glm::vec3(-1, 0, 0);
-			break;
-		}
+// Set forward based on angle
+switch (angle)
+{
+case 0:
+	tile->forward = glm::vec3(0, 0, -1);
+	break;
+case 90:
+	tile->forward = glm::vec3(1, 0, 0);
+	break;
+case 180:
+	tile->forward = glm::vec3(0, 0, 1);
+	break;
+case 270:
+	tile->forward = glm::vec3(-1, 0, 0);
+	break;
+}
 
-		// Other properties
-		tile->isClaimed = false;
-		tile->xIndex = xIndex;
-		tile->zIndex = zIndex;
-		
-		// Scale positions based on map size and tile count
-		float xPos = ((float)xIndex * tileWidth) - (MAP_WIDTH / 2) + tileWidth/2;
-		float zPos = ((float)zIndex * tileWidth) - (MAP_WIDTH / 2) + tileWidth/2;
-		tile->pos = glm::vec2(xPos, zPos);
-		
-		// Toss it into the array
-		tiles[zIndex][xIndex] = tile; 
+// Other properties
+tile->isClaimed = false;
+tile->isDoublyClaimed = false;
+tile->xIndex = xIndex;
+tile->zIndex = zIndex;
 
-		// Increment indices appropriately
-		xIndex = (xIndex + 1) % width;
-		if (xIndex == 0)
-		{
-			zIndex += 1;
-		}
+// Scale positions based on map size and tile count
+float xPos = ((float)xIndex * tileWidth) - (MAP_WIDTH / 2) + tileWidth / 2;
+float zPos = ((float)zIndex * tileWidth) - (MAP_WIDTH / 2) + tileWidth / 2;
+tile->pos = glm::vec2(xPos, zPos);
 
-		tileType = levelFile.get();
+// Toss it into the array
+tiles[zIndex][xIndex] = tile;
+
+// Increment indices appropriately
+xIndex = (xIndex + 1) % width;
+if (xIndex == 0)
+{
+	zIndex += 1;
+}
+
+tileType = levelFile.get();
 	}
 
 	// Iterate over tiles and aggregate them into game entities
@@ -152,13 +153,61 @@ std::vector<std::shared_ptr<SBaseEntity>> TextLevelParser::parseLevelFromFile(
 				{
 					entityWidth += WALL_WIDTH;
 					entityDepth += WALL_WIDTH;
+
+					// North <--> South wall
+					if (entityDepth > entityWidth)
+					{
+						// Tiles are already sorted by Z. Retract
+						// wall as necessary
+						if (aggregatedTiles[0]->isDoublyClaimed)
+						{
+							// North end
+							entityDepth -= WALL_WIDTH;
+							avgPos.y += WALL_WIDTH / 2;
+						}
+						if (aggregatedTiles.back()->isDoublyClaimed)
+						{
+							// South end
+							entityDepth -= WALL_WIDTH;
+							avgPos.y -= WALL_WIDTH / 2;
+						}
+
+						// TODO: extend walls to connect to neighboring buildings
+					}
+
+					// West <--> East wall
+					else if (entityWidth > entityDepth)
+					{
+						// Sort tiles by X
+						std::sort(aggregatedTiles.begin(), aggregatedTiles.end(),
+							[](const Tile* a, const Tile* b) -> bool
+						{
+							return a->pos.x < b->pos.x;
+						});
+
+						// Retract wall as necessary
+						if (aggregatedTiles[0]->isDoublyClaimed)
+						{
+							// West end
+							entityWidth -= WALL_WIDTH;
+							avgPos.x += WALL_WIDTH/2;
+						}
+						if (aggregatedTiles.back()->isDoublyClaimed)
+						{
+							// East end
+							entityWidth -= WALL_WIDTH;
+							avgPos.x -= WALL_WIDTH/2;
+						}
+
+						// TODO: extend walls to connect to neighboring buildings
+					}
 				}
 				else // For everything else, fit the object tightly to its tiles
 				{
 					entityWidth += tileWidth;
 					entityDepth += tileWidth;
 				}
-				
+
 				// Entity to build and add to vector
 				std::shared_ptr<SBaseEntity> entity = nullptr;
 
@@ -264,6 +313,12 @@ void TextLevelParser::Tile::aggregateTiles(
 	}
 	else
 	{
+		// Edge case for walls; reclaimed tile while moving to right
+		if (this->isClaimed)
+		{
+			this->isDoublyClaimed = true;
+		}
+
 		this->isClaimed = true;
 		aggregatedTiles.push_back(this);
 		switch (dir)
@@ -275,6 +330,7 @@ void TextLevelParser::Tile::aggregateTiles(
 					tiles[zIndex][xIndex - 1]->type == this->type &&
 					aggregatedTiles.size() == 1)
 				{
+					tiles[zIndex][xIndex - 1]->isDoublyClaimed = true;
 					aggregatedTiles.push_back(tiles[zIndex][xIndex - 1]);
 				}
 
@@ -303,6 +359,7 @@ void TextLevelParser::Tile::aggregateTiles(
 					tiles[zIndex - 1][xIndex]->type == this->type &&
 					aggregatedTiles.size() == 1)
 				{
+					tiles[zIndex - 1][xIndex]->isDoublyClaimed = true;
 					aggregatedTiles.push_back(tiles[zIndex - 1][xIndex]);
 				}
 

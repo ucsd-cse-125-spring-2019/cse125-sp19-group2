@@ -50,6 +50,7 @@ private:
 		int xIndex;
 		int zIndex;
 		bool isClaimed;
+		bool isDoublyClaimed;
 
 		void aggregateTiles(
 			Tile*** tiles,
