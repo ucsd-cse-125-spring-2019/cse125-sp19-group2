@@ -50,7 +50,7 @@ void GameServer::start()
 
 	// Map initialization
 	auto entities = _levelParser->parseLevelFromFile(
-		"Levels/basic_map.txt",
+		"Levels/map.dat",
 		_jails,
 		_humanSpawns,
 		_dogSpawns);

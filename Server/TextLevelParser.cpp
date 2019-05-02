@@ -23,11 +23,11 @@ std::vector<std::shared_ptr<SBaseEntity>> TextLevelParser::parseLevelFromFile(
 	// List containing game objects parsed from level file
 	auto entityList = std::vector<std::shared_ptr<SBaseEntity>>();
 
-	// 2 passes over file: first pass determines dimensions of map
+	// Open level file
 	std::ifstream levelFile;
 	try
 	{
-		levelFile = std::ifstream(path);
+		levelFile = std::ifstream(path, std::ios_base::binary);
 	}
 	catch (std::runtime_error e)
 	{
@@ -36,12 +36,13 @@ std::vector<std::shared_ptr<SBaseEntity>> TextLevelParser::parseLevelFromFile(
 		exit(1);
 	}
 
-	std::string tileString;
-	int tileCount = 0;
-	while (levelFile >> tileString)
-	{
-		tileCount++;
-	}
+	// Get size of file
+	levelFile.seekg(0, std::ios::end);
+	int fileSize = (int)levelFile.tellg();
+	levelFile.seekg(0, std::ios::beg);
+
+	// Each tile has a type and an orientation
+	int tileCount = fileSize / 2;
 
 	// Ensure tile count is a perfect square
 	auto sr = std::sqrt(tileCount);
@@ -65,43 +66,20 @@ std::vector<std::shared_ptr<SBaseEntity>> TextLevelParser::parseLevelFromFile(
 	int xIndex = 0;
 	int zIndex = 0;
 
-	std::string tileType;
-	int angle; // Angle of tile in degrees
+	uint8_t tileType = levelFile.get();
+	uint8_t angle; // Angle of tile in degrees
 
-	// Re-init file and loop over tiles
-	levelFile = std::ifstream(path);
-	while (levelFile >> tileString)
+	// Read until end of file
+	while (zIndex < width)
 	{
-		tileType = tileString.substr(0, tileString.find(","));
-		tileString.erase(0, tileType.size() + 1);
-		angle = std::stoi(tileString);
+		// Read next byte as angle
+		angle = levelFile.get() * 2; // Angles are encoded as half their value
 
 		// Create a tile and put it into our 2D array
 		Tile* tile = new Tile();
 
-		// Assign type based on string
-		TileType type = TILE_EMPTY;
-		if (tileType == "wall-tile")
-		{
-			type = TILE_WALL;
-		}
-		else if (tileType == "fence-tile")
-		{
-			type = TILE_FENCE;
-		}
-		else if (tileType == "jail-tile")
-		{
-			type = TILE_JAIL;
-		}
-		else if (tileType == "human-spawn-tile")
-		{
-			type = TILE_HUMAN_SPAWN;
-		}
-		else if (tileType == "dog-spawn-tile")
-		{
-			type = TILE_DOG_SPAWN;
-		}
-		tile->type = type;
+		// Cast uint to enum
+		tile->type = (TileType)tileType;
 
 		// Set forward based on angle
 		switch (angle)
@@ -139,6 +117,8 @@ std::vector<std::shared_ptr<SBaseEntity>> TextLevelParser::parseLevelFromFile(
 		{
 			zIndex += 1;
 		}
+
+		tileType = levelFile.get();
 	}
 
 	// Iterate over tiles and aggregate them into game entities
