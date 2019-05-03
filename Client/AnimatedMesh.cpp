@@ -227,7 +227,7 @@ bool AnimatedMesh::initMaterials(const aiScene* scene, const string& filename) {
 
                 // Create and store texture
                 Texture* texture = new Texture();
-                texture->id = LoadTextureFromFile(path.C_Str(), dir);
+                texture->id = LoadTextureFromFile(path.C_Str(), "./Resources/Textures");
                 texture->type = TextureType::DIFFUSE;
                 texture->path = path.C_Str();
 
