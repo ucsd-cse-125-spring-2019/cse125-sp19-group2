@@ -120,9 +120,6 @@ void QuadTree::divide()
 
 std::vector<BaseState*> QuadTree::query(BaseState * state)
 {
-	state->depth = state->depth + _wiggleRoom;
-	state->width = state->width + _wiggleRoom;
-	state->height = state->height + _wiggleRoom;
 	std::vector<BaseState*> objectsInRange;
 	for (int i = 0; i < 4; i++)
 	{
