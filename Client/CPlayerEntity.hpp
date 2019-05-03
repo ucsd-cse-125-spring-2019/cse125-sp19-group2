@@ -12,13 +12,13 @@ public:
         // Allocate member variables
 
         // Read in an animated Mesh
-        _playerModel = std::make_unique<Animation>("./Resources/Models/dog_animation.fbx");
+        _playerModel = std::make_unique<Animation>("./Resources/Models/human.dae");
 		
         // TODO: determine which animation gets played
         _playerModel->animatedMesh->_sequenceIndex = 0;
 
         // determine deltaTime in millisecond
-		_playerModel->timeStep = 4.0f;
+		_playerModel->timeStep = 16.6f;
 
 
         _playerShader = std::make_unique<Shader>();
@@ -58,9 +58,9 @@ public:
         _playerShader->set_uniform("u_model", model);
         _playerShader->set_uniform("u_material.shininess", 0.6f);
         _playerShader->set_uniform("u_pointlight.position", glm::vec3(-3.0f, 3.0f, -3.0f));
-        _playerShader->set_uniform("u_pointlight.ambient", glm::vec3(0.5f, 0.5f, 0.5f));
+        _playerShader->set_uniform("u_pointlight.ambient", glm::vec3(0.05f, 0.05f, 0.05f));
         _playerShader->set_uniform("u_pointlight.diffuse", glm::vec3(0.8f, 0.8f, 0.8f));
-        _playerShader->set_uniform("u_pointlight.specular", glm::vec3(1.0f, 1.0f, 1.0f));
+        _playerShader->set_uniform("u_pointlight.specular", glm::vec3(0.5f, 0.5f, 0.5f));
         _playerShader->set_uniform("u_pointlight.constant", 1.0f);
         _playerShader->set_uniform("u_pointlight.linear", 0.09f);
         _playerShader->set_uniform("u_pointlight.quadratic", 0.032f);

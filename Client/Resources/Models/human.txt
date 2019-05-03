@@ -1,0 +1,3 @@
+idle 1 71
+running 72 104
+swinging 105 122
