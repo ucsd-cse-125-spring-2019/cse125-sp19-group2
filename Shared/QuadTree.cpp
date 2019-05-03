@@ -13,11 +13,10 @@ int QuadTree::getIndex(BaseState * state)
 {
 	int index = -1;
 	// extra room (must be more than velocity of player)
-	double wiggleRoom = 1.5;
-	double objBottom = (state->pos.z - state->depth / 2) - wiggleRoom;
-	double objTop = (state->pos.z + state->depth / 2) + wiggleRoom;
-	double objLeft = (state->pos.x - state->width / 2) - wiggleRoom;
-	double objRight = (state->pos.x + state->width / 2) + wiggleRoom;
+	double objBottom = (state->pos.z - state->depth / 2);
+	double objTop = (state->pos.z + state->depth / 2);
+	double objLeft = (state->pos.x - state->width / 2);
+	double objRight = (state->pos.x + state->width / 2);
 	double quadBottom = _boundary.pos.y - _boundary.halfWidth;
 	double quadHorizMid = _boundary.pos.y;
 	double quadTop = _boundary.pos.y + _boundary.halfWidth;
@@ -121,6 +120,9 @@ void QuadTree::divide()
 
 std::vector<BaseState*> QuadTree::query(BaseState * state)
 {
+	state->depth = state->depth + _wiggleRoom;
+	state->width = state->width + _wiggleRoom;
+	state->height = state->height + _wiggleRoom;
 	std::vector<BaseState*> objectsInRange;
 	for (int i = 0; i < 4; i++)
 	{
