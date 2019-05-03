@@ -21,6 +21,7 @@ public:
 			_playerModel->animatedMesh->_takeIndex += 1;
 			_playerModel->animatedMesh->_takeIndex %= _playerModel->animatedMesh->takeCount();
 		});
+
         // TODO: determine which animation gets played
         _playerModel->animatedMesh->_takeIndex = 0;
 
