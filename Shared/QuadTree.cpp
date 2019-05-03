@@ -12,10 +12,12 @@ QuadTree::~QuadTree()
 int QuadTree::getIndex(BaseState * state)
 {
 	int index = -1;
-	double objBottom = (state->pos.z - state->depth / 2);
-	double objTop = (state->pos.z + state->depth / 2);
-	double objLeft = (state->pos.x - state->width / 2);
-	double objRight = (state->pos.x + state->width / 2);
+	// extra room (must be more than velocity of player)
+	double wiggleRoom = 1.5;
+	double objBottom = (state->pos.z - state->depth / 2) - wiggleRoom;
+	double objTop = (state->pos.z + state->depth / 2) + wiggleRoom;
+	double objLeft = (state->pos.x - state->width / 2) - wiggleRoom;
+	double objRight = (state->pos.x + state->width / 2) + wiggleRoom;
 	double quadBottom = _boundary.pos.y - _boundary.halfWidth;
 	double quadHorizMid = _boundary.pos.y;
 	double quadTop = _boundary.pos.y + _boundary.halfWidth;
