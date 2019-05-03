@@ -3,26 +3,15 @@
 Animation::Animation(const std::string& filename): isPlaying(false), speed(1.0f), lastTime(-1.0f), timer(0.0f), timeStep(8.33f) {
     animatedMesh = std::make_unique<AnimatedMesh>();
     animatedMesh->loadMesh(filename);
-	setStateDuration({
-		{"all", {0.0f,-1.0f}}
-	});
 }
 
-void Animation::update(const std::string& state) {
+void Animation::update() {
     if (isPlaying) {
-        // Look up state duration, if not exist, use all
-		auto res = states.find(state);
-        if(res == states.end()) {
-			
-        }
-		else {
-		    
-		}
-		eval("all");
+		eval();
     }
 }
 
-void Animation::eval(const std::string& state) {
+void Animation::eval() {
     if(lastTime < 0) {
 		lastTime = static_cast<float>(GetTickCount());
 		return;

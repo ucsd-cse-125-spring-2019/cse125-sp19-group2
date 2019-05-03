@@ -44,7 +44,7 @@ public:
 
     void render(std::unique_ptr<Camera> const& camera) override {
 		// Update Animation
-		_playerModel->update("all");
+		_playerModel->update();
 
         if(_isLocal) {
 			//return;
