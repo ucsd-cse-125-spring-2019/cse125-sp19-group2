@@ -1,10 +1,14 @@
 ﻿#include "AnimatedMesh.hpp"
-#include <glm/gtc/type_ptr.hpp>
-#include <glm/gtx/quaternion.hpp>
 #include "Shared/Logger.hpp"
 #include <execution>
 #include <optional>
-#include <glm/gtx/matrix_decompose.hpp> 
+#include <assimp/postprocess.h>
+#include <fstream>
+#include <unordered_set>
+#include <glm/glm.hpp>
+#include <glm/gtc/type_ptr.hpp>
+#include <glm/gtx/quaternion.hpp>
+#include <glm/gtc/matrix_transform.hpp>
 
 #define POSITION_LOCATION 0
 #define NORMAL_LOCATION 1
@@ -69,7 +73,7 @@ bool AnimatedMesh::loadMesh(const string& filename) {
     Assimp::Importer importer;
 	importer.SetPropertyBool(AI_CONFIG_IMPORT_FBX_PRESERVE_PIVOTS, false);
     //importer.SetPropertyBool(AI_CONFIG_IMPORT_FBX_STRICT_MODE, true);
-
+    
     auto scene = importer.ReadFile(filename.c_str(),
                                          aiProcess_Triangulate |
                                          aiProcess_GenSmoothNormals |

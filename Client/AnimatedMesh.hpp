@@ -4,15 +4,15 @@
 #include <vector>
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
-#include <assimp/postprocess.h>
 #include "Texture.hpp"
 #include <glm/glm.hpp>
+#include <glm/gtc/type_ptr.hpp>
+#include <glm/gtx/quaternion.hpp>
+#include <glm/gtc/matrix_transform.hpp>
 #include <map>
 #include "Shader.hpp"
 #include <functional>
 #include <sstream>
-#include <fstream>
-#include <unordered_set>
 #include "Shared/Logger.hpp"
 
 #define MAX_BONES_PER_VERTEX 8
@@ -32,8 +32,8 @@ inline std::vector<std::string> split(std::string str, char delimiter) {
 
 struct TakeInfo {
     std::string takeName;
-    int start;
-    int end;
+    int start{};
+    int end{};
 };
 
 struct Node {
@@ -115,6 +115,9 @@ enum VERTEXBUFFERTYPES {
     TYPECOUNT
 };
 
+/**
+ * \brief A class that handles animationMesh loading and animation look up.
+ */
 class AnimatedMesh {
 public:
     int _takeIndex;
@@ -123,12 +126,30 @@ public:
 
     ~AnimatedMesh();
 
+    /**
+     * \brief Load the animated mesh
+     * \param filename(const std::string&) Path to the animated mesh
+     * \return bool: whether the loading is success
+     */
     bool loadMesh(const std::string& filename);
 
+    /**
+     * \brief Render the mesh with texture
+     * \param shader(const std::unique_ptr<Shader>&) The shader program to render the mesh
+     */
     void render(const std::unique_ptr<Shader>& shader);
 
+    /**
+     * \brief Lookup the animation transforms at the given time (in second), and populate output std::vector
+     * \param second(float) Time (in seconds)
+     * \param transforms(std::vector<glm::mat4>&) Output parameter to saved the transforms
+     */
     void getTransform(float second, std::vector<glm::mat4>& transforms);
 
+    /**
+     * \brief Getter, return the animation count of this animated mesh
+     * \return uint32_t: The animation count of this animated mesh
+     */
     uint32_t takeCount() const;
 
 private:
