@@ -5,6 +5,8 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include "Camera.hpp"
 #include "Animation.hpp"
+#include "glad/glad.h"
+#include "InputManager.h"
 
 class CPlayerEntity : public CBaseEntity {
 public:
@@ -12,10 +14,16 @@ public:
         // Allocate member variables
 
         // Read in an animated Mesh
-        _playerModel = std::make_unique<Animation>("./Resources/Models/dog_animation.fbx");
-		
+        _playerModel = std::make_unique<Animation>("./Resources/Models/dog_animation.dae");
+
+		InputManager::getInstance().getKey(85)->onPress([this]()
+		{
+			_playerModel->animatedMesh->_takeIndex += 1;
+			_playerModel->animatedMesh->_takeIndex %= 2;
+		});
+
         // TODO: determine which animation gets played
-        _playerModel->animatedMesh->_sequenceIndex = 0;
+        _playerModel->animatedMesh->_takeIndex = 0;
 
         // determine deltaTime in millisecond
 		_playerModel->timeStep = 4.0f;

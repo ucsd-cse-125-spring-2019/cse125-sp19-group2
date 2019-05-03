@@ -4,6 +4,7 @@
 #include "Shared/Logger.hpp"
 #include <execution>
 #include <optional>
+#include <glm/gtx/matrix_decompose.hpp> 
 
 #define POSITION_LOCATION 0
 #define NORMAL_LOCATION 1
@@ -12,6 +13,9 @@
 #define BONEID2_LOCATION 4
 #define BONEWEIGHT_LOCATION 5
 #define BONEWEIGHT2_LOCATION 6
+
+#undef USE_FBX
+#define USE_TAKE_INFO
 
 using namespace std;
 using namespace glm;
@@ -31,7 +35,7 @@ void WeightData::addWeight(uint32_t boneID, float weight) {
     Logger::getInstance()->warn("more bones than we have space for");
 }
 
-AnimatedMesh::AnimatedMesh(): _sequenceIndex(0), _VAO(0) {
+AnimatedMesh::AnimatedMesh(): _takeIndex(0), _VAO(0) {
     memset(_buffers, 0, 5);
 }
 
@@ -63,11 +67,15 @@ bool AnimatedMesh::loadMesh(const string& filename) {
 
     bool ret = false;
     Assimp::Importer importer;
-    const auto scene = importer.ReadFile(filename.c_str(),
+	importer.SetPropertyBool(AI_CONFIG_IMPORT_FBX_PRESERVE_PIVOTS, false);
+    //importer.SetPropertyBool(AI_CONFIG_IMPORT_FBX_STRICT_MODE, true);
+
+    auto scene = importer.ReadFile(filename.c_str(),
                                          aiProcess_Triangulate |
                                          aiProcess_GenSmoothNormals |
                                          aiProcess_FlipUVs |
-                                         aiProcess_JoinIdenticalVertices);
+                                         aiProcess_JoinIdenticalVertices 
+	                                    );
 
     if (scene) {
         _globalInverseTransform = mat4_cast(scene->mRootNode->mTransformation);
@@ -77,6 +85,10 @@ bool AnimatedMesh::loadMesh(const string& filename) {
     else {
         printf("Error parsing '%s': '%s'\n", filename.c_str(), importer.GetErrorString());
     }
+
+#ifdef USE_TAKE_INFO
+	loadTakes(filename);
+#endif 
 
     glBindVertexArray(0);
 
@@ -111,9 +123,9 @@ void AnimatedMesh::render(const std::unique_ptr<Shader>& shader) {
 
 void AnimatedMesh::getTransform(float second, vector<mat4>& transforms) {
 
-    const float tickrate = _sequences[_sequenceIndex]->tickrate != 0 ? _sequences[_sequenceIndex]->tickrate : 30.0f;
+    const float tickrate = _takes[_takeIndex]->tickrate != 0 ? _takes[_takeIndex]->tickrate : 30.0f;
     const float ticks = second * tickrate;
-    const float time = fmod(ticks, _sequences[_sequenceIndex]->duration);
+    const float time = fmod(ticks, _takes[_takeIndex]->duration);
 
     computeWorldMatrix(time, _root.get(), glm::mat4(1.0f));
 
@@ -241,9 +253,11 @@ bool AnimatedMesh::initScene(const aiScene* scene, const string& filename) {
     _entries.resize(scene->mNumMeshes);
     _textures.resize(scene->mNumMaterials);
 
-    // Fill up sequence
+    // Fill up takes
     for (uint32_t i = 0; i < scene->mNumAnimations; i ++) {
-        _sequences.push_back(initSequence(scene->mAnimations[i]));
+		if (scene->mAnimations[i]->mDuration > 0) {
+			_takes.push_back(initTake(scene->mAnimations[i]));
+		}
     }
 
     // Fill up node list (recursively)
@@ -356,6 +370,14 @@ unique_ptr<Node> AnimatedMesh::initNode(const Node* parent, const aiNode* node) 
 
     // Fill in data
     n->name = node->mName.data;
+
+#ifdef USE_FBX
+	if(n->name == "") {
+		node->mChildren[0]->mTransformation = node->mTransformation;
+		return initNode(parent, node->mChildren[0]);
+	}
+#endif
+
     n->transform = mat4_cast(node->mTransformation);
 
     // Bookkeeping parent ptr
@@ -366,33 +388,44 @@ unique_ptr<Node> AnimatedMesh::initNode(const Node* parent, const aiNode* node) 
         n->children.push_back(initNode(n.get(), node->mChildren[i]));
     }
 
+    // Bookkeeping
+	_nodeList.push_back(n.get());
+
     // Transfer node ptr back to parent
     return n;
 }
 
-unique_ptr<Sequence> AnimatedMesh::initSequence(const aiAnimation* animation) {
+unique_ptr<Take> AnimatedMesh::initTake(const aiAnimation* animation) {
 
-    auto seq = make_unique<Sequence>();
+    auto take = make_unique<Take>();
     // Fill in metadata
-    seq->tickrate = float(animation->mTicksPerSecond);
-    seq->duration = float(animation->mDuration);
+    take->tickrate = float(animation->mTicksPerSecond);
+    take->duration = float(animation->mDuration);
 
     // Init Channel
     for (uint32_t i = 0; i < animation->mNumChannels; i ++) {
-        auto cha = initChannel(animation->mChannels[i]);
-        seq->channels.insert({cha->jointName, std::move(cha)});
+		take->channels.push_back(initChannel(animation->mChannels[i]));
     }
 
-    // Transfer seq ptr back to parent
-    return seq;
+    // Build channel map
+#ifdef USE_FBX
+	processFBXAnimation(*take);
+#else
+    for(uint32_t i = 0; i < take->channels.size(); i ++) {
+		auto cha = take->channels[i].get();
+		take->channelMap.insert({ cha->jointName, cha });
+    }
+#endif
+    // Transfer take ptr back to parent
+    return take;
 }
 
 const Channel* AnimatedMesh::findChannel(const string& nodeName) {
-    auto& channels = _sequences[_sequenceIndex]->channels;
+    auto& channels = _takes[_takeIndex]->channelMap;
     const auto cha = channels.find(nodeName);
 
     if (cha != channels.end()) {
-        return (cha->second.get());
+        return (cha->second);
     }
     return nullptr;
 }
@@ -421,6 +454,11 @@ vec4 AnimatedMesh::getInterpolatedValue(float time, uint32_t start,
                                         const vector<unique_ptr<Keyframe>>& keyframes,
                                         std::function<glm::vec4(float, glm::vec4, glm::vec4)> interpolateFunction) {
 
+    if(keyframes.size()==1) {
+        // Only one frame exists, no need for interpolation
+		return keyframes[0]->value;
+    }
+
     auto& k1 = keyframes[start];
     uint32_t end = start + 1;
     if (start == keyframes.size() - 1) {
@@ -429,8 +467,8 @@ vec4 AnimatedMesh::getInterpolatedValue(float time, uint32_t start,
     auto& k2 = keyframes[end];
 
     const float startTime = k1->time;
-    // Assuming sequence starts from 0, really
-    const float endTime = end == 0 ? _sequences[_sequenceIndex]->duration : k2->time;
+    // Assuming take starts from 0, really
+    const float endTime = end == 0 ? _takes[_takeIndex]->duration : k2->time;
 
     const float dt = endTime - startTime;
     float factor = (time - startTime) / dt;
@@ -452,11 +490,11 @@ void AnimatedMesh::computeWorldMatrix(float time, const Node* node, const mat4& 
         return make_vec4(value_ptr(slerp(make_quat(value_ptr(v1)), make_quat(value_ptr(v2)), f)));
     };
 
-    string name(node->name);
+    const string name(node->name);
 
-    auto& seq = _sequences[_sequenceIndex];
+    auto& take = _takes[_takeIndex];
     mat4 nodeTransform = node->transform;
-    auto res = findChannel(node->name);
+    const auto res = findChannel(node->name);
     if (res) {
         // Interpolate and generate transformation matrix
         const auto& cha = (*res);
@@ -466,17 +504,23 @@ void AnimatedMesh::computeWorldMatrix(float time, const Node* node, const mat4& 
         const quat rQuat = make_quat(value_ptr(rVec));
         const vec3 sVec = vec3(getInterpolatedValue(time, t, cha.scales, vec3Interp));
 
-        mat4 tMat = translate(mat4(1.0f), tVec);
-        mat4 rMat = toMat4(rQuat);
-        mat4 sMat = scale(mat4(1.0f), sVec);
-        nodeTransform = tMat * rMat * sMat;
+        const mat4 tMat = translate(mat4(1.0f), tVec);
+        const mat4 rMat = toMat4(rQuat);
+        const mat4 sMat = scale(mat4(1.0f), sVec);
+#ifdef USE_FBX
+		nodeTransform = tMat * mat4(mat3(node->transform)) * rMat * sMat; // 
+#else
+		nodeTransform = tMat * rMat * sMat;
+#endif
     }
 
     mat4 world = parent * nodeTransform;
 
     if (_boneMap.find(name) != _boneMap.end()) {
         const uint32_t boneIndex = _boneMap[name];
-        _boneInfo[boneIndex].worldMatrix = _globalInverseTransform * world * _boneInfo[boneIndex].bindingMatrix;
+		_boneInfo[boneIndex].worldMatrix = _globalInverseTransform * world *_boneInfo[boneIndex].bindingMatrix;
+    }else {
+		//Logger::getInstance()->info("Not a animation bone:" + name);
     }
 
     for (auto& child : node->children) {
