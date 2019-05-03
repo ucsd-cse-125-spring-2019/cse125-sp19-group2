@@ -19,13 +19,11 @@ public:
 		InputManager::getInstance().getKey(85)->onPress([this]()
 		{
 			_playerModel->animatedMesh->_takeIndex += 1;
-			_playerModel->animatedMesh->_takeIndex %= 2;
+			_playerModel->animatedMesh->_takeIndex %= _playerModel->animatedMesh->takeCount();
 		});
         // TODO: determine which animation gets played
         _playerModel->animatedMesh->_takeIndex = 0;
 
-        // determine deltaTime in millisecond
-		_playerModel->timeStep = 16.6f;
 
 
         _playerShader = std::make_unique<Shader>();

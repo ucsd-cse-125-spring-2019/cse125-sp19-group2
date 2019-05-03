@@ -1,6 +1,6 @@
 ﻿#include "Animation.hpp"
 
-Animation::Animation(const std::string& filename): isPlaying(false), speed(1.0f), lastTime(-1.0f), timer(0.0f), timeStep(16.0f) {
+Animation::Animation(const std::string& filename): isPlaying(false), speed(1.0f), lastTime(-1.0f), timer(0.0f), timeStep(8.33f) {
     animatedMesh = std::make_unique<AnimatedMesh>();
     animatedMesh->loadMesh(filename);
 	setStateDuration({

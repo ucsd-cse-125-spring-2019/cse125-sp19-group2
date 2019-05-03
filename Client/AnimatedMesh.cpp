@@ -136,6 +136,10 @@ void AnimatedMesh::getTransform(float second, vector<mat4>& transforms) {
     }
 }
 
+uint32_t AnimatedMesh::takeCount() const {
+    return _takes.size();
+}
+
 void AnimatedMesh::loadBones(uint32_t meshIndex, const aiMesh* mesh, vector<WeightData>& bones) {
     for (uint32_t i = 0; i < mesh->mNumBones; i++) {
         uint32_t boneIndex = 0;
@@ -526,4 +530,180 @@ void AnimatedMesh::computeWorldMatrix(float time, const Node* node, const mat4& 
     for (auto& child : node->children) {
         computeWorldMatrix(time, child.get(), world);
     }
+}
+
+void AnimatedMesh::processFBXAnimation(Take& seq) {
+    std::vector<std::unique_ptr<Channel>> temp;
+    std::unordered_set<std::string> processed;
+
+    for (uint32_t i = 0; i < seq.channels.size(); i++) {
+        auto& cha = seq.channels[i];
+        auto strtok = split(cha->jointName, '$');
+        if (strtok.size() > 1) {
+            // complex animation, need to manually compose
+            // Remove _ in jointName_
+            auto jointName = strtok[0];
+            jointName.pop_back();
+
+            // if not yet compose,
+            if (processed.find(jointName) == processed.end()) {
+                temp.push_back(composeChannel(seq, jointName));
+                processed.insert(jointName);
+            }
+        }
+    }
+
+    // Clear the original channels
+    seq.channels.clear();
+
+    // Copy back all composed new channels
+    move(seq.channels, temp);
+
+    // Create map based on name
+    for (uint32_t i = 0; i < seq.channels.size(); i++) {
+        auto cha = seq.channels[i].get();
+        seq.channelMap.insert({cha->jointName, cha});
+    }
+}
+
+std::unique_ptr<Channel> AnimatedMesh::composeChannel(Take& seq, std::string& jointName) {
+    // Gather all corresponding channels
+    Channel* translation = nullptr;
+    Channel* rotation = nullptr;
+    Channel* scaling = nullptr;
+
+    for (uint32_t i = 0; i < seq.channels.size(); i++) {
+        auto& cha = seq.channels[i];
+        auto strtok = split(cha->jointName, '$');
+        if (strtok.size() > 1) {
+            // complex animation, need to manually compose
+            // Remove _ in jointName_
+            auto name = strtok[0];
+            name.pop_back();
+
+            // if this is the correct channel
+            if (name == jointName) {
+                // Check what kind of this animation it is.
+                auto type = strtok[2];
+                type.erase(0, 1);
+
+                if (type == "Translation") {
+                    translation = cha.get();
+                }
+                else if (type == "Rotation") {
+                    rotation = cha.get();
+                }
+                else if (type == "Scaling") {
+                    scaling = cha.get();
+                }
+                else {
+                    Logger::getInstance()->warn("Unknown channel type:" + type);
+                }
+            }
+        }
+    }
+
+    auto ret = std::make_unique<Channel>();
+    ret->jointName = jointName;
+    if (translation) {
+        move(ret->translations, translation->translations);
+    }
+
+    if (rotation) {
+        move(ret->rotations, rotation->rotations);
+    }
+
+    if (scaling) {
+        move(ret->scales, scaling->scales);
+    }
+
+    return ret;
+}
+
+void AnimatedMesh::loadTakes(const std::string& filename) {
+    // Replace extension
+    // Find ext
+    const auto extPos = filename.find_last_of('.');
+    auto nameWithoutExt = filename;
+
+    // Remove ext
+    nameWithoutExt.erase(extPos);
+
+    // Append ext
+    const auto takeName = nameWithoutExt + TAKE_EXT;
+
+    // Load Takes from file
+    std::ifstream infile(takeName);
+    std::string name;
+    int start, end;
+    while (infile >> name >> start >> end) {
+        // Process takes info
+        auto& t = _takeInfo.emplace_back();
+        t.takeName = name;
+        t.start = start;
+        t.end = end;
+    }
+
+    // Process takes based on loaded in information
+    std::vector<std::unique_ptr<Take>> temp;
+    const auto& allTake = _takes[0];
+    for (uint32_t i = 0; i < _takeInfo.size(); i++) {
+        const auto& info = _takeInfo[i];
+        auto newTake = std::make_unique<Take>();
+        const auto startIndex = info.start;
+        const auto endIndex = info.end;
+        const auto size = endIndex - startIndex;
+
+        // Copy metadata 
+        newTake->takeName = info.takeName;
+        newTake->tickrate = allTake->tickrate;
+
+        // Create channels
+        for (uint32_t j = 0; j < allTake->channels.size(); j ++) {
+            auto cha = std::make_unique<Channel>();
+            auto& from = allTake->channels[j];
+            // Copy name
+            cha->jointName = from->jointName;
+
+            // Copy frame
+            move(cha->translations, from->translations, startIndex, size);
+            move(cha->rotations, from->rotations, startIndex, size);
+            move(cha->scales, from->scales, startIndex, size);
+
+            // Calculate offset
+            const auto startTime = cha->translations[0]->time;
+
+            // Offset keyframe
+            for (uint32_t k = 0; k < cha->translations.size(); k++) {
+                cha->translations[k]->time -= startTime;
+                cha->rotations[k]->time -= startTime;
+                cha->scales[k]->time -= startTime;
+            }
+
+            newTake->channels.push_back(std::move(cha));
+        }
+
+        // Build channel map
+        for (uint32_t i = 0; i < newTake->channels.size(); i++) {
+            auto cha = newTake->channels[i].get();
+            newTake->channelMap.insert({cha->jointName, cha});
+        }
+
+        // Calculate duration
+        auto& list = newTake->channels[0]->translations;
+        const auto startTime = list[0]->time;
+        const auto endTime = list[list.size() - 1]->time;
+        newTake->duration = endTime - startTime;
+
+        // Save the new take
+        auto index = temp.size();
+        _takeMap.insert({newTake->takeName, index});
+        temp.push_back(std::move(newTake));
+    }
+
+    // Remove original 
+    _takes.clear();
+
+    // Copy temp into _takes
+    move(_takes, temp);
 }
