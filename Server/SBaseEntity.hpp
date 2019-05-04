@@ -49,6 +49,13 @@ public:
 		return _collider->getColliding(tree);
 	};
 
+	// Called by the CollisionManager; handle collision with specific object
+	virtual void handleCollision(std::shared_ptr<SBaseEntity> entity)
+	{
+		// Basic "bumping away" logic
+		_collider->handleCollision(entity->getState().get());
+	};
+		 
 	// TODO: add more server-specific functions that are object-agnostic
 
 protected:

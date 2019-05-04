@@ -9,6 +9,7 @@
 #include "NetworkServer.hpp"
 #include "SBaseEntity.hpp"
 #include "LevelParser.hpp"
+#include "CollisionManager.hpp"
 
 using tick = std::chrono::duration<double, std::ratio<1, TICKS_PER_SEC>>;
 
@@ -38,6 +39,9 @@ private:
 	// Parser for text or JSON level files
 	std::unique_ptr<LevelParser> _levelParser;
 
+	// Collision handler
+	std::unique_ptr<CollisionManager> _collisionManager;
+
     // Map of all game entities
     std::unordered_map<uint32_t, std::shared_ptr<SBaseEntity>> _entityMap;
 
@@ -58,23 +62,5 @@ private:
 
 	// Timer for game itself
 	std::chrono::nanoseconds _gameDuration;
-
-	/** Functions **/
-
-	// Resolve collisions
-	void handleCollisions();
-
-	// AABB collision resolution
-	void handleAABB(BaseState* stateA, BaseState* stateB);
-
-	// Capsule collision resolution
-	void handleCapsule(BaseState* stateA, BaseState* stateB);
-
-	// Dog-human collisions
-	void handleDogCaught(
-		BaseState* dog,
-		BaseState* human,
-		std::unordered_set<std::pair<BaseState*, BaseState*>, PairHash> & collisionSet,
-		QuadTree * tree);
 };
 

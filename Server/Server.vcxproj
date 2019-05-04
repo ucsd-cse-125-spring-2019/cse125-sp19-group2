@@ -212,6 +212,7 @@
     </CustomBuildStep>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="CollisionManager.cpp" />
     <ClCompile Include="GameServer.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="NetworkServer.cpp" />
@@ -222,6 +223,7 @@
     <ClInclude Include="AABBCollider.hpp" />
     <ClInclude Include="BaseCollider.hpp" />
     <ClInclude Include="CapsuleCollider.hpp" />
+    <ClInclude Include="CollisionManager.hpp" />
     <ClInclude Include="GameServer.hpp" />
     <ClInclude Include="IdGenerator.hpp" />
     <ClInclude Include="LevelParser.hpp" />

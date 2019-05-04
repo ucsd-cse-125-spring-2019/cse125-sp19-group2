@@ -53,6 +53,9 @@ public:
 		return resultVec;
 	};
 
+	// Handle push-back between entities. By default, does nothing
+	virtual void handleCollision(BaseState* state) {};
+
 protected:
 	BaseState* _state;
 

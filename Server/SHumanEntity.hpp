@@ -20,5 +20,18 @@ public:
 	};
 
 	~SHumanEntity() {};
+
+	// Dog getting caught is not handled by the human
+	void handleCollision(std::shared_ptr<SBaseEntity> entity)
+	{
+		if (entity->getState()->type != ENTITY_DOG)
+		{
+			SBaseEntity::handleCollision(entity);
+		}
+		else
+		{
+			Logger::getInstance()->debug("Ignoring collision with dog");
+		}
+	}
 };
 

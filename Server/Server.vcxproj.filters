@@ -54,6 +54,9 @@
     <ClCompile Include="GridLevelParser.cpp">
       <Filter>Source Files\Level</Filter>
     </ClCompile>
+    <ClCompile Include="CollisionManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="GameServer.hpp">
@@ -100,6 +103,9 @@
     </ClInclude>
     <ClInclude Include="GridLevelParser.hpp">
       <Filter>Header Files\Level</Filter>
+    </ClInclude>
+    <ClInclude Include="CollisionManager.hpp">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
