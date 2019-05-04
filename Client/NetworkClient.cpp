@@ -127,10 +127,10 @@ uint32_t NetworkClient::connect(std::string address, std::string port)
 
         Logger::getInstance()->info(
                 "Successfully connected to " + address + ":" + port +
-                " with playerId " + std::to_string((uint32_t)*playerId));
+                " with playerId " + std::to_string(*(uint32_t*)playerId));
 
 		// Return player ID
-		return (uint32_t)*playerId;
+		return *(uint32_t*)playerId;
 	}
 }
 
