@@ -3,6 +3,19 @@
 #include "CollisionManager.hpp"
 #include "SDogEntity.hpp"
 
+// Allow pairs inside unordered_set
+struct PairHash
+{
+	template <class T1, class T2>
+	std::size_t operator () (std::pair<T1, T2> const &pair) const
+	{
+		std::size_t h1 = std::hash<T1>()(pair.first);
+		std::size_t h2 = std::hash<T2>()(pair.second);
+
+		return h1 ^ h2;
+	}
+};
+
 CollisionManager::CollisionManager(
 	std::unordered_map<uint32_t, std::shared_ptr<SBaseEntity>>* entityMap,
 	std::vector<glm::vec2>* jails)

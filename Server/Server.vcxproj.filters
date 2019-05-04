@@ -28,14 +28,17 @@
     <Filter Include="Source Files\Util">
       <UniqueIdentifier>{72980280-738a-4a30-b406-5afbf995fa9c}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Header Files\Collider">
-      <UniqueIdentifier>{83400ed4-8600-4689-8643-3dfea0c57b07}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Header Files\Level">
       <UniqueIdentifier>{2808c6b2-fe5b-4358-81af-0697e7466de5}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source Files\Level">
       <UniqueIdentifier>{f77826ab-e04d-4368-8157-b199c5e536ea}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Physics">
+      <UniqueIdentifier>{1ce31f09-2106-48da-a08e-1afc4022a97f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Physics">
+      <UniqueIdentifier>{83400ed4-8600-4689-8643-3dfea0c57b07}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -55,7 +58,7 @@
       <Filter>Source Files\Level</Filter>
     </ClCompile>
     <ClCompile Include="CollisionManager.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\Physics</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -78,13 +81,13 @@
       <Filter>Header Files\Entity</Filter>
     </ClInclude>
     <ClInclude Include="BaseCollider.hpp">
-      <Filter>Header Files\Collider</Filter>
+      <Filter>Header Files\Physics</Filter>
     </ClInclude>
     <ClInclude Include="CapsuleCollider.hpp">
-      <Filter>Header Files\Collider</Filter>
+      <Filter>Header Files\Physics</Filter>
     </ClInclude>
     <ClInclude Include="AABBCollider.hpp">
-      <Filter>Header Files\Collider</Filter>
+      <Filter>Header Files\Physics</Filter>
     </ClInclude>
     <ClInclude Include="SBoxEntity.hpp">
       <Filter>Header Files\Entity</Filter>
@@ -105,7 +108,7 @@
       <Filter>Header Files\Level</Filter>
     </ClInclude>
     <ClInclude Include="CollisionManager.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\Physics</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

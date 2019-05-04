@@ -25,9 +25,9 @@ public:
 
 	bool isCaught = false;
 
-	// Dog getting caught is handled by the dog, not the human
 	void handleCollision(std::shared_ptr<SBaseEntity> entity) override
 	{
+		// Dog getting caught is handled by the dog, not the human
 		if (entity->getState()->type == ENTITY_HUMAN)
 		{
 			isCaught = true;
