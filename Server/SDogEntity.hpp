@@ -9,14 +9,14 @@ public:
 	{
 		_state->type = ENTITY_DOG;
 
-		_state->scale = glm::vec3(0.5f);
+		_state->scale = glm::vec3(1);
 
 		// Collider stuff
-		_state->width = 0.25f;
-		_state->height = 0.25f;
-		_state->depth = 0.25f;
+		_state->width = 0.8f;
+		_state->height = 0.8f;
+		_state->depth = 0.8f;
 
-		_velocity = 1;
+		_velocity = 5.0f;
 	};
 
 	~SDogEntity() {};

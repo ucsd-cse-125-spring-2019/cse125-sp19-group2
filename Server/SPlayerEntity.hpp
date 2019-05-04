@@ -24,7 +24,7 @@ public:
 		_state->up = glm::vec3(0, 1, 0);
 
 		// Standard scale
-		_state->scale = glm::vec3(0.1f);
+		_state->scale = glm::vec3(1);
 
 		_state->colliderType = COLLIDER_CAPSULE;
 

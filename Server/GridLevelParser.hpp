@@ -7,11 +7,11 @@
   * Parser for tile-based level editor, which exports tiles in a newline-
   * separated file. The level is assumed to have the dimensions of a square.
   */
-class TextLevelParser : public LevelParser
+class GridLevelParser : public LevelParser
 {
 public:
-	TextLevelParser();
-	~TextLevelParser();
+	GridLevelParser();
+	~GridLevelParser();
 
 	std::vector<std::shared_ptr<SBaseEntity>> parseLevelFromFile(
 		std::string path,

@@ -8,11 +8,11 @@
 #define PORTNUM "4000"
 
 // Width and height of walls and fences
-#define WALL_WIDTH 0.2f
-#define WALL_HEIGHT 1.0f
+#define WALL_WIDTH 0.5f
+#define WALL_HEIGHT 3.0f
 
 // Map is a square so this is the same as height
-#define MAP_WIDTH 10
+#define MAP_WIDTH 50
 
 // Not needed in client but many server-side objects need access to this def.
 #define TICKS_PER_SEC 30  // 33.3 ms per update() loop

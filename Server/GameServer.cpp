@@ -3,7 +3,7 @@
 #include <random>
 #include <glm/glm.hpp>
 
-#include "TextLevelParser.hpp"
+#include "GridLevelParser.hpp"
 #include "SDogEntity.hpp"
 #include "SHumanEntity.hpp"
 #include "SBoxEntity.hpp"
@@ -49,7 +49,7 @@ void GameServer::start()
 	_dogSpawns = std::queue<glm::vec2>();
 
 	// Init level parser and load level
-	_levelParser = std::make_unique<TextLevelParser>();
+	_levelParser = std::make_unique<GridLevelParser>();
 
 	// Map initialization
 	auto entities = _levelParser->parseLevelFromFile(

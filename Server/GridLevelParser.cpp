@@ -1,20 +1,20 @@
 #include <fstream>
 #include <algorithm>
-#include "TextLevelParser.hpp"
+#include "GridLevelParser.hpp"
 #include "SBoxEntity.hpp"
 #include "SJailEntity.hpp"
 
-TextLevelParser::TextLevelParser()
+GridLevelParser::GridLevelParser()
 {
 }
 
 
-TextLevelParser::~TextLevelParser()
+GridLevelParser::~GridLevelParser()
 {
 }
 
 
-std::vector<std::shared_ptr<SBaseEntity>> TextLevelParser::parseLevelFromFile(
+std::vector<std::shared_ptr<SBaseEntity>> GridLevelParser::parseLevelFromFile(
 	std::string path,
 	std::vector<glm::vec2> & jailLocations,
 	std::queue<glm::vec2> & humanSpawns,
@@ -235,9 +235,9 @@ std::vector<std::shared_ptr<SBaseEntity>> TextLevelParser::parseLevelFromFile(
 					case TILE_JAIL:
 					{
 						entity = std::make_shared<SJailEntity>(
-							glm::vec3(avgPos.x, 0.15f, avgPos.y),
+							glm::vec3(avgPos.x, 1, avgPos.y),
 							aggregatedTiles[0]->forward,
-							glm::vec3(entityWidth, 0.3f, entityDepth));
+							glm::vec3(entityWidth, 2, entityDepth));
 						jailLocations.push_back(avgPos);
 						break;
 					}
@@ -266,7 +266,7 @@ std::vector<std::shared_ptr<SBaseEntity>> TextLevelParser::parseLevelFromFile(
 	return entityList;
 }
 
-void TextLevelParser::getTileInfo(
+void GridLevelParser::getTileInfo(
 	std::vector<Tile*> & tiles,
 	glm::vec2 & avgPos,
 	float & width,
@@ -299,7 +299,7 @@ void TextLevelParser::getTileInfo(
 	depth = std::abs(tiles[0]->pos.y - tiles.back()->pos.y);
 }
 
-void TextLevelParser::Tile::aggregateTiles(
+void GridLevelParser::Tile::aggregateTiles(
 	Tile*** tiles,
 	TileType type,
 	Direction dir,

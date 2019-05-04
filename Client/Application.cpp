@@ -216,7 +216,7 @@ void Application::Draw() {
 	// Render Skybox
 	_skyboxShader->Use();
 	_skyboxShader->set_uniform("u_projection", _localPlayer->getCamera()->projection_matrix());
-	_skyboxShader->set_uniform("u_view", _localPlayer->getCamera()->view_matrix() * glm::scale(glm::mat4(1.0f), glm::vec3(6,6,6)));
+	_skyboxShader->set_uniform("u_view", _localPlayer->getCamera()->view_matrix() * glm::scale(glm::mat4(1.0f), glm::vec3(MAP_WIDTH/2 + 20)));
       //glm::mat4(glm::mat3(_localPlayer->getCamera()->view_matrix()))
 	_skybox->draw(_skyboxShader);
 

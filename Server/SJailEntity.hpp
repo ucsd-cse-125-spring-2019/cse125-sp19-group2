@@ -2,7 +2,7 @@
 
 #include "SBoxEntity.hpp"
 
-#define JAIL_WALL_WIDTH 0.05f
+#define JAIL_WALL_WIDTH 0.25f
 
 class SJailEntity : public SBaseEntity
 {
