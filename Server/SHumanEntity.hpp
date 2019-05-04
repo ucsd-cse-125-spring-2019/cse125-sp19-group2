@@ -28,10 +28,6 @@ public:
 		{
 			SBaseEntity::handleCollision(entity);
 		}
-		else
-		{
-			Logger::getInstance()->debug("Ignoring collision with dog");
-		}
 	}
 };
 

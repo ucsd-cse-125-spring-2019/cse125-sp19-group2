@@ -30,7 +30,6 @@ public:
 	{
 		if (entity->getState()->type == ENTITY_HUMAN)
 		{
-			Logger::getInstance()->debug("Sending dog to jail");
 			isCaught = true;
 			
 			// Choose a random jail
