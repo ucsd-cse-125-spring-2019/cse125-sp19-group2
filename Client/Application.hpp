@@ -18,6 +18,7 @@
 #include "PointLight.hpp"
 #include "DirectionalLight.hpp"
 
+
 class Application {
 public:
   Application(const char *windowTitle, int argc, char **argv);
@@ -98,6 +99,18 @@ private:
   // Test Lights
   std::unique_ptr<PointLight> _point_light;
   std::unique_ptr<DirectionalLight> _dir_light;
+
+    // Test UI
+    bool _flag;
+    int _integer;
+    float _float;
+    std::string _string;
+    enum Enum {
+        Item1 = 0,
+        Item2,
+        Item3
+    };
+    Enum _enum;
 };
 
 #endif

@@ -8,6 +8,7 @@
 #include "InputManager.h"
 #include "Shared/Logger.hpp"
 #include "EntityManager.hpp"
+#include "GuiManager.h"
 
 Application::Application(const char* windowTitle, int argc, char** argv) {
   _win_title = windowTitle;
@@ -67,6 +68,8 @@ void Application::Setup() {
   glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
   glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
   glEnable(GL_CULL_FACE);
+
+    
 
   // Initialize pointers
   _testShader = std::make_unique<Shader>();
@@ -129,6 +132,35 @@ void Application::Setup() {
     this->count += 1;
     std::cout << this->count << std::endl;
   });
+
+    // Initialize GuiManager
+    GuiManager::getInstance().init(_window);
+
+    // Create a testing widget
+    bool enabled = true;
+    auto *gui = GuiManager::getInstance().createFormHelper();
+    gui->addWindow(Eigen::Vector2i(10, 10), "Form helper")->center();
+    gui->addGroup("Basic types");
+    gui->addVariable("Play Sound", _flag)->setTooltip("Play Sound");
+    gui->addVariable("string", _string);
+
+    gui->addGroup("Validating fields");
+    auto * v = gui->addVariable("int", _integer);
+    v->setSpinnable(true);
+
+    gui->addVariable("float", _float)->setTooltip("Test.");
+
+    gui->addGroup("Complex types");
+    gui->addVariable("Enumeration", _enum, enabled)->setItems({ "Left", "Middle", "Right" });
+
+    gui->addButton("Add One", [&]() {
+        _integer += 1;
+    });
+
+    gui->addGroup("Other widgets");
+    gui->addButton("A button", []() { std::cout << "Button pressed." << std::endl; })->setTooltip("Testing a much longer tooltip, that will wrap around to new lines multiple times.");;
+
+    GuiManager::getInstance().setDirty();
 }
 
 void Application::Cleanup() {
@@ -161,7 +193,7 @@ void Application::Run() {
 
   Setup();
 
-  glfwSwapInterval(1);
+  glfwSwapInterval(0);
   glfwGetFramebufferSize(_window, &_win_width, &_win_height);
   StaticResize(_window, _win_width, _win_height);
 
@@ -205,14 +237,14 @@ void Application::Update()
 void Application::Draw() {
   // Begin drawing scene
   glViewport(0, 0, _win_width, _win_height);
-  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
   // Test FBO
   _quadFrameBuffer->renderScene([this]
   {
     // render scene
     //_frameBuffer->drawQuad(_testShader);
-	  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT| GL_STENCIL_BUFFER_BIT);
 	// Render Skybox
 	_skyboxShader->Use();
 	_skyboxShader->set_uniform("u_projection", _localPlayer->getCamera()->projection_matrix());
@@ -227,7 +259,9 @@ void Application::Draw() {
     _debuglightShader->set_uniform("u_projection", _localPlayer->getCamera()->projection_matrix());
     _debuglightShader->set_uniform("u_view", _localPlayer->getCamera()->view_matrix());
     _point_light->draw(_debuglightShader);
-    
+
+    // Draw UI
+    GuiManager::getInstance().draw();
   });
 
   // Render _frameBuffer Quad
@@ -253,6 +287,7 @@ void Application::StaticKeyboard(GLFWwindow* window,
   int key, int scancode, int action, int mods) {
   Application* instance = (Application *)glfwGetWindowUserPointer(window);
   instance->Keyboard(key, scancode, action, mods);
+
 }
 
 void Application::StaticMouseButton(GLFWwindow* window, int btn, int action, int mods) {
@@ -271,6 +306,7 @@ void Application::StaticMouseScroll(GLFWwindow* window, double x, double y) {
 }
 
 void Application::Resize(int x, int y) {
+    GuiManager::getInstance().getScreen()->resizeCallbackEvent(x, y);
   glfwGetFramebufferSize(_window, &x, &y);
   _win_width = x;
   _win_height = y;
@@ -278,6 +314,7 @@ void Application::Resize(int x, int y) {
 }
 
 void Application::Keyboard(int key, int scancode, int action, int mods) {
+  GuiManager::getInstance().getScreen()->keyCallbackEvent(key, scancode, action, mods);
   if (action == GLFW_PRESS) {
     if (mods == GLFW_MOD_SHIFT) {
       InputManager::getInstance().fire(key, KeyState::Press | KeyState::Shift);
@@ -297,12 +334,17 @@ void Application::Keyboard(int key, int scancode, int action, int mods) {
 }
 
 void Application::MouseButton(int btn, int action, int mods) {
+    GuiManager::getInstance().getScreen()->mouseButtonCallbackEvent(btn, action, mods);
 }
 
 void Application::MouseMotion(double x, double y) {
+    GuiManager::getInstance().getScreen()->cursorPosCallbackEvent(x, y);
+        
 }
 
 void Application::MouseScroll(double x, double y) {
+    GuiManager::getInstance().getScreen()->scrollCallbackEvent(x, y);
+        
 }
 
 void Application::PreCreate() {
@@ -311,6 +353,15 @@ void Application::PreCreate() {
   glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 4);
   glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
   glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
+
+  glfwWindowHint(GLFW_SAMPLES, 0);
+  glfwWindowHint(GLFW_RED_BITS, 8);
+  glfwWindowHint(GLFW_GREEN_BITS, 8);
+  glfwWindowHint(GLFW_BLUE_BITS, 8);
+  glfwWindowHint(GLFW_ALPHA_BITS, 8);
+  glfwWindowHint(GLFW_STENCIL_BITS, 8);
+  glfwWindowHint(GLFW_DEPTH_BITS, 24);
+  glfwWindowHint(GLFW_RESIZABLE, GL_TRUE);
 }
 
 void Application::PostCreate() {
