@@ -118,21 +118,6 @@ private:
     };
     Enum _enum;
 
-    // Test sound
-    FMOD::System *_system;
-
-     // Listener Vector
-    FMOD_VECTOR * _pos;
-    FMOD_VECTOR * _forward;
-    FMOD_VECTOR * _up;
-
-    // ambient
-    FMOD::Sound *_ambientAudio;
-    FMOD::Channel *_ambientChannel;
-
-    // positional
-    FMOD::Sound *_positionalAudio;
-    FMOD::Channel *_positionalChannel;
 };
 
 #endif

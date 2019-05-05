@@ -7,7 +7,7 @@
 #include "Animation.hpp"
 #include "glad/glad.h"
 #include "InputManager.h"
-#include "GuiManager.h"
+#include "GuiManager.hpp"
 
 class CPlayerEntity : public CBaseEntity {
 public:

@@ -1,4 +1,4 @@
-﻿#include "GuiManager.h"
+﻿#include "GuiManager.hpp"
 #include <chrono>
 
 using namespace nanogui;
