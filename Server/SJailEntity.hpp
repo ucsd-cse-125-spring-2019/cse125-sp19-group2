@@ -62,8 +62,6 @@ public:
 			glm::vec3(1, 0, 0),
 			glm::vec3(JAIL_WALL_WIDTH, scale.y, scale.z - JAIL_WALL_WIDTH*2)
 		));
-
-		_walls.front()->getState()->isSolid = false;
 	};
 	~SJailEntity() {};
 
