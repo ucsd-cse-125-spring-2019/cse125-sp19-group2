@@ -1,5 +1,6 @@
 #pragma once
 
+#include <random>
 #include "SPlayerEntity.hpp"
 
 class SDogEntity : public SPlayerEntity

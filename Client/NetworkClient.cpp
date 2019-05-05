@@ -171,7 +171,7 @@ void NetworkClient::socketReadHandler()
 		}
 
 		// Grab length from buffer
-		uint32_t length = *lengthBuf;
+		uint32_t length = *(uint32_t*)lengthBuf;
 
 		// Grab next "length" bytes
 		bytesRead = 0;

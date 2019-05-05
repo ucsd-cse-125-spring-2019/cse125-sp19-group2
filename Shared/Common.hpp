@@ -21,6 +21,7 @@
 // enter the picture.
 enum EntityType
 {
+	ENTITY_STATE,	// Not really an entity but needed to differentiate GameState
     ENTITY_EXAMPLE,
 	ENTITY_DOG,
 	ENTITY_HUMAN,

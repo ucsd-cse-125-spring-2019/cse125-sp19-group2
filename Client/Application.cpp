@@ -7,6 +7,7 @@
 #include "Camera.hpp"
 #include "InputManager.h"
 #include "Shared/Logger.hpp"
+#include "Shared/GameState.hpp"
 #include "EntityManager.hpp"
 
 Application::Application(const char* windowTitle, int argc, char** argv) {
@@ -188,6 +189,15 @@ void Application::Update()
     {
         // Update entity
 		EntityManager::getInstance().update(state);
+
+		// Check for special case of GameState update
+		if (state->type == ENTITY_STATE)
+		{
+			auto gameState = std::static_pointer_cast<GameState>(state);
+
+			// TODO: do something with general state
+			// Timer, winner of game, in lobby, etc
+		}
     }
   }
   catch (std::runtime_error e)

@@ -21,9 +21,6 @@ GameServer::~GameServer()
 
 void GameServer::start()
 {
-	// Seed RNG with current time
-	std::srand(unsigned(std::time(0)));
-
     // Start network server
     _networkInterface = std::make_unique<NetworkServer>(PORTNUM);
 
@@ -35,11 +32,20 @@ void GameServer::start()
 	_humanSpawns = std::queue<glm::vec2>();
 	_dogSpawns = std::queue<glm::vec2>();
 
-	// Init level parser and load level
-	_levelParser = std::make_unique<GridLevelParser>();
+	// Initialize game state struct
+	_gameState = std::make_shared<GameState>();
+	_gameState->type = ENTITY_STATE;
+	_gameState->gameStarted = false;
+	_gameState->gameOver = false;
+	_gameState->inLobby = false;
+	_gameState->numReady = 0;
+	_gameState->millisecondsToStart = 0;
+	_gameState->millisecondsLeft = 0;
+	_gameState->dogs = std::vector<uint32_t>();
+	_gameState->humans = std::vector<uint32_t>();
 
-	// Init collision manager
-	_collisionManager = std::make_unique<CollisionManager>(&_entityMap, &_jails);
+	// Init level parser
+	_levelParser = std::make_unique<GridLevelParser>();
 
 	// Map initialization
 	auto entities = _levelParser->parseLevelFromFile(
@@ -56,16 +62,19 @@ void GameServer::start()
 	{
 		Logger::getInstance()->fatal("No jails found in level file");
 		fgetc(stdin);
+		exit(1);
 	}
 	if (!_humanSpawns.size())
 	{
 		Logger::getInstance()->fatal("No human spawn locations found in level file");
 		fgetc(stdin);
+		exit(1);
 	}
 	if (!_dogSpawns.size())
 	{
 		Logger::getInstance()->fatal("No dog spawn locations found in level file");
 		fgetc(stdin);
+		exit(1);
 	}
 
 	// Insert generated entities into global map
@@ -74,188 +83,149 @@ void GameServer::start()
 		_entityMap.insert({ entity->getState()->id, entity });
 	}
 
-    // Start update loop
-    this->update();
+	// Init collision manager
+	_collisionManager = std::make_unique<CollisionManager>(&_entityMap);
+
+	// Init event handler
+	_eventManager = std::make_unique<EventManager>(
+		&_entityMap,
+		_networkInterface.get(),
+		&_jails,
+		&_humanSpawns,
+		&_dogSpawns,
+		_gameState);
+
+    // Run update loop, keeping each iteration at a minimum of 1 tick
+	while (true)
+	{
+		auto timerStart = std::chrono::steady_clock::now();
+
+		this->update();
+
+		auto timerEnd = std::chrono::steady_clock::now();
+
+		// Elapsed time in nanoseconds
+		auto elapsed = timerEnd - timerStart;
+
+		//Logger::getInstance()->debug("Elapsed time: " + std::to_string(std::chrono::duration_cast<std::chrono::microseconds>(elapsed).count()));
+
+		// Warn if server is overloaded
+		if (tick(elapsed).count() > 1)
+		{
+			Logger::getInstance()->warn("Update loop took longer than a tick (" +
+					std::to_string(std::chrono::duration_cast<std::chrono::milliseconds>(elapsed).count()) +
+					"ms)");
+		}
+		else
+		{
+			// Sleep for the difference
+			std::this_thread::sleep_for(tick(1) - elapsed);
+		}
+	}
 }
 
 
 void GameServer::update()
 {
-    while (true)
-    {
-        auto timerStart = std::chrono::steady_clock::now();
-        /*** Begin Loop ***/
+	// General game state and network updates
 
-		// Get events from clients
-		auto playerEvents = _networkInterface->receiveEvents();
+	// Increment game timer if game is started
+	if (_gameState->gameStarted)
+	{
+		_gameState->_gameDuration = std::chrono::steady_clock::now() - _gameState->_gameStart;
+		_gameState->millisecondsLeft =
+			(long)std::chrono::duration_cast<std::chrono::milliseconds>(
+				std::chrono::duration_cast<std::chrono::nanoseconds>(MAX_GAME_LENGTH)
+				- _gameState->_gameDuration).count();
+	}
 
-        // Loop over player events
-        for (auto& playerEvent : playerEvents)
-        {
-			// If the player just joined, create a player entity and send the
-			// state of every object on the server
-			if (playerEvent->type == EVENT_PLAYER_JOIN)
-			{
-				Logger::getInstance()->debug(
-						std::string("\"") + playerEvent->playerName +
-						std::string("\" joined the server!"));
+	// Handle events from clients and update() each entity
+	_eventManager->update();
 
-				std::shared_ptr<SBaseEntity> playerEntity;
+	// Collision resolution
+	_collisionManager->handleCollisions();
 
-				// Make player entity; for now, even numbers are human, odd are dogs
-				if (playerEvent->playerId % 2)
-				{
-					// Get first element from human spawn locations and push it back
-					glm::vec2 humanSpawn = _humanSpawns.front();
-					_humanSpawns.pop();
-					_humanSpawns.push(humanSpawn);
+	// Update general state of the game based on updates and clock
+	updateGameState();
 
-					// Create player entity at position
-					playerEntity = std::make_shared<SHumanEntity>(playerEvent->playerId);
-					playerEntity->getState()->pos = glm::vec3(humanSpawn.x, 0, humanSpawn.y);
-					_humans.push_back(playerEntity);
-				}
-				else
-				{
-					// Get first element from dog spawn locations and push it back
-					glm::vec2 dogSpawn = _dogSpawns.front();
-					_dogSpawns.pop();
-					_dogSpawns.push(dogSpawn);
+	// Build update list for clients
+	auto updates = std::vector<std::shared_ptr<BaseState>>();
+	for (auto& entityPair : _entityMap)
+	{
+		uint32_t id = entityPair.first;
+		std::shared_ptr<SBaseEntity> entity = entityPair.second;
 
-					// Create player entity at position
-					playerEntity = std::make_shared<SDogEntity>(playerEvent->playerId, &_jails);
-					playerEntity->getState()->pos = glm::vec3(dogSpawn.x, 0, dogSpawn.y);
-					_dogs.push_back(playerEntity);
-				}
-
-				// Throw it into server-wide map
-				_entityMap.insert(std::pair<uint32_t,
-						std::shared_ptr<SBaseEntity>>(
-						playerEntity->getState()->id, playerEntity));
-
-				// Generate a vector of all object states
-				auto updateVec = std::vector<std::shared_ptr<BaseState>>();
-				for (auto& entityPair : _entityMap)
-				{
-					updateVec.push_back(entityPair.second->getState());
-				}
-
-				// Send updates to this player only
-				_networkInterface->sendUpdates(updateVec, playerEvent->playerId);
-
-				// Also send this player entity to everyone. Results in a
-				// duplicate update for the player who joined, but is cleaner
-				// than a boolean check inside update()
-				_networkInterface->sendUpdate(playerEntity->getState());
-
-				// If we now have two players, start the game
-				if (_humans.size() + _dogs.size() == 2)
-				{
-					_gameStarted = true;
-					Logger::getInstance()->debug("Game Started!");
-				}
-			}
-
-			// If a player has left, destroy their entity
-			if (playerEvent->type == EVENT_PLAYER_LEAVE)
-			{
-				// Find player entity first
-				auto it = _entityMap.find(playerEvent->playerId);
-				if (it != _entityMap.end())
-				{
-					auto playerEntity = it->second;
-
-					// Send an update with deleted flag set to true
-					playerEntity->getState()->isDestroyed = true;
-					_networkInterface->sendUpdate(playerEntity->getState());
-
-					// Remove the entity from the map
-					_entityMap.erase(it);
-				}
-				else
-				{
-					Logger::getInstance()->warn(
-						std::string("Could not find player entity with ID: ") +
-						std::to_string(playerEvent->playerId));
-				}
-			}
-        }
-
-        // General game logic
-
-		// There are two identical for loops here; this is intentional, because
-		// we need to update ALL objects on the server before sending updates
-		for (auto& entityPair : _entityMap)
+		// Add to vector only if there is an update available
+		if (entity->hasChanged)
 		{
-			entityPair.second->update(playerEvents);
+			updates.push_back(entity->getState());
 		}
+	}
 
-		// Collision resolution
-		_collisionManager->handleCollisions();
+	// Send out the updates
+	_networkInterface->sendUpdates(updates);
 
-		// Update state of the game
-		bool dogsCaught = true;
-		for (auto& dog : _dogs)
+	// Send a copy of the GameState struct if any players are connected.
+	// This is a bit dangerous because if the client is not receiving anything
+	// the network queues could fill up pretty damn fast. It is also mostly a
+	// waste of CPU and bandwidth; we may just want the clients to use their
+	// own clocks for the countdown.
+	if (_gameState->dogs.size() || _gameState->humans.size())
+	{
+		_networkInterface->sendUpdate(_gameState);
+	}
+
+	// Remove all entities marked for deletion
+	auto deletedEntities = std::vector<uint32_t>();
+
+	// Build list first, otherwise we would break the iteration
+	for (auto& entityPair : _entityMap)
+	{
+		if (entityPair.second->getState()->isDestroyed)
 		{
-			dogsCaught &= std::static_pointer_cast<SDogEntity>(dog)->isCaught;
+			deletedEntities.push_back(entityPair.first);
 		}
+	}
 
-		if (_gameStarted && dogsCaught)
-		{
-			_gameStarted = false;
-			_gameOver = true;
-			Logger::getInstance()->debug("Humans won!");
-		}
-		else if (_gameStarted && _gameDuration > MAX_GAME_LENGTH)
-		{
-			_gameStarted = false;
-			_gameOver = true;
-			Logger::getInstance()->debug("Dogs won!");
-		}
+	// Delete everything in list
+	for (auto& id : deletedEntities)
+	{
+		_entityMap.erase(_entityMap.find(id));
+	}
+}
 
-        // Send updates to clients
-        auto updates = std::vector<std::shared_ptr<BaseState>>();
-        for (auto& entityPair : _entityMap)
-        {
-            uint32_t id = entityPair.first;
-            std::shared_ptr<SBaseEntity> entity = entityPair.second;
 
-            // Add to vector only if there is an update available
-			if (entity->hasChanged)
-			{
-				updates.push_back(entity->getState());
-			}
-        }
+void GameServer::updateGameState()
+{
+	// If we now have two players, start the game
+	if (!_gameState->gameStarted &&
+		!_gameState->gameOver &&
+		_gameState->dogs.size() + _gameState->humans.size() >= 2)
+	{
+		Logger::getInstance()->debug("Game started!");
+		_gameState->gameStarted = true;
+		_gameState->_gameStart = std::chrono::steady_clock::now();
+	}
 
-		// Send out the updates
-		_networkInterface->sendUpdates(updates);
+	// Check if all the dogs have been caught
+	bool dogsCaught = true;
+	for (auto& dogId : _gameState->dogs)
+	{
+		auto dog = _entityMap.find(dogId)->second;
+		dogsCaught &= std::static_pointer_cast<SDogEntity>(dog)->isCaught;
+	}
 
-        /*** End Loop ***/
-
-        auto timerEnd = std::chrono::steady_clock::now();
-
-        // Elapsed time in nanoseconds
-        auto elapsed = timerEnd - timerStart;
-
-		//Logger::getInstance()->debug("Elapsed time: " + std::to_string(std::chrono::duration_cast<std::chrono::microseconds>(elapsed).count()));
-
-        // Warn if server is overloaded
-        if (tick(elapsed).count() > 1)
-        {
-            Logger::getInstance()->warn("Update loop took longer than a tick (" +
-                    std::to_string(std::chrono::duration_cast<std::chrono::milliseconds>(elapsed).count()) +
-                    "ms)");
-        }
-        else
-        {
-            // Sleep for the difference
-            std::this_thread::sleep_for(tick(1) - elapsed);
-        }
-
-		// If game is running, increment timer
-		if (_gameStarted)
-		{
-			_gameDuration += (std::chrono::steady_clock::now() - timerStart);
-		}
-    }
+	// Game end logic
+	if (_gameState->gameStarted && dogsCaught)
+	{
+		_gameState->gameStarted = false;
+		_gameState->gameOver = true;
+		Logger::getInstance()->debug("Humans won!");
+	}
+	else if (_gameState->gameStarted && _gameState->_gameDuration >= MAX_GAME_LENGTH)
+	{
+		_gameState->gameStarted = false;
+		_gameState->gameOver = true;
+		Logger::getInstance()->debug("Dogs won!");
+	}
 }

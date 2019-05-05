@@ -13,8 +13,7 @@ public:
 	// Constructs a new manager. Requires raw pointers to the server-wide
 	// entity map and the vector of jail locations.
 	CollisionManager(
-		std::unordered_map<uint32_t, std::shared_ptr<SBaseEntity>>* entityMap,
-		std::vector<glm::vec2>* jails);
+		std::unordered_map<uint32_t, std::shared_ptr<SBaseEntity>>* entityMap);
 
 	~CollisionManager();
 
@@ -24,6 +23,5 @@ public:
 
 private:
 	std::unordered_map<uint32_t, std::shared_ptr<SBaseEntity>>* _entityMap;
-	std::vector<glm::vec2>* _jails;
 };
 

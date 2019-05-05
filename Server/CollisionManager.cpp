@@ -17,11 +17,9 @@ struct PairHash
 };
 
 CollisionManager::CollisionManager(
-	std::unordered_map<uint32_t, std::shared_ptr<SBaseEntity>>* entityMap,
-	std::vector<glm::vec2>* jails)
+	std::unordered_map<uint32_t, std::shared_ptr<SBaseEntity>>* entityMap)
 {
 	_entityMap = entityMap;
-	_jails = jails;
 }
 
 CollisionManager::~CollisionManager()

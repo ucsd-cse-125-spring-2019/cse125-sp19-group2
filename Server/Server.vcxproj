@@ -213,6 +213,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="CollisionManager.cpp" />
+    <ClCompile Include="EventManager.cpp" />
     <ClCompile Include="GameServer.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="NetworkServer.cpp" />
@@ -225,6 +226,7 @@
     <ClInclude Include="CapsuleCollider.hpp" />
     <ClInclude Include="CollisionManager.hpp" />
     <ClInclude Include="EmptyCollider.hpp" />
+    <ClInclude Include="EventManager.hpp" />
     <ClInclude Include="GameServer.hpp" />
     <ClInclude Include="IdGenerator.hpp" />
     <ClInclude Include="LevelParser.hpp" />
