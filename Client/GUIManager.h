@@ -20,7 +20,9 @@ public:
 
     void setDirty();
 
-    nanogui::FormHelper* createFormHelper();
+    nanogui::FormHelper* createFormHelper(const std::string & name);
+
+    nanogui::FormHelper* getFormHelper(const std::string & name);
 
 private:
     bool _dirty = false;
@@ -31,8 +33,11 @@ private:
     // window
     GLFWwindow* _window = nullptr;
 
+    // Map name to FormHelper
+    std::unordered_map<std::string, int> _formHelperMap;
+
     // List of FormHelper
-    std::vector<std::unique_ptr<nanogui::FormHelper>> formHelpers;
+    std::vector<std::unique_ptr<nanogui::FormHelper>> _formHelpers;
 
     // Timer
     std::chrono::steady_clock::time_point _lastTime;

@@ -8,7 +8,7 @@ public:
 	CHumanEntity() : CPlayerEntity()
 	{
         // Load Animation
-        init("./Resources/Models/human.dae");
+        setPath("./Resources/Models/human.dae");
 	};
 	~CHumanEntity() {};
 };

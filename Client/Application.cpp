@@ -10,6 +10,13 @@
 #include "EntityManager.hpp"
 #include "GuiManager.h"
 
+void vec3ToFmod(const glm::vec3& v, FMOD_VECTOR* fv)
+{
+    fv->x = v.x;
+    fv->y = v.y;
+    fv->z = v.z;
+}
+
 Application::Application(const char* windowTitle, int argc, char** argv) {
   _win_title = windowTitle;
   _win_width = 800;
@@ -138,28 +145,115 @@ void Application::Setup() {
 
     // Create a testing widget
     bool enabled = true;
-    auto *gui = GuiManager::getInstance().createFormHelper();
+    auto *gui = GuiManager::getInstance().createFormHelper("Form helper");
     gui->addWindow(Eigen::Vector2i(10, 10), "Form helper")->center();
-    gui->addGroup("Basic types");
-    gui->addVariable("Play Sound", _flag)->setTooltip("Play Sound");
-    gui->addVariable("string", _string);
-
+    
     gui->addGroup("Validating fields");
     auto * v = gui->addVariable("int", _integer);
     v->setSpinnable(true);
 
     gui->addVariable("float", _float)->setTooltip("Test.");
-
-    gui->addGroup("Complex types");
-    gui->addVariable("Enumeration", _enum, enabled)->setItems({ "Left", "Middle", "Right" });
-
     gui->addButton("Add One", [&]() {
         _integer += 1;
     });
 
-    gui->addGroup("Other widgets");
-    gui->addButton("A button", []() { std::cout << "Button pressed." << std::endl; })->setTooltip("Testing a much longer tooltip, that will wrap around to new lines multiple times.");;
+    
+    // Test Sound
+    FMOD_RESULT result;
 
+    result = FMOD::System_Create(&_system); // Create the main system object.
+    if (result != FMOD_OK)
+    {
+        printf("FMOD error! (%d) %s\n", result, FMOD_ErrorString(result));
+    }
+
+    result = _system->init(512, FMOD_INIT_NORMAL | FMOD_INIT_3D_RIGHTHANDED, 0); // Initialize FMOD.
+    if (result != FMOD_OK)
+    {
+        printf("FMOD error! (%d) %s\n", result, FMOD_ErrorString(result));
+    }
+
+    _system->setSpeakerPosition(FMOD_SPEAKER_FRONT_LEFT, -1.0f, 0.0f, true);
+    _system->setSpeakerPosition(FMOD_SPEAKER_FRONT_RIGHT, 1.0f, 0.0f, true);
+    _system->setDSPBufferSize(512, 2);
+
+    // listener init
+    _pos = new FMOD_VECTOR();
+    _forward = new FMOD_VECTOR();
+    _up = new FMOD_VECTOR();
+
+    // Ambient sound setup
+    result = _system->createSound(
+        "Resources/Sounds/Mario - Overworld.mp3", // Dummy background music
+        FMOD_LOOP_NORMAL ,
+        NULL,
+        &_ambientAudio
+    );
+
+
+    result = _system->playSound(
+        _ambientAudio,
+        NULL,
+        true,
+        &_ambientChannel
+    );
+
+    _ambientChannel->setVolume(0.4);
+    _ambientChannel->setPaused(!_playAmbient);
+
+
+    // Positional sound setup
+    result = _system->createSound(
+        "Resources/Sounds/footsteps.mp3", // Dummy background music
+        FMOD_LOOP_NORMAL | FMOD_3D | FMOD_3D_WORLDRELATIVE | FMOD_3D_INVERSEROLLOFF,
+        NULL,
+        &_positionalAudio
+    );
+
+
+    result = _system->playSound(
+        _positionalAudio,
+        NULL,
+        true,
+        &_positionalChannel
+    );
+
+    _positionalChannel->setVolume(1.0);
+
+    // Set Listener's position
+    vec3ToFmod(glm::vec3(0,0,0), _pos);
+    vec3ToFmod(glm::vec3(0,0,-1), _forward);
+    vec3ToFmod(glm::vec3(0,1,0), _up);
+    _system->set3DListenerAttributes(0, _pos, 0, _forward, _up);
+    
+    gui->addGroup("Sound");
+    gui->addVariable("Play Ambient Sound", _playAmbient)->setCallback([&](const bool flag) {
+        _playAmbient = flag;
+        _ambientChannel->setPaused(!flag);
+    });
+    gui->addVariable("Play Positional Sound", _playPositional)->setCallback([&](const bool flag) {
+        _playPositional = flag;
+        _positionalChannel->setPaused(!flag);
+    });
+    auto * pos = gui->addVariable("Sound Location", _enum, enabled);
+    pos->setItems({ "Left", "Front", "Right" });
+    pos->setCallback([&](const Enum & e) {
+        FMOD_VECTOR v;
+        switch (e) {
+		case Left:
+            vec3ToFmod(glm::vec3(-2, 0 , 0), &v);
+            break;
+		case Front:
+            vec3ToFmod(glm::vec3(0, 0 , -2), &v);
+            break;
+		case Right:
+            vec3ToFmod(glm::vec3(2, 0 , 0), &v);
+            break;
+        }
+        _enum = e;
+        _positionalChannel->set3DAttributes(&v, 0);
+    });
+    
     GuiManager::getInstance().setDirty();
 }
 
@@ -213,6 +307,9 @@ void Application::Run() {
 
 void Application::Update()
 {
+    // Update sound position
+    _system->update();
+
   // Get updates from the server
   try
   {

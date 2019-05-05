@@ -152,6 +152,8 @@ public:
      */
     uint32_t takeCount() const;
 
+    std::string getCurrentAnimName() const;
+
 private:
 
     // Helper functions related to model loading

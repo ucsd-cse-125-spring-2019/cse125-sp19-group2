@@ -7,6 +7,7 @@
 #include "Animation.hpp"
 #include "glad/glad.h"
 #include "InputManager.h"
+#include "GuiManager.h"
 
 class CPlayerEntity : public CBaseEntity {
 public:
@@ -19,10 +20,34 @@ public:
         _playerShader->LoadFromFile(GL_FRAGMENT_SHADER, "./Resources/Shaders/animation.frag");
         _playerShader->CreateProgram();
 
-        // Load Animation
-        if(!_playerModel){
-            init("./Resources/Models/dog.dae");
-		}
+        // Read in an animated Mesh
+        _playerModel = std::make_unique<Animation>(_modelPath);
+
+		InputManager::getInstance().getKey(85)->onPress([this]()
+		{
+			_playerModel->animatedMesh->_takeIndex += 1;
+			_playerModel->animatedMesh->_takeIndex %= _playerModel->animatedMesh->takeCount();
+		});
+
+        GuiManager::getInstance().getFormHelper("Form helper")->addGroup("Cycle Animation");
+        GuiManager::getInstance().getFormHelper("Form helper")->addButton("Next", [&]() {
+            _playerModel->animatedMesh->_takeIndex += 1;
+		    _playerModel->animatedMesh->_takeIndex %= _playerModel->animatedMesh->takeCount();
+            _currentAnim = _playerModel->animatedMesh->getCurrentAnimName();
+        })->setTooltip("Testing a much longer tooltip, that will wrap around to new lines multiple times.");
+
+        GuiManager::getInstance().getFormHelper("Form helper")->addVariable("Current Animation", _currentAnim);
+
+        GuiManager::getInstance().setDirty();
+
+        // TODO: determine which animation gets played
+        _playerModel->animatedMesh->_takeIndex = 0;
+
+        // Call init to let Animation precache uniform location
+		_playerModel->init(_playerShader);
+
+        // Set Animation to playing mode
+		_playerModel->isPlaying = true;
     }
 
     void render(std::unique_ptr<Camera> const& camera) override {
@@ -86,24 +111,8 @@ public:
 		_isLocal = flag;
     }
 
-    void init(const std::string & filepath) {
-        // Read in an animated Mesh
-        _playerModel = std::make_unique<Animation>(filepath);
-
-		InputManager::getInstance().getKey(85)->onPress([this]()
-		{
-			_playerModel->animatedMesh->_takeIndex += 1;
-			_playerModel->animatedMesh->_takeIndex %= _playerModel->animatedMesh->takeCount();
-		});
-
-        // TODO: determine which animation gets played
-        _playerModel->animatedMesh->_takeIndex = 0;
-
-        // Call init to let Animation precache uniform location
-		_playerModel->init(_playerShader);
-
-        // Set Animation to playing mode
-		_playerModel->isPlaying = true;
+    void setPath(const std::string & filepath) {
+        _modelPath = filepath;
     }
 
 protected:
@@ -112,4 +121,6 @@ protected:
     std::shared_ptr<BaseState> _state;
     std::unique_ptr<Animation> _playerModel;
     std::unique_ptr<Shader> _playerShader;
+    std::string _modelPath = "./Resources/Models/dog.dae";
+    std::string _currentAnim = "";
 };

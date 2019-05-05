@@ -8,7 +8,7 @@ public:
 	CDogEntity() : CPlayerEntity()
 	{
 		// Load Animation
-        init("./Resources/Models/dog.dae");
+        setPath("./Resources/Models/dog.dae");
 	};
 	~CDogEntity() {};
 };

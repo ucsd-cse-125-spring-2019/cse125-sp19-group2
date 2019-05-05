@@ -19,6 +19,9 @@
 #include "DirectionalLight.hpp"
 #include "AnimatedMesh.hpp"
 #include "Animation.hpp"
+#include "fmod/fmod.h"
+#include "fmod/fmod.hpp"
+#include "fmod/fmod_errors.h"
 
 
 class Application {
@@ -103,16 +106,33 @@ private:
   std::unique_ptr<DirectionalLight> _dir_light;
 
     // Test UI
-    bool _flag;
+    bool _playAmbient = true;
+    bool _playPositional;
     int _integer;
     float _float;
     std::string _string;
     enum Enum {
-        Item1 = 0,
-        Item2,
-        Item3
+        Left = 0,
+        Front,
+        Right
     };
     Enum _enum;
+
+    // Test sound
+    FMOD::System *_system;
+
+     // Listener Vector
+    FMOD_VECTOR * _pos;
+    FMOD_VECTOR * _forward;
+    FMOD_VECTOR * _up;
+
+    // ambient
+    FMOD::Sound *_ambientAudio;
+    FMOD::Channel *_ambientChannel;
+
+    // positional
+    FMOD::Sound *_positionalAudio;
+    FMOD::Channel *_positionalChannel;
 };
 
 #endif

@@ -55,7 +55,7 @@ void GuiManager::draw() {
         _dirty = false;
     }
 
-    for (auto & element : formHelpers) {
+    for (auto & element : _formHelpers) {
         element->refresh();
     }
 
@@ -74,8 +74,17 @@ void GuiManager::setDirty() {
     _dirty = true;
 }
 
-FormHelper* GuiManager::createFormHelper() {
+FormHelper* GuiManager::createFormHelper(const string & name) {
     auto f = make_unique<FormHelper>(_screen);
-    formHelpers.push_back(std::move(f));
-    return formHelpers.back().get();
+    _formHelpers.push_back(std::move(f));
+    _formHelperMap.insert({name, _formHelpers.size() - 1});
+    return _formHelpers.back().get();
+}
+
+nanogui::FormHelper* GuiManager::getFormHelper(const std::string& name) {
+    const auto res = _formHelperMap.find(name);
+    if(res != _formHelperMap.end()) {
+        return _formHelpers[res->second].get();
+    }
+    return nullptr;
 }

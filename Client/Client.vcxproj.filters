@@ -61,13 +61,13 @@
     <ClCompile Include="glad.c">
       <Filter>Source Files\Graphics</Filter>
     </ClCompile>
-    <ClCompile Include="GUIManager.cpp">
-      <Filter>Header Files\Graphics</Filter>
-    </ClCompile>
     <ClCompile Include="AnimatedMesh.cpp">
       <Filter>Source Files\Graphics</Filter>
     </ClCompile>
     <ClCompile Include="Animation.cpp">
+      <Filter>Source Files\Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="GUIManager.cpp">
       <Filter>Source Files\Graphics</Filter>
     </ClCompile>
   </ItemGroup>

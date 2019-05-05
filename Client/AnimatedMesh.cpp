@@ -144,6 +144,10 @@ uint32_t AnimatedMesh::takeCount() const {
     return _takes.size();
 }
 
+std::string AnimatedMesh::getCurrentAnimName() const {
+    return _takes[_takeIndex]->takeName;
+}
+
 void AnimatedMesh::loadBones(uint32_t meshIndex, const aiMesh* mesh, vector<WeightData>& bones) {
     for (uint32_t i = 0; i < mesh->mNumBones; i++) {
         uint32_t boneIndex = 0;
