@@ -12,19 +12,6 @@ class CPlayerEntity : public CBaseEntity {
 public:
     CPlayerEntity() {
         // Allocate member variables
-
-        // Read in an animated Mesh
-        _playerModel = std::make_unique<Animation>("./Resources/Models/human.dae");
-
-		InputManager::getInstance().getKey(85)->onPress([this]()
-		{
-			_playerModel->animatedMesh->_takeIndex += 1;
-			_playerModel->animatedMesh->_takeIndex %= _playerModel->animatedMesh->takeCount();
-		});
-
-        // TODO: determine which animation gets played
-        _playerModel->animatedMesh->_takeIndex = 0;
-
         _playerShader = std::make_unique<Shader>();
         _state = std::make_shared<BaseState>();
 
@@ -32,12 +19,10 @@ public:
         _playerShader->LoadFromFile(GL_FRAGMENT_SHADER, "./Resources/Shaders/animation.frag");
         _playerShader->CreateProgram();
 
-        // Call init to let Animation precache uniform location
-		_playerModel->init(_playerShader);
-
-        // Set Animation to playing mode
-		_playerModel->isPlaying = true;
-
+        // Load Animation
+        if(!_playerModel){
+            init("./Resources/Models/dog.dae");
+		}
     }
 
     void render(std::unique_ptr<Camera> const& camera) override {
@@ -101,10 +86,27 @@ public:
 		_isLocal = flag;
     }
 
-protected:
-    std::unique_ptr<Model> _playerModel;
+    void init(const std::string & filepath) {
+        // Read in an animated Mesh
+        _playerModel = std::make_unique<Animation>(filepath);
 
-private:
+		InputManager::getInstance().getKey(85)->onPress([this]()
+		{
+			_playerModel->animatedMesh->_takeIndex += 1;
+			_playerModel->animatedMesh->_takeIndex %= _playerModel->animatedMesh->takeCount();
+		});
+
+        // TODO: determine which animation gets played
+        _playerModel->animatedMesh->_takeIndex = 0;
+
+        // Call init to let Animation precache uniform location
+		_playerModel->init(_playerShader);
+
+        // Set Animation to playing mode
+		_playerModel->isPlaying = true;
+    }
+
+protected:
 	bool _isLocal = false;
 
     std::shared_ptr<BaseState> _state;
