@@ -110,6 +110,9 @@
     <ClInclude Include="CollisionManager.hpp">
       <Filter>Header Files\Physics</Filter>
     </ClInclude>
+    <ClInclude Include="EmptyCollider.hpp">
+      <Filter>Header Files\Physics</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

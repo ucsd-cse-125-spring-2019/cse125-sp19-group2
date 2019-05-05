@@ -224,6 +224,7 @@
     <ClInclude Include="BaseCollider.hpp" />
     <ClInclude Include="CapsuleCollider.hpp" />
     <ClInclude Include="CollisionManager.hpp" />
+    <ClInclude Include="EmptyCollider.hpp" />
     <ClInclude Include="GameServer.hpp" />
     <ClInclude Include="IdGenerator.hpp" />
     <ClInclude Include="LevelParser.hpp" />

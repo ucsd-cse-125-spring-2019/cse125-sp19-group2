@@ -30,6 +30,7 @@ public:
 
 		_state->isDestroyed = false;
 		_state->isStatic = false;
+		_state->isSolid = true;
 
 		// collider to track collision info idk
 		_collider = std::make_unique<CapsuleCollider>(_state.get());

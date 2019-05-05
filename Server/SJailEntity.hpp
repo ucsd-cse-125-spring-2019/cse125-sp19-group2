@@ -1,6 +1,7 @@
 #pragma once
 
 #include "SBoxEntity.hpp"
+#include "EmptyCollider.hpp"
 
 #define JAIL_WALL_WIDTH 0.25f
 
@@ -26,9 +27,11 @@ public:
 
 		// No collider on the jail object, only on its children
 		_state->colliderType = COLLIDER_NONE;
+		_collider = std::make_unique<EmptyCollider>();
 
 		_state->isDestroyed = false;
 		_state->isStatic = true;
+		_state->isSolid = false;
 
 		hasChanged = false;
 
@@ -59,24 +62,10 @@ public:
 			glm::vec3(1, 0, 0),
 			glm::vec3(JAIL_WALL_WIDTH, scale.y, scale.z - JAIL_WALL_WIDTH*2)
 		));
+
+		_walls.front()->getState()->isSolid = false;
 	};
 	~SJailEntity() {};
-
-	// Cannot collide with anything
-	bool isColliding(QuadTree & tree) override
-	{
-		return false;
-	}
-
-	bool isColliding(BaseState* state) override
-	{
-		return false;
-	}
-
-	std::vector<BaseState*> getColliding(QuadTree & tree)
-	{
-		return std::vector<BaseState*>();
-	}
 
 	void update(std::vector<std::shared_ptr<GameEvent>> events) override
 	{

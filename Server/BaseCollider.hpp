@@ -9,6 +9,11 @@
 class BaseCollider
 {
 public:
+	BaseCollider()
+	{
+		_state = nullptr;
+	}
+
 	BaseCollider(BaseState* state)
 	{
 		_state = state;
@@ -60,7 +65,7 @@ protected:
 	BaseState* _state;
 
 	// Broad-phase collision detection always uses a QuadTree
-	std::vector<BaseState*> broadPhase(QuadTree & tree)
+	virtual std::vector<BaseState*> broadPhase(QuadTree & tree)
 	{
 		return tree.query(_state);
 	};

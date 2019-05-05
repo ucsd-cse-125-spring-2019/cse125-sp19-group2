@@ -2,6 +2,7 @@
 
 #include <memory>
 #include "IdGenerator.hpp"
+#include "AABBCollider.hpp"
 #include "SBaseEntity.hpp"
 #include "Shared/BaseState.hpp"
 
@@ -37,8 +38,12 @@ public:
 		_state->depth = scale.z;
 		_state->colliderType = COLLIDER_AABB;
 
+		// Basic AABB collider
+		_collider = std::make_unique<AABBCollider>(_state.get());
+
 		_state->isDestroyed = false;
 		_state->isStatic = true;
+		_state->isSolid = true;
 
 		hasChanged = false;
 	};
