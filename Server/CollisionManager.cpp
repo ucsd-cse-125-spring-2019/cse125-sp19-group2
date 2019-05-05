@@ -93,7 +93,7 @@ void CollisionManager::handleCollisions()
 		for (auto& collidingEntity : entityA->getColliding(*tree))
 		{
 			// Only re-add if solid
-			if (collidingEntity->isSolid)
+			if (objectA->isSolid && collidingEntity->isSolid)
 			{
 				collisionSet.insert({ entityA->getState().get(), collidingEntity });
 			}
