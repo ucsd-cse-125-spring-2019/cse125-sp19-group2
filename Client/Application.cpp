@@ -102,6 +102,10 @@ void Application::Setup() {
   _debuglightShader->LoadFromFile(GL_FRAGMENT_SHADER, "./Resources/Shaders/debuglight.frag");
   _debuglightShader->CreateProgram();
 
+
+  // Create cube model
+  _cube = std::make_unique<Model>("./Resources/Models/simpleobject2.obj");
+
   _skybox = std::make_unique<Skybox>("thefog");
 
   // Create light
@@ -248,9 +252,26 @@ void Application::Draw() {
 	// Render Skybox
 	_skyboxShader->Use();
 	_skyboxShader->set_uniform("u_projection", _localPlayer->getCamera()->projection_matrix());
-	_skyboxShader->set_uniform("u_view", _localPlayer->getCamera()->view_matrix() * glm::scale(glm::mat4(1.0f), glm::vec3(6,6,6)));
+	_skyboxShader->set_uniform("u_view", _localPlayer->getCamera()->view_matrix() * glm::scale(glm::mat4(1.0f), glm::vec3(200,200,200)));
       //glm::mat4(glm::mat3(_localPlayer->getCamera()->view_matrix()))
 	_skybox->draw(_skyboxShader);
+
+    _cubeShader->Use();
+    _cubeShader->set_uniform("u_projection", _localPlayer->getCamera()->projection_matrix());
+    _cubeShader->set_uniform("u_view", _localPlayer->getCamera()->view_matrix());
+    _cubeShader->set_uniform("u_model", glm::translate(glm::mat4(1.0f), glm::vec3(0, 0.1, -3.0f)) *
+      glm::rotate(glm::mat4(1.0f), glm::radians(60.0f), glm::vec3(0.1, 0.0, 0.0)));
+    _cubeShader->set_uniform("u_material.shininess", 0.6f);
+
+    // Lights
+    _cubeShader->set_uniform("u_numdirlights", static_cast<GLuint>(1));
+    _cubeShader->set_uniform("u_numpointlights", static_cast<GLuint>(1));
+
+    _point_light->setUniforms(_cubeShader);
+    _dir_light->setUniforms(_cubeShader);
+
+    // Cube
+    _cube->Draw(_cubeShader);
 
     EntityManager::getInstance().render(_localPlayer->getCamera());
 

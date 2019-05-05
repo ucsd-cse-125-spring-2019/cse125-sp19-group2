@@ -17,6 +17,8 @@
 #include "LocalPlayer.hpp"
 #include "PointLight.hpp"
 #include "DirectionalLight.hpp"
+#include "AnimatedMesh.hpp"
+#include "Animation.hpp"
 
 
 class Application {

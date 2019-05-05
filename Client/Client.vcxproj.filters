@@ -64,6 +64,12 @@
     <ClCompile Include="GUIManager.cpp">
       <Filter>Header Files\Graphics</Filter>
     </ClCompile>
+    <ClCompile Include="AnimatedMesh.cpp">
+      <Filter>Source Files\Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="Animation.cpp">
+      <Filter>Source Files\Graphics</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Application.hpp">
@@ -147,6 +153,12 @@
     <ClInclude Include="GUIManager.h">
       <Filter>Header Files\Graphics</Filter>
     </ClInclude>
+    <ClInclude Include="Animation.hpp">
+      <Filter>Header Files\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="AnimatedMesh.hpp">
+      <Filter>Header Files\Graphics</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
@@ -184,6 +196,12 @@
       <Filter>Resource Files</Filter>
     </None>
     <None Include="Resources\Shaders\debuglight.vert">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="Resources\Shaders\animation.frag">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="Resources\Shaders\animation.vert">
       <Filter>Resource Files</Filter>
     </None>
   </ItemGroup>
