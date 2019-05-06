@@ -1,51 +1,59 @@
 ﻿#include "Animation.hpp"
 
-Animation::Animation(const std::string& filename): isPlaying(false), speed(1.0f), lastTime(-1.0f), timer(0.0f), timeStep(8.33f) {
-    animatedMesh = std::make_unique<AnimatedMesh>();
+using namespace std;
+using namespace glm;
+using namespace chrono;
+
+Animation::Animation(const string& filename): _isPlaying(false), _speed(1.0f), _timer(0.0f), _timeStep(-1.0f) {
+    animatedMesh = make_unique<AnimatedMesh>();
     animatedMesh->loadMesh(filename);
 }
 
 void Animation::update() {
-    if (isPlaying) {
+    if (_isPlaying) {
 		eval();
     }
 }
 
 void Animation::eval() {
-    if(lastTime < 0) {
-		lastTime = static_cast<float>(GetTickCount());
-		return;
+    if(_lastTime.time_since_epoch().count() == 0) {
+        _lastTime = high_resolution_clock::now();
+        return;
     }
-    const float currentTime = static_cast<float>(GetTickCount());
-	if (timeStep < 0) {
-		timer += (currentTime - lastTime) * speed;
+
+    const auto curr = high_resolution_clock::now();
+    const auto dt = curr - _lastTime;
+    const float dtInMicrosecond = chrono::duration_cast<microseconds>(dt).count();
+    
+	if (_timeStep < 0) {
+		_timer += (dtInMicrosecond/ 1000.0) * _speed;
 	}else {
-		timer += timeStep;
+		_timer += _timeStep;
 	}
-	animatedMesh->getTransform(timer/1000.0f, transforms);
-    lastTime = static_cast<float>(GetTickCount());
+	animatedMesh->getTransform(_timer/1000.0f, _transforms);
+    _lastTime = high_resolution_clock::now();
 }
 
-void Animation::render(const std::unique_ptr<Shader> & shader) {
+void Animation::render(const unique_ptr<Shader> & shader) {
 	shader->Use();
     
-    for (int i = 0; i < transforms.size(); i ++) {
-        setBoneUniform(i, transforms[i]);
+    for (int i = 0; i < _transforms.size(); i ++) {
+        setBoneUniform(i, _transforms[i]);
     }
 
     animatedMesh->render(shader);
 }
 
-void Animation::init(const std::unique_ptr<Shader> & shader) {
+void Animation::init(const unique_ptr<Shader> & shader) {
 	shader->Use();
     for (unsigned int i = 0; i < MAX_BONES; i++) {
         char name[128];
         memset(name, 0, sizeof(name));
         snprintf(name, sizeof(name), "u_bones[%d]", i);
-        m_boneLocation[i] = glGetUniformLocation(shader->program(), name);
+        _boneLocation[i] = glGetUniformLocation(shader->program(), name);
     }
 }
 
-void Animation::setBoneUniform(uint32_t index, const glm::mat4& transform) {
-    glUniformMatrix4fv(m_boneLocation[index], 1, GL_FALSE, &transform[0][0]);
+void Animation::setBoneUniform(uint32_t index, const mat4& transform) {
+    glUniformMatrix4fv(_boneLocation[index], 1, GL_FALSE, &transform[0][0]);
 }

@@ -12,17 +12,17 @@ public:
     /**
 	 * \brief The parameter to determine whether it should play animation or not
 	 */
-    bool isPlaying;
+    bool _isPlaying;
 
     /**
 	 * \brief The speed of the animation
 	 */
-    float speed;
+    float _speed;
 
     /**
 	 * \brief The timestep of the animation (in millisecond)
 	 */
-    float timeStep;
+    float _timeStep;
 
     /**
      * \brief Constructor of Animation, load the animated mesh
@@ -56,9 +56,9 @@ private:
 	void setBoneUniform(uint32_t index, const glm::mat4& transform);
 
 	static const uint32_t MAX_BONES = 100;
-	GLuint m_boneLocation[MAX_BONES];
-	std::vector<glm::mat4> transforms{};
+	GLuint _boneLocation[MAX_BONES];
+	std::vector<glm::mat4> _transforms{};
 
-	float timer;
-	float lastTime;
+	float _timer; // in millisecond
+	std::chrono::steady_clock::time_point _lastTime;
 };

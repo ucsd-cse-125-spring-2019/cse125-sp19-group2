@@ -47,7 +47,7 @@ public:
 		_playerModel->init(_playerShader);
 
         // Set Animation to playing mode
-		_playerModel->isPlaying = true;
+		_playerModel->_isPlaying = true;
     }
 
     void render(std::unique_ptr<Camera> const& camera) override {
