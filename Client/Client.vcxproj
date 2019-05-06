@@ -75,23 +75,27 @@
     <SourcePath>$(VC_SourcePath);$(SolutionDir)/Shared</SourcePath>
     <LibraryPath>$(VC_LibraryPath_x86);$(WindowsSDK_LibraryPath_x86);$(NETFXKitsDir)Lib\um\x86;$(SolutionDir)/Library/lib/x86</LibraryPath>
     <OutDir>$(SolutionDir)$(Platform)\$(Configuration)\</OutDir>
-    <CustomBuildAfterTargets>Clean</CustomBuildAfterTargets>
+    <CustomBuildAfterTargets>
+    </CustomBuildAfterTargets>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);$(SolutionDir);$(SolutionDir)/Library/include</IncludePath>
     <SourcePath>$(VC_SourcePath);$(SolutionDir)/Shared</SourcePath>
     <LibraryPath>$(VC_LibraryPath_x86);$(WindowsSDK_LibraryPath_x86);$(NETFXKitsDir)Lib\um\x86;$(SolutionDir)/Library/lib/x86</LibraryPath>
     <OutDir>$(SolutionDir)$(Platform)\$(Configuration)\</OutDir>
-    <CustomBuildAfterTargets>Clean</CustomBuildAfterTargets>
+    <CustomBuildAfterTargets>
+    </CustomBuildAfterTargets>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);$(SolutionDir);$(SolutionDir)/Library/include;$(SolutionDir)/Library/include/ext</IncludePath>
     <LibraryPath>$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(NETFXKitsDir)Lib\um\x64;$(SolutionDir)/Library/lib/x64;$(SolutionDir)/Library/lib/x64/Debug</LibraryPath>
     <SourcePath>$(VC_SourcePath);$(SolutionDir)/Shared</SourcePath>
-    <CustomBuildAfterTargets>Clean</CustomBuildAfterTargets>
+    <CustomBuildAfterTargets>
+    </CustomBuildAfterTargets>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <CustomBuildAfterTargets>Clean</CustomBuildAfterTargets>
+    <CustomBuildAfterTargets>
+    </CustomBuildAfterTargets>
     <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);$(SolutionDir);$(SolutionDir)/Library/include;$(SolutionDir)/Library/include/ext</IncludePath>
     <SourcePath>$(VC_SourcePath);$(SolutionDir)/Shared</SourcePath>
     <LibraryPath>$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(NETFXKitsDir)Lib\um\x64;$(SolutionDir)/Library/lib/x64;$(SolutionDir)/Library/lib/x64/Release</LibraryPath>
@@ -120,11 +124,14 @@
       <Message>Copying client resource files into build directory</Message>
     </PostBuildEvent>
     <CustomBuildStep>
-      <Command>rd /s /q "$(OutDir)Resources"</Command>
+      <Command>
+      </Command>
     </CustomBuildStep>
     <CustomBuildStep>
-      <Message>Cleaning resource files</Message>
-      <Outputs>dummy.txt</Outputs>
+      <Message>
+      </Message>
+      <Outputs>
+      </Outputs>
     </CustomBuildStep>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -152,11 +159,14 @@ xcopy /y /d  "$(SolutionDir)Library\lib\x64\Debug\*.dll" "$(OutDir)"</Command>
       <Message>Copying client resource files into build directory</Message>
     </PostBuildEvent>
     <CustomBuildStep>
-      <Command>rd /s /q "$(OutDir)Resources"</Command>
+      <Command>
+      </Command>
     </CustomBuildStep>
     <CustomBuildStep>
-      <Message>Cleaning resource files</Message>
-      <Outputs>dummy.txt</Outputs>
+      <Message>
+      </Message>
+      <Outputs>
+      </Outputs>
     </CustomBuildStep>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -177,9 +187,12 @@ xcopy /y /d  "$(SolutionDir)Library\lib\x64\Debug\*.dll" "$(OutDir)"</Command>
       <EntryPointSymbol>mainCRTStartup</EntryPointSymbol>
     </Link>
     <CustomBuildStep>
-      <Command>rd /s /q "$(OutDir)Resources"</Command>
-      <Message>Cleaning resource files</Message>
-      <Outputs>dummy.txt</Outputs>
+      <Command>
+      </Command>
+      <Message>
+      </Message>
+      <Outputs>
+      </Outputs>
     </CustomBuildStep>
     <PreLinkEvent>
       <Command>xcopy /y /d  "$(SolutionDir)Library\lib\x86\*.dll" "$(OutDir)"</Command>
@@ -209,9 +222,12 @@ xcopy /y /d  "$(SolutionDir)Library\lib\x64\Debug\*.dll" "$(OutDir)"</Command>
       <EntryPointSymbol>mainCRTStartup</EntryPointSymbol>
     </Link>
     <CustomBuildStep>
-      <Command>rd /s /q "$(OutDir)Resources"</Command>
-      <Message>Cleaning resource files</Message>
-      <Outputs>dummy.txt</Outputs>
+      <Command>
+      </Command>
+      <Message>
+      </Message>
+      <Outputs>
+      </Outputs>
     </CustomBuildStep>
     <PreLinkEvent>
       <Command>xcopy /y /d  "$(SolutionDir)Library\lib\x64\*.dll" "$(OutDir)"
@@ -311,5 +327,10 @@ xcopy /y /d  "$(SolutionDir)Library\lib\x64\Release\*.dll" "$(OutDir)"</Command>
     <Error Condition="!Exists('..\packages\soil.1.16.0\build\native\soil.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\soil.1.16.0\build\native\soil.props'))" />
     <Error Condition="!Exists('..\packages\glm.0.9.9.500\build\native\glm.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\glm.0.9.9.500\build\native\glm.targets'))" />
     <Error Condition="!Exists('..\packages\glfw.3.3.0.1\build\native\glfw.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\glfw.3.3.0.1\build\native\glfw.targets'))" />
+  </Target>
+  <Target Name="BeforeClean">
+    <Message Text="Cleaning resource files..." />
+    <Exec Command="rd /s /q $(OutDir)Resources" />
+	<Exec Command="del /q /f /s $(OutDir)*.dll" />
   </Target>
 </Project>
