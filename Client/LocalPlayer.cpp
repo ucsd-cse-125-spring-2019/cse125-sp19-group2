@@ -98,28 +98,29 @@ void LocalPlayer::inputReadHandler()
 	{
 		if (pad->is_connected())
 		{
-			pad->update();
-			if (pad->State._buttons[GamePad_Button_DPAD_LEFT] == true) {
-				//Logger::getInstance()->debug("left pressed");
+			if (pad->KeyDown(GamePad_Button_DPAD_LEFT)) {
 				InputManager::getInstance().fire(GLFW_KEY_A, KeyState::Press);
-				pad->State._buttons[GamePad_Button_DPAD_LEFT] = false;
+			};
+			if (pad->KeyUp(GamePad_Button_DPAD_LEFT)) {
+				InputManager::getInstance().fire(GLFW_KEY_A, KeyState::Release);
 			}
-			
-			if (pad->State._buttons[GamePad_Button_DPAD_RIGHT] == true) {
-				//Logger::getInstance()->debug("right pressed");
+			if (pad->KeyDown(GamePad_Button_DPAD_RIGHT)) {
 				InputManager::getInstance().fire(GLFW_KEY_D, KeyState::Press);
-				pad->State._buttons[GamePad_Button_DPAD_RIGHT] = false;
-
 			}
-			if (pad->State._buttons[GamePad_Button_DPAD_UP] == true) {
-				//Logger::getInstance()->debug("up pressed");
+			if (pad->KeyUp(GamePad_Button_DPAD_RIGHT)) {
+				InputManager::getInstance().fire(GLFW_KEY_D, KeyState::Release);
+			}
+			if (pad->KeyDown(GamePad_Button_DPAD_UP)) {
 				InputManager::getInstance().fire(GLFW_KEY_W, KeyState::Press);
-				pad->State._buttons[GamePad_Button_DPAD_UP] = false;
 			}
-			if (pad->State._buttons[GamePad_Button_DPAD_DOWN] == true) {
-				//Logger::getInstance()->debug("down pressed");
+			if (pad->KeyUp(GamePad_Button_DPAD_UP)) {
+				InputManager::getInstance().fire(GLFW_KEY_W, KeyState::Release);
+			}
+			if (pad->KeyDown(GamePad_Button_DPAD_DOWN)) {
 				InputManager::getInstance().fire(GLFW_KEY_S, KeyState::Press);
-				pad->State._buttons[GamePad_Button_DPAD_DOWN] = false;
+			}
+			if (pad->KeyUp(GamePad_Button_DPAD_DOWN)) {
+				InputManager::getInstance().fire(GLFW_KEY_S, KeyState::Release);
 			}
 		}
 	}
