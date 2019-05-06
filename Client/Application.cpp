@@ -32,16 +32,16 @@ Application::Application(const char* windowTitle, int argc, char** argv) {
   {
     uint32_t playerId = _networkClient->connect("localhost", PORTNUM);
 
-	// First thing we do is create a player join event with player name
-	auto joinEvent = std::make_shared<GameEvent>();
-	joinEvent->playerId = playerId;
-	joinEvent->type = EVENT_PLAYER_JOIN;
+    // First thing we do is create a player join event with player name
+    auto joinEvent = std::make_shared<GameEvent>();
+    joinEvent->playerId = playerId;
+    joinEvent->type = EVENT_PLAYER_JOIN;
 
-	// TODO: change this to player-specified name
-	joinEvent->playerName = "Player" + std::to_string(playerId);
-	_networkClient->sendEvent(joinEvent);
+    // TODO: change this to player-specified name
+    joinEvent->playerName = "Player" + std::to_string(playerId);
+    _networkClient->sendEvent(joinEvent);
 
-	_localPlayer = std::make_unique<LocalPlayer>(playerId, _networkClient);
+    _localPlayer = std::make_unique<LocalPlayer>(playerId, _networkClient);
   }
   catch (std::runtime_error e)
   {
@@ -156,7 +156,7 @@ void Application::Setup() {
     // Test Sound
     auto ambient = AudioManager::getInstance().getAudioSource("Ambient Sound");
     ambient->init("Resources/Sounds/Mario - Overworld.mp3");
-    ambient->setVolume(0.4);
+    ambient->setVolume(0.4f);
     ambient->play(_playAmbient);
 
     auto positional = AudioManager::getInstance().getAudioSource("Positional Sound");
@@ -179,13 +179,13 @@ void Application::Setup() {
     pos->setItems({ "Left", "Front", "Right" });
     pos->setCallback([=](const Enum & e) {
         switch (e) {
-		case Left:
+        case Left:
             positional->setPosition(glm::vec3(-2, 0 , 0));
             break;
-		case Front:
+        case Front:
             positional->setPosition(glm::vec3(0, 0 , -2));
             break;
-		case Right:
+        case Right:
             positional->setPosition(glm::vec3(2, 0 , 0));
             break;
         }
@@ -253,16 +253,16 @@ void Application::Update()
     for (auto& state : _networkClient->receiveUpdates())
     {
         // Update entity
-		EntityManager::getInstance().update(state);
+        EntityManager::getInstance().update(state);
 
-		// Check for special case of GameState update
-		if (state->type == ENTITY_STATE)
-		{
-			auto gameState = std::static_pointer_cast<GameState>(state);
+        // Check for special case of GameState update
+        if (state->type == ENTITY_STATE)
+        {
+            auto gameState = std::static_pointer_cast<GameState>(state);
 
-			// TODO: do something with general state
-			// Timer, winner of game, in lobby, etc
-		}
+            // TODO: do something with general state
+            // Timer, winner of game, in lobby, etc
+        }
     }
   }
   catch (std::runtime_error e)
@@ -270,7 +270,7 @@ void Application::Update()
     // Disconnected from the server
   }
   if (_localPlayer) {
-	  _localPlayer->update();
+      _localPlayer->update();
   }
     
   // Update sound engine
@@ -292,17 +292,17 @@ void Application::Draw() {
   {
     // render scene
     //_frameBuffer->drawQuad(_testShader);
-	  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT| GL_STENCIL_BUFFER_BIT);
-	// Render Skybox
-	_skyboxShader->Use();
-	_skyboxShader->set_uniform("u_projection", _localPlayer->getCamera()->projection_matrix());
-	_skyboxShader->set_uniform("u_view", _localPlayer->getCamera()->view_matrix() * glm::scale(glm::mat4(1.0f), glm::vec3(200,200,200)));
+      glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT| GL_STENCIL_BUFFER_BIT);
+    // Render Skybox
+    _skyboxShader->Use();
+    _skyboxShader->set_uniform("u_projection", _localPlayer->getCamera()->projection_matrix());
+    _skyboxShader->set_uniform("u_view", _localPlayer->getCamera()->view_matrix() * glm::scale(glm::mat4(1.0f), glm::vec3(200,200,200)));
       //glm::mat4(glm::mat3(_localPlayer->getCamera()->view_matrix()))
-	_skybox->draw(_skyboxShader);
+    _skybox->draw(_skyboxShader);
 
     EntityManager::getInstance().render(_localPlayer->getCamera());
 
-	  // Debug Shader
+      // Debug Shader
     _debuglightShader->Use();
     _debuglightShader->set_uniform("u_projection", _localPlayer->getCamera()->projection_matrix());
     _debuglightShader->set_uniform("u_view", _localPlayer->getCamera()->view_matrix());

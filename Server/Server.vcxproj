@@ -87,13 +87,15 @@
     <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);$(SolutionDir);$(SolutionDir)/Library/include</IncludePath>
     <LibraryPath>$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(NETFXKitsDir)Lib\um\x64;$(SolutionDir)/Library/lib/x64;$(SolutionDir)/Library/lib/x64/Debug</LibraryPath>
     <SourcePath>$(VC_SourcePath);$(SolutionDir)/Shared</SourcePath>
-    <CustomBuildAfterTargets>Clean</CustomBuildAfterTargets>
+    <CustomBuildAfterTargets>
+    </CustomBuildAfterTargets>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);$(SolutionDir);$(SolutionDir)/Library/include</IncludePath>
     <LibraryPath>$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(NETFXKitsDir)Lib\um\x64;$(SolutionDir)/Library/lib/x64;$(SolutionDir)/Library/lib/x64/Release</LibraryPath>
     <SourcePath>$(VC_SourcePath);$(SolutionDir)/Shared</SourcePath>
-    <CustomBuildAfterTargets>Clean</CustomBuildAfterTargets>
+    <CustomBuildAfterTargets>
+    </CustomBuildAfterTargets>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -141,13 +143,16 @@
       <Message>Copying level files into build directory</Message>
     </PostBuildEvent>
     <CustomBuildStep>
-      <Command>rd /s /q "$(OutDir)Levels"</Command>
+      <Command>
+      </Command>
     </CustomBuildStep>
     <CustomBuildStep>
-      <Message>Removing level files</Message>
+      <Message>
+      </Message>
     </CustomBuildStep>
     <CustomBuildStep>
-      <Outputs>dummy.txt</Outputs>
+      <Outputs>
+      </Outputs>
     </CustomBuildStep>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -202,13 +207,16 @@
       <Message>Copying level files into build directory</Message>
     </PostBuildEvent>
     <CustomBuildStep>
-      <Command>rd /s /q "$(OutDir)Levels"</Command>
+      <Command>
+      </Command>
     </CustomBuildStep>
     <CustomBuildStep>
-      <Message>Removing level files</Message>
+      <Message>
+      </Message>
     </CustomBuildStep>
     <CustomBuildStep>
-      <Outputs>dummy.txt</Outputs>
+      <Outputs>
+      </Outputs>
     </CustomBuildStep>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -252,5 +260,9 @@
       <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
     </PropertyGroup>
     <Error Condition="!Exists('..\packages\glm.0.9.9.500\build\native\glm.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\glm.0.9.9.500\build\native\glm.targets'))" />
+  </Target>
+  <Target Name="BeforeClean">
+    <Message Text="Cleaning level files..." />
+    <Exec Command="rd /s /q $(OutDir)Levels" />
   </Target>
 </Project>

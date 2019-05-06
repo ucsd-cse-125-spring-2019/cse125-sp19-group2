@@ -5,11 +5,11 @@
 class CDogEntity : public CPlayerEntity
 {
 public:
-	CDogEntity() : CPlayerEntity()
-	{
-		// Load Animation
-        setPath("./Resources/Models/dog.dae");
-	};
-	~CDogEntity() {};
+    CDogEntity() : CPlayerEntity()
+    {
+        // Load Animation
+        initAnimation("./Resources/Models/dog.dae");
+    };
+    ~CDogEntity() {};
 };
 

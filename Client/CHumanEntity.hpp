@@ -5,11 +5,11 @@
 class CHumanEntity : public CPlayerEntity
 {
 public:
-	CHumanEntity() : CPlayerEntity()
-	{
+    CHumanEntity() : CPlayerEntity()
+    {
         // Load Animation
-        setPath("./Resources/Models/human.dae");
-	};
-	~CHumanEntity() {};
+        initAnimation("./Resources/Models/human.dae");
+    };
+    ~CHumanEntity() {};
 };
 

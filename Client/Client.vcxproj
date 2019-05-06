@@ -145,7 +145,7 @@
       <PreprocessorDefinitions>_ENABLE_EXTENDED_ALIGNED_STORAGE;_MBCS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>fmod_vc.lib;Debug/nanogui.lib;Ws2_32.lib;Debug/Shared.lib;assimp.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>fmod_vc.lib;nanogui.lib;Ws2_32.lib;Shared.lib;assimp.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PreLinkEvent>
       <Command>xcopy /y /d  "$(SolutionDir)Library\lib\x64\*.dll" "$(OutDir)"
@@ -217,7 +217,7 @@ xcopy /y /d  "$(SolutionDir)Library\lib\x64\Debug\*.dll" "$(OutDir)"</Command>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalDependencies>fmod_vc.lib;Release/nanogui.lib;Ws2_32.lib;Release/Shared.lib;assimp.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>fmod_vc.lib;nanogui.lib;Ws2_32.lib;Shared.lib;assimp.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <SubSystem>Windows</SubSystem>
       <EntryPointSymbol>mainCRTStartup</EntryPointSymbol>
     </Link>
@@ -331,6 +331,6 @@ xcopy /y /d  "$(SolutionDir)Library\lib\x64\Release\*.dll" "$(OutDir)"</Command>
   <Target Name="BeforeClean">
     <Message Text="Cleaning resource files..." />
     <Exec Command="rd /s /q $(OutDir)Resources" />
-	<Exec Command="del /q /f /s $(OutDir)*.dll" />
+    <Exec Command="del /q /f /s $(OutDir)*.dll" />
   </Target>
 </Project>
