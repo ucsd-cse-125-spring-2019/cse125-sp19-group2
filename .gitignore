@@ -243,7 +243,11 @@ _Pvt_Extensions
 
 ## Allow anything under Library/
 !Library/lib/x86/
+!Library/lib/x86/Release/
+!Library/lib/x86/Debug/
 !Library/lib/x64/
+!Library/lib/x64/Release/
+!Library/lib/x64/Debug/
 
 ## Build generated
 build/
