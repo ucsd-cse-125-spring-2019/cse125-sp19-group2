@@ -17,6 +17,12 @@
 #include "LocalPlayer.hpp"
 #include "PointLight.hpp"
 #include "DirectionalLight.hpp"
+#include "AnimatedMesh.hpp"
+#include "Animation.hpp"
+#include "fmod/fmod.h"
+#include "fmod/fmod.hpp"
+#include "fmod/fmod_errors.h"
+
 
 class Application {
 public:
@@ -98,6 +104,20 @@ private:
   // Test Lights
   std::unique_ptr<PointLight> _point_light;
   std::unique_ptr<DirectionalLight> _dir_light;
+
+    // Test UI
+    bool _playAmbient = true;
+    bool _playPositional;
+    int _integer;
+    float _float;
+    std::string _string;
+    enum Enum {
+        Left = 0,
+        Front,
+        Right
+    };
+    Enum _enum;
+
 };
 
 #endif

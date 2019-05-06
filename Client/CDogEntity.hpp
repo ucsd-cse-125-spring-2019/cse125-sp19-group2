@@ -7,7 +7,8 @@ class CDogEntity : public CPlayerEntity
 public:
 	CDogEntity() : CPlayerEntity()
 	{
-		_playerModel = std::make_unique<Model>("./Resources/Models/dog.fbx");
+		// Load Animation
+        setPath("./Resources/Models/dog.dae");
 	};
 	~CDogEntity() {};
 };

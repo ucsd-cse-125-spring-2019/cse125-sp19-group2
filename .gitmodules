@@ -1,0 +1,6 @@
+[submodule "Library/include/ext/nanovg"]
+	path = Library/include/ext/nanovg
+	url = https://github.com/wjakob/nanovg
+[submodule "Library/include/ext/eigen"]
+	path = Library/include/ext/eigen
+	url = https://github.com/eigenteam/eigen-git-mirror.git
