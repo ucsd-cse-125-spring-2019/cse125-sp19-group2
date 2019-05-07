@@ -71,7 +71,8 @@ class Camera
   void set_position(float x, float y, float z);
   void set_pitch(float pitch, bool constrain_pitch = true);
   void set_yaw(float yaw);
-  void set_aspect(float aspect);  
+  void set_aspect(float aspect);
+  void set_fovy(float fovy);
   void set_movement_speed(float speed);
   void set_mouse_sensitivity(float sensitivity);
   

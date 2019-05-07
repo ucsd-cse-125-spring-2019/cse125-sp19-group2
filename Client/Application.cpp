@@ -354,11 +354,13 @@ void Application::StaticMouseScroll(GLFWwindow* window, double x, double y) {
 }
 
 void Application::Resize(int x, int y) {
-    GuiManager::getInstance().getScreen()->resizeCallbackEvent(x, y);
   glfwGetFramebufferSize(_window, &x, &y);
   _win_width = x;
   _win_height = y;
   glViewport(0, 0, x, y);
+  _quadFrameBuffer->resize(x, y);
+  _localPlayer->resize(x, y);
+  GuiManager::getInstance().getScreen()->resizeCallbackEvent(x, y);
 }
 
 void Application::Keyboard(int key, int scancode, int action, int mods) {

@@ -37,4 +37,11 @@ public:
      * \return std::unique_ptr<Camera> const&: Local camera
      */
     std::unique_ptr<Camera> const& getCamera();
+
+    /**
+     * \brief Function needs to be called when the window resizes
+     * \param x(int) Width of the window
+     * \param y(int) Height of the window
+     */
+    void resize(int x, int y);
 };

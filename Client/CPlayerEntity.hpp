@@ -82,27 +82,24 @@ public:
         _isLocal = flag;
     }
 
+    std::unique_ptr<Animation>& getPlayerModel() {
+        return _playerModel;
+    }
+
+    std::string & getCurrentAnim() {
+        return _currentAnim;
+    }
+
+    void setCurrentAnim(const std::string & name) {
+        _currentAnim = name;
+    }
+
 protected:
     void initAnimation(std::string modelPath) {
         // Read in an animated Mesh
         _playerModel = std::make_unique<Animation>(modelPath);
 
-        InputManager::getInstance().getKey(85)->onPress([this]()
-        {
-            _playerModel->animatedMesh->_takeIndex += 1;
-            _playerModel->animatedMesh->_takeIndex %= _playerModel->animatedMesh->takeCount();
-        });
-
-        GuiManager::getInstance().getFormHelper("Form helper")->addGroup("Cycle Animation");
-        GuiManager::getInstance().getFormHelper("Form helper")->addButton("Next", [&]() {
-            _playerModel->animatedMesh->_takeIndex += 1;
-            _playerModel->animatedMesh->_takeIndex %= _playerModel->animatedMesh->takeCount();
-            _currentAnim = _playerModel->animatedMesh->getCurrentAnimName();
-        })->setTooltip("Testing a much longer tooltip, that will wrap around to new lines multiple times.");
-
-        GuiManager::getInstance().getFormHelper("Form helper")->addVariable("Current Animation", _currentAnim);
-
-        GuiManager::getInstance().setDirty();
+        
 
         // TODO: determine which animation gets played
         _playerModel->animatedMesh->_takeIndex = 0;

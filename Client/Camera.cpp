@@ -160,6 +160,10 @@ void Camera::set_aspect(float aspect)
   _aspect = aspect;
 }
 
+void Camera::set_fovy(float fovy) {
+  _fov = fovy;
+}
+
 void Camera::set_movement_speed(float speed)
 {
   _movement_speed = speed;
