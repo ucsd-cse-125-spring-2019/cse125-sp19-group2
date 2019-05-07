@@ -2,17 +2,21 @@
 
 #include <random>
 #include "SPlayerEntity.hpp"
+#include "Shared/DogState.hpp"
 
 class SDogEntity : public SPlayerEntity
 {
 public:
 	SDogEntity(uint32_t playerId, std::vector<glm::vec2>* jails) : SPlayerEntity(playerId)
 	{
+		_state = std::make_shared<DogState>();
+
+		// Parent initialization
+		SPlayerEntity::initState(playerId);
+
 		_state->type = ENTITY_DOG;
 
 		_state->scale = glm::vec3(1);
-
-		_state->stamina = 10;
 
 		// Collider stuff
 		_state->width = 0.8f;
@@ -22,6 +26,10 @@ public:
 		_velocity = 5.0f;
 
 		_jails = jails;
+
+		// Dog-specific stuff
+		auto dogState = std::static_pointer_cast<DogState>(_state);
+		dogState->runStamina = 10;
 	};
 
 	~SDogEntity() {};
@@ -30,6 +38,9 @@ public:
 
 	void handleCollision(std::shared_ptr<SBaseEntity> entity) override
 	{
+		// Cast for dog-specific stuff
+		auto dogState = std::static_pointer_cast<DogState>(_state);
+
 		// Dog getting caught is handled by the dog, not the human
 		if (entity->getState()->type == ENTITY_HUMAN)
 		{
@@ -43,7 +54,7 @@ public:
 		}
 		else if (entity->getState()->type == ENTITY_BONE)
 		{
-			_state->stamina += 5;
+			dogState->runStamina += 5;
 		}
 		else
 		{
@@ -55,5 +66,6 @@ public:
 private:
 	// List of jails the dog could potentially be sent to
 	std::vector<glm::vec2>* _jails;
+	int type = 0;
 };
 

@@ -10,10 +10,15 @@ class SPlayerEntity : public SBaseEntity
 public:
 	SPlayerEntity(uint32_t playerId)
 	{
-		// Allocate a state struct and initialize. Modify as necessary for more
-		// sane defaults
-		_state = std::make_shared<BaseState>();
+		// Capsule collider
+		_collider = std::make_unique<CapsuleCollider>(_state.get());
 
+		hasChanged = false;
+	};
+
+	// Needs to be in a helper function b/c children create state objectb
+	void initState(uint32_t playerId) override
+	{
 		// ID and type
 		_state->id = playerId;
 
@@ -32,12 +37,8 @@ public:
 		_state->isDestroyed = false;
 		_state->isStatic = false;
 		_state->isSolid = true;
+	}
 
-		// collider to track collision info idk
-		_collider = std::make_unique<CapsuleCollider>(_state.get());
-
-		hasChanged = false;
-	};
 	~SPlayerEntity() {};
 
 	virtual void update(std::vector<std::shared_ptr<GameEvent>> events) override

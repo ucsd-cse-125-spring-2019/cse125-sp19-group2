@@ -143,9 +143,11 @@
     <ClInclude Include="BlockingQueue.hpp" />
     <ClInclude Include="Common.hpp" />
     <ClInclude Include="BaseState.hpp" />
+    <ClInclude Include="DogState.hpp" />
     <ClInclude Include="ExampleState.hpp" />
     <ClInclude Include="GameEvent.hpp" />
     <ClInclude Include="GameState.hpp" />
+    <ClInclude Include="HumanState.hpp" />
     <ClInclude Include="Logger.hpp" />
     <ClInclude Include="QuadTree.hpp" />
   </ItemGroup>
