@@ -3,16 +3,19 @@
 #include "IdGenerator.hpp"
 #include "SBaseEntity.hpp"
 #include "CapsuleCollider.hpp"
+#include "Shared\PlayerState.hpp"
 
 class SPlayerEntity : public SBaseEntity
 {
 public:
 	SPlayerEntity(uint32_t playerId)
 	{
-		// Allocate a state struct and initialize. Modify as necessary for more
-		// sane defaults
-		_state = std::make_shared<BaseState>();
+		hasChanged = false;
+	};
 
+	// Needs to be in a helper function b/c children create state objectb
+	void initState(uint32_t playerId) override
+	{
 		// ID and type
 		_state->id = playerId;
 
@@ -32,11 +35,10 @@ public:
 		_state->isStatic = false;
 		_state->isSolid = true;
 
-		// collider to track collision info idk
+		// Capsule collider
 		_collider = std::make_unique<CapsuleCollider>(_state.get());
+	}
 
-		hasChanged = false;
-	};
 	~SPlayerEntity() {};
 
 	virtual void update(std::vector<std::shared_ptr<GameEvent>> events) override
@@ -107,7 +109,7 @@ public:
 
 protected:
 	// TODO: change this to PlayerState or some such
-	std::shared_ptr<BaseState> _state;
+	std::shared_ptr<PlayerState> _state;
 
 	// Player movement velocity in units/second
 	float _velocity;

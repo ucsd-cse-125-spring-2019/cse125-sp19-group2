@@ -104,6 +104,9 @@
     <ClInclude Include="SHumanEntity.hpp">
       <Filter>Header Files\Entity</Filter>
     </ClInclude>
+    <ClInclude Include="SBoneEntity.hpp">
+      <Filter>Header Files\Entity</Filter>
+    </ClInclude>
     <ClInclude Include="LevelParser.hpp">
       <Filter>Header Files\Level</Filter>
     </ClInclude>
