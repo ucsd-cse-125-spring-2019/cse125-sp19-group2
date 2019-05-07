@@ -27,22 +27,35 @@ public:
     // All server objects must have a state to send to the client.
     virtual std::shared_ptr<BaseState> getState() = 0;
 
+	// For objects with "scene graphs". By default, no kids
+	virtual	std::vector<std::shared_ptr<SBaseEntity>> getChildren()
+	{
+		return std::vector<std::shared_ptr<SBaseEntity>>();
+	};
+
 	// Wrappers for colliders
-	bool isColliding(QuadTree & tree)
+	virtual bool isColliding(QuadTree & tree)
 	{
 		return _collider->isColliding(tree);
 	};
 
-	bool isColliding(BaseState* state)
+	virtual bool isColliding(BaseState* state)
 	{
 		return _collider->isColliding(state);
 	};
 
-	std::vector<BaseState*> getColliding(QuadTree & tree)
+	virtual std::vector<BaseState*> getColliding(QuadTree & tree)
 	{
 		return _collider->getColliding(tree);
 	};
 
+	// Called by the CollisionManager; handle collision with specific object
+	virtual void handleCollision(std::shared_ptr<SBaseEntity> entity)
+	{
+		// Basic "bumping away" logic
+		_collider->handleCollision(entity->getState().get());
+	};
+		 
 	// TODO: add more server-specific functions that are object-agnostic
 
 protected:

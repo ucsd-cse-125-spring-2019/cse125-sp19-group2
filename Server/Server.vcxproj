@@ -74,22 +74,28 @@
     <SourcePath>$(VC_SourcePath);$(SolutionDir)/Shared</SourcePath>
     <LibraryPath>$(VC_LibraryPath_x86);$(WindowsSDK_LibraryPath_x86);$(NETFXKitsDir)Lib\um\x86;$(SolutionDir)/Library/lib/x86</LibraryPath>
     <OutDir>$(SolutionDir)$(Platform)\$(Configuration)\</OutDir>
+    <CustomBuildAfterTargets>Clean</CustomBuildAfterTargets>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);$(SolutionDir);$(SolutionDir)/Library/include</IncludePath>
     <SourcePath>$(VC_SourcePath);$(SolutionDir)/Shared</SourcePath>
     <LibraryPath>$(VC_LibraryPath_x86);$(WindowsSDK_LibraryPath_x86);$(NETFXKitsDir)Lib\um\x86;$(SolutionDir)/Library/lib/x86</LibraryPath>
     <OutDir>$(SolutionDir)$(Platform)\$(Configuration)\</OutDir>
+    <CustomBuildAfterTargets>Clean</CustomBuildAfterTargets>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);$(SolutionDir);$(SolutionDir)/Library/include</IncludePath>
-    <LibraryPath>$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(NETFXKitsDir)Lib\um\x64;$(SolutionDir)/Library/lib/x64</LibraryPath>
+    <LibraryPath>$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(NETFXKitsDir)Lib\um\x64;$(SolutionDir)/Library/lib/x64;$(SolutionDir)/Library/lib/x64/Debug</LibraryPath>
     <SourcePath>$(VC_SourcePath);$(SolutionDir)/Shared</SourcePath>
+    <CustomBuildAfterTargets>
+    </CustomBuildAfterTargets>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);$(SolutionDir);$(SolutionDir)/Library/include</IncludePath>
-    <LibraryPath>$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(NETFXKitsDir)Lib\um\x64;$(SolutionDir)/Library/lib/x64</LibraryPath>
+    <LibraryPath>$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(NETFXKitsDir)Lib\um\x64;$(SolutionDir)/Library/lib/x64;$(SolutionDir)/Library/lib/x64/Release</LibraryPath>
     <SourcePath>$(VC_SourcePath);$(SolutionDir)/Shared</SourcePath>
+    <CustomBuildAfterTargets>
+    </CustomBuildAfterTargets>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -102,6 +108,21 @@
     <Link>
       <AdditionalDependencies>Ws2_32.lib;Shared.lib;assimp.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
+    <PostBuildEvent>
+      <Command>xcopy /y /d /e /i "$(ProjectDir)Levels" "$(OutDir)Levels"</Command>
+    </PostBuildEvent>
+    <PostBuildEvent>
+      <Message>Copying level files into build directory</Message>
+    </PostBuildEvent>
+    <CustomBuildStep>
+      <Command>rd /s /q "$(OutDir)Levels"</Command>
+    </CustomBuildStep>
+    <CustomBuildStep>
+      <Message>Removing level files</Message>
+    </CustomBuildStep>
+    <CustomBuildStep>
+      <Outputs>dummy.txt</Outputs>
+    </CustomBuildStep>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
@@ -115,6 +136,24 @@
     <Link>
       <AdditionalDependencies>Ws2_32.lib;Shared.lib;assimp.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
+    <PostBuildEvent>
+      <Command>xcopy /y /d /e /i "$(ProjectDir)Levels" "$(OutDir)Levels"</Command>
+    </PostBuildEvent>
+    <PostBuildEvent>
+      <Message>Copying level files into build directory</Message>
+    </PostBuildEvent>
+    <CustomBuildStep>
+      <Command>
+      </Command>
+    </CustomBuildStep>
+    <CustomBuildStep>
+      <Message>
+      </Message>
+    </CustomBuildStep>
+    <CustomBuildStep>
+      <Outputs>
+      </Outputs>
+    </CustomBuildStep>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
@@ -131,6 +170,21 @@
       <OptimizeReferences>true</OptimizeReferences>
       <AdditionalDependencies>Ws2_32.lib;Shared.lib;assimp.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
+    <PostBuildEvent>
+      <Command>xcopy /y /d /e /i "$(ProjectDir)Levels" "$(OutDir)Levels"</Command>
+    </PostBuildEvent>
+    <PostBuildEvent>
+      <Message>Copying level files into build directory</Message>
+    </PostBuildEvent>
+    <CustomBuildStep>
+      <Command>rd /s /q "$(OutDir)Levels"</Command>
+    </CustomBuildStep>
+    <CustomBuildStep>
+      <Message>Removing level files</Message>
+    </CustomBuildStep>
+    <CustomBuildStep>
+      <Outputs>dummy.txt</Outputs>
+    </CustomBuildStep>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
@@ -146,26 +200,53 @@
       <OptimizeReferences>true</OptimizeReferences>
       <AdditionalDependencies>Ws2_32.lib;Shared.lib;assimp.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
+    <PostBuildEvent>
+      <Command>xcopy /y /d /e /i "$(ProjectDir)Levels" "$(OutDir)Levels"</Command>
+    </PostBuildEvent>
+    <PostBuildEvent>
+      <Message>Copying level files into build directory</Message>
+    </PostBuildEvent>
+    <CustomBuildStep>
+      <Command>
+      </Command>
+    </CustomBuildStep>
+    <CustomBuildStep>
+      <Message>
+      </Message>
+    </CustomBuildStep>
+    <CustomBuildStep>
+      <Outputs>
+      </Outputs>
+    </CustomBuildStep>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="CollisionManager.cpp" />
+    <ClCompile Include="EventManager.cpp" />
     <ClCompile Include="GameServer.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="NetworkServer.cpp" />
     <ClCompile Include="IdGenerator.cpp" />
+    <ClCompile Include="GridLevelParser.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AABBCollider.hpp" />
     <ClInclude Include="BaseCollider.hpp" />
     <ClInclude Include="CapsuleCollider.hpp" />
+    <ClInclude Include="CollisionManager.hpp" />
+    <ClInclude Include="EmptyCollider.hpp" />
+    <ClInclude Include="EventManager.hpp" />
     <ClInclude Include="GameServer.hpp" />
     <ClInclude Include="IdGenerator.hpp" />
+    <ClInclude Include="LevelParser.hpp" />
     <ClInclude Include="NetworkServer.hpp" />
     <ClInclude Include="SBaseEntity.hpp" />
     <ClInclude Include="SBoxEntity.hpp" />
     <ClInclude Include="SDogEntity.hpp" />
     <ClInclude Include="SExampleEntity.hpp" />
     <ClInclude Include="SHumanEntity.hpp" />
+    <ClInclude Include="SJailEntity.hpp" />
     <ClInclude Include="SPlayerEntity.hpp" />
+    <ClInclude Include="GridLevelParser.hpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
@@ -179,5 +260,9 @@
       <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
     </PropertyGroup>
     <Error Condition="!Exists('..\packages\glm.0.9.9.500\build\native\glm.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\glm.0.9.9.500\build\native\glm.targets'))" />
+  </Target>
+  <Target Name="BeforeClean">
+    <Message Text="Cleaning level files..." />
+    <Exec Command="rd /s /q $(OutDir)Levels" />
   </Target>
 </Project>

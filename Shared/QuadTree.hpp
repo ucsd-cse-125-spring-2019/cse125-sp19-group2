@@ -63,6 +63,7 @@ public:
 private:
 	// Square bounding box defining this node's area
 	BoundingBox _boundary;
+	double _wiggleRoom = 3;
 
 	// Objects in this node
 	std::vector<BaseState*> _objects;

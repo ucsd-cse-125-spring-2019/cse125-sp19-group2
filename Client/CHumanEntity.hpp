@@ -5,10 +5,11 @@
 class CHumanEntity : public CPlayerEntity
 {
 public:
-	CHumanEntity() : CPlayerEntity()
-	{
-		_playerModel = std::make_unique<Model>("./Resources/Models/human.fbx");
-	};
-	~CHumanEntity() {};
+    CHumanEntity() : CPlayerEntity()
+    {
+        // Load Animation
+        initAnimation("./Resources/Models/human.dae");
+    };
+    ~CHumanEntity() {};
 };
 

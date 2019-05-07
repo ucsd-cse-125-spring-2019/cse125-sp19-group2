@@ -16,7 +16,7 @@ private:
 
 	glm::vec3 _offset;
 	float _pitch = -45.0f;
-	float _distance = 3.0f;
+	float _distance = 14.0f;
 
 public:
 

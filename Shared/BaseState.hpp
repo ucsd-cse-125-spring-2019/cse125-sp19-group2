@@ -51,6 +51,9 @@ struct BaseState
 	// Whether or not the object can move
 	bool isStatic;
 
+	// Whether or not the object can be passed through
+	bool isSolid;
+
 	// Serialization for Cereal
 	template<class Archive>
 	void serialize(Archive & archive)
@@ -66,7 +69,8 @@ struct BaseState
 				height,
 				colliderType,
 				isDestroyed,
-				isStatic);
+				isStatic,
+				isSolid);
 	};
 
 	virtual void print()
