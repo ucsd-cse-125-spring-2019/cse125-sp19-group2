@@ -27,7 +27,8 @@ enum EntityType
 	ENTITY_HUMAN,
 	ENTITY_BOX,
 	ENTITY_WALL,
-	ENTITY_JAIL
+	ENTITY_JAIL,
+	ENTITY_BONE
 	// TODO: add new types here, e.g. ENTITY_DOGBONE
 };
 

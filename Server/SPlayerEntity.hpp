@@ -3,6 +3,7 @@
 #include "IdGenerator.hpp"
 #include "SBaseEntity.hpp"
 #include "CapsuleCollider.hpp"
+#include "Shared\PlayerState.hpp"
 
 class SPlayerEntity : public SBaseEntity
 {
@@ -107,7 +108,7 @@ public:
 
 protected:
 	// TODO: change this to PlayerState or some such
-	std::shared_ptr<BaseState> _state;
+	std::shared_ptr<PlayerState> _state;
 
 	// Player movement velocity in units/second
 	float _velocity;

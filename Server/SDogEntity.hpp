@@ -12,6 +12,8 @@ public:
 
 		_state->scale = glm::vec3(1);
 
+		_state->stamina = 10;
+
 		// Collider stuff
 		_state->width = 0.8f;
 		_state->height = 0.8f;
@@ -38,6 +40,10 @@ public:
 			std::shuffle(_jails->begin(), _jails->end(), std::default_random_engine(seed));
 			glm::vec2 jailPos = (*_jails)[0];
 			getState()->pos = glm::vec3(jailPos.x, 0, jailPos.y);
+		}
+		else if (entity->getState()->type == ENTITY_BONE)
+		{
+			_state->stamina += 5;
 		}
 		else
 		{
