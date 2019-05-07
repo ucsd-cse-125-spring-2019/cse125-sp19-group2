@@ -3,6 +3,9 @@
 #include <cereal/types/string.hpp>
 
 #include "NetworkClient.hpp"
+#include "Shared/PlayerState.hpp"
+#include "Shared/DogState.hpp"
+#include "Shared/HumanState.hpp"
 
 NetworkClient::NetworkClient()
 {

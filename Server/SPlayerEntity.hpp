@@ -10,9 +10,6 @@ class SPlayerEntity : public SBaseEntity
 public:
 	SPlayerEntity(uint32_t playerId)
 	{
-		// Capsule collider
-		_collider = std::make_unique<CapsuleCollider>(_state.get());
-
 		hasChanged = false;
 	};
 
@@ -37,6 +34,9 @@ public:
 		_state->isDestroyed = false;
 		_state->isStatic = false;
 		_state->isSolid = true;
+
+		// Capsule collider
+		_collider = std::make_unique<CapsuleCollider>(_state.get());
 	}
 
 	~SPlayerEntity() {};

@@ -6,7 +6,13 @@
 
 struct PlayerState : BaseState
 {
-	// for future use maybe
+	// TODO: player-specific variables
+
+	template<class Archive>
+	void serialize(Archive & archive)
+	{
+		archive(cereal::base_class<BaseState>(this));
+	}
 };
 
 // Register the polymorphic struct with cereal

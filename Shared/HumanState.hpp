@@ -12,7 +12,7 @@ struct HumanState : public PlayerState
 	template<class Archive>
 	void serialize(Archive & archive)
 	{
-		archive(cereal::base_class<BaseState>(this));
+		archive(cereal::base_class<PlayerState>(this));
 	}
 };
 

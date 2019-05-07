@@ -12,7 +12,7 @@ struct DogState : PlayerState
 	void serialize(Archive & archive)
 	{
 		archive(
-			cereal::base_class<BaseState>(this),
+			cereal::base_class<PlayerState>(this),
 			runStamina);
 	}
 };

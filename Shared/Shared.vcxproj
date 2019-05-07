@@ -149,6 +149,7 @@
     <ClInclude Include="GameState.hpp" />
     <ClInclude Include="HumanState.hpp" />
     <ClInclude Include="Logger.hpp" />
+    <ClInclude Include="PlayerState.hpp" />
     <ClInclude Include="QuadTree.hpp" />
   </ItemGroup>
   <ItemGroup>
