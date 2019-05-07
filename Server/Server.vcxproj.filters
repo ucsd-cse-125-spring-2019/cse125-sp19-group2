@@ -28,15 +28,27 @@
     <Filter Include="Source Files\Util">
       <UniqueIdentifier>{72980280-738a-4a30-b406-5afbf995fa9c}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Header Files\Collider">
+    <Filter Include="Header Files\Level">
+      <UniqueIdentifier>{2808c6b2-fe5b-4358-81af-0697e7466de5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Level">
+      <UniqueIdentifier>{f77826ab-e04d-4368-8157-b199c5e536ea}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Physics">
+      <UniqueIdentifier>{1ce31f09-2106-48da-a08e-1afc4022a97f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Physics">
       <UniqueIdentifier>{83400ed4-8600-4689-8643-3dfea0c57b07}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Game">
+      <UniqueIdentifier>{ca00576b-a131-4097-8061-47a0bddfa71e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Game">
+      <UniqueIdentifier>{c743a8e6-487a-44bb-b564-b68178c9d972}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="GameServer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="NetworkServer.cpp">
@@ -45,11 +57,20 @@
     <ClCompile Include="IdGenerator.cpp">
       <Filter>Source Files\Util</Filter>
     </ClCompile>
+    <ClCompile Include="GridLevelParser.cpp">
+      <Filter>Source Files\Level</Filter>
+    </ClCompile>
+    <ClCompile Include="CollisionManager.cpp">
+      <Filter>Source Files\Physics</Filter>
+    </ClCompile>
+    <ClCompile Include="GameServer.cpp">
+      <Filter>Source Files\Game</Filter>
+    </ClCompile>
+    <ClCompile Include="EventManager.cpp">
+      <Filter>Source Files\Game</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="GameServer.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="NetworkServer.hpp">
       <Filter>Header Files\Network</Filter>
     </ClInclude>
@@ -66,13 +87,13 @@
       <Filter>Header Files\Entity</Filter>
     </ClInclude>
     <ClInclude Include="BaseCollider.hpp">
-      <Filter>Header Files\Collider</Filter>
+      <Filter>Header Files\Physics</Filter>
     </ClInclude>
     <ClInclude Include="CapsuleCollider.hpp">
-      <Filter>Header Files\Collider</Filter>
+      <Filter>Header Files\Physics</Filter>
     </ClInclude>
     <ClInclude Include="AABBCollider.hpp">
-      <Filter>Header Files\Collider</Filter>
+      <Filter>Header Files\Physics</Filter>
     </ClInclude>
     <ClInclude Include="SBoxEntity.hpp">
       <Filter>Header Files\Entity</Filter>
@@ -85,6 +106,27 @@
     </ClInclude>
     <ClInclude Include="SBoneEntity.hpp">
       <Filter>Header Files\Entity</Filter>
+    </ClInclude>
+    <ClInclude Include="LevelParser.hpp">
+      <Filter>Header Files\Level</Filter>
+    </ClInclude>
+    <ClInclude Include="SJailEntity.hpp">
+      <Filter>Header Files\Entity</Filter>
+    </ClInclude>
+    <ClInclude Include="GridLevelParser.hpp">
+      <Filter>Header Files\Level</Filter>
+    </ClInclude>
+    <ClInclude Include="CollisionManager.hpp">
+      <Filter>Header Files\Physics</Filter>
+    </ClInclude>
+    <ClInclude Include="EmptyCollider.hpp">
+      <Filter>Header Files\Physics</Filter>
+    </ClInclude>
+    <ClInclude Include="GameServer.hpp">
+      <Filter>Header Files\Game</Filter>
+    </ClInclude>
+    <ClInclude Include="EventManager.hpp">
+      <Filter>Header Files\Game</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
