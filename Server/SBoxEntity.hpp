@@ -2,13 +2,17 @@
 
 #include <memory>
 #include "IdGenerator.hpp"
+#include "AABBCollider.hpp"
 #include "SBaseEntity.hpp"
 #include "Shared/BaseState.hpp"
 
 class SBoxEntity : public SBaseEntity
 {
 public:
-	SBoxEntity(glm::vec3 pos, float width, float depth, float height)
+	SBoxEntity(
+		glm::vec3 pos,
+		glm::vec3 forward,
+		glm::vec3 scale)
 	{
 		// Allocate a state struct and initialize. Modify as necessary for more
 		// sane defaults
@@ -26,16 +30,20 @@ public:
 		_state->up = glm::vec3(0, 1, 0);
 
 		// Base scale on constructor args
-		_state->scale = glm::vec3(width, height, depth);
+		_state->scale = scale;
 
 		// Collider stuff
-		_state->width = width;
-		_state->height = height;
-		_state->depth = depth;
+		_state->width = scale.x;
+		_state->height = scale.y;
+		_state->depth = scale.z;
 		_state->colliderType = COLLIDER_AABB;
+
+		// Basic AABB collider
+		_collider = std::make_unique<AABBCollider>(_state.get());
 
 		_state->isDestroyed = false;
 		_state->isStatic = true;
+		_state->isSolid = true;
 
 		hasChanged = false;
 	};

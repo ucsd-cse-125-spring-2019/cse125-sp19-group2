@@ -1,0 +1,2 @@
+idle 1 25
+running 29 50

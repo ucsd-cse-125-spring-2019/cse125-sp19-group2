@@ -12,6 +12,7 @@ QuadTree::~QuadTree()
 int QuadTree::getIndex(BaseState * state)
 {
 	int index = -1;
+	// extra room (must be more than velocity of player)
 	double objBottom = (state->pos.z - state->depth / 2);
 	double objTop = (state->pos.z + state->depth / 2);
 	double objLeft = (state->pos.x - state->width / 2);

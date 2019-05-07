@@ -7,8 +7,12 @@
 
 #define PORTNUM "4000"
 
-#define MAP_WIDTH 100
-#define MAP_HEIGHT 100
+// Width and height of walls and fences
+#define WALL_WIDTH 0.5f
+#define WALL_HEIGHT 3.0f
+
+// Map is a square so this is the same as height
+#define MAP_WIDTH 50
 
 // Not needed in client but many server-side objects need access to this def.
 #define TICKS_PER_SEC 30  // 33.3 ms per update() loop
@@ -17,17 +21,20 @@
 // enter the picture.
 enum EntityType
 {
+	ENTITY_STATE,	// Not really an entity but needed to differentiate GameState
     ENTITY_EXAMPLE,
 	ENTITY_DOG,
 	ENTITY_HUMAN,
 	ENTITY_BOX,
-	ENTITY_WALL
+	ENTITY_WALL,
+	ENTITY_JAIL
 	// TODO: add new types here, e.g. ENTITY_DOGBONE
 };
 
 // Types of narrow-phase colliders
 enum ColliderType
 {
+	COLLIDER_NONE,
 	COLLIDER_AABB,
 	COLLIDER_CAPSULE
 };

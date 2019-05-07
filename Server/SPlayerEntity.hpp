@@ -24,12 +24,13 @@ public:
 		_state->up = glm::vec3(0, 1, 0);
 
 		// Standard scale
-		_state->scale = glm::vec3(0.1f);
+		_state->scale = glm::vec3(1);
 
 		_state->colliderType = COLLIDER_CAPSULE;
 
 		_state->isDestroyed = false;
 		_state->isStatic = false;
+		_state->isSolid = true;
 
 		// collider to track collision info idk
 		_collider = std::make_unique<CapsuleCollider>(_state.get());
@@ -40,41 +41,31 @@ public:
 
 	virtual void update(std::vector<std::shared_ptr<GameEvent>> events) override
 	{
+		// Do nothing if we are set to be destroyed
+		if (_state->isDestroyed)
+		{
+			return;
+		}
+
 		hasChanged = false;
 
 		// Only change attributes of this object if not static
 		if (!_state->isStatic)
 		{
-			// Filter events for this player only
-			std::vector<std::shared_ptr<GameEvent>> filteredEvents;
-			std::copy_if(events.begin(), events.end(), std::back_inserter(filteredEvents), [&](std::shared_ptr<GameEvent> i)
-				{
-					return i->playerId == _state->id;
-				});
-
-			// Sort by event type
-			std::sort(filteredEvents.begin(), filteredEvents.end(),
-				[](const std::shared_ptr<GameEvent> & a, const std::shared_ptr<GameEvent> & b) -> bool
-				{
-					return a->type < b->type;
-				});
-
-			// Remove duplicate events
-			filteredEvents.erase(std::unique(filteredEvents.begin(), filteredEvents.end(),
+			// Remove duplicate events (events are already sorted)
+			events.erase(std::unique(events.begin(), events.end(),
 				[](const std::shared_ptr<GameEvent> & a, const std::shared_ptr<GameEvent> & b) -> bool
 				{
 					return a->type == b->type;
-				}), filteredEvents.end());
+				}), events.end());
 
 			// If any events left, process them
-			if (filteredEvents.size())
+			if (events.size())
 			{
-				//Logger::getInstance()->debug("Received " + std::to_string(filteredEvents.size()) + " events");
-
 				// Overall direction of player
 				glm::vec3 dir = glm::vec3(0);
 
-				for (auto& event : filteredEvents)
+				for (auto& event : events)
 				{
 					switch (event->type)
 					{

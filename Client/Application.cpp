@@ -7,7 +7,10 @@
 #include "Camera.hpp"
 #include "InputManager.h"
 #include "Shared/Logger.hpp"
+#include "Shared/GameState.hpp"
 #include "EntityManager.hpp"
+#include "GuiManager.hpp"
+#include "AudioManager.hpp"
 
 Application::Application(const char* windowTitle, int argc, char** argv) {
   _win_title = windowTitle;
@@ -29,16 +32,16 @@ Application::Application(const char* windowTitle, int argc, char** argv) {
   {
     uint32_t playerId = _networkClient->connect("localhost", PORTNUM);
 
-	// First thing we do is create a player join event with player name
-	auto joinEvent = std::make_shared<GameEvent>();
-	joinEvent->playerId = playerId;
-	joinEvent->type = EVENT_PLAYER_JOIN;
+    // First thing we do is create a player join event with player name
+    auto joinEvent = std::make_shared<GameEvent>();
+    joinEvent->playerId = playerId;
+    joinEvent->type = EVENT_PLAYER_JOIN;
 
-	// TODO: change this to player-specified name
-	joinEvent->playerName = "Player" + std::to_string(playerId);
-	_networkClient->sendEvent(joinEvent);
+    // TODO: change this to player-specified name
+    joinEvent->playerName = "Player" + std::to_string(playerId);
+    _networkClient->sendEvent(joinEvent);
 
-	_localPlayer = std::make_unique<LocalPlayer>(playerId, _networkClient);
+    _localPlayer = std::make_unique<LocalPlayer>(playerId, _networkClient);
   }
   catch (std::runtime_error e)
   {
@@ -67,6 +70,8 @@ void Application::Setup() {
   glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
   glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
   glEnable(GL_CULL_FACE);
+
+    
 
   // Initialize pointers
   _testShader = std::make_unique<Shader>();
@@ -129,6 +134,66 @@ void Application::Setup() {
     this->count += 1;
     std::cout << this->count << std::endl;
   });
+
+    // Initialize GuiManager
+    GuiManager::getInstance().init(_window);
+
+    // Create a testing widget
+    bool enabled = true;
+    auto *gui = GuiManager::getInstance().createFormHelper("Form helper");
+    gui->addWindow(Eigen::Vector2i(2, 35), "Form helper");
+    
+    gui->addGroup("Validating fields");
+    auto * v = gui->addVariable("int", _integer);
+    v->setSpinnable(true);
+
+    gui->addVariable("float", _float)->setTooltip("Test.");
+    gui->addButton("Add One", [&]() {
+        _integer += 1;
+    });
+
+    
+    // Test Sound
+    auto ambient = AudioManager::getInstance().getAudioSource("Ambient Sound");
+    ambient->init("Resources/Sounds/Mario - Overworld.mp3");
+    ambient->setVolume(0.4f);
+    ambient->play(_playAmbient);
+
+    auto positional = AudioManager::getInstance().getAudioSource("Positional Sound");
+    positional->init("Resources/Sounds/footsteps.mp3", true, true);
+    positional->play(_playPositional);
+
+    // Add Widget to control sound
+    gui->addGroup("Sound");
+    gui->addVariable("Play Ambient Sound", _playAmbient)->setCallback([=](const bool flag) {
+        _playAmbient = flag;
+        ambient->play(flag);
+    });
+    gui->addVariable("Play Positional Sound", _playPositional)->setCallback([=](const bool flag) {
+        _playPositional = flag;
+        positional->play(flag);
+    });
+
+    // Control sound position
+    auto * pos = gui->addVariable("Sound Location", _enum, enabled);
+    pos->setItems({ "Left", "Front", "Right" });
+    pos->setCallback([=](const Enum & e) {
+        switch (e) {
+        case Left:
+            positional->setPosition(glm::vec3(-2, 0 , 0));
+            break;
+        case Front:
+            positional->setPosition(glm::vec3(0, 0 , -2));
+            break;
+        case Right:
+            positional->setPosition(glm::vec3(2, 0 , 0));
+            break;
+        }
+        _enum = e;
+    });
+
+    GuiManager::getInstance().setDirty();
+
 }
 
 void Application::Cleanup() {
@@ -181,13 +246,23 @@ void Application::Run() {
 
 void Application::Update()
 {
+
   // Get updates from the server
   try
   {
     for (auto& state : _networkClient->receiveUpdates())
     {
         // Update entity
-		EntityManager::getInstance().update(state);
+        EntityManager::getInstance().update(state);
+
+        // Check for special case of GameState update
+        if (state->type == ENTITY_STATE)
+        {
+            auto gameState = std::static_pointer_cast<GameState>(state);
+
+            // TODO: do something with general state
+            // Timer, winner of game, in lobby, etc
+        }
     }
   }
   catch (std::runtime_error e)
@@ -195,8 +270,13 @@ void Application::Update()
     // Disconnected from the server
   }
   if (_localPlayer) {
-	  _localPlayer->update();
+      _localPlayer->update();
   }
+    
+  // Update sound engine
+  AudioManager::getInstance().update();
+
+    
   InputManager::getInstance().update();
   _camera->Update();
   _point_light->update();
@@ -205,29 +285,31 @@ void Application::Update()
 void Application::Draw() {
   // Begin drawing scene
   glViewport(0, 0, _win_width, _win_height);
-  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
   // Test FBO
   _quadFrameBuffer->renderScene([this]
   {
     // render scene
     //_frameBuffer->drawQuad(_testShader);
-	  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	// Render Skybox
-	_skyboxShader->Use();
-	_skyboxShader->set_uniform("u_projection", _localPlayer->getCamera()->projection_matrix());
-	_skyboxShader->set_uniform("u_view", _localPlayer->getCamera()->view_matrix() * glm::scale(glm::mat4(1.0f), glm::vec3(6,6,6)));
+      glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT| GL_STENCIL_BUFFER_BIT);
+    // Render Skybox
+    _skyboxShader->Use();
+    _skyboxShader->set_uniform("u_projection", _localPlayer->getCamera()->projection_matrix());
+    _skyboxShader->set_uniform("u_view", _localPlayer->getCamera()->view_matrix() * glm::scale(glm::mat4(1.0f), glm::vec3(200,200,200)));
       //glm::mat4(glm::mat3(_localPlayer->getCamera()->view_matrix()))
-	_skybox->draw(_skyboxShader);
+    _skybox->draw(_skyboxShader);
 
     EntityManager::getInstance().render(_localPlayer->getCamera());
 
-	  // Debug Shader
+      // Debug Shader
     _debuglightShader->Use();
     _debuglightShader->set_uniform("u_projection", _localPlayer->getCamera()->projection_matrix());
     _debuglightShader->set_uniform("u_view", _localPlayer->getCamera()->view_matrix());
     _point_light->draw(_debuglightShader);
-    
+
+    // Draw UI
+    GuiManager::getInstance().draw();
   });
 
   // Render _frameBuffer Quad
@@ -253,6 +335,7 @@ void Application::StaticKeyboard(GLFWwindow* window,
   int key, int scancode, int action, int mods) {
   Application* instance = (Application *)glfwGetWindowUserPointer(window);
   instance->Keyboard(key, scancode, action, mods);
+
 }
 
 void Application::StaticMouseButton(GLFWwindow* window, int btn, int action, int mods) {
@@ -271,6 +354,7 @@ void Application::StaticMouseScroll(GLFWwindow* window, double x, double y) {
 }
 
 void Application::Resize(int x, int y) {
+    GuiManager::getInstance().getScreen()->resizeCallbackEvent(x, y);
   glfwGetFramebufferSize(_window, &x, &y);
   _win_width = x;
   _win_height = y;
@@ -278,6 +362,7 @@ void Application::Resize(int x, int y) {
 }
 
 void Application::Keyboard(int key, int scancode, int action, int mods) {
+  GuiManager::getInstance().getScreen()->keyCallbackEvent(key, scancode, action, mods);
   if (action == GLFW_PRESS) {
     if (mods == GLFW_MOD_SHIFT) {
       InputManager::getInstance().fire(key, KeyState::Press | KeyState::Shift);
@@ -297,12 +382,17 @@ void Application::Keyboard(int key, int scancode, int action, int mods) {
 }
 
 void Application::MouseButton(int btn, int action, int mods) {
+    GuiManager::getInstance().getScreen()->mouseButtonCallbackEvent(btn, action, mods);
 }
 
 void Application::MouseMotion(double x, double y) {
+    GuiManager::getInstance().getScreen()->cursorPosCallbackEvent(x, y);
+        
 }
 
 void Application::MouseScroll(double x, double y) {
+    GuiManager::getInstance().getScreen()->scrollCallbackEvent(x, y);
+        
 }
 
 void Application::PreCreate() {
@@ -311,6 +401,15 @@ void Application::PreCreate() {
   glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 4);
   glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
   glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
+
+  glfwWindowHint(GLFW_SAMPLES, 0);
+  glfwWindowHint(GLFW_RED_BITS, 8);
+  glfwWindowHint(GLFW_GREEN_BITS, 8);
+  glfwWindowHint(GLFW_BLUE_BITS, 8);
+  glfwWindowHint(GLFW_ALPHA_BITS, 8);
+  glfwWindowHint(GLFW_STENCIL_BITS, 8);
+  glfwWindowHint(GLFW_DEPTH_BITS, 24);
+  glfwWindowHint(GLFW_RESIZABLE, GL_TRUE);
 }
 
 void Application::PostCreate() {

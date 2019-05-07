@@ -24,9 +24,9 @@ class NetworkClient
 public:
 	/*
 	** API: This will initialize the internal structures of the client. Be sure
-    ** to call before connect().
-    **
-    ** Internal: Initialize queues.
+	** to call before connect().
+	**
+	** Internal: Initialize queues.
 	*/
 	NetworkClient();
 
@@ -36,41 +36,41 @@ public:
 	~NetworkClient();
 
 	/*
-    ** API: Call with address and port to connect to server, returns a player
-    ** ID. After this call, the closeConnection(), sendEvents(), and
-    ** receiveUpdates() functions can be called on the client. Synchronous.
-    **
+	** API: Call with address and port to connect to server, returns a player
+	** ID. After this call, the closeConnection(), sendEvents(), and
+	** receiveUpdates() functions can be called on the client. Synchronous.
+	**
 	** Throws: std::runtime_error if connection to server fails
-    **
+	**
 	** Internal: Called from the main thread in client. Connects to server,
-    ** creates a socket, spawns a thread with connect(), and returns a player
-    ** ID.
+	** creates a socket, spawns a thread with connect(), and returns a player
+	** ID.
 	*/
 	uint32_t connect(std::string address, std::string port);
 
 	/*
-    ** API: Call this function to disconnect from the server. After this call,
-    ** the only valid function to call on the client is connect(). Synchronous.
-    **
-    ** Note that this function is called automatically if the server goes down
-    ** or there are other socket errors. It is therefore imperative to use
-    ** try-catch blocks on the sendEvents() and receiveUpdates() functions to
-    ** ensure that the client smoothly rides through a disconnect.
-    **
+	** API: Call this function to disconnect from the server. After this call,
+	** the only valid function to call on the client is connect(). Synchronous.
+	**
+	** Note that this function is called automatically if the server goes down
+	** or there are other socket errors. It is therefore imperative to use
+	** try-catch blocks on the sendEvents() and receiveUpdates() functions to
+	** ensure that the client smoothly rides through a disconnect.
+	**
 	** Internal: Shuts down internal I/O threads, clears queues, and closes
-    ** the connected socket.
+	** the connected socket.
 	*/
 	void closeConnection();
 
 	/*
-    ** API: Send events to the server. Events will be queued internally and
-    ** sent on a different thread. Synchronous for the calling thread;
-    ** asynchronous with respect to the network.
-    **
-    ** Throws: std::runtime_error if not connected to server
-    **
+	** API: Send events to the server. Events will be queued internally and
+	** sent on a different thread. Synchronous for the calling thread;
+	** asynchronous with respect to the network.
+	**
+	** Throws: std::runtime_error if not connected to server
+	**
 	** Internal: Add events to the _eventQueue, to be sent by socketHandler().
-    **
+	**
 	*/
 	void sendEvents(std::vector<std::shared_ptr<GameEvent>> events);
 
@@ -80,13 +80,13 @@ public:
 	void sendEvent(std::shared_ptr<GameEvent> event);
 
 	/*
-    ** API: Receive updates from the server. Synchronous for the calling
-    ** thread; asynchronous with respect to the network.
-    **
-    ** Throws: std::runtime_error if not connected to server
-    **
+	** API: Receive updates from the server. Synchronous for the calling
+	** thread; asynchronous with respect to the network.
+	**
+	** Throws: std::runtime_error if not connected to server
+	**
 	** Internal: Return contents of _updateQueue as a vector, removing them
-    ** from the queue.
+	** from the queue.
 	*/
 	std::vector<std::shared_ptr<BaseState>> receiveUpdates();
 
