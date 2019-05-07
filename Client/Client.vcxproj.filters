@@ -135,9 +135,6 @@
     <ClInclude Include="DirectionalLight.hpp">
       <Filter>Header Files\Graphics</Filter>
     </ClInclude>
-    <ClInclude Include="GamePadXbox.hpp">
-      <Filter>Header Files\Input</Filter>
-    </ClInclude>
     <ClInclude Include="CBoxEntity.hpp">
       <Filter>Header Files\Entity</Filter>
     </ClInclude>
@@ -146,6 +143,9 @@
     </ClInclude>
     <ClInclude Include="CHumanEntity.hpp">
       <Filter>Header Files\Entity</Filter>
+    </ClInclude>
+    <ClInclude Include="GamePadXbox.hpp">
+      <Filter>Header Files\Input</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
