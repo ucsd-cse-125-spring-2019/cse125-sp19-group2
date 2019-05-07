@@ -131,6 +131,7 @@ std::vector<Texture> Model::LoadMaterialTextures(aiMaterial *material,
   std::vector<Texture> textures;
 
   // no texture
+  glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
   if (material->GetTextureCount(ai_tex_type) == 0)
   {
 	  // Create and store texture

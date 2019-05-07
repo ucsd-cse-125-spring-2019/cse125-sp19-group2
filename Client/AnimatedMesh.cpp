@@ -1,6 +1,5 @@
 ﻿#include "AnimatedMesh.hpp"
 #include "Shared/Logger.hpp"
-#include <execution>
 #include <optional>
 #include <assimp/postprocess.h>
 #include <fstream>
