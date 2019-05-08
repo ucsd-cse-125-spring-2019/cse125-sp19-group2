@@ -30,6 +30,10 @@ public:
     // that it is not necessary
     virtual uint32_t getId() = 0;
 
+    // Getter for culling
+    virtual glm::vec3 getPos() const = 0;
+    virtual float getRadius() const = 0;
+
 	// TODO: add any functionality here that is needed in every client-side
 	// object.
 };

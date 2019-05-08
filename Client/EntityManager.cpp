@@ -14,11 +14,11 @@ EntityManager& EntityManager::getInstance() {
 }
 
 std::shared_ptr<CBaseEntity> EntityManager::getEntity(uint32_t id) {
-    auto result = entityList.find(id);
+    auto result = _entityMap.find(id);
 
     // Return if found
-    if (result != entityList.end()) {
-        return result->second;
+    if (result != _entityMap.end()) {
+        return _entityList[result->second];
     }
     return nullptr;
 }
@@ -26,11 +26,11 @@ std::shared_ptr<CBaseEntity> EntityManager::getEntity(uint32_t id) {
 std::shared_ptr<CBaseEntity> EntityManager::getEntity(std::shared_ptr<BaseState> const& state) {
     // Check if the Entity is already created
     uint32_t id = state->id;
-    auto result = entityList.find(id);
+    auto result = _entityMap.find(id);
 
     // Return if found
-    if (result != entityList.end()) {
-        return result->second;
+    if (result != _entityMap.end()) {
+        return _entityList[result->second];
     }
 
     // Otherwise create the Entity based on its type
@@ -52,7 +52,8 @@ std::shared_ptr<CBaseEntity> EntityManager::getEntity(std::shared_ptr<BaseState>
 
 	if (entity)
 	{
-		entityList.insert({ id, entity });
+        _entityList.push_back(entity);
+        _entityMap.insert({id, _entityList.size() - 1});
 	}
 
     return entity;
@@ -62,9 +63,9 @@ void EntityManager::update(std::shared_ptr<BaseState> const& state) {
     // First check if marked as destroyed
     if (state->isDestroyed) {
         // Find in map and destroy if it exists
-        auto result = entityList.find(state->id);
-        if (result != entityList.end()) {
-            entityList.erase(result);
+        auto result = _entityMap.find(state->id);
+        if (result != _entityMap.end()) {
+            _entityMap.erase(result);
         }
         return;
     }
@@ -78,9 +79,17 @@ void EntityManager::update(std::shared_ptr<BaseState> const& state) {
 }
 
 void EntityManager::render(std::unique_ptr<Camera> const& camera) {
-    std::for_each(entityList.begin(), entityList.end(),
-        [&camera](std::pair<uint32_t, std::shared_ptr<CBaseEntity>> entity)
-        {
-            entity.second->render(camera);
-        });
+    std::vector<bool> test(_entityList.size());
+
+    for(uint32_t i = 0 ; i < _entityList.size(); i ++) {
+        const glm::vec3 pos = _entityList[i]->getPos();
+        const float radius = _entityList[i]->getRadius();
+        test[i] = camera->isInFrustum(pos, radius);
+    }
+
+    for(uint32_t i = 0 ; i < _entityList.size(); i ++) {
+        if(test[i]) {
+            _entityList[i]->render(camera);
+        }
+    }
 }

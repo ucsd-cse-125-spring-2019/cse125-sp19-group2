@@ -16,20 +16,22 @@ public:
 		_boxShader->LoadFromFile(GL_VERTEX_SHADER, "./Resources/Shaders/basiclight.vert");
 		_boxShader->LoadFromFile(GL_FRAGMENT_SHADER, "./Resources/Shaders/basiclight.frag");
 		_boxShader->CreateProgram();
+
 	};
 	~CBoxEntity() {};
 
 	void render(std::unique_ptr<Camera> const& camera) override {
-		_boxShader->Use();
-		_boxShader->set_uniform("u_projection", camera->projection_matrix());
-		_boxShader->set_uniform("u_view", camera->view_matrix());
-
-		// Compute model matrix based on state: t * r * s
+        // Compute model matrix based on state: t * r * s
 		const auto t = glm::translate(glm::mat4(1.0f), _state->pos);
 		const auto r = glm::lookAt(glm::vec3(0.0f), _state->forward, _state->up);
 		const auto s = glm::scale(glm::mat4(1.0f), _state->scale);
 
 		auto model = t * r * s;
+
+		_boxShader->Use();
+		_boxShader->set_uniform("u_projection", camera->projection_matrix());
+		_boxShader->set_uniform("u_view", camera->view_matrix());
+
 		// Pass model matrix into shader
 		_boxShader->set_uniform("u_model", model);
 		_boxShader->set_uniform("u_material.shininess", 0.6f);
@@ -61,6 +63,15 @@ public:
 
 	uint32_t getId() override {
 		return _state->id;
+	}
+
+    glm::vec3 getPos() const override {
+	    return _state->pos;
+	}
+
+    float getRadius() const override {
+        const auto scale = _state->scale;
+	    return std::max(scale.x, std::max(scale.y, scale.z));
 	}
 
 private:

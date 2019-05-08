@@ -94,12 +94,19 @@ public:
         _currentAnim = name;
     }
 
+    glm::vec3 getPos() const override {
+	    return _state->pos;
+	}
+
+    float getRadius() const override {
+        const auto scale = _state->scale;
+	    return std::max(scale.x, std::max(scale.y, scale.z));
+	}
+
 protected:
     void initAnimation(std::string modelPath) {
         // Read in an animated Mesh
         _playerModel = std::make_unique<Animation>(modelPath);
-
-        
 
         // TODO: determine which animation gets played
         _playerModel->animatedMesh->_takeIndex = 0;

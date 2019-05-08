@@ -8,6 +8,8 @@
 #include <glad/glad.h>
 #include <glm/glm.hpp>
 #include <glm/gtx/transform.hpp>
+#include <tuple>
+#include <vector>
 
 enum CameraMovement
 {
@@ -65,6 +67,7 @@ class Camera
   glm::mat4 projection_matrix() const;
   glm::mat4 view_matrix() const;
   glm::vec3 position() const;
+  bool isInFrustum(glm::vec3 p, float radius) const;
   float fov() const;
 
   void set_position(const glm::vec3 & position);
@@ -83,6 +86,17 @@ class Camera
   glm::vec3 _up;       ///< The camera's up vector.
   glm::vec3 _world_up;
   glm::vec3 _right;    ///< The camera's right vector.
+
+    glm::vec3 ftl;
+    glm::vec3 ftr;
+    glm::vec3 fbl;
+    glm::vec3 fbr;
+    glm::vec3 ntl;
+    glm::vec3 ntr;
+    glm::vec3 nbl;
+    glm::vec3 nbr;
+
+    std::vector<std::tuple<glm::vec3, glm::vec3, glm::vec3>> _planes; 
   
   float _pitch;        ///< The camera's pitch.
   float _yaw;          ///< The camera's yaw.

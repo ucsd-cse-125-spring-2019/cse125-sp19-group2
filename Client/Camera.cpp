@@ -20,6 +20,30 @@ void Camera::Update()
 	_forward = glm::normalize(forward);
 	_right = glm::normalize(glm::cross(_forward, _world_up));
 	_up = glm::normalize(glm::cross(_right, _forward));
+
+    float tanVal = 2.0 * (float)tan(glm::radians(_fov) * 0.5);
+	float nh = _near * tanVal;
+	float nw = nh * _aspect; 
+	float fh = _far  * tanVal;
+	float fw = fh * _aspect;
+
+    glm::vec3 farCenter = _position + _forward * _far;
+	ftl = farCenter + (_up * fh/2.0f) - (_right * fw/2.0f);
+	ftr = farCenter + (_up * fh/2.0f) + (_right * fw/2.0f);
+	fbl = farCenter - (_up * fh/2.0f) - (_right * fw/2.0f);
+	fbr = farCenter - (_up * fh/2.0f) + (_right * fw/2.0f);
+	glm::vec3 nc = _position + _forward * _near; 
+	ntl = nc + (_up * nh/2.0f) - (_right * nw/2.0f);
+	ntr = nc + (_up * nh/2.0f) + (_right * nw/2.0f);
+	nbl = nc - (_up * nh/2.0f) - (_right * nw/2.0f);
+	nbr = nc - (_up * nh/2.0f) + (_right * nw/2.0f);
+
+    _planes[0] = {ntr,ntl,ftl};
+	_planes[1] = {nbl,nbr,fbr};
+	_planes[2] = {ntl,nbl,fbl};
+	_planes[3] = {nbr,ntr,fbr};
+	_planes[4] = {ntl,ntr,nbr};
+	_planes[5] = {ftr,ftl,fbl};
 }
 
 void Camera::Reset()
@@ -38,6 +62,9 @@ void Camera::Reset()
   
   _movement_speed = cameradefaults::move_speed;
   _sensitivity    = cameradefaults::mouse_sensitivity;
+
+  _planes.resize(6);
+    
 }
 
 void Camera::CameraDolly(CameraMovement direction, float delta_time)
@@ -116,6 +143,18 @@ glm::mat4 Camera::view_matrix() const
 glm::vec3 Camera::position() const
 {
 	return _position;
+}
+
+bool Camera::isInFrustum(glm::vec3 p, float radius) const {
+	for(int i=0; i < 6; i++) {
+        auto & [p0, p1, p2] = _planes[i];
+        glm::vec3 normal = glm::normalize(glm::cross((p1-p0), (p2-p1)));
+        glm::vec3 vec = p - p0;
+        float dist = glm::dot(vec, normal);
+		if (dist + radius < 0)
+			return false;
+	}
+    return true;
 }
 
 float Camera::fov() const

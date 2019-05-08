@@ -226,7 +226,7 @@ void Application::Run() {
 
   Setup();
 
-  glfwSwapInterval(1);
+  glfwSwapInterval(0);
   glfwGetFramebufferSize(_window, &_win_width, &_win_height);
   StaticResize(_window, _win_width, _win_height);
 
