@@ -19,7 +19,8 @@ ColliderManager& ColliderManager::getInstance() {
 	static ColliderManager colliderManager;
 	// Load models and shader if not loaded
 	if (ColliderManager::_cubeModel == nullptr) {
-		ColliderManager::_cubeModel = std::make_unique<Model>("./Resources/Models/cube.obj");
+		ColliderManager::_cubeModel = std::make_unique<Model>("./Resources/Models/cube.fbx");
+		ColliderManager::_cylinderModel = std::make_unique<Model>("./Resources/Models/cylinder.fbx");
 		ColliderManager::_shader = std::make_unique<Shader>();
 		ColliderManager::_shader->LoadFromFile(GL_VERTEX_SHADER, "./Resources/Shaders/collider.vert");
 		ColliderManager::_shader->LoadFromFile(GL_FRAGMENT_SHADER, "./Resources/Shaders/collider.frag");
@@ -59,7 +60,6 @@ void ColliderManager::erase(uint32_t id) {
 
 void ColliderManager::render(std::unique_ptr<Camera> const& camera) {
 	// Setup shader
-	Logger::getInstance()->debug("Rendering colliders");
 	ColliderManager::_shader->Use();
 	ColliderManager::_shader->set_uniform("u_projection", camera->projection_matrix());
 	ColliderManager::_shader->set_uniform("u_view", camera->view_matrix());
@@ -69,28 +69,23 @@ void ColliderManager::render(std::unique_ptr<Camera> const& camera) {
 		[&camera](std::pair<uint32_t, std::shared_ptr<colliderInfo>> entry)
 	{
 		std::shared_ptr<colliderInfo> curBox = entry.second;
+
+		// Compute model matrix based on state: t * s
+		const auto t = glm::translate(glm::mat4(1.0f), curBox->pos);
+		const auto s = glm::scale(glm::mat4(1.0f), curBox->scale);
+
+		auto model = t * s;
+
+		// Pass model matrix into shader
+		ColliderManager::_shader->set_uniform("u_model", model);
+
 		switch (curBox->colliderType) {
 		case COLLIDER_AABB:
-
-			// Compute model matrix based on state: t * s
-			const auto t = glm::translate(glm::mat4(1.0f), curBox->pos);
-			const auto s = glm::scale(glm::mat4(1.0f), curBox->scale);
-
-			auto model = t * s;
-
-			// Pass model matrix into shader
-			ColliderManager::_shader->set_uniform("u_model", model);
-
-			ColliderManager::_cubeModel->Draw(ColliderManager::_shader);
+			ColliderManager::_cubeModel->getMeshAt(0).DrawLine(ColliderManager::_shader);
 			break;
 		case COLLIDER_CAPSULE:
-
+			ColliderManager::_cylinderModel->getMeshAt(0).DrawLine(ColliderManager::_shader);
 			break;
 		}
 	});
-	Logger::getInstance()->debug("Finish rendering colliders");
-}
-
-void ColliderManager::initCube() {
-
 }

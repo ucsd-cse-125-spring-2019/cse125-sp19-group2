@@ -25,6 +25,9 @@ public:
   // Renders the mesh to the current framebuffer.
   void Draw(std::unique_ptr<Shader> const &shader);
 
+  // Renders the mesh into lines to the current framebuffer
+  void DrawLine(std::unique_ptr<Shader> const &shader);
+
 private:
 
   std::vector<Vertex>  _vertices;

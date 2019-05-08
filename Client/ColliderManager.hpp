@@ -18,29 +18,6 @@ struct colliderInfo {
 };
 
 /**
- * \ vertices of cube (it is dirty I know)
- */
-const GLfloat cubeVertices[] = {
-	-0.5f, 0, 0.5f,
-	0.5f, 0, 0.5f,
-	0.5f, 0, -0.5f,
-	-0.5f, 0, -0.5f,
-	-0.5f, 1.0f, 0.5f,
-	0.5f, 1.0f, 0.5f,
-	0.5f, 1.0f, -0.5f,
-	-0.5f, 1.0f, -0.5f
-};
-
-/**
-* \ indices of cube vertices in order (it is dirty I know)
-*/
-const GLuint cubeIndices[] = {
-	0,1, 1,2, 2,3, 3,0,
-	4,5, 5,6, 6,7, 7,4,
-	0,4, 1,5, 2,6, 3,7
-};
-
-/**
  * \brief Manage all collision boxes' updating and rendering (mainly just for rendering in debug mode).
  */
 class ColliderManager
@@ -75,10 +52,5 @@ public:
 	* \param camera(std::unique_ptr<Camera> const&) Local camera
 	*/
 	void render(std::unique_ptr<Camera> const& camera);
-
-	/**
-	* \brief Helper function for initializing cube object
-	*/
-	void initCube();
 };
 
