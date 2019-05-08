@@ -68,13 +68,13 @@ std::vector<std::shared_ptr<SBaseEntity>> GridLevelParser::parseLevelFromFile(
 	int zIndex = 0;
 
 	uint8_t tileType = levelFile.get();
-	uint8_t angle; // Angle of tile in degrees
+	int angle; // Angle of tile in degrees
 
 	// Read until end of file
 	while (zIndex < width)
 	{
 		// Read next byte as angle
-		angle = levelFile.get() * 2; // Angles are encoded as half their value
+		angle = levelFile.get() * 2; // Angles are encoded as 1/3 their value
 
 		// Create a tile and put it into our 2D array
 		Tile* tile = new Tile();
@@ -89,13 +89,13 @@ std::vector<std::shared_ptr<SBaseEntity>> GridLevelParser::parseLevelFromFile(
 			tile->forward = glm::vec3(0, 0, -1);
 			break;
 		case 90:
-			tile->forward = glm::vec3(1, 0, 0);
+			tile->forward = glm::vec3(-1, 0, 0);
 			break;
 		case 180:
 			tile->forward = glm::vec3(0, 0, 1);
 			break;
 		case 270:
-			tile->forward = glm::vec3(-1, 0, 0);
+			tile->forward = glm::vec3(1, 0, 0);
 			break;
 		}
 
