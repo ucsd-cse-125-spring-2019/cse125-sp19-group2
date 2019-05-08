@@ -246,6 +246,7 @@ xcopy /y /d  "$(SolutionDir)Library\lib\x64\Release\*.dll" "$(OutDir)"</Command>
     <ClCompile Include="AudioManager.cpp" />
     <ClCompile Include="AudioSource.cpp" />
     <ClCompile Include="Camera.cpp" />
+    <ClCompile Include="ColliderManager.cpp" />
     <ClCompile Include="EntityManager.cpp" />
     <ClCompile Include="DirectionalLight.cpp" />
     <ClCompile Include="FrameBuffer.cpp" />
@@ -274,6 +275,8 @@ xcopy /y /d  "$(SolutionDir)Library\lib\x64\Release\*.dll" "$(OutDir)"</Command>
     <None Include="Resources\Shaders\basic.vert" />
     <None Include="Resources\Shaders\basiclight.frag" />
     <None Include="Resources\Shaders\basiclight.vert" />
+    <None Include="Resources\Shaders\collider.frag" />
+    <None Include="Resources\Shaders\collider.vert" />
     <None Include="Resources\Shaders\debuglight.frag" />
     <None Include="Resources\Shaders\debuglight.vert" />
     <None Include="Resources\Shaders\pano.frag" />
@@ -295,6 +298,7 @@ xcopy /y /d  "$(SolutionDir)Library\lib\x64\Release\*.dll" "$(OutDir)"</Command>
     <ClInclude Include="CExampleEntity.hpp" />
     <ClInclude Include="CHouseEntity.hpp" />
     <ClInclude Include="CHumanEntity.hpp" />
+    <ClInclude Include="ColliderManager.hpp" />
     <ClInclude Include="CPlayerEntity.hpp" />
     <ClInclude Include="EntityManager.hpp" />
     <ClInclude Include="FrameBuffer.h" />

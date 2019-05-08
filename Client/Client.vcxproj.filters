@@ -79,6 +79,9 @@
     <ClCompile Include="AudioManager.cpp">
       <Filter>Source Files\Graphics</Filter>
     </ClCompile>
+    <ClCompile Include="ColliderManager.cpp">
+      <Filter>Source Files\Entity</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Application.hpp">
@@ -180,6 +183,9 @@
     <ClInclude Include="CHouseEntity.hpp">
       <Filter>Header Files\Entity</Filter>
     </ClInclude>
+    <ClInclude Include="ColliderManager.hpp">
+      <Filter>Header Files\Entity</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
@@ -223,6 +229,12 @@
       <Filter>Resource Files</Filter>
     </None>
     <None Include="Resources\Shaders\animation.vert">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="Resources\Shaders\collider.frag">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="Resources\Shaders\collider.vert">
       <Filter>Resource Files</Filter>
     </None>
   </ItemGroup>
