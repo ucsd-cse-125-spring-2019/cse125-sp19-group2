@@ -29,12 +29,37 @@ public:
 
 		// Dog-specific stuff
 		auto dogState = std::static_pointer_cast<DogState>(_state);
+		dogState->currentAnimation = ANIMATION_DOG_IDLE;
 		dogState->runStamina = 10;
 	};
 
 	~SDogEntity() {};
 
 	bool isCaught = false;
+
+	void update(std::vector<std::shared_ptr<GameEvent>> events) override
+	{
+		auto dogState = std::static_pointer_cast<DogState>(_state);
+
+		// Save old position
+		glm::vec3 oldPos = _state->pos;
+
+		// Update and check for changes
+		SPlayerEntity::update(events);
+
+		// Set running/not running based on position
+		if (_state->pos != oldPos)
+		{
+			dogState->currentAnimation = ANIMATION_DOG_RUNNING;
+		}
+		else if (dogState->currentAnimation != ANIMATION_DOG_IDLE)
+		{
+			dogState->currentAnimation = ANIMATION_DOG_IDLE;
+			hasChanged = true;
+		}
+
+		// TODO: catching animation
+	}
 
 	void handleCollision(std::shared_ptr<SBaseEntity> entity) override
 	{

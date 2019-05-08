@@ -40,3 +40,20 @@ enum ColliderType
 	COLLIDER_AABB,
 	COLLIDER_CAPSULE
 };
+
+// Ensure animations are in the same order as their corresponding text files!
+
+// Animations for humans
+enum HumanAnimation
+{
+	ANIMATION_HUMAN_IDLE, // Index 0
+	ANIMATION_HUMAN_RUNNING, // Index 1
+	ANIMATION_HUMAN_CATCHING // Index 2
+};
+
+// Animations for dogs
+enum DogAnimation
+{
+	ANIMATION_DOG_IDLE, // Index 0
+	ANIMATION_DOG_RUNNING // Index 1
+};

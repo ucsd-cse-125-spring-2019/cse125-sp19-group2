@@ -8,11 +8,14 @@
 struct HumanState : public PlayerState
 {
 	// TODO: Human-specific state
+	HumanAnimation currentAnimation;
 
 	template<class Archive>
 	void serialize(Archive & archive)
 	{
-		archive(cereal::base_class<PlayerState>(this));
+		archive(
+			cereal::base_class<PlayerState>(this),
+			currentAnimation);
 	}
 };
 

@@ -6,6 +6,7 @@
 
 struct DogState : PlayerState
 {
+	DogAnimation currentAnimation;
 	int runStamina;
 
 	template<class Archive>
@@ -13,6 +14,7 @@ struct DogState : PlayerState
 	{
 		archive(
 			cereal::base_class<PlayerState>(this),
+			currentAnimation,
 			runStamina);
 	}
 };

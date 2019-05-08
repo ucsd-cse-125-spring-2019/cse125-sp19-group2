@@ -92,6 +92,7 @@ protected:
             _playerModel->animatedMesh->_takeIndex %= _playerModel->animatedMesh->takeCount();
         });
 
+		/*
         GuiManager::getInstance().getFormHelper("Form helper")->addGroup("Cycle Animation");
         GuiManager::getInstance().getFormHelper("Form helper")->addButton("Next", [&]() {
             _playerModel->animatedMesh->_takeIndex += 1;
@@ -104,6 +105,7 @@ protected:
         GuiManager::getInstance().setDirty();
 
         // TODO: determine which animation gets played
+		*/
         _playerModel->animatedMesh->_takeIndex = 0;
 
         // Call init to let Animation precache uniform location
