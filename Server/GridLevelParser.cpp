@@ -2,6 +2,7 @@
 #include <algorithm>
 #include "GridLevelParser.hpp"
 #include "SBoxEntity.hpp"
+#include "SHouseEntity.hpp"
 #include "SJailEntity.hpp"
 
 GridLevelParser::GridLevelParser()
@@ -249,6 +250,23 @@ std::vector<std::shared_ptr<SBaseEntity>> GridLevelParser::parseLevelFromFile(
 					case TILE_DOG_SPAWN:
 					{
 						dogSpawns.push(avgPos);
+						break;
+					}
+					case TILE_HOUSE_6X6_A:
+					{
+						// 6x6 red house
+						entity = std::make_shared<SHouseEntity>(
+							ENTITY_HOUSE_6X6_A,
+							glm::vec3(avgPos.x, 0, avgPos.y),
+							aggregatedTiles[0]->forward,
+							glm::vec3(6,6,6));
+						break;
+					}
+					case TILE_DOGBONE:
+					{
+						// Dog bone to refill dog stamina
+						// TODO
+
 						break;
 					}
 				}

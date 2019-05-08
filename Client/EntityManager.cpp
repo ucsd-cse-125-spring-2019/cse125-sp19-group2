@@ -2,6 +2,7 @@
 #include "CDogEntity.hpp"
 #include "CHumanEntity.hpp"
 #include "CBoxEntity.hpp"
+#include "CHouseEntity.hpp"
 #include "Shared/Logger.hpp"
 #include <algorithm>
 
@@ -47,6 +48,10 @@ std::shared_ptr<CBaseEntity> EntityManager::getEntity(std::shared_ptr<BaseState>
 		break;
 	case ENTITY_BOX:
 		entity = std::make_shared<CBoxEntity>();
+		break;
+
+	case ENTITY_HOUSE_6X6_A:
+		entity = std::make_shared<CHouseEntity>(type);
 		break;
     }
 

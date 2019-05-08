@@ -244,6 +244,7 @@
     <ClInclude Include="SBoxEntity.hpp" />
     <ClInclude Include="SDogEntity.hpp" />
     <ClInclude Include="SExampleEntity.hpp" />
+    <ClInclude Include="SHouseEntity.hpp" />
     <ClInclude Include="SHumanEntity.hpp" />
     <ClInclude Include="SJailEntity.hpp" />
     <ClInclude Include="SPlayerEntity.hpp" />
