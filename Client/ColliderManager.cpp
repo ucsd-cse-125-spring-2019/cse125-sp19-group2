@@ -59,6 +59,9 @@ void ColliderManager::erase(uint32_t id) {
 }
 
 void ColliderManager::render(std::unique_ptr<Camera> const& camera) {
+
+	if (!renderMode) return;
+
 	// Setup shader
 	ColliderManager::_shader->Use();
 	ColliderManager::_shader->set_uniform("u_projection", camera->projection_matrix());

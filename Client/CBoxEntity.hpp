@@ -9,7 +9,7 @@ class CBoxEntity : public CBaseEntity
 public:
 	CBoxEntity() {
 		// Allocate member variables
-		_boxModel = std::make_unique<Model>("./Resources/Models/cube.obj");
+		_boxModel = std::make_unique<Model>("./Resources/Models/wall.fbx");
 		_boxShader = std::make_unique<Shader>();
 		_state = std::make_shared<BaseState>();
 

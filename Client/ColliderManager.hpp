@@ -28,6 +28,7 @@ private:
 	static std::unique_ptr<Model> _cubeModel;
 	static std::unique_ptr<Model> _cylinderModel;
 	static std::unique_ptr<Shader> _shader;
+
 public:
 	/**
 	* \brief The singleton getter of ColliderManager (create one if not exist)
@@ -52,5 +53,7 @@ public:
 	* \param camera(std::unique_ptr<Camera> const&) Local camera
 	*/
 	void render(std::unique_ptr<Camera> const& camera);
+
+	bool renderMode = false;
 };
 
