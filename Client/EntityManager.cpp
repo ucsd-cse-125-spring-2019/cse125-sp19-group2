@@ -3,6 +3,7 @@
 #include "CHumanEntity.hpp"
 #include "CBoxEntity.hpp"
 #include "CHouseEntity.hpp"
+#include "ColliderManager.hpp"
 #include "Shared/Logger.hpp"
 #include <algorithm>
 
@@ -71,6 +72,9 @@ void EntityManager::update(std::shared_ptr<BaseState> const& state) {
         if (result != entityList.end()) {
             entityList.erase(result);
         }
+
+		ColliderManager::getInstance().erase(state->id);
+
         return;
     }
 
@@ -80,6 +84,8 @@ void EntityManager::update(std::shared_ptr<BaseState> const& state) {
 	{
 		entity->updateState(state);
 	}
+
+	ColliderManager::getInstance().updateState(state);
 }
 
 void EntityManager::render(std::unique_ptr<Camera> const& camera) {
@@ -88,4 +94,6 @@ void EntityManager::render(std::unique_ptr<Camera> const& camera) {
         {
             entity.second->render(camera);
         });
+
+	ColliderManager::getInstance().render(camera);
 }
