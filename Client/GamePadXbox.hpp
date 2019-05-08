@@ -1,25 +1,7 @@
 ﻿#include <windows.h>
 #include <XInput.h>     // XInput API
-#include "../Shared/Logger.hpp"
-#pragma comment(lib, "XInput.lib")   // Library. If your compiler doesn't support this type of lib include change to the corresponding one
-
-class Vector2
-{
-private:
-	float x;
-	float y;
-public:
-	Vector2(float x, float y) {
-		this->x = x;
-		this->y = y;
-	}
-	float getX() {
-		return this->x;
-	}
-	float getY() {
-		return this->y;
-	}
-};
+#include "glm/glm.hpp"
+#include "Shared/Logger.hpp"
 
 typedef enum
 {
@@ -65,7 +47,7 @@ public:
 	virtual ~GamePadXbox(void)
 	{
 		// We don't want the controller to be vibrating accidentally when we exit the app
-		if (isConnected()) setVibration(Vector2(0.0f, 0.0f));
+		if (isConnected()) setVibration(glm::vec2(0.0f, 0.0f));
 	}
 
 	bool isConnected();
@@ -77,13 +59,13 @@ public:
 	float getForceLT();
 	float getForceRT();
 	//LS, RS move vector: [0,1]
-	Vector2 getLS();
-	Vector2 getRS();
+	glm::vec2 getLS();
+	glm::vec2 getRS();
 	//LS, RS from the origin: [0,1]
 	float getForceLS();
 	float getForceRS();
 	// Set Vibration: [0,1]
-	void setVibration(Vector2 lr);
+	void setVibration(glm::vec2 lr);
 private:
 	XINPUT_STATE _controllerState;
 	XINPUT_STATE _controllerStatePre;

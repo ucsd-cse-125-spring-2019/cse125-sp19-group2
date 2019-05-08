@@ -14,7 +14,7 @@ bool GamePadXbox::isConnected()
 	else return false;
 }
 
-void GamePadXbox::setVibration(Vector2 lr)
+void GamePadXbox::setVibration(glm::vec2 lr)
 {
 	// Create a new Vibraton 
 	XINPUT_VIBRATION vibration;
@@ -22,12 +22,11 @@ void GamePadXbox::setVibration(Vector2 lr)
 	ZeroMemory(&vibration, sizeof(XINPUT_VIBRATION));
 
 	// Set the Vibration Values
-	vibration.wLeftMotorSpeed = lr.getX() * 65535; // use any value between 0-65535 here
-	vibration.wRightMotorSpeed = lr.getY() * 65535; // use any value between 0-65535 here
+	vibration.wLeftMotorSpeed = lr.x * 65535; // use any value between 0-65535 here
+	vibration.wRightMotorSpeed = lr.y * 65535; // use any value between 0-65535 here
 
 	// Vibrate the controller
 	XInputSetState((int)_controllerNum, &vibration);
-
 }
 
 void GamePadXbox::reset()
@@ -70,7 +69,7 @@ float GamePadXbox::getForceRT()
 	return ret / 255.0f;
 }
 
-Vector2 GamePadXbox::getLS()
+glm::vec2 GamePadXbox::getLS()
 {
 	float LX = _controllerState.Gamepad.sThumbLX;
 	float LY = _controllerState.Gamepad.sThumbLY;
@@ -80,7 +79,7 @@ Vector2 GamePadXbox::getLS()
 	if (abs(LY) < XINPUT_GAMEPAD_LEFT_THUMB_DEADZONE)
 		LY = 0;
 	if (LX == 0 && LY == 0)
-		return Vector2(0, 0);
+		return glm::vec2(0, 0);
 	//determine how far the controller is pushed
 	float magnitude = sqrt(LX * LX + LY * LY);
 
@@ -88,10 +87,10 @@ Vector2 GamePadXbox::getLS()
 	float normalizedLX = LX / magnitude;
 	float normalizedLY = LY / magnitude;
 
-	return Vector2(normalizedLX, normalizedLY);
+	return glm::vec2(normalizedLX, normalizedLY);
 }
 
-Vector2 GamePadXbox::getRS()
+glm::vec2 GamePadXbox::getRS()
 {
 	float RX = _controllerState.Gamepad.sThumbRX;
 	float RY = _controllerState.Gamepad.sThumbRY;
@@ -101,7 +100,7 @@ Vector2 GamePadXbox::getRS()
 	if (abs(RY) < XINPUT_GAMEPAD_RIGHT_THUMB_DEADZONE)
 		RY = 0;
 	if (RX == 0 && RY == 0)
-		return Vector2(0, 0);
+		return glm::vec2(0, 0);
 	//determine how far the controller is pushed
 	float magnitude = sqrt(RX * RX + RY * RY);
 
@@ -109,7 +108,7 @@ Vector2 GamePadXbox::getRS()
 	float normalizedRX = RX / magnitude;
 	float normalizedRY = RY / magnitude;
 
-	return Vector2(normalizedRX, normalizedRY);
+	return glm::vec2(normalizedRX, normalizedRY);
 }
 
 
