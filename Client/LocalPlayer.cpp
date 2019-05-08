@@ -123,6 +123,8 @@ void LocalPlayer::inputReadHandler()
 				InputManager::getInstance().fire(GLFW_KEY_S, KeyState::Release);
 			}
 		}
+
+		std::this_thread::sleep_for(std::chrono::milliseconds(1));
 	}
 	delete pad;
 }
