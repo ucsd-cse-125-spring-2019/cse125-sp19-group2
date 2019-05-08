@@ -30,6 +30,7 @@ public:
 		const auto s = glm::scale(glm::mat4(1.0f), _state->scale);
 
 		auto model = t * r * s;
+
 		// Pass model matrix into shader
 		_boxShader->set_uniform("u_model", model);
 		_boxShader->set_uniform("u_material.shininess", 0.6f);
@@ -45,9 +46,6 @@ public:
 	}
 
 	void updateState(std::shared_ptr<BaseState> state) override {
-		//_state = state;
-		_state->id = state->id;
-
 		// Translation
 		_state->pos = state->pos;
 
