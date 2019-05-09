@@ -176,3 +176,7 @@ std::vector<Texture> Model::LoadMaterialTextures(aiMaterial *material,
 
   return textures;
 }
+
+Mesh Model::getMeshAt(int i) {
+	return _meshes[i];
+}

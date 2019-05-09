@@ -23,9 +23,13 @@ public:
 		// Set dog-specific state variables
 		auto currentState = std::static_pointer_cast<DogState>(_state);
 		auto newState = std::static_pointer_cast<DogState>(state);
+		
+		// Animation
+		currentState->currentAnimation = newState->currentAnimation;
+		_playerModel->animatedMesh->_takeIndex = newState->currentAnimation;
 
+		// Dog attributes and items
 		currentState->runStamina = newState->runStamina;
-		// TODO
 	}
 };
 

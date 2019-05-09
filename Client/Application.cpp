@@ -11,6 +11,7 @@
 #include "EntityManager.hpp"
 #include "GuiManager.hpp"
 #include "AudioManager.hpp"
+#include "ColliderManager.hpp"
 
 Application::Application(const char* windowTitle, int argc, char** argv) {
   _win_title = windowTitle;
@@ -133,6 +134,11 @@ void Application::Setup() {
   {
     this->count += 1;
     std::cout << this->count << std::endl;
+  });
+
+  InputManager::getInstance().getKey(GLFW_KEY_T)->onPress([&]
+  {
+	  ColliderManager::getInstance().renderMode = !ColliderManager::getInstance().renderMode;
   });
 
     // Initialize GuiManager
