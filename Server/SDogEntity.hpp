@@ -4,6 +4,9 @@
 #include "SPlayerEntity.hpp"
 #include "Shared/DogState.hpp"
 
+#define BASE_VELOCITY 5.0f
+#define RUN_VELOCITY BASE_VELOCITY * 1.5f;
+
 class SDogEntity : public SPlayerEntity
 {
 public:
@@ -23,7 +26,7 @@ public:
 		_state->height = 0.8f;
 		_state->depth = 0.8f;
 
-		_velocity = 5.0f;
+		_velocity = BASE_VELOCITY;
 
 		_jails = jails;
 
@@ -43,6 +46,34 @@ public:
 
 		// Save old position
 		glm::vec3 oldPos = _state->pos;
+
+		events.erase(std::unique(events.begin(), events.end(),
+			[](const std::shared_ptr<GameEvent> & a, const std::shared_ptr<GameEvent> & b) -> bool
+		{
+			return a->type == b->type;
+		}), events.end());
+
+		// If any events left, process them
+		if (events.size())
+		{
+			for (auto& event : events)
+			{
+				switch (event->type)
+				{
+				case EVENT_PLAYER_RUN:
+					if (dogState->runStamina > 0)
+					{
+						_velocity = RUN_VELOCITY;
+					}
+					dogState->runStamina -= 1;
+
+					break;
+				// TODO: event for when player releases running button
+				default:
+					break;
+				}
+			}
+		}
 
 		// Update and check for changes
 		SPlayerEntity::update(events);
@@ -79,7 +110,7 @@ public:
 		}
 		else if (entity->getState()->type == ENTITY_BONE)
 		{
-			dogState->runStamina += 5;
+			dogState->runStamina += 150;
 		}
 		else
 		{
