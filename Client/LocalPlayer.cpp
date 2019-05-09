@@ -68,7 +68,7 @@ LocalPlayer::LocalPlayer(uint32_t playerId, std::unique_ptr<NetworkClient> const
     });
 
 	// Player move right event
-	InputManager::getInstance().getKey(GLFW_KEY_SHIFT)->onRepeat([&]
+	InputManager::getInstance().getKey(GLFW_KEY_LEFT_SHIFT)->onRepeat([&]
 	{
 		auto event = std::make_shared<GameEvent>();
 		event->playerId = _playerId;

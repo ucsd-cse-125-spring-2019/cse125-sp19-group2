@@ -10,7 +10,7 @@
 class CBoneEntity : public CBaseEntity
 {
 public:
-	CBoneEntity(EntityType type) {
+	CBoneEntity() {
 		// Allocate member variables
 
 		_boneModel = std::make_unique<Model>("./Resources/Models/dogbone.fbx");
@@ -21,7 +21,8 @@ public:
 		_boneShader->LoadFromFile(GL_VERTEX_SHADER, "./Resources/Shaders/basiclight.vert");
 		_boneShader->LoadFromFile(GL_FRAGMENT_SHADER, "./Resources/Shaders/basiclight.frag");
 		_boneShader->CreateProgram();
-	}
+	};
+
 	~CBoneEntity() {};
 
 	void render(std::unique_ptr<Camera> const& camera) override {

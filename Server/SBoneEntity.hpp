@@ -25,12 +25,26 @@ public:
 
 		_state->isDestroyed = false;
 		_state->isStatic = false;
+		_state->type = ENTITY_BONE;
 
 		// collider to track collision info idk
 		_collider = std::make_unique<CapsuleCollider>(_state.get());
 
 		hasChanged = false;
 	};
+
+	// Update function, called every tick
+	void update(std::vector<std::shared_ptr<GameEvent>> events) override 
+	{
+		
+	}
+
+	// All server objects must have a state to send to the client.
+	std::shared_ptr<BaseState> getState() override
+	{
+		return _state;
+	}
+
 private:
 	std::shared_ptr<BaseState> _state;
 };
