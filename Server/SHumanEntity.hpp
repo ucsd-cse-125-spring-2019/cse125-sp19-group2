@@ -26,9 +26,34 @@ public:
 
 		// Human-specific stuff
 		auto humanState = std::static_pointer_cast<HumanState>(_state);
+		humanState->currentAnimation = ANIMATION_HUMAN_IDLE;
 	};
 
 	~SHumanEntity() {};
+
+	void update(std::vector<std::shared_ptr<GameEvent>> events) override
+	{
+		auto humanState = std::static_pointer_cast<HumanState>(_state);
+
+		// Save old position
+		glm::vec3 oldPos = _state->pos;
+
+		// Update and check for changes
+		SPlayerEntity::update(events);
+
+		// Set running/not running based on position
+		if (_state->pos != oldPos)
+		{
+			humanState->currentAnimation = ANIMATION_HUMAN_RUNNING;
+		}
+		else if (humanState->currentAnimation != ANIMATION_HUMAN_IDLE)
+		{
+			humanState->currentAnimation = ANIMATION_HUMAN_IDLE;
+			hasChanged = true;
+		}
+
+		// TODO: catching animation
+	}
 
 	void handleCollision(std::shared_ptr<SBaseEntity> entity)
 	{

@@ -24,7 +24,11 @@ public:
 		auto currentState = std::static_pointer_cast<HumanState>(_state);
 		auto newState = std::static_pointer_cast<HumanState>(state);
 
-		// TODO
+		// Animation
+		currentState->currentAnimation = newState->currentAnimation;
+		_playerModel->animatedMesh->_takeIndex = newState->currentAnimation;
+
+		// Human attributes and items
 	}
 };
 
