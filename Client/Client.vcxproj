@@ -285,6 +285,7 @@ xcopy /y /d  "$(SolutionDir)Library\lib\x64\Release\*.dll" "$(OutDir)"</Command>
     <None Include="Resources\Shaders\quad.vert" />
     <None Include="Resources\Shaders\skybox.frag" />
     <None Include="Resources\Shaders\skybox.vert" />
+    <None Include="Resources\Shaders\wall.vert" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Animation.hpp" />
