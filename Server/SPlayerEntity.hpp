@@ -54,37 +54,18 @@ public:
 		// Only change attributes of this object if not static
 		if (!_state->isStatic)
 		{
-			// Remove duplicate events (events are already sorted)
-			events.erase(std::unique(events.begin(), events.end(),
-				[](const std::shared_ptr<GameEvent> & a, const std::shared_ptr<GameEvent> & b) -> bool
-				{
-					return a->type == b->type;
-				}), events.end());
-
 			// If any events left, process them
 			if (events.size())
 			{
-				// Overall direction of player
+				// Overall direction of player; take average of all direction vectors
 				glm::vec3 dir = glm::vec3(0);
 
 				for (auto& event : events)
 				{
-					switch (event->type)
+					// We assume player direction change happens before movement
+					if (event->type == EVENT_PLAYER_MOVE)
 					{
-					case EVENT_PLAYER_MOVE_FORWARD:
-						dir += glm::vec3(0, 0, -1);
-						break;
-					case EVENT_PLAYER_MOVE_BACKWARD:
-						dir += glm::vec3(0, 0, 1);
-						break;
-					case EVENT_PLAYER_MOVE_LEFT:
-						dir += glm::vec3(-1, 0, 0);
-						break;
-					case EVENT_PLAYER_MOVE_RIGHT:
-						dir += glm::vec3(1, 0, 0);
-						break;
-					default:
-						break;
+						dir += glm::vec3(event->direction.x, 0, event->direction.y);
 					}
 				}
 

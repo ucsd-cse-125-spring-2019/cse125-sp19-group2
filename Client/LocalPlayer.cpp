@@ -12,7 +12,8 @@ LocalPlayer::LocalPlayer(uint32_t playerId, std::unique_ptr<NetworkClient> const
     {
         auto event = std::make_shared<GameEvent>();
         event->playerId = _playerId;
-        event->type = EVENT_PLAYER_MOVE_FORWARD;
+        event->type = EVENT_PLAYER_MOVE;
+		event->direction = glm::vec2(0, -1);
 
         // Try sending the update
         try {
@@ -27,7 +28,8 @@ LocalPlayer::LocalPlayer(uint32_t playerId, std::unique_ptr<NetworkClient> const
     {
         auto event = std::make_shared<GameEvent>();
         event->playerId = _playerId;
-        event->type = EVENT_PLAYER_MOVE_BACKWARD;
+        event->type = EVENT_PLAYER_MOVE;
+		event->direction = glm::vec2(0, 1);
 
         // Try sending the update
         try {
@@ -42,7 +44,8 @@ LocalPlayer::LocalPlayer(uint32_t playerId, std::unique_ptr<NetworkClient> const
     {
         auto event = std::make_shared<GameEvent>();
         event->playerId = _playerId;
-        event->type = EVENT_PLAYER_MOVE_LEFT;
+        event->type = EVENT_PLAYER_MOVE;
+		event->direction = glm::vec2(-1, 0);
 
         // Try sending the update
         try {
@@ -57,7 +60,8 @@ LocalPlayer::LocalPlayer(uint32_t playerId, std::unique_ptr<NetworkClient> const
     {
         auto event = std::make_shared<GameEvent>();
         event->playerId = _playerId;
-        event->type = EVENT_PLAYER_MOVE_RIGHT;
+        event->type = EVENT_PLAYER_MOVE;
+		event->direction = glm::vec2(1, 0);
 
         // Try sending the update
         try {
