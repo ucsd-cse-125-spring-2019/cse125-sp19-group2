@@ -46,10 +46,14 @@ public:
 		{
 			humanState->currentAnimation = ANIMATION_HUMAN_RUNNING;
 		}
-		else if (humanState->currentAnimation != ANIMATION_HUMAN_IDLE)
+
+		// Check for stop event
+		for (auto& event : events)
 		{
-			humanState->currentAnimation = ANIMATION_HUMAN_IDLE;
-			hasChanged = true;
+			if (event->type == EVENT_PLAYER_STOP)
+			{
+				humanState->currentAnimation = ANIMATION_HUMAN_IDLE;
+			}
 		}
 
 		// TODO: catching animation

@@ -13,10 +13,13 @@ private:
 
     std::unique_ptr<Camera> _camera;
     std::shared_ptr<CPlayerEntity> _playerEntity;
+	NetworkClient* _networkClient;
 
 	glm::vec3 _offset;
 	float _pitch = -45.0f;
 	float _distance = 14.0f;
+
+	bool _moveKeysPressed, _stopped;
 
 public:
 
@@ -25,7 +28,7 @@ public:
      * \param playerId(uint32_t) Entity id of local player
      * \param networkClient(std::unique_ptr<NetworkClient> const&) networkClient for sending events
      */
-    LocalPlayer(uint32_t playerId, std::unique_ptr<NetworkClient> const& networkClient);
+    LocalPlayer(uint32_t playerId, NetworkClient* networkClient);
 
     /**
      * \brief Update camera based on player entity.

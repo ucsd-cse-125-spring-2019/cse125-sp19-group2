@@ -3,13 +3,14 @@
 #include "Shared/GameEvent.hpp"
 #include "EntityManager.hpp"
 
-LocalPlayer::LocalPlayer(uint32_t playerId, std::unique_ptr<NetworkClient> const& networkClient) {
+LocalPlayer::LocalPlayer(uint32_t playerId, NetworkClient* networkClient) {
 
     _playerId = playerId;
 
     // Player move forward event
     InputManager::getInstance().getKey(GLFW_KEY_W)->onRepeat([&]
     {
+		_moveKeysPressed = true;
         auto event = std::make_shared<GameEvent>();
         event->playerId = _playerId;
         event->type = EVENT_PLAYER_MOVE;
@@ -26,7 +27,8 @@ LocalPlayer::LocalPlayer(uint32_t playerId, std::unique_ptr<NetworkClient> const
     // Player move backward event
     InputManager::getInstance().getKey(GLFW_KEY_S)->onRepeat([&]
     {
-        auto event = std::make_shared<GameEvent>();
+		_moveKeysPressed = true;
+		auto event = std::make_shared<GameEvent>();
         event->playerId = _playerId;
         event->type = EVENT_PLAYER_MOVE;
 		event->direction = glm::vec2(0, 1);
@@ -42,6 +44,7 @@ LocalPlayer::LocalPlayer(uint32_t playerId, std::unique_ptr<NetworkClient> const
     // Player move left event
     InputManager::getInstance().getKey(GLFW_KEY_A)->onRepeat([&]
     {
+		_moveKeysPressed = true;
         auto event = std::make_shared<GameEvent>();
         event->playerId = _playerId;
         event->type = EVENT_PLAYER_MOVE;
@@ -58,6 +61,7 @@ LocalPlayer::LocalPlayer(uint32_t playerId, std::unique_ptr<NetworkClient> const
     // Player move right event
     InputManager::getInstance().getKey(GLFW_KEY_D)->onRepeat([&]
     {
+		_moveKeysPressed = true;
         auto event = std::make_shared<GameEvent>();
         event->playerId = _playerId;
         event->type = EVENT_PLAYER_MOVE;
@@ -74,6 +78,11 @@ LocalPlayer::LocalPlayer(uint32_t playerId, std::unique_ptr<NetworkClient> const
     _camera = std::make_unique<Camera>();
 	_camera->set_pitch(_pitch);
     _offset = glm::normalize(glm::vec3(0.0f, 0.5f, 0.5f));
+
+	_networkClient = networkClient;
+
+	_moveKeysPressed = false;
+	_stopped = true;
 }
 
 void LocalPlayer::update() {
@@ -88,6 +97,22 @@ void LocalPlayer::update() {
     }
     _camera->set_position(_playerEntity->getState()->pos + _distance * _offset);
     _camera->Update();
+
+	// Stop events for the server
+	if (!_stopped && !_moveKeysPressed)
+	{
+		_stopped = true;
+		auto event = std::make_shared<GameEvent>();
+		event->playerId = _playerId;
+		event->type = EVENT_PLAYER_STOP;
+		_networkClient->sendEvent(event);
+	}
+	else if (_moveKeysPressed)
+	{
+		_stopped = false;
+	}
+
+	_moveKeysPressed = false;
 }
 
 std::unique_ptr<Camera> const& LocalPlayer::getCamera() {
