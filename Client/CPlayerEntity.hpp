@@ -85,14 +85,8 @@ protected:
     void initAnimation(std::string modelPath) {
         // Read in an animated Mesh
         _playerModel = std::make_unique<Animation>(modelPath);
-
-        InputManager::getInstance().getKey(85)->onPress([this]()
-        {
-            _playerModel->animatedMesh->_takeIndex += 1;
-            _playerModel->animatedMesh->_takeIndex %= _playerModel->animatedMesh->takeCount();
-        });
-
-		// Ensuring index is non-garbage value
+		
+        // Ensuring index is non-garbage value
         _playerModel->animatedMesh->_takeIndex = 0;
 
         // Call init to let Animation precache uniform location
