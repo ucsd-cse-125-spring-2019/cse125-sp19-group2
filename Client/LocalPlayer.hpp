@@ -2,6 +2,7 @@
 #include "CPlayerEntity.hpp"
 #include <GLFW/glfw3.h>
 #include "NetworkClient.hpp"
+#include "GamePadXbox.hpp"
 
 /**
  * \brief A class that handles the entity corresponding to local player and camera movement.
@@ -21,6 +22,11 @@ private:
 
 	bool _moveKeysPressed, _stopped;
 
+	std::thread _readThread;
+	/*
+	** Runs in its own thread; handle input from controller
+	*/
+	void inputReadHandler();
 public:
 
     /**

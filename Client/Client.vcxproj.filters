@@ -58,6 +58,9 @@
     <ClCompile Include="DirectionalLight.cpp">
       <Filter>Source Files\Graphics</Filter>
     </ClCompile>
+    <ClCompile Include="GamePadXbox.cpp">
+      <Filter>Source Files\Input</Filter>
+    </ClCompile>
     <ClCompile Include="glad.c">
       <Filter>Source Files\Graphics</Filter>
     </ClCompile>
@@ -161,6 +164,9 @@
     </ClInclude>
     <ClInclude Include="CHumanEntity.hpp">
       <Filter>Header Files\Entity</Filter>
+    </ClInclude>
+    <ClInclude Include="GamePadXbox.hpp">
+      <Filter>Header Files\Input</Filter>
     </ClInclude>
     <ClInclude Include="Animation.hpp">
       <Filter>Header Files\Graphics</Filter>
