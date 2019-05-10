@@ -48,6 +48,10 @@ void ColliderManager::updateState(std::shared_ptr<BaseState> const& state) {
 		newInfo->scale = glm::vec3(state->width, state->height, state->depth);
 		newInfo->pos = state->pos;
 		colliderList.insert({ state->id, newInfo });
+		if (state->type == ENTITY_BONE)
+		{
+			Logger::getInstance()->debug("Creating collider for dog bone");
+		}
 	}
 }
 

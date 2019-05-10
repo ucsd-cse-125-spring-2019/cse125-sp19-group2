@@ -57,8 +57,6 @@ std::shared_ptr<CBaseEntity> EntityManager::getEntity(std::shared_ptr<BaseState>
 		break;
 	case ENTITY_BONE:
 		entity = std::make_shared<CBoneEntity>();
-		Logger::getInstance()->debug("dogbone on client");
-
 		break;
     }
 

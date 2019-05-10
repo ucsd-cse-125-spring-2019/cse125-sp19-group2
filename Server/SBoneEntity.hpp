@@ -25,12 +25,19 @@ public:
 		_state->up = glm::vec3(0, 1, 0);
 
 		// Standard scale
-		_state->scale = glm::vec3(0.1f);
+		_state->scale = glm::vec3(1);
 
+		// Collider stuff
 		_state->colliderType = COLLIDER_CAPSULE;
 
+		// Tighter bounding spheres for the bones
+		_state->width = 0.6f;
+		_state->height = 0.6f;
+		_state->depth = 0.6f;
+
 		_state->isDestroyed = false;
-		_state->isStatic = false;
+		_state->isStatic = true;
+		_state->isSolid = false;
 
 		// collider to track collision info idk
 		_collider = std::make_unique<CapsuleCollider>(_state.get());
@@ -42,6 +49,10 @@ public:
 	void update(std::vector<std::shared_ptr<GameEvent>> events) override 
 	{
 		
+	}
+
+	void handleCollision(std::shared_ptr<SBaseEntity> entity) override
+	{
 	}
 
 	// All server objects must have a state to send to the client.

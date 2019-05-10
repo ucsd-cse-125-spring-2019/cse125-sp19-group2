@@ -267,7 +267,6 @@ std::vector<std::shared_ptr<SBaseEntity>> GridLevelParser::parseLevelFromFile(
 					{
 						entity = std::make_shared<SBoneEntity>(
 							glm::vec3(avgPos.x, 0, avgPos.y));
-						Logger::getInstance()->debug("dogbone on server");
 						break;
 					}
 				}

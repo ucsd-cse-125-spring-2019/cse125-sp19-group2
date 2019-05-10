@@ -33,7 +33,7 @@ public:
 		// Dog-specific stuff
 		auto dogState = std::static_pointer_cast<DogState>(_state);
 		dogState->currentAnimation = ANIMATION_DOG_IDLE;
-		dogState->runStamina = 10;
+		dogState->runStamina = MAX_DOG_STAMINA;
 	};
 
 	~SDogEntity() {};
@@ -47,25 +47,49 @@ public:
 		// Save old position
 		glm::vec3 oldPos = _state->pos;
 
-		events.erase(std::unique(events.begin(), events.end(),
+		// Filter for non-movement events
+		auto filteredEvents = std::vector<std::shared_ptr<GameEvent>>();
+		for (auto& event : events)
+		{
+			// TODO: fix this once movement refactor is merged
+			if (event->type != EVENT_PLAYER_MOVE_BACKWARD &&
+				event->type != EVENT_PLAYER_MOVE_FORWARD &&
+				event->type != EVENT_PLAYER_MOVE_LEFT &&
+				event->type != EVENT_PLAYER_MOVE_RIGHT)
+			{
+				filteredEvents.push_back(event);
+			}
+		}
+
+		// Remove duplicates. This should probably be moved to the EventManager,
+		// because the human will have to do the exact same thing
+		filteredEvents.erase(std::unique(filteredEvents.begin(), filteredEvents.end(),
 			[](const std::shared_ptr<GameEvent> & a, const std::shared_ptr<GameEvent> & b) -> bool
 		{
 			return a->type == b->type;
-		}), events.end());
+		}), filteredEvents.end());
 
 		// If any events left, process them
-		if (events.size())
+		if (filteredEvents.size())
 		{
-			for (auto& event : events)
+			for (auto& event : filteredEvents)
 			{
 				switch (event->type)
 				{
 				case EVENT_PLAYER_RUN:
+					// TODO: find out when dog stops running. Will have the same problem
+					// when tick rate is higher than FPS unless client generates event
+					// when dog stops running.
 					if (dogState->runStamina > 0)
 					{
 						_velocity = RUN_VELOCITY;
 					}
-					dogState->runStamina -= 1;
+					dogState->runStamina -= 1 / TICKS_PER_SEC;
+					
+					if (dogState->runStamina < 0)
+					{
+						dogState->runStamina = 0;
+					}
 
 					break;
 				// TODO: event for when player releases running button
@@ -110,7 +134,13 @@ public:
 		}
 		else if (entity->getState()->type == ENTITY_BONE)
 		{
-			dogState->runStamina += 150;
+			// Refill dog stamina
+			dogState->runStamina = MAX_DOG_STAMINA;
+			hasChanged = true;
+
+			// Remove dog bone
+			entity->getState()->isDestroyed = true;
+			entity->hasChanged = true;
 		}
 		else
 		{
