@@ -40,7 +40,7 @@ public:
 	GamePadXbox(GamePadIndex player)
 	{
 		_playerIndex = player;
-		_controllerNum = 0;
+		_controllerNum = player;
 		reset();
 	}
 
@@ -66,6 +66,14 @@ public:
 	float getForceRS();
 	// Set Vibration: [0,1]
 	void setVibration(glm::vec2 lr);
+
+	/**
+	 * \brief Set the number of the controller
+	 * Usage: setControllerNum(GamePadIndex_One)
+	 * \param GamePadIndex(int) GamePadIndex Keycode
+	 * \return true if success
+	 */
+	bool setControllerNum(GamePadIndex player);
 private:
 	XINPUT_STATE _controllerState;
 	XINPUT_STATE _controllerStatePre;

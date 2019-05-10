@@ -22,7 +22,8 @@ private:
 
 	bool _moveKeysPressed, _stopped;
 
-	std::thread _readThread;
+	std::thread _readThread; 
+  
 	/*
 	** Runs in its own thread; handle input from controller
 	*/
