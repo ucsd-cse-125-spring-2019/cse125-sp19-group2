@@ -6,7 +6,7 @@
 
 #include "Shared/Common.hpp"	// GameEntity type enum
 
-// Allow Cereal serialization of GLM vectors
+// Allow Cereal serialization of GLM 3-item vectors
 namespace cereal
 {
 	template<class Archive>

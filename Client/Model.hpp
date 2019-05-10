@@ -25,6 +25,9 @@ public:
 
   void Draw(std::unique_ptr<Shader> const &shader);
 
+  // Get mesh in _meshes at index i
+  Mesh getMeshAt(int i);
+
 private:
 
   // Mesh Data

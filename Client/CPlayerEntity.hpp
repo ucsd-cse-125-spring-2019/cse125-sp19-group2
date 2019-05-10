@@ -14,7 +14,6 @@ public:
     CPlayerEntity() {
         // Allocate member variables
         _playerShader = std::make_unique<Shader>();
-        _state = std::make_shared<BaseState>();
 
         _playerShader->LoadFromFile(GL_VERTEX_SHADER, "./Resources/Shaders/animation.vert");
         _playerShader->LoadFromFile(GL_FRAGMENT_SHADER, "./Resources/Shaders/animation.frag");
@@ -35,7 +34,7 @@ public:
 
         // Compute model matrix based on state: t * r * s
         const auto t = glm::translate(glm::mat4(1.0f), _state->pos);
-        const auto r = glm::lookAt(glm::vec3(0.0f),_state->forward, _state->up);
+        const auto r = glm::lookAt(glm::vec3(0.0f), _state->forward, _state->up);
         const auto s = glm::scale(glm::mat4(1.0f), _state->scale); 
         
         auto model = t * r * s;
@@ -55,7 +54,7 @@ public:
         _playerModel->render(_playerShader);
     }
 
-    void updateState(std::shared_ptr<BaseState> state) override {
+    virtual void updateState(std::shared_ptr<BaseState> state) override {
         //_state = state;
         _state->id = state->id;
 
@@ -102,13 +101,13 @@ public:
         const auto scale = _state->scale;
 	    return std::max(scale.x, std::max(scale.y, scale.z));
 	}
-
+	
 protected:
     void initAnimation(std::string modelPath) {
         // Read in an animated Mesh
         _playerModel = std::make_unique<Animation>(modelPath);
-
-        // TODO: determine which animation gets played
+		
+        // Ensuring index is non-garbage value
         _playerModel->animatedMesh->_takeIndex = 0;
 
         // Call init to let Animation precache uniform location

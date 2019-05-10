@@ -55,6 +55,9 @@ public:
 		// Basic "bumping away" logic
 		_collider->handleCollision(entity->getState().get());
 	};
+
+	// Initializes state struct
+	virtual void initState(uint32_t playerId) {};
 		 
 	// TODO: add more server-specific functions that are object-agnostic
 

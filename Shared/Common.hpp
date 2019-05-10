@@ -12,7 +12,7 @@
 #define WALL_HEIGHT 3.0f
 
 // Map is a square so this is the same as height
-#define MAP_WIDTH 50
+#define MAP_WIDTH 48
 
 // Not needed in client but many server-side objects need access to this def.
 #define TICKS_PER_SEC 30  // 33.3 ms per update() loop
@@ -27,7 +27,9 @@ enum EntityType
 	ENTITY_HUMAN,
 	ENTITY_BOX,
 	ENTITY_WALL,
-	ENTITY_JAIL
+	ENTITY_JAIL,
+	ENTITY_HOUSE_6X6_A,
+	ENTITY_BONE
 	// TODO: add new types here, e.g. ENTITY_DOGBONE
 };
 
@@ -37,4 +39,21 @@ enum ColliderType
 	COLLIDER_NONE,
 	COLLIDER_AABB,
 	COLLIDER_CAPSULE
+};
+
+// Ensure animations are in the same order as their corresponding text files!
+
+// Animations for humans
+enum HumanAnimation
+{
+	ANIMATION_HUMAN_IDLE, // Index 0
+	ANIMATION_HUMAN_RUNNING, // Index 1
+	ANIMATION_HUMAN_CATCHING // Index 2
+};
+
+// Animations for dogs
+enum DogAnimation
+{
+	ANIMATION_DOG_IDLE, // Index 0
+	ANIMATION_DOG_RUNNING // Index 1
 };

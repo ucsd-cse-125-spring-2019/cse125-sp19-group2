@@ -28,7 +28,9 @@ private:
 		TILE_WALL,
 		TILE_FENCE,
 		TILE_HUMAN_SPAWN,
-		TILE_DOG_SPAWN
+		TILE_DOG_SPAWN,
+		TILE_HOUSE_6X6_A,
+		TILE_DOGBONE
 	};
 
 	// Direction of aggregation

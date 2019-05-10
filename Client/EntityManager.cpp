@@ -2,6 +2,8 @@
 #include "CDogEntity.hpp"
 #include "CHumanEntity.hpp"
 #include "CBoxEntity.hpp"
+#include "CHouseEntity.hpp"
+#include "ColliderManager.hpp"
 #include "Shared/Logger.hpp"
 #include <algorithm>
 
@@ -48,6 +50,10 @@ std::shared_ptr<CBaseEntity> EntityManager::getEntity(std::shared_ptr<BaseState>
 	case ENTITY_BOX:
 		entity = std::make_shared<CBoxEntity>();
 		break;
+
+	case ENTITY_HOUSE_6X6_A:
+		entity = std::make_shared<CHouseEntity>(type);
+		break;
     }
 
 	if (entity)
@@ -67,6 +73,9 @@ void EntityManager::update(std::shared_ptr<BaseState> const& state) {
         if (result != _entityMap.end()) {
             _entityMap.erase(result);
         }
+
+		ColliderManager::getInstance().erase(state->id);
+
         return;
     }
 
@@ -76,6 +85,8 @@ void EntityManager::update(std::shared_ptr<BaseState> const& state) {
 	{
 		entity->updateState(state);
 	}
+
+	ColliderManager::getInstance().updateState(state);
 }
 
 void EntityManager::render(std::unique_ptr<Camera> const& camera) {
