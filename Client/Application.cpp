@@ -42,7 +42,7 @@ Application::Application(const char* windowTitle, int argc, char** argv) {
     joinEvent->playerName = "Player" + std::to_string(playerId);
     _networkClient->sendEvent(joinEvent);
 
-    _localPlayer = std::make_unique<LocalPlayer>(playerId, _networkClient.get());
+    _localPlayer = std::make_unique<LocalPlayer>(playerId, _networkClient);
   }
   catch (std::runtime_error e)
   {

@@ -53,6 +53,8 @@ public:
 			if (event->type == EVENT_PLAYER_STOP)
 			{
 				humanState->currentAnimation = ANIMATION_HUMAN_IDLE;
+				hasChanged = true;
+				break;
 			}
 		}
 

@@ -3,7 +3,7 @@
 #include "Shared/GameEvent.hpp"
 #include "EntityManager.hpp"
 
-LocalPlayer::LocalPlayer(uint32_t playerId, NetworkClient* networkClient) {
+LocalPlayer::LocalPlayer(uint32_t playerId, std::unique_ptr<NetworkClient> const& networkClient) {
 
     _playerId = playerId;
 
@@ -11,6 +11,7 @@ LocalPlayer::LocalPlayer(uint32_t playerId, NetworkClient* networkClient) {
     InputManager::getInstance().getKey(GLFW_KEY_W)->onRepeat([&]
     {
 		_moveKeysPressed = true;
+		_stopped = false;
         auto event = std::make_shared<GameEvent>();
         event->playerId = _playerId;
         event->type = EVENT_PLAYER_MOVE;
@@ -28,6 +29,7 @@ LocalPlayer::LocalPlayer(uint32_t playerId, NetworkClient* networkClient) {
     InputManager::getInstance().getKey(GLFW_KEY_S)->onRepeat([&]
     {
 		_moveKeysPressed = true;
+		_stopped = false;
 		auto event = std::make_shared<GameEvent>();
         event->playerId = _playerId;
         event->type = EVENT_PLAYER_MOVE;
@@ -45,6 +47,7 @@ LocalPlayer::LocalPlayer(uint32_t playerId, NetworkClient* networkClient) {
     InputManager::getInstance().getKey(GLFW_KEY_A)->onRepeat([&]
     {
 		_moveKeysPressed = true;
+		_stopped = false;
         auto event = std::make_shared<GameEvent>();
         event->playerId = _playerId;
         event->type = EVENT_PLAYER_MOVE;
@@ -62,6 +65,7 @@ LocalPlayer::LocalPlayer(uint32_t playerId, NetworkClient* networkClient) {
     InputManager::getInstance().getKey(GLFW_KEY_D)->onRepeat([&]
     {
 		_moveKeysPressed = true;
+		_stopped = false;
         auto event = std::make_shared<GameEvent>();
         event->playerId = _playerId;
         event->type = EVENT_PLAYER_MOVE;
@@ -79,7 +83,7 @@ LocalPlayer::LocalPlayer(uint32_t playerId, NetworkClient* networkClient) {
 	_camera->set_pitch(_pitch);
     _offset = glm::normalize(glm::vec3(0.0f, 0.5f, 0.5f));
 
-	_networkClient = networkClient;
+	_networkClient = networkClient.get();
 
 	_moveKeysPressed = false;
 	_stopped = true;
@@ -106,10 +110,6 @@ void LocalPlayer::update() {
 		event->playerId = _playerId;
 		event->type = EVENT_PLAYER_STOP;
 		_networkClient->sendEvent(event);
-	}
-	else if (_moveKeysPressed)
-	{
-		_stopped = false;
 	}
 
 	_moveKeysPressed = false;

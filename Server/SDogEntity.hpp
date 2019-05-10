@@ -59,6 +59,8 @@ public:
 			if (event->type == EVENT_PLAYER_STOP)
 			{
 				dogState->currentAnimation = ANIMATION_DOG_IDLE;
+				hasChanged = true;
+				break;
 			}
 		}
 

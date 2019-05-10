@@ -28,7 +28,7 @@ public:
      * \param playerId(uint32_t) Entity id of local player
      * \param networkClient(std::unique_ptr<NetworkClient> const&) networkClient for sending events
      */
-    LocalPlayer(uint32_t playerId, NetworkClient* networkClient);
+    LocalPlayer(uint32_t playerId, std::unique_ptr<NetworkClient> const& networkClient);
 
     /**
      * \brief Update camera based on player entity.
