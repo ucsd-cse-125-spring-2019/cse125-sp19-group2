@@ -275,6 +275,9 @@ void Application::Update()
   {
     // Disconnected from the server
   }
+
+  InputManager::getInstance().update();
+
   if (_localPlayer) {
       _localPlayer->update();
   }
@@ -283,7 +286,6 @@ void Application::Update()
   AudioManager::getInstance().update();
 
     
-  InputManager::getInstance().update();
   _camera->Update();
   _point_light->update();
 }

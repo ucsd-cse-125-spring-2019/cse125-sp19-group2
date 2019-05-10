@@ -51,11 +51,7 @@ public:
 		auto filteredEvents = std::vector<std::shared_ptr<GameEvent>>();
 		for (auto& event : events)
 		{
-			// TODO: fix this once movement refactor is merged
-			if (event->type != EVENT_PLAYER_MOVE_BACKWARD &&
-				event->type != EVENT_PLAYER_MOVE_FORWARD &&
-				event->type != EVENT_PLAYER_MOVE_LEFT &&
-				event->type != EVENT_PLAYER_MOVE_RIGHT)
+			if (event->type != EVENT_PLAYER_MOVE)
 			{
 				filteredEvents.push_back(event);
 			}
@@ -107,10 +103,16 @@ public:
 		{
 			dogState->currentAnimation = ANIMATION_DOG_RUNNING;
 		}
-		else if (dogState->currentAnimation != ANIMATION_DOG_IDLE)
+
+		// Check for stop event
+		for (auto& event : events)
 		{
-			dogState->currentAnimation = ANIMATION_DOG_IDLE;
-			hasChanged = true;
+			if (event->type == EVENT_PLAYER_STOP)
+			{
+				dogState->currentAnimation = ANIMATION_DOG_IDLE;
+				hasChanged = true;
+				break;
+			}
 		}
 
 		// TODO: catching animation
