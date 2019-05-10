@@ -16,26 +16,26 @@ std::unique_ptr<Key> const& InputManager::getKey(int keycode) {
 }
 
 void InputManager::fire(int keycode, KeyState keyState) {
-  lock.lock();
+  _lock.lock();
   _inputQueue.push_back(std::make_tuple(keycode, keyState));
-  lock.unlock();
+  _lock.unlock();
 }
 
 void InputManager::repeat(int keycode) {
-  lock.lock();
+  _lock.lock();
   _repeatQueue.push_back(std::make_tuple(keycode, KeyState::None));
-  lock.unlock();
+  _lock.unlock();
 }
 
 void InputManager::update() {
 
   std::vector<std::tuple<int, KeyState>> local;
-  lock.lock();
+  _lock.lock();
   local.insert(local.begin(), _inputQueue.begin(), _inputQueue.end());
   local.insert(local.end(), _repeatQueue.begin(), _repeatQueue.end());
   _inputQueue.clear();
   _repeatQueue.clear();
-  lock.unlock();
+  _lock.unlock();
 
   for (const auto [keycode, keyState] : local) {
     auto result = _keyList.find(keycode);

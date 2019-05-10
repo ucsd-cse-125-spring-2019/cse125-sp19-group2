@@ -5,6 +5,7 @@
 #include <queue>
 #include <iterator>
 #include <mutex>
+#include <glm/vec2.hpp>
 
 /**
  * \brief A singleton class that receives and processes keyboard inputs
@@ -43,6 +44,8 @@ public:
      */
     void repeat(int keycode);
 
+	void updateMouse();
+
     /**
      * \brief Process all input events inside the queue
      */
@@ -54,7 +57,9 @@ private:
     std::unordered_map<int, std::unique_ptr<Key>> _keyList;
     std::vector<std::tuple<int, KeyState>> _inputQueue;
     std::vector<std::tuple<int, KeyState>> _repeatQueue;
-    std::mutex lock;
+    std::mutex _lock;
+
+	glm::vec2 _lastMousePos;
 };
 
 #endif

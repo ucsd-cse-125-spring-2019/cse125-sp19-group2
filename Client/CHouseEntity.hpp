@@ -72,6 +72,15 @@ public:
 	uint32_t getId() override {
 		return _state->id;
 	}
+
+	glm::vec3 getPos() const override {
+	    return _state->pos;
+	}
+
+    float getRadius() const override {
+        const auto scale = _state->scale;
+	    return std::max(scale.x, std::max(scale.y, scale.z));
+	}
 	
 private:
 	std::shared_ptr<BaseState> _state;

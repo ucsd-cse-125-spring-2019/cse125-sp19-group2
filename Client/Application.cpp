@@ -392,7 +392,21 @@ void Application::Keyboard(int key, int scancode, int action, int mods) {
 }
 
 void Application::MouseButton(int btn, int action, int mods) {
+	
     GuiManager::getInstance().getScreen()->mouseButtonCallbackEvent(btn, action, mods);
+	if(action == GLFW_PRESS)
+	{
+		if(mods == GLFW_MOD_SHIFT)
+		{
+			
+		}else
+		{
+			
+		}
+	}else if(action == GLFW_RELEASE)
+	{
+		
+	}
 }
 
 void Application::MouseMotion(double x, double y) {
