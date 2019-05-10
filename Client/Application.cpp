@@ -252,6 +252,8 @@ void Application::Run() {
 
 void Application::Update()
 {
+  // Get updates from controller
+  _localPlayer == nullptr ? 0 : _localPlayer->updateController();
 
   // Get updates from the server
   try
@@ -392,31 +394,30 @@ void Application::Keyboard(int key, int scancode, int action, int mods) {
 }
 
 void Application::MouseButton(int btn, int action, int mods) {
-	
     GuiManager::getInstance().getScreen()->mouseButtonCallbackEvent(btn, action, mods);
 	if(action == GLFW_PRESS)
 	{
 		if(mods == GLFW_MOD_SHIFT)
 		{
-			
+			InputManager::getInstance().fire(btn, KeyState::Press | KeyState::Shift);
 		}else
 		{
-			
+			InputManager::getInstance().fire(btn, KeyState::Press);
 		}
 	}else if(action == GLFW_RELEASE)
 	{
-		
+		InputManager::getInstance().fire(btn, KeyState::Release);
 	}
 }
 
 void Application::MouseMotion(double x, double y) {
     GuiManager::getInstance().getScreen()->cursorPosCallbackEvent(x, y);
-        
+    InputManager::getInstance().move(Key::KEYTYPE::MOUSE, x, y);
 }
 
 void Application::MouseScroll(double x, double y) {
     GuiManager::getInstance().getScreen()->scrollCallbackEvent(x, y);
-        
+    InputManager::getInstance().scroll(y);
 }
 
 void Application::PreCreate() {

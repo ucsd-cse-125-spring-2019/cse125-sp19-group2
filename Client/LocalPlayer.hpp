@@ -13,20 +13,16 @@ private:
     uint32_t _playerId;
 
     std::unique_ptr<Camera> _camera;
+    std::unique_ptr<GamePadXbox> _pad;
     std::shared_ptr<CPlayerEntity> _playerEntity;
 	NetworkClient* _networkClient;
+
 
 	glm::vec3 _offset;
 	float _pitch = -45.0f;
 	float _distance = 14.0f;
 
 	bool _moveKeysPressed, _stopped;
-
-	std::thread _readThread;
-	/*
-	** Runs in its own thread; handle input from controller
-	*/
-	void inputReadHandler();
 public:
 
     /**
@@ -40,6 +36,11 @@ public:
      * \brief Update camera based on player entity.
      */
     void update();
+    
+	/*
+	** Runs in its own thread; handle input from controller
+	*/
+	void updateController();
 
     /**
      * \brief Get local camera (for rendering)

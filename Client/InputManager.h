@@ -6,6 +6,8 @@
 #include <iterator>
 #include <mutex>
 #include <glm/vec2.hpp>
+#include <glm/ext/quaternion_geometric.inl>
+#include <glm/gtx/norm.inl>
 
 /**
  * \brief A singleton class that receives and processes keyboard inputs
@@ -44,12 +46,17 @@ public:
      */
     void repeat(int keycode);
 
-	void updateMouse();
+    void move(int keyType, double x, double y);
+
+    void scroll(double s);
 
     /**
      * \brief Process all input events inside the queue
      */
     void update();
+
+    template <typename T>
+    void onScroll(T&& lambda);
 
 private:
     InputManager();
@@ -57,9 +64,15 @@ private:
     std::unordered_map<int, std::unique_ptr<Key>> _keyList;
     std::vector<std::tuple<int, KeyState>> _inputQueue;
     std::vector<std::tuple<int, KeyState>> _repeatQueue;
-    std::mutex _lock;
+    std::vector<std::tuple<int, glm::vec2>> _moveQueue;
+    std::vector<std::function<void(float)>> _onScroll;
 
-	glm::vec2 _lastMousePos;
+    std::mutex _lock;
 };
+
+template <typename T>
+void InputManager::onScroll(T&& lambda) {
+    _onScroll.push_back(lambda);
+}
 
 #endif
