@@ -7,6 +7,11 @@ LocalPlayer::LocalPlayer(uint32_t playerId, std::unique_ptr<NetworkClient> const
 
     _playerId = playerId;
 
+	// Spawn threads for server I/O
+	_readThread = std::thread(
+		&LocalPlayer::inputReadHandler,
+		this);
+
     // Player move forward event
     InputManager::getInstance().getKey(GLFW_KEY_W)->onRepeat([&]
     {
@@ -85,7 +90,44 @@ void LocalPlayer::update() {
     _camera->set_position(_playerEntity->getState()->pos + _distance * _offset);
     _camera->Update();
 }
+void LocalPlayer::inputReadHandler()
+{
+	GamePadXbox* pad = new GamePadXbox(GamePadIndex_One);
 
+	while (1)
+	{
+		if (pad->isConnected())
+		{
+			if (pad->isKeyDown(GamePad_Button_DPAD_LEFT)) {
+				InputManager::getInstance().fire(GLFW_KEY_A, KeyState::Press);
+			};
+			if (pad->isKeyUp(GamePad_Button_DPAD_LEFT)) {
+				InputManager::getInstance().fire(GLFW_KEY_A, KeyState::Release);
+			}
+			if (pad->isKeyDown(GamePad_Button_DPAD_RIGHT)) {
+				InputManager::getInstance().fire(GLFW_KEY_D, KeyState::Press);
+			}
+			if (pad->isKeyUp(GamePad_Button_DPAD_RIGHT)) {
+				InputManager::getInstance().fire(GLFW_KEY_D, KeyState::Release);
+			}
+			if (pad->isKeyDown(GamePad_Button_DPAD_UP)) {
+				InputManager::getInstance().fire(GLFW_KEY_W, KeyState::Press);
+			}
+			if (pad->isKeyUp(GamePad_Button_DPAD_UP)) {
+				InputManager::getInstance().fire(GLFW_KEY_W, KeyState::Release);
+			}
+			if (pad->isKeyDown(GamePad_Button_DPAD_DOWN)) {
+				InputManager::getInstance().fire(GLFW_KEY_S, KeyState::Press);
+			}
+			if (pad->isKeyUp(GamePad_Button_DPAD_DOWN)) {
+				InputManager::getInstance().fire(GLFW_KEY_S, KeyState::Release);
+			}
+		}
+
+		std::this_thread::sleep_for(std::chrono::milliseconds(1));
+	}
+	delete pad;
+}
 std::unique_ptr<Camera> const& LocalPlayer::getCamera() {
     return _camera;
 }
