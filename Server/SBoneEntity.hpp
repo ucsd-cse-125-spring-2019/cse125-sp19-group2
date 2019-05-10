@@ -1,4 +1,6 @@
 #pragma once
+
+#include "IdGenerator.hpp"
 #include "SBaseEntity.hpp"
 #include "CapsuleCollider.hpp"
 
@@ -10,6 +12,10 @@ public:
 		// Allocate a state struct and initialize. Modify as necessary for more
 		// sane defaults
 		_state = std::make_shared<BaseState>();
+
+		// ID and type
+		_state->id = IdGenerator::getInstance()->getNextId();
+		_state->type = ENTITY_BONE;
 
 		// At origin by default
 		_state->pos = pos;
@@ -25,7 +31,6 @@ public:
 
 		_state->isDestroyed = false;
 		_state->isStatic = false;
-		_state->type = ENTITY_BONE;
 
 		// collider to track collision info idk
 		_collider = std::make_unique<CapsuleCollider>(_state.get());

@@ -399,10 +399,6 @@ void NetworkServer::socketWriteHandler()
 		std::pair<uint32_t, std::shared_ptr<BaseState>> nextPair;
 		_updateQueue->pop(nextPair);
 
-		if (nextPair.second->type != ENTITY_STATE)
-		{
-			int meme = 1;
-		}
 		// Grab player ID and shared pointer from pair
 		uint32_t playerId = nextPair.first;
 		std::shared_ptr<BaseState> nextItem = nextPair.second;
