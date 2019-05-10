@@ -33,7 +33,7 @@ void GamePadXbox::reset()
 {
 	// clean the state
 	ZeroMemory(&_controllerState, sizeof(XINPUT_STATE));
-	// clean the state
+	// clean the pre state
 	ZeroMemory(&_controllerStatePre, sizeof(XINPUT_STATE));
 }
 
@@ -187,4 +187,32 @@ float GamePadXbox::getForceRS()
 	}
 
 	return normalizedMagnitude;
+}
+
+bool GamePadXbox::setControllerNum(GamePadIndex player) {
+	// First check range of controller number
+	if (player < GamePadIndex_One || player > GamePadIndex_Four)
+	{
+		return false;
+	}
+
+	XINPUT_STATE controllerCurState;
+	ZeroMemory(&controllerCurState, sizeof(XINPUT_STATE));
+
+	// Get the state
+	DWORD Result = XInputGetState(player, &controllerCurState);
+
+	if (Result == ERROR_SUCCESS)
+	{
+		this->reset();
+		_playerIndex = player;
+		_controllerNum = player;
+		_controllerState = controllerCurState;
+		return true;
+	}
+	else 
+	{
+		ZeroMemory(&controllerCurState, sizeof(XINPUT_STATE));
+		return false;
+	}
 }
