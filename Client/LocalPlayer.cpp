@@ -127,6 +127,23 @@ void LocalPlayer::inputReadHandler()
 	{
 		if (pad->isConnected())
 		{
+			auto dir = pad->getLS();
+			if (dir != glm::vec2(0))
+			{
+				// Invert z
+				dir.y = -(dir.y);
+
+				// Send event
+				auto event = std::make_shared<GameEvent>();
+				event->type = EVENT_PLAYER_MOVE;
+				event->playerId = _playerId;
+				event->direction = dir;
+				_networkClient->sendEvent(event);
+
+				_stopped = false;
+				_moveKeysPressed = true;
+			}
+
 			if (pad->isKeyDown(GamePad_Button_DPAD_LEFT)) {
 				InputManager::getInstance().fire(GLFW_KEY_A, KeyState::Press);
 			};
