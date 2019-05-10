@@ -52,10 +52,16 @@ public:
 		{
 			dogState->currentAnimation = ANIMATION_DOG_RUNNING;
 		}
-		else if (dogState->currentAnimation != ANIMATION_DOG_IDLE)
+
+		// Check for stop event
+		for (auto& event : events)
 		{
-			dogState->currentAnimation = ANIMATION_DOG_IDLE;
-			hasChanged = true;
+			if (event->type == EVENT_PLAYER_STOP)
+			{
+				dogState->currentAnimation = ANIMATION_DOG_IDLE;
+				hasChanged = true;
+				break;
+			}
 		}
 
 		// TODO: catching animation

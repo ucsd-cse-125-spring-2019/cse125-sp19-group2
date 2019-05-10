@@ -14,11 +14,16 @@ private:
 
     std::unique_ptr<Camera> _camera;
     std::shared_ptr<CPlayerEntity> _playerEntity;
+	NetworkClient* _networkClient;
 
 	glm::vec3 _offset;
 	float _pitch = -45.0f;
 	float _distance = 14.0f;
-	std::thread _readThread;
+
+	bool _moveKeysPressed, _stopped;
+
+	std::thread _readThread; 
+  
 	/*
 	** Runs in its own thread; handle input from controller
 	*/

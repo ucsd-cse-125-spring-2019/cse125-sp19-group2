@@ -33,6 +33,7 @@ void GamePadXbox::reset()
 {
 	// clean the state
 	ZeroMemory(&_controllerState, sizeof(XINPUT_STATE));
+
 	// clean the pre state
 	ZeroMemory(&_controllerStatePre, sizeof(XINPUT_STATE));
 }
