@@ -6,6 +6,7 @@
 #include "glad/glad.h"
 #include "InputManager.h"
 #include "GuiManager.hpp"
+#include "Shared/PlayerState.hpp"
 
 class CPlayerEntity : public CBaseEntity {
 public:
@@ -32,6 +33,12 @@ public:
 
 		// Invert z
         _state->forward.z = -_state->forward.z;
+
+		// Player-specific stuff
+		auto currentState = std::static_pointer_cast<PlayerState>(_state);
+		auto newState = std::static_pointer_cast<PlayerState>(state);
+
+		// TODO: player variables
     }
 
     std::shared_ptr<BaseState> const& getState() { return _state; }

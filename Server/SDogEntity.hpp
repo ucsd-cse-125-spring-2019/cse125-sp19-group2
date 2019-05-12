@@ -63,8 +63,6 @@ public:
 				break;
 			}
 		}
-
-		// TODO: catching animation
 	}
 
 	void handleCollision(std::shared_ptr<SBaseEntity> entity) override

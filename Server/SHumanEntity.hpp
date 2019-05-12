@@ -58,7 +58,7 @@ public:
 			}
 		}
 
-		// TODO: catching animation
+		// TODO: net throwing animation
 	}
 
 	void handleCollision(std::shared_ptr<SBaseEntity> entity)

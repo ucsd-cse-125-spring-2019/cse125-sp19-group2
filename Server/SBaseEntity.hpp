@@ -61,9 +61,12 @@ public:
 	};
 
 	// Initializes state struct to some sane defaults
-	virtual void initState()
+	virtual void initState(bool generateId = true)
 	{
-		_state->id = IdGenerator::getInstance()->getNextId();
+		if (generateId)
+		{
+			_state->id = IdGenerator::getInstance()->getNextId();
+		}
 
 		// At origin, looking forward, with 1x1x1 scale
 		_state->pos = glm::vec3(0);

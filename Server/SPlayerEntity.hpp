@@ -15,10 +15,10 @@ public:
 
 	~SPlayerEntity() {};
 
-	virtual void initState() override
+	virtual void initState(bool generateId = true) override
 	{
 		// Base init
-		SBaseEntity::initState();
+		SBaseEntity::initState(false);
 
 		// Players are not static
 		_state->isStatic = false;
