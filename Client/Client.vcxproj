@@ -304,6 +304,7 @@ xcopy /y /d  "$(SolutionDir)Library\lib\x64\Release\*.dll" "$(OutDir)"</Command>
     <ClInclude Include="CHumanEntity.hpp" />
     <ClInclude Include="ColliderManager.hpp" />
     <ClInclude Include="CPlayerEntity.hpp" />
+    <ClInclude Include="Drawable.hpp" />
     <ClInclude Include="EntityManager.hpp" />
     <ClInclude Include="FrameBuffer.h" />
     <ClInclude Include="GamePadXbox.hpp" />
