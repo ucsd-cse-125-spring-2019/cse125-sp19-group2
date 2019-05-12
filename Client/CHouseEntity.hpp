@@ -19,7 +19,7 @@ public:
 		{
 		case ENTITY_HOUSE_6X6_A:
 		{
-			_houseModel = std::make_unique<Model>("./Resources/Models/house_6x6_A.fbx");
+			_houseModel = std::make_unique<Model>("./Resources/Models/fountain.fbx");
 		}
 		}
 
