@@ -11,38 +11,18 @@ const float FP_EPSILON = 0.00001f;
 class SPlayerEntity : public SBaseEntity
 {
 public:
-	SPlayerEntity(uint32_t playerId)
-	{
-		hasChanged = false;
-	};
-
-	// Needs to be in a helper function b/c children create state objectb
-	void initState(uint32_t playerId) override
-	{
-		// ID and type
-		_state->id = playerId;
-
-		// At origin by default
-		_state->pos = glm::vec3(0);
-
-		// Looking forward (along Z axis)
-		_state->forward = glm::vec3(0, 0, 1);
-		_state->up = glm::vec3(0, 1, 0);
-
-		// Standard scale
-		_state->scale = glm::vec3(1);
-
-		_state->colliderType = COLLIDER_CAPSULE;
-
-		_state->isDestroyed = false;
-		_state->isStatic = false;
-		_state->isSolid = true;
-
-		// Capsule collider
-		_collider = std::make_unique<CapsuleCollider>(_state.get());
-	}
+	SPlayerEntity() {};
 
 	~SPlayerEntity() {};
+
+	virtual void initState() override
+	{
+		// Base init
+		SBaseEntity::initState();
+
+		// Players are not static
+		_state->isStatic = false;
+	}
 
 	virtual void update(std::vector<std::shared_ptr<GameEvent>> events) override
 	{
@@ -107,15 +87,7 @@ public:
 		}
 	}
 
-	virtual std::shared_ptr<BaseState> getState() override
-	{
-		return _state;
-	}
-
 protected:
-	// TODO: change this to PlayerState or some such
-	std::shared_ptr<PlayerState> _state;
-
 	// Player movement velocity in units/second
 	float _velocity;
 };

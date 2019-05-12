@@ -1,4 +1,5 @@
 #pragma once
+
 #include "SBaseEntity.hpp"
 #include "CapsuleCollider.hpp"
 
@@ -11,26 +12,21 @@ public:
 		// sane defaults
 		_state = std::make_shared<BaseState>();
 
-		// At origin by default
+		// Base defaults
+		SBaseEntity::initState();
+
+		// Position from ctor
+		_state->type = ENTITY_BONE;
 		_state->pos = pos;
 
-		// Looking forward (along Z axis)
-		_state->forward = glm::vec3(0, 0, 1);
-		_state->up = glm::vec3(0, 1, 0);
-
-		// Standard scale
-		_state->scale = glm::vec3(0.1f);
-
-		_state->colliderType = COLLIDER_CAPSULE;
-
-		_state->isDestroyed = false;
-		_state->isStatic = false;
-
-		// collider to track collision info idk
+		// Capsule collider
 		_collider = std::make_unique<CapsuleCollider>(_state.get());
+		_state->colliderType = COLLIDER_CAPSULE;
+		_state->width = 0.6f;
+		_state->depth = 0.6f;
+		_state->height = 0.6f;
 
-		hasChanged = false;
+		// Non-solid object
+		_state->isSolid = false;
 	};
-private:
-	std::shared_ptr<BaseState> _state;
 };

@@ -26,7 +26,10 @@ public:
 		
 		// Animation
 		currentState->currentAnimation = newState->currentAnimation;
-		_playerModel->animatedMesh->_takeIndex = newState->currentAnimation;
+
+		// Requires a cast
+		Animation* dogAnimation = static_cast<Animation*>(_objectModel.get());
+		dogAnimation->animatedMesh->_takeIndex = newState->currentAnimation;
 
 		// Dog attributes and items
 		currentState->runStamina = newState->runStamina;

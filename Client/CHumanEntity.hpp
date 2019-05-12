@@ -26,9 +26,13 @@ public:
 
 		// Animation
 		currentState->currentAnimation = newState->currentAnimation;
-		_playerModel->animatedMesh->_takeIndex = newState->currentAnimation;
+
+		// Requires a cast
+		Animation* humanAnimation = static_cast<Animation*>(_objectModel.get());
+		humanAnimation->animatedMesh->_takeIndex = newState->currentAnimation;
 
 		// Human attributes and items
+		// TODO
 	}
 };
 

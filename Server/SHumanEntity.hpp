@@ -6,18 +6,18 @@
 class SHumanEntity : public SPlayerEntity
 {
 public:
-	SHumanEntity(uint32_t playerId) : SPlayerEntity(playerId)
+	SHumanEntity(uint32_t playerId)
 	{
 		_state = std::make_shared<HumanState>();
 
 		// Parent initialization
-		SPlayerEntity::initState(playerId);
-
+		SPlayerEntity::initState();
+		_state->id = playerId;
 		_state->type = ENTITY_HUMAN;
 
-		_state->scale = glm::vec3(1);
-
 		// Collider stuff
+		_collider = std::make_unique<CapsuleCollider>(_state.get());
+		_state->colliderType = COLLIDER_CAPSULE;
 		_state->width = 0.9f;
 		_state->height = 0.9f;
 		_state->depth = 0.9f;

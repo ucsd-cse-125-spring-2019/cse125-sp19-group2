@@ -7,18 +7,18 @@
 class SDogEntity : public SPlayerEntity
 {
 public:
-	SDogEntity(uint32_t playerId, std::vector<glm::vec2>* jails) : SPlayerEntity(playerId)
+	SDogEntity(uint32_t playerId, std::vector<glm::vec2>* jails)
 	{
 		_state = std::make_shared<DogState>();
 
 		// Parent initialization
-		SPlayerEntity::initState(playerId);
-
+		SPlayerEntity::initState();
+		_state->id = playerId;
 		_state->type = ENTITY_DOG;
 
-		_state->scale = glm::vec3(1);
-
 		// Collider stuff
+		_collider = std::make_unique<CapsuleCollider>(_state.get());
+		_state->colliderType = COLLIDER_CAPSULE;
 		_state->width = 0.8f;
 		_state->height = 0.8f;
 		_state->depth = 0.8f;
