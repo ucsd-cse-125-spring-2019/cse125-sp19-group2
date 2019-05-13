@@ -117,7 +117,7 @@ private:
         Right
     };
     Enum _enum;
-
+	GamePadIndex _gamepad_num;
 };
 
 #endif

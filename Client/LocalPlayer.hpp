@@ -23,7 +23,8 @@ private:
 	bool _moveKeysPressed, _stopped;
 
 	std::thread _readThread; 
-  
+
+	GamePadXbox* _gamePad;
 	/*
 	** Runs in its own thread; handle input from controller
 	*/
@@ -47,4 +48,12 @@ public:
      * \return std::unique_ptr<Camera> const&: Local camera
      */
     std::unique_ptr<Camera> const& getCamera();
+
+	/**
+	 * \brief Set the number of the controller
+	 * Usage: setControllerNum(GamePadIndex_One)
+	 * \param GamePadIndex(int) GamePadIndex Keycode
+	 * \return true if success
+	 */
+	bool setControllerNum(GamePadIndex player);
 };

@@ -198,6 +198,32 @@ void Application::Setup() {
         _enum = e;
     });
 
+	// Add Widget to control sound
+	gui->addGroup("Controller");
+	// Control sound position
+	auto* controller_num = gui->addVariable("Controller Number", _gamepad_num, enabled);
+	controller_num->setItems({ "1", "2", "3", "4" });
+	controller_num->setCallback([=](const GamePadIndex& e) {
+		switch (e) {
+		case GamePadIndex_One:
+			if (_localPlayer->setControllerNum(GamePadIndex_One))
+				_gamepad_num = e;
+			break;
+		case GamePadIndex_Two:
+			if (_localPlayer->setControllerNum(GamePadIndex_Two))
+				_gamepad_num = e;
+			break;
+		case GamePadIndex_Three:
+			if (_localPlayer->setControllerNum(GamePadIndex_Three))
+				_gamepad_num = e;
+			break;
+		case GamePadIndex_Four:
+			if (_localPlayer->setControllerNum(GamePadIndex_Four))
+				_gamepad_num = e;
+			break;
+		}
+	});
+
     GuiManager::getInstance().setDirty();
 
 }

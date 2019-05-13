@@ -8,6 +8,7 @@ LocalPlayer::LocalPlayer(uint32_t playerId, std::unique_ptr<NetworkClient> const
     _playerId = playerId;
 
 	// Spawn threads for server I/O
+	_gamePad = new GamePadXbox(GamePadIndex_One);
 	_readThread = std::thread(
 		&LocalPlayer::inputReadHandler,
 		this);
@@ -92,6 +93,7 @@ LocalPlayer::LocalPlayer(uint32_t playerId, std::unique_ptr<NetworkClient> const
 
 	_moveKeysPressed = false;
 	_stopped = true;
+
 }
 
 void LocalPlayer::update() {
@@ -121,13 +123,11 @@ void LocalPlayer::update() {
 }
 void LocalPlayer::inputReadHandler()
 {
-	GamePadXbox* pad = new GamePadXbox(GamePadIndex_One);
-
 	while (1)
 	{
-		if (pad->isConnected())
+		if (_gamePad->isConnected())
 		{
-			auto dir = pad->getLS();
+			auto dir = _gamePad->getLS();
 			if (dir != glm::vec2(0))
 			{
 				// Invert z
@@ -144,36 +144,39 @@ void LocalPlayer::inputReadHandler()
 				_moveKeysPressed = true;
 			}
 
-			if (pad->isKeyDown(GamePad_Button_DPAD_LEFT)) {
+			if (_gamePad->isKeyDown(GamePad_Button_DPAD_LEFT)) {
 				InputManager::getInstance().fire(GLFW_KEY_A, KeyState::Press);
 			};
-			if (pad->isKeyUp(GamePad_Button_DPAD_LEFT)) {
+			if (_gamePad->isKeyUp(GamePad_Button_DPAD_LEFT)) {
 				InputManager::getInstance().fire(GLFW_KEY_A, KeyState::Release);
 			}
-			if (pad->isKeyDown(GamePad_Button_DPAD_RIGHT)) {
+			if (_gamePad->isKeyDown(GamePad_Button_DPAD_RIGHT)) {
 				InputManager::getInstance().fire(GLFW_KEY_D, KeyState::Press);
 			}
-			if (pad->isKeyUp(GamePad_Button_DPAD_RIGHT)) {
+			if (_gamePad->isKeyUp(GamePad_Button_DPAD_RIGHT)) {
 				InputManager::getInstance().fire(GLFW_KEY_D, KeyState::Release);
 			}
-			if (pad->isKeyDown(GamePad_Button_DPAD_UP)) {
+			if (_gamePad->isKeyDown(GamePad_Button_DPAD_UP)) {
 				InputManager::getInstance().fire(GLFW_KEY_W, KeyState::Press);
 			}
-			if (pad->isKeyUp(GamePad_Button_DPAD_UP)) {
+			if (_gamePad->isKeyUp(GamePad_Button_DPAD_UP)) {
 				InputManager::getInstance().fire(GLFW_KEY_W, KeyState::Release);
 			}
-			if (pad->isKeyDown(GamePad_Button_DPAD_DOWN)) {
+			if (_gamePad->isKeyDown(GamePad_Button_DPAD_DOWN)) {
 				InputManager::getInstance().fire(GLFW_KEY_S, KeyState::Press);
 			}
-			if (pad->isKeyUp(GamePad_Button_DPAD_DOWN)) {
+			if (_gamePad->isKeyUp(GamePad_Button_DPAD_DOWN)) {
 				InputManager::getInstance().fire(GLFW_KEY_S, KeyState::Release);
 			}
 		}
 
 		std::this_thread::sleep_for(std::chrono::milliseconds(1));
 	}
-	delete pad;
 }
 std::unique_ptr<Camera> const& LocalPlayer::getCamera() {
     return _camera;
+}
+bool LocalPlayer::setControllerNum(GamePadIndex player)
+{
+	return _gamePad->setControllerNum(player);
 }
