@@ -221,7 +221,6 @@ std::vector<std::shared_ptr<SBaseEntity>> GridLevelParser::parseLevelFromFile(
 						// For now just create a box entity
 						entity = std::make_shared<SBoxEntity>(
 							glm::vec3(avgPos.x, 0, avgPos.y),
-							aggregatedTiles[0]->forward,
 							glm::vec3(entityWidth, WALL_HEIGHT, entityDepth));
 						break;
 					}
@@ -230,7 +229,6 @@ std::vector<std::shared_ptr<SBaseEntity>> GridLevelParser::parseLevelFromFile(
 						// Same as above; will be changed eventually
 						entity = std::make_shared<SBoxEntity>(
 							glm::vec3(avgPos.x, 0, avgPos.y),
-							aggregatedTiles[0]->forward,
 							glm::vec3(entityWidth, WALL_HEIGHT, entityDepth));
 						break;
 					}
