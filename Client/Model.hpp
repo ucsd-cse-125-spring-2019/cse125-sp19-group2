@@ -6,6 +6,7 @@
 #define MODEL_HPP
 
 #include "mesh.hpp"
+#include "Drawable.hpp"
 
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
@@ -14,7 +15,7 @@
 #include <string>
 #include <vector>
 
-class Model
+class Model : public Drawable
 {
 public:
 
@@ -23,7 +24,7 @@ public:
 
   ~Model();
 
-  void Draw(std::unique_ptr<Shader> const &shader);
+  void render(std::unique_ptr<Shader> const &shader) override;
 
   // Get mesh in _meshes at index i
   Mesh getMeshAt(int i);

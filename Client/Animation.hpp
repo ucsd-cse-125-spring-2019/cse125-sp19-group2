@@ -1,11 +1,12 @@
 ﻿#pragma once
+#include "Drawable.hpp"
 #include "AnimatedMesh.hpp"
 #include "Shader.hpp"
 
 /**
  * \brief The class that handles playing animation
  */
-class Animation {
+class Animation : public Drawable {
 public:
 	std::unique_ptr<AnimatedMesh> animatedMesh;
 
@@ -33,7 +34,7 @@ public:
     /**
      * \brief Being called each frame, to update the animation
      */
-    void update();
+    void update() override;
 
     /**
      * \brief Being called by update, if isPlaying == true
@@ -44,7 +45,7 @@ public:
 	 * \brief Render the mesh with texture and animation
 	 * \param shader(const std::unique_ptr<Shader>&) The shader program to render the mesh
 	 */
-    void render(const std::unique_ptr<Shader> & shader);
+    void render(const std::unique_ptr<Shader> & shader) override;
 
     /**
      * \brief Initialize the related uniform for animation (specifically the boneMatrix Uniform)

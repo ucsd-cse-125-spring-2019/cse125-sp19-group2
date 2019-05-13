@@ -11,40 +11,26 @@ class SBoxEntity : public SBaseEntity
 public:
 	SBoxEntity(
 		glm::vec3 pos,
-		glm::vec3 forward,
 		glm::vec3 scale)
 	{
 		// Allocate a state struct and initialize. Modify as necessary for more
 		// sane defaults
 		_state = std::make_shared<BaseState>();
 
-		// ID and type
-		_state->id = IdGenerator::getInstance()->getNextId();
+		// Base defaults
+		SBaseEntity::initState();
 		_state->type = ENTITY_BOX;
 
-		// At origin by default
+		// Ctor parameters
 		_state->pos = pos;
-
-		_state->forward = glm::vec3(0, 0, 1);
-		_state->up = glm::vec3(0, 1, 0);
-
-		// Base scale on constructor args
 		_state->scale = scale;
 
-		// Collider stuff
+		// Basic AABB, based on scale
+		_collider = std::make_unique<AABBCollider>(_state.get());
+		_state->colliderType = COLLIDER_AABB;
 		_state->width = scale.x;
 		_state->height = scale.y;
 		_state->depth = scale.z;
-		_state->colliderType = COLLIDER_AABB;
-
-		// Basic AABB collider
-		_collider = std::make_unique<AABBCollider>(_state.get());
-
-		_state->isDestroyed = false;
-		_state->isStatic = true;
-		_state->isSolid = true;
-
-		hasChanged = false;
 	};
 	~SBoxEntity() {};
 
@@ -52,13 +38,5 @@ public:
 	{
 		// Update does nothing for box entities
 	}
-
-	std::shared_ptr<BaseState> getState() override
-	{
-		return _state;
-	}
-
-private:
-	std::shared_ptr<BaseState> _state;
 };
 

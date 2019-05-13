@@ -20,7 +20,7 @@ Model::~Model()
   }
 }
 
-void Model::Draw(std::unique_ptr<Shader> const &shader)
+void Model::render(std::unique_ptr<Shader> const &shader)
 {
   for (Mesh mesh : _meshes) mesh.Draw(shader);
 }
