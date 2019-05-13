@@ -16,5 +16,15 @@ public:
 		_objectShader->LoadFromFile(GL_FRAGMENT_SHADER, "./Resources/Shaders/basiclight.frag");
 		_objectShader->CreateProgram();
 	};
+
+    virtual void render(std::unique_ptr<Camera> const& camera) override
+	{
+        _objectShader->Use();
+        // Pass model matrix into shader
+        const auto s = glm::scale(glm::mat4(1.0f), _state->scale);
+		_objectShader->set_uniform("u_scale", s);
+        CBaseEntity::render(camera);
+	}
+
 	~CBoxEntity(){};
 };

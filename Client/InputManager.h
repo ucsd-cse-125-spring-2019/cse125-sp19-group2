@@ -6,8 +6,7 @@
 #include <iterator>
 #include <mutex>
 #include <glm/vec2.hpp>
-#include <glm/ext/quaternion_geometric.inl>
-#include <glm/gtx/norm.inl>
+#include <GLFW/glfw3.h>
 
 /**
  * \brief A singleton class that receives and processes keyboard inputs
@@ -31,7 +30,9 @@ public:
      * \param keycode(int) GLFW Keycode
      * \return std::unique_ptr<Key> const&: Key reference to the corresponding keycode.
      */
-    std::unique_ptr<Key> const& getKey(int keycode);
+    Key* getKey(int keycode);
+
+    Key2D* getKey2D(int keycode);
 
     /**
      * \brief Send the input-related event to InputManager's queue
@@ -55,6 +56,12 @@ public:
      */
     void update();
 
+    void setWindow(GLFWwindow* window);
+
+    GLFWwindow* getWindow() const;
+
+    bool isForegroundWindow() const;
+
     template <typename T>
     void onScroll(T&& lambda);
 
@@ -68,6 +75,7 @@ private:
     std::vector<std::function<void(float)>> _onScroll;
 
     std::mutex _lock;
+    GLFWwindow* _window = nullptr;
 };
 
 template <typename T>

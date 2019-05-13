@@ -17,11 +17,9 @@ private:
     std::shared_ptr<CPlayerEntity> _playerEntity;
     NetworkClient *_networkClient;
 
-    glm::vec3 _offset;
-    float _pitch = -45.0f;
-    float _distance = 14.0f;
+    float _height;
 
-    bool _moveKeysPressed, _stopped;
+    bool _moveKeysPressed, _stopped, _moveCamera;
 
 public:
     /**
@@ -53,4 +51,5 @@ public:
      * \param y(int) Height of the window
      */
     void resize(int x, int y);
+
 };

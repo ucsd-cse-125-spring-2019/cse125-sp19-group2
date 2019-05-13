@@ -2,6 +2,7 @@
 #include "InputManager.h"
 #include "Shared/GameEvent.hpp"
 #include "EntityManager.hpp"
+#include <glm/gtx/string_cast.hpp>
 
 LocalPlayer::LocalPlayer(uint32_t playerId, std::unique_ptr<NetworkClient> const& networkClient) {
 
@@ -17,7 +18,7 @@ LocalPlayer::LocalPlayer(uint32_t playerId, std::unique_ptr<NetworkClient> const
         auto event = std::make_shared<GameEvent>();
         event->playerId = _playerId;
         event->type = EVENT_PLAYER_MOVE;
-		event->direction = glm::vec2(0, -1);
+		event->direction = _camera->convert_direction(glm::vec2(0, -1));
 
         // Try sending the update
         try {
@@ -35,7 +36,7 @@ LocalPlayer::LocalPlayer(uint32_t playerId, std::unique_ptr<NetworkClient> const
 		auto event = std::make_shared<GameEvent>();
         event->playerId = _playerId;
         event->type = EVENT_PLAYER_MOVE;
-		event->direction = glm::vec2(0, 1);
+		event->direction = _camera->convert_direction(glm::vec2(0, 1));
 
         // Try sending the update
         try {
@@ -53,7 +54,7 @@ LocalPlayer::LocalPlayer(uint32_t playerId, std::unique_ptr<NetworkClient> const
         auto event = std::make_shared<GameEvent>();
         event->playerId = _playerId;
         event->type = EVENT_PLAYER_MOVE;
-		event->direction = glm::vec2(-1, 0);
+		event->direction = _camera->convert_direction(glm::vec2(-1, 0));
 
         // Try sending the update
         try {
@@ -71,7 +72,7 @@ LocalPlayer::LocalPlayer(uint32_t playerId, std::unique_ptr<NetworkClient> const
         auto event = std::make_shared<GameEvent>();
         event->playerId = _playerId;
         event->type = EVENT_PLAYER_MOVE;
-		event->direction = glm::vec2(1, 0);
+		event->direction = _camera->convert_direction(glm::vec2(1, 0));
 
         // Try sending the update
         try {
@@ -81,31 +82,43 @@ LocalPlayer::LocalPlayer(uint32_t playerId, std::unique_ptr<NetworkClient> const
         };
     });
 
-    InputManager::getInstance().getKey(Key::KEYTYPE::MOUSE)->([&]
+    InputManager::getInstance().onScroll([&](float y)
     {
-		_moveKeysPressed = true;
-		_stopped = false;
-        auto event = std::make_shared<GameEvent>();
-        event->playerId = _playerId;
-        event->type = EVENT_PLAYER_MOVE;
-		event->direction = glm::vec2(1, 0);
-
-        // Try sending the update
-        try {
-            networkClient->sendEvent(event);
-        }
-        catch (std::runtime_error e) {
-        };
+		_camera->set_distance(-y);
     });
+
+    InputManager::getInstance().getKey(GLFW_MOUSE_BUTTON_RIGHT)->onPress([&]
+    {
+		glfwSetInputMode(InputManager::getInstance().getWindow(), GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+        _moveCamera = true;
+    });
+
+    InputManager::getInstance().getKey(GLFW_MOUSE_BUTTON_RIGHT)->onRelease([&]
+    {
+		glfwSetInputMode(InputManager::getInstance().getWindow(), GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+        _moveCamera = false;
+    });
+
+    InputManager::getInstance().getKey2D(Key::KEYTYPE::MOUSE)->onMove([&](glm::vec2 v)
+    {
+        //std::cout << glm::to_string(v) << std::endl;
+        if(_moveCamera && InputManager::getInstance().isForegroundWindow()){
+            _camera->move_camera(v);
+		}
+    });
+
+
 
     _camera = std::make_unique<Camera>();
-    _camera->set_pitch(_pitch);
-    _offset = glm::normalize(glm::vec3(0.0f, 0.5f, 0.5f));
 
 	_networkClient = networkClient.get();
 
 	_moveKeysPressed = false;
 	_stopped = true;
+    _moveCamera = false;
+
+    // TODO: set player model height properly
+    _height = 1.0f;
 }
 
 void LocalPlayer::update() {
@@ -118,36 +131,11 @@ void LocalPlayer::update() {
         }
         _playerEntity->setLocal(true);
 
-        InputManager::getInstance().getKey(85)->onPress(
-            [this]() {
-                _playerEntity->getPlayerModel()->animatedMesh->_takeIndex += 1;
-                _playerEntity->getPlayerModel()->animatedMesh->_takeIndex %= _playerEntity
-                                                                             ->
-                                                                             getPlayerModel()
-                                                                             ->animatedMesh
-                                                                             ->takeCount();
-            });
-
-        GuiManager::getInstance().getFormHelper("Form helper")->addGroup("Cycle Animation");
-        GuiManager::getInstance().getFormHelper("Form helper")->addButton(
-            "Next", [&]() {
-                _playerEntity->getPlayerModel()->animatedMesh->_takeIndex += 1;
-                _playerEntity->getPlayerModel()->animatedMesh->_takeIndex %= _playerEntity
-                                                                             ->
-                                                                             getPlayerModel()
-                                                                             ->animatedMesh->
-                                                                             takeCount();
-                _playerEntity->setCurrentAnim(
-                    _playerEntity->getPlayerModel()->animatedMesh->getCurrentAnimName());
-            })->setTooltip(
-            "Testing a much longer tooltip, that will wrap around to new lines multiple times.");
-
-        GuiManager::getInstance().getFormHelper("Form helper")->addVariable(
-            "Current Animation", _playerEntity->getCurrentAnim());
-
         GuiManager::getInstance().setDirty();
     }
-    _camera->set_position(_playerEntity->getState()->pos + _distance * _offset);
+    glm::vec3 pos = _playerEntity->getState()->pos;
+    pos.y += _height;
+    _camera->set_position(pos);
     _camera->Update();
 
 	// Stop events for the server
@@ -176,7 +164,7 @@ void LocalPlayer::updateController()
 				    auto event = std::make_shared<GameEvent>();
 				    event->type = EVENT_PLAYER_MOVE;
 				    event->playerId = _playerId;
-				    event->direction = dir;
+				    event->direction = _camera->convert_direction(dir);
 				    _networkClient->sendEvent(event);
 
 				    _stopped = false;
@@ -214,16 +202,5 @@ std::unique_ptr<Camera> const& LocalPlayer::getCamera() {
 }
 
 void LocalPlayer::resize(int x, int y) {
-    const float aspect = float(x) / y;
-    float fovx = glm::degrees(2 * atan(tan(glm::radians(45 * 0.5)) * aspect));
-    if (fovx >= 45) {
-        // update fovy as well
-        fovx = 45;
-        const float newFovy = glm::degrees(2 * atan(tan(glm::radians(45 * 0.5)) / aspect));
-        _camera->set_fovy(newFovy);
-    }
-    else {
-        _camera->set_fovy(45.0f);
-    }
-    _camera->set_aspect(aspect);
+    _camera->resize(x, y);
 }

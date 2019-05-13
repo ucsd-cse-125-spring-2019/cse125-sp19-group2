@@ -35,7 +35,6 @@ public:
 		auto model = t * r * s;
 
 		// Pass model matrix into shader
-		_objectShader->set_uniform("u_scale", s);
 		_objectShader->set_uniform("u_model", model);
 		_objectShader->set_uniform("u_material.shininess", 0.6f);
 		_objectShader->set_uniform("u_pointlight.position", glm::vec3(-3.0f, 3.0f, -3.0f));
@@ -71,8 +70,14 @@ public:
 	}
 
     // Getter for culling
-    virtual glm::vec3 getPos() const = 0;
-    virtual float getRadius() const = 0;
+    virtual glm::vec3 getPos() const {
+	    return _state->pos;
+	}
+
+    virtual float getRadius() const {
+	    const auto scale = _state->scale;
+	    return std::max(scale.x, std::max(scale.y, scale.z));
+	}
 
 	// TODO: add any functionality here that is needed in every client-side
 	// object.

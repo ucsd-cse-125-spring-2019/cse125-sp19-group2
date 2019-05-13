@@ -6,7 +6,6 @@
 #include <functional>
 #include <Windows.h>
 #include <glm/vec2.hpp>
-#include <glm/gtx/norm.inl>
 
 /**
  * \brief bitflag enum for keystate

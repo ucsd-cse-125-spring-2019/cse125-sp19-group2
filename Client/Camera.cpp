@@ -5,6 +5,8 @@
 #include "Camera.hpp"
 
 #include <iostream>
+#include <algorithm>
+#include <glm/gtx/matrix_transform_2d.hpp> 
 
 Camera::Camera()
 {
@@ -13,6 +15,10 @@ Camera::Camera()
 
 void Camera::Update()
 {
+    // Make sure pitch is within limit
+    this->constrain_pitch();
+
+    // Calculate three axis
 	glm::vec3 forward;
 	forward.x = cos(glm::radians(_yaw)) * cos(glm::radians(_pitch));
 	forward.y = sin(glm::radians(_pitch));
@@ -20,6 +26,9 @@ void Camera::Update()
 	_forward = glm::normalize(forward);
 	_right = glm::normalize(glm::cross(_forward, _world_up));
 	_up = glm::normalize(glm::cross(_right, _forward));
+
+    // Update _position based on _forward, _lookAtPosition and _distance
+    _position = _lookAtPosition - _forward * _distance;
 
     float tanVal = 2.0 * (float)tan(glm::radians(_fov) * 0.5);
 	float nh = _near * tanVal;
@@ -64,7 +73,8 @@ void Camera::Reset()
   _sensitivity    = cameradefaults::mouse_sensitivity;
 
   _planes.resize(6);
-    
+  set_distance(14.0f, false);
+  set_pitch(45.0f);
 }
 
 void Camera::CameraDolly(CameraMovement direction, float delta_time)
@@ -107,17 +117,7 @@ void Camera::CameraPan(float delta_yaw, float delta_pitch, bool constrain_pitch)
   _yaw   += delta_yaw;
   _pitch += delta_pitch;
   
-  if (constrain_pitch)
-  {
-    if (_pitch > 89.0f)
-    {
-      _pitch = 89.0f;
-    }
-    else if (_pitch < -89.0f)
-    {
-      _pitch = -89.0f;
-    }
-  }
+  this->constrain_pitch();
 }
 
 void Camera::CameraZoom(float delta_zoom)
@@ -165,28 +165,21 @@ float Camera::fov() const
 
 void Camera::set_position(const glm::vec3 & position)
 {
-  _position = position;
+  _lookAtPosition = position;
 }
 
 void Camera::set_position(float x, float y, float z)
 {
-  _position.x = x;
-  _position.y = y;
-  _position.z = z;
+  _lookAtPosition.x = x;
+  _lookAtPosition.y = y;
+  _lookAtPosition.z = z;
 }
 
 void Camera::set_pitch(float pitch, bool constrain_pitch) {
 	_pitch = pitch;
 	if (constrain_pitch)
 	{
-		if (_pitch > 89.0f)
-		{
-			_pitch = 89.0f;
-		}
-		else if (_pitch < -89.0f)
-		{
-			_pitch = -89.0f;
-		}
+		this->constrain_pitch();
 	}
 }
 
@@ -211,4 +204,61 @@ void Camera::set_movement_speed(float speed)
 void Camera::set_mouse_sensitivity(float sensitivity)
 {
   _sensitivity = sensitivity;
+}
+
+void Camera::set_distance(float distance, bool delta) {
+    if(delta){
+        _distance += distance * 0.4;
+	}else {
+	    _distance = distance;
+	}
+
+    // Clamp _distance to 0-30 units
+    _distance = std::max(std::min(_distance, 30.0f), 0.0f);
+
+    // Set _pitchLimit
+    // 0 -> 89.0, 1 -> 0, 30 -> -89.0, lerp
+    if(_distance <= 1) {
+        _pitchLimit = 89.0f - (89.0f * _distance);
+    }else {
+        _pitchLimit = 0 - (89.0f / 30.0f * _distance);
+    }
+}
+
+void Camera::resize(int x, int y) {
+    const float aspect = float(x) / y;
+    static float limit = glm::degrees(2 * atan(tan(glm::radians(45 * 0.5)) * aspect));
+    float fovx = glm::degrees(2 * atan(tan(glm::radians(45 * 0.5)) * aspect));
+    if (fovx >= limit) {
+        // update fovy as well
+        fovx = limit;
+        const float newFovy = glm::degrees(2 * atan(tan(glm::radians(limit * 0.5)) / aspect));
+        set_fovy(newFovy);
+    }
+    else {
+        set_fovy(45.0f);
+    }
+    set_aspect(aspect);
+}
+
+void Camera::move_camera(glm::vec2 v, bool isMouse) {
+    const auto delta = v * _mouseSensitivity;
+    CameraPan(delta.x, -delta.y);
+}
+
+void Camera::constrain_pitch() {
+    if (_pitch > _pitchLimit) {
+        _pitch = _pitchLimit;
+    }
+    else if (_pitch < -89.0f) {
+        _pitch = -89.0f;
+    }
+}
+
+glm::vec2 Camera::convert_direction(glm::vec2 input) {
+    static glm::vec2 initial = glm::vec2(0, -1);
+    const glm::vec2 rotVec = glm::normalize(glm::vec2(_forward.x, _forward.z));
+    const float angle = glm::atan(rotVec.y - initial.y,rotVec.x - initial.x);
+    glm::vec2 out = glm::rotate(glm::mat3(1.0f), angle * 2.0f) * glm::vec3(input, 0);
+    return out;
 }

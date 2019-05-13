@@ -47,27 +47,6 @@ public:
         _isLocal = flag;
     }
 
-    std::unique_ptr<Animation>& getPlayerModel() {
-        return _playerModel;
-    }
-
-    std::string & getCurrentAnim() {
-        return _currentAnim;
-    }
-
-    void setCurrentAnim(const std::string & name) {
-        _currentAnim = name;
-    }
-
-    glm::vec3 getPos() const override {
-	    return _state->pos;
-	}
-
-    float getRadius() const override {
-        const auto scale = _state->scale;
-	    return std::max(scale.x, std::max(scale.y, scale.z));
-	}
-	
 protected:
     void initAnimation(std::string modelPath) {
         // Read in an animated Mesh

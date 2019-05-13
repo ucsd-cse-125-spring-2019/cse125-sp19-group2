@@ -124,6 +124,9 @@ void Application::Setup() {
     }
   );
 
+    // Give InputManager a reference to GLFWwindow
+    InputManager::getInstance().setWindow(_window);
+
   // Test input; to be removed
   InputManager::getInstance().getKey(GLFW_KEY_G)->onPress([&]
   {
@@ -253,7 +256,9 @@ void Application::Run() {
 void Application::Update()
 {
   // Get updates from controller
-  _localPlayer == nullptr ? 0 : _localPlayer->updateController();
+    if(_localPlayer) {
+        _localPlayer->updateController();
+    }
 
   // Get updates from the server
   try

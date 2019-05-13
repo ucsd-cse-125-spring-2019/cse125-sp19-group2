@@ -57,17 +57,13 @@ Key2D::Key2D(int keyType): Key(keyType) {
 void Key2D::update(glm::vec2 pos) {
     // if it's mouse, use delta
     if (_keycode == KEYTYPE::MOUSE) {
-        // Initialize last mouse position
-        if (_lastPos.x < 0 && _lastPos.y < 0) {
-            _lastPos = pos;
-        }
 
         // Calculate mouse delta
         const auto curr = pos;
         _lastDelta = curr - _lastPos;
 
         // Call events if the delta is larger than something
-        if (glm::length2(_lastDelta) > 0.001) {
+        if (_lastDelta.length() > 0.001) {
             for (auto f : _onMove) {
                 f(_lastDelta);
             }
@@ -77,7 +73,7 @@ void Key2D::update(glm::vec2 pos) {
     }else {
         // else use pos directly
         // Call events if the delta is larger than something
-        if (glm::length2(pos) > 0.001) {
+        if (pos.length() > 0.001) {
             for (auto f : _onMove) {
                 f(pos);
             }

@@ -5,17 +5,29 @@ InputManager& InputManager::getInstance() {
     return inputManager;
 }
 
-std::unique_ptr<Key> const& InputManager::getKey(int keycode) {
+Key* InputManager::getKey(int keycode) {
+    if(keycode < 0) {
+        return nullptr;
+    }
     auto result = _keyList.find(keycode);
     if (result == _keyList.end()) {
-        if(keycode >= 0){
-            return _keyList.insert({keycode, std::make_unique<Key>(keycode)}).first->second;
-		}else {
-		    return _keyList.insert({keycode, std::make_unique<Key2D>(keycode)}).first->second;
-		}
+        return _keyList.insert({keycode, std::make_unique<Key>(keycode)}).first->second.get();
     }
     else {
-        return result->second;
+        return result->second.get();
+    }
+}
+
+Key2D* InputManager::getKey2D(int keycode) {
+    if(keycode >= 0) {
+        return nullptr;
+    }
+    auto result = _keyList.find(keycode);
+    if (result == _keyList.end()) {
+		return static_cast<Key2D*>(_keyList.insert({keycode, std::make_unique<Key2D>(keycode)}).first->second.get());
+    }
+    else {
+        return static_cast<Key2D*>(result->second.get());
     }
 }
 
@@ -72,6 +84,21 @@ void InputManager::update() {
             result->second->update(keyState);
         };
     }
+}
+
+void InputManager::setWindow(GLFWwindow* window) {
+    _window = window;
+}
+
+GLFWwindow* InputManager::getWindow() const {
+    return _window;
+}
+
+bool InputManager::isForegroundWindow() const {
+    HWND windowHwnd = FindWindow(0, "ProjectBone");
+    if (!windowHwnd)
+        return false;
+    return windowHwnd == GetFocus();
 }
 
 InputManager::InputManager() {

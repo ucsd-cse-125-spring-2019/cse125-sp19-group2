@@ -78,10 +78,25 @@ class Camera
   void set_fovy(float fovy);
   void set_movement_speed(float speed);
   void set_mouse_sensitivity(float sensitivity);
-  
+
+  void set_distance(float distance, bool delta = true);
+
+  /**
+     * \brief Function needs to be called when the window resizes
+     * \param x(int) Width of the window
+     * \param y(int) Height of the window
+     */
+  void resize(int x, int y);
+
+    void move_camera(glm::vec2 v, bool isMouse = true);
+
+    void constrain_pitch();
+
+    glm::vec2 convert_direction(glm::vec2 input);
+
  private:
-  
-  glm::vec3 _position; ///< The camera's position in world space.
+  glm::vec3 _lookAtPosition; ///< The camera's lookAt position 
+  glm::vec3 _position; ///< The camera's position in world space (calculated)
   glm::vec3 _forward;  ///< The camera's forward vector.
   glm::vec3 _up;       ///< The camera's up vector.
   glm::vec3 _world_up;
@@ -98,7 +113,8 @@ class Camera
 
     std::vector<std::tuple<glm::vec3, glm::vec3, glm::vec3>> _planes; 
   
-  float _pitch;        ///< The camera's pitch.
+  float _pitch = -45.0f;        ///< The camera's pitch.
+  float _pitchLimit = 0.0f; ///< The upper limit of camera pitch.
   float _yaw;          ///< The camera's yaw.
   
   float _fov;
@@ -109,6 +125,10 @@ class Camera
   
   float _movement_speed;
   float _sensitivity;
+
+  float _distance = 14.0f;
+
+  float _mouseSensitivity = 1.0f;
 };
 
 #endif /* CAMERA_HPP */
