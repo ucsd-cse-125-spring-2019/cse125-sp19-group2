@@ -25,6 +25,7 @@ private:
 	std::thread _readThread; 
 
 	GamePadXbox* _gamePad;
+	PlayerType _playerType;
 	/*
 	** Runs in its own thread; handle input from controller
 	*/
@@ -56,4 +57,16 @@ public:
 	 * \return true if success
 	 */
 	bool setControllerNum(GamePadIndex player);
+
+	/**
+	 * \brief Set the type of player
+	 * Usage: setPlayerType(Player_Dog)
+	 * \param PlayerType(int) Player_Dog = 0, Player_Human = 1
+	 * \return void
+	 */
+	void setPlayerType(PlayerType typeNum);
+
+	PlayerType getPlayerType();
+
+	uint32_t getPlayerId();
 };

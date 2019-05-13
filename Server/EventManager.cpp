@@ -47,6 +47,11 @@ void EventManager::update()
 			handlePlayerLeave(event);
 			break;
 		}
+		case EVENT_PLAYER_READY:
+		{
+			handlePlayerReady(event);
+			break;
+		}
 		default:
 			// By default, the entity handles the event
 			auto it = eventMap.find(event->playerId);
@@ -86,11 +91,14 @@ void EventManager::handlePlayerJoin(std::shared_ptr<GameEvent> event)
 	Logger::getInstance()->debug(
 		std::string("\"") + event->playerName +
 		std::string("\" joined the server!"));
+}
+
+void EventManager::handlePlayerReady(std::shared_ptr<GameEvent> event)
+{
 
 	std::shared_ptr<SBaseEntity> playerEntity;
-
-	// Make player entity; for now, even numbers are human, odd are dogs
-	if (event->playerId % 2)
+	// Make player entity based on player type
+	if (event->playerType == Player_Human)
 	{
 		// Get first element from human spawn locations and push it back
 		glm::vec2 humanSpawn = _humanSpawns->front();
@@ -101,6 +109,9 @@ void EventManager::handlePlayerJoin(std::shared_ptr<GameEvent> event)
 		playerEntity = std::make_shared<SHumanEntity>(event->playerId);
 		playerEntity->getState()->pos = glm::vec3(humanSpawn.x, 0, humanSpawn.y);
 		_gameState->humans.push_back(playerEntity->getState()->id);
+		Logger::getInstance()->debug(
+			std::string("\"") + event->playerName +
+			std::string("\" is ready as a human!"));
 	}
 	else
 	{
@@ -113,12 +124,15 @@ void EventManager::handlePlayerJoin(std::shared_ptr<GameEvent> event)
 		playerEntity = std::make_shared<SDogEntity>(event->playerId, _jails);
 		playerEntity->getState()->pos = glm::vec3(dogSpawn.x, 0, dogSpawn.y);
 		_gameState->dogs.push_back(playerEntity->getState()->id);
+		Logger::getInstance()->debug(
+			std::string("\"") + event->playerName +
+			std::string("\" is ready as a dog!"));
 	}
 
 	// Throw it into server-wide map
 	_entityMap->insert(std::pair<uint32_t,
 		std::shared_ptr<SBaseEntity>>(
-		playerEntity->getState()->id, playerEntity));
+			playerEntity->getState()->id, playerEntity));
 
 	// Generate a vector of all object states
 	auto updateVec = std::vector<std::shared_ptr<BaseState>>();
@@ -139,6 +153,11 @@ void EventManager::handlePlayerJoin(std::shared_ptr<GameEvent> event)
 void EventManager::handlePlayerLeave(std::shared_ptr<GameEvent> event)
 {
 	// Get player entity first
+	// if not found, it means that this player is not ready yet
+	// no need to handle leave
+	if (_entityMap->find(event->playerId) == _entityMap->end()) {
+		return;
+	}
 	auto entity = _entityMap->find(event->playerId)->second;
 
 	// First remove from dogs or humans vector

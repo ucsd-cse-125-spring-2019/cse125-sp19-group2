@@ -200,7 +200,7 @@ void GameServer::updateGameState()
 	// If we now have two players, start the game
 	if (!_gameState->gameStarted &&
 		!_gameState->gameOver &&
-		_gameState->dogs.size() + _gameState->humans.size() >= 2)
+		_gameState->dogs.size() && _gameState->humans.size() )
 	{
 		Logger::getInstance()->debug("Game started!");
 		_gameState->gameStarted = true;

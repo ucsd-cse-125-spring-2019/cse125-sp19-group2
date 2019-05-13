@@ -198,9 +198,9 @@ void Application::Setup() {
         _enum = e;
     });
 
-	// Add Widget to control sound
+	// Add Widget to control controller
 	gui->addGroup("Controller");
-	// Control sound position
+	// Controller number 
 	auto* controller_num = gui->addVariable("Controller Number", _gamepad_num, enabled);
 	controller_num->setItems({ "1", "2", "3", "4" });
 	controller_num->setCallback([=](const GamePadIndex& e) {
@@ -223,7 +223,31 @@ void Application::Setup() {
 			break;
 		}
 	});
-
+	// Add Widget to control game start
+	gui->addGroup("Game");
+	// get player type 
+	auto* player_type = gui->addVariable("Play as ", _player_type, enabled);
+	player_type->setItems({ "Dog", "Human"});
+	player_type->setCallback([=](const PlayerType& e) {
+		switch (e) {
+		case Player_Dog:
+			_localPlayer->setPlayerType(Player_Dog);
+			_player_type = e;
+			break;
+		case Player_Human:
+			_localPlayer->setPlayerType(Player_Human);
+			_player_type = e;
+			break;
+		}
+	});
+	gui->addButton("Ready", [&]() {
+		auto event = std::make_shared<GameEvent>();
+		event->playerId = _localPlayer->getPlayerId();
+		event->type = EVENT_PLAYER_READY;
+		event->playerName = "Player" + std::to_string(event->playerId);
+		event->playerType = _localPlayer->getPlayerType();
+		_networkClient->sendEvent(event);
+	});
     GuiManager::getInstance().setDirty();
 
 }

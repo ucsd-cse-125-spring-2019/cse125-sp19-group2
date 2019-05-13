@@ -22,7 +22,7 @@
 #include "fmod/fmod.h"
 #include "fmod/fmod.hpp"
 #include "fmod/fmod_errors.h"
-
+#include "Shared/GameEvent.hpp"
 
 class Application {
 public:
@@ -118,6 +118,7 @@ private:
     };
     Enum _enum;
 	GamePadIndex _gamepad_num;
+	PlayerType _player_type;
 };
 
 #endif

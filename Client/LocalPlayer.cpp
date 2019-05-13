@@ -6,6 +6,7 @@
 LocalPlayer::LocalPlayer(uint32_t playerId, std::unique_ptr<NetworkClient> const& networkClient) {
 
     _playerId = playerId;
+	_playerType = Player_Dog;
 
 	// Spawn threads for server I/O
 	_gamePad = new GamePadXbox(GamePadIndex_One);
@@ -179,4 +180,16 @@ std::unique_ptr<Camera> const& LocalPlayer::getCamera() {
 bool LocalPlayer::setControllerNum(GamePadIndex player)
 {
 	return _gamePad->setControllerNum(player);
+}
+void LocalPlayer::setPlayerType(PlayerType typeNum) 
+{
+	_playerType = typeNum;
+}
+PlayerType LocalPlayer::getPlayerType()
+{
+	return _playerType;
+}
+uint32_t LocalPlayer::getPlayerId()
+{
+	return _playerId;
 }
