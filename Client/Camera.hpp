@@ -81,6 +81,8 @@ class Camera
 
   void set_distance(float distance, bool delta = true);
 
+  void update_distance();
+
   /**
      * \brief Function needs to be called when the window resizes
      * \param x(int) Width of the window
@@ -93,6 +95,7 @@ class Camera
     void constrain_pitch();
 
     glm::vec2 convert_direction(glm::vec2 input);
+
 
  private:
   glm::vec3 _lookAtPosition; ///< The camera's lookAt position 
@@ -126,7 +129,9 @@ class Camera
   float _movement_speed;
   float _sensitivity;
 
+	float _targetDistance = 14.0f;
   float _distance = 14.0f;
+	float _smoothness = 20.0f;
 
   float _mouseSensitivity = 1.0f;
 };

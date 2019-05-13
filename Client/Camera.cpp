@@ -18,6 +18,9 @@ void Camera::Update()
     // Make sure pitch is within limit
     this->constrain_pitch();
 
+	// Update distance and related parameter
+	this->update_distance();
+
     // Calculate three axis
 	glm::vec3 forward;
 	forward.x = cos(glm::radians(_yaw)) * cos(glm::radians(_pitch));
@@ -208,21 +211,33 @@ void Camera::set_mouse_sensitivity(float sensitivity)
 
 void Camera::set_distance(float distance, bool delta) {
     if(delta){
-        _distance += distance * 0.4;
+        _targetDistance += distance * 0.5;
 	}else {
-	    _distance = distance;
+	    _targetDistance = distance;
+	}
+	
+	// Clamp _targetDistance to 0-30 units
+	_targetDistance = std::max(std::min(_targetDistance, 30.0f), 0.0f);
+}
+
+void Camera::update_distance()
+{
+	// Smoothly change _distance toward _targetDistance
+	const auto delta = _targetDistance - _distance;
+	if(abs(delta) > 0.01){
+		_distance += delta / _smoothness;
 	}
 
-    // Clamp _distance to 0-30 units
-    _distance = std::max(std::min(_distance, 30.0f), 0.0f);
-
-    // Set _pitchLimit
-    // 0 -> 89.0, 1 -> 0, 30 -> -89.0, lerp
-    if(_distance <= 1) {
-        _pitchLimit = 89.0f - (89.0f * _distance);
-    }else {
-        _pitchLimit = 0 - (89.0f / 30.0f * _distance);
-    }
+	// Set _pitchLimit
+	// 0 -> 89.0, 1 -> 0, 30 -> -89.0, lerp
+	if (_distance <= 1)
+	{
+		_pitchLimit = 89.0f - (89.0f * _distance);
+	}
+	else
+	{
+		_pitchLimit = 0 - (89.0f / 30.0f * _distance);
+	}
 }
 
 void Camera::resize(int x, int y) {
