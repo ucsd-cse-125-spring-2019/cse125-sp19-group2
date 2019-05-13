@@ -25,7 +25,6 @@ public:
 		// At origin by default
 		_state->pos = pos;
 
-		// Looking forward (along Z axis)
 		_state->forward = glm::vec3(0, 0, 1);
 		_state->up = glm::vec3(0, 1, 0);
 

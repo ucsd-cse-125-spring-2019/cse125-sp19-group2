@@ -14,7 +14,6 @@ public:
     CPlayerEntity() {
         // Allocate member variables
         _playerShader = std::make_unique<Shader>();
-        _state = std::make_shared<BaseState>();
 
         _playerShader->LoadFromFile(GL_VERTEX_SHADER, "./Resources/Shaders/animation.vert");
         _playerShader->LoadFromFile(GL_FRAGMENT_SHADER, "./Resources/Shaders/animation.frag");
@@ -35,7 +34,7 @@ public:
 
         // Compute model matrix based on state: t * r * s
         const auto t = glm::translate(glm::mat4(1.0f), _state->pos);
-        const auto r = glm::lookAt(glm::vec3(0.0f),_state->forward, _state->up);
+        const auto r = glm::lookAt(glm::vec3(0.0f), _state->forward, _state->up);
         const auto s = glm::scale(glm::mat4(1.0f), _state->scale); 
         
         auto model = t * r * s;
@@ -55,7 +54,7 @@ public:
         _playerModel->render(_playerShader);
     }
 
-    void updateState(std::shared_ptr<BaseState> state) override {
+    virtual void updateState(std::shared_ptr<BaseState> state) override {
         //_state = state;
         _state->id = state->id;
 
@@ -86,25 +85,8 @@ protected:
     void initAnimation(std::string modelPath) {
         // Read in an animated Mesh
         _playerModel = std::make_unique<Animation>(modelPath);
-
-        InputManager::getInstance().getKey(85)->onPress([this]()
-        {
-            _playerModel->animatedMesh->_takeIndex += 1;
-            _playerModel->animatedMesh->_takeIndex %= _playerModel->animatedMesh->takeCount();
-        });
-
-        GuiManager::getInstance().getFormHelper("Form helper")->addGroup("Cycle Animation");
-        GuiManager::getInstance().getFormHelper("Form helper")->addButton("Next", [&]() {
-            _playerModel->animatedMesh->_takeIndex += 1;
-            _playerModel->animatedMesh->_takeIndex %= _playerModel->animatedMesh->takeCount();
-            _currentAnim = _playerModel->animatedMesh->getCurrentAnimName();
-        })->setTooltip("Testing a much longer tooltip, that will wrap around to new lines multiple times.");
-
-        GuiManager::getInstance().getFormHelper("Form helper")->addVariable("Current Animation", _currentAnim);
-
-        GuiManager::getInstance().setDirty();
-
-        // TODO: determine which animation gets played
+		
+        // Ensuring index is non-garbage value
         _playerModel->animatedMesh->_takeIndex = 0;
 
         // Call init to let Animation precache uniform location

@@ -9,11 +9,11 @@ class CBoxEntity : public CBaseEntity
 public:
 	CBoxEntity() {
 		// Allocate member variables
-		_boxModel = std::make_unique<Model>("./Resources/Models/cube.obj");
+		_boxModel = std::make_unique<Model>("./Resources/Models/wall.fbx");
 		_boxShader = std::make_unique<Shader>();
 		_state = std::make_shared<BaseState>();
 
-		_boxShader->LoadFromFile(GL_VERTEX_SHADER, "./Resources/Shaders/basiclight.vert");
+		_boxShader->LoadFromFile(GL_VERTEX_SHADER, "./Resources/Shaders/wall.vert");
 		_boxShader->LoadFromFile(GL_FRAGMENT_SHADER, "./Resources/Shaders/basiclight.frag");
 		_boxShader->CreateProgram();
 	};
@@ -30,7 +30,9 @@ public:
 		const auto s = glm::scale(glm::mat4(1.0f), _state->scale);
 
 		auto model = t * r * s;
+
 		// Pass model matrix into shader
+		_boxShader->set_uniform("u_scale", s);
 		_boxShader->set_uniform("u_model", model);
 		_boxShader->set_uniform("u_material.shininess", 0.6f);
 		_boxShader->set_uniform("u_pointlight.position", glm::vec3(-3.0f, 3.0f, -3.0f));
@@ -45,9 +47,6 @@ public:
 	}
 
 	void updateState(std::shared_ptr<BaseState> state) override {
-		//_state = state;
-		_state->id = state->id;
-
 		// Translation
 		_state->pos = state->pos;
 
