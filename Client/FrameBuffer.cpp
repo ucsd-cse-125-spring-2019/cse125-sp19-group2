@@ -83,6 +83,12 @@ FrameBuffer::FrameBuffer(int width, int height) {
 }
 
 FrameBuffer::~FrameBuffer() {
+    glDeleteFramebuffers(1, &frameBufferID);
+    glDeleteTextures(1, &rgbaTexture);
+    glDeleteTextures(1, &depthTexture);
+    glDeleteRenderbuffers(1, &depthBufferID);
+    glDeleteBuffers(1, &VBO);
+    glDeleteBuffers(1, &VAO);
 }
 
 void FrameBuffer::setEnable(bool status) {
@@ -122,4 +128,24 @@ unsigned FrameBuffer::getRGBA() {
 
 unsigned FrameBuffer::getDepth() {
   return depthTexture;
+}
+
+void FrameBuffer::resize(int x, int y) {
+    this->width = x;
+    this->height = y;
+    // resize color texture
+    glBindTexture(GL_TEXTURE_2D, rgbaTexture);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, this->width, this->height, 0, GL_RGBA, GL_UNSIGNED_BYTE, 0);
+    glBindTexture(GL_TEXTURE_2D, 0);
+
+    // resize depth attachment
+    glBindRenderbuffer(GL_RENDERBUFFER, depthBufferID);
+    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, this->width, this->height);
+    glBindRenderbuffer(GL_RENDERBUFFER, 0);
+
+    //resize depth texture
+    glBindTexture(GL_TEXTURE_2D, depthTexture);
+    glTexImage2D(
+        GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT24, this->width, this->height, 0, GL_DEPTH_COMPONENT, GL_FLOAT, 0);
+
 }

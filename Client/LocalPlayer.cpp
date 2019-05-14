@@ -2,15 +2,13 @@
 #include "InputManager.h"
 #include "Shared/GameEvent.hpp"
 #include "EntityManager.hpp"
+#include <glm/gtx/string_cast.hpp>
 
 LocalPlayer::LocalPlayer(uint32_t playerId, std::unique_ptr<NetworkClient> const& networkClient) {
 
     _playerId = playerId;
 
-	// Spawn threads for server I/O
-	_readThread = std::thread(
-		&LocalPlayer::inputReadHandler,
-		this);
+    _pad = std::make_unique<GamePadXbox>(GamePadIndex_One);
 
     // Player move forward event
     InputManager::getInstance().getKey(GLFW_KEY_W)->onRepeat([&]
@@ -20,7 +18,7 @@ LocalPlayer::LocalPlayer(uint32_t playerId, std::unique_ptr<NetworkClient> const
         auto event = std::make_shared<GameEvent>();
         event->playerId = _playerId;
         event->type = EVENT_PLAYER_MOVE;
-		event->direction = glm::vec2(0, -1);
+		event->direction = _camera->convert_direction(glm::vec2(0, -1));
 
         // Try sending the update
         try {
@@ -38,7 +36,7 @@ LocalPlayer::LocalPlayer(uint32_t playerId, std::unique_ptr<NetworkClient> const
 		auto event = std::make_shared<GameEvent>();
         event->playerId = _playerId;
         event->type = EVENT_PLAYER_MOVE;
-		event->direction = glm::vec2(0, 1);
+		event->direction = _camera->convert_direction(glm::vec2(0, 1));
 
         // Try sending the update
         try {
@@ -56,7 +54,7 @@ LocalPlayer::LocalPlayer(uint32_t playerId, std::unique_ptr<NetworkClient> const
         auto event = std::make_shared<GameEvent>();
         event->playerId = _playerId;
         event->type = EVENT_PLAYER_MOVE;
-		event->direction = glm::vec2(-1, 0);
+		event->direction = _camera->convert_direction(glm::vec2(-1, 0));
 
         // Try sending the update
         try {
@@ -74,7 +72,7 @@ LocalPlayer::LocalPlayer(uint32_t playerId, std::unique_ptr<NetworkClient> const
         auto event = std::make_shared<GameEvent>();
         event->playerId = _playerId;
         event->type = EVENT_PLAYER_MOVE;
-		event->direction = glm::vec2(1, 0);
+		event->direction = _camera->convert_direction(glm::vec2(1, 0));
 
         // Try sending the update
         try {
@@ -82,6 +80,31 @@ LocalPlayer::LocalPlayer(uint32_t playerId, std::unique_ptr<NetworkClient> const
         }
         catch (std::runtime_error e) {
         };
+    });
+
+    InputManager::getInstance().onScroll([&](float y)
+    {
+		_camera->set_distance(-y);
+    });
+
+    InputManager::getInstance().getKey(GLFW_MOUSE_BUTTON_RIGHT)->onPress([&]
+    {
+		glfwSetInputMode(InputManager::getInstance().getWindow(), GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+        _moveCamera = true;
+    });
+
+    InputManager::getInstance().getKey(GLFW_MOUSE_BUTTON_RIGHT)->onRelease([&]
+    {
+		glfwSetInputMode(InputManager::getInstance().getWindow(), GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+        _moveCamera = false;
+    });
+
+    InputManager::getInstance().getKey2D(Key::KEYTYPE::MOUSE)->onMove([&](glm::vec2 v)
+    {
+        //std::cout << glm::to_string(v) << std::endl;
+        if(_moveCamera && InputManager::getInstance().isForegroundWindow()){
+            _camera->move_camera(v);
+		}
     });
 
 	// Player move right event
@@ -99,27 +122,33 @@ LocalPlayer::LocalPlayer(uint32_t playerId, std::unique_ptr<NetworkClient> const
 		};
 	});
 
-    _camera = std::make_unique<Camera>();
-	_camera->set_pitch(_pitch);
-    _offset = glm::normalize(glm::vec3(0.0f, 0.5f, 0.5f));
+  _camera = std::make_unique<Camera>();
 
 	_networkClient = networkClient.get();
 
 	_moveKeysPressed = false;
 	_stopped = true;
+  _moveCamera = false;
+
+  // TODO: set player model height properly
+  _height = 1.0f;
 }
 
 void LocalPlayer::update() {
     if (!_playerEntity) {
         _playerEntity = std::dynamic_pointer_cast<CPlayerEntity>(EntityManager::getInstance().getEntity(_playerId));
 
-		// Break out if player entity does not yet exist
-		if (!_playerEntity) {
-			return;
-		}
-		_playerEntity->setLocal(true);
+        // Break out if player entity does not yet exist
+        if (!_playerEntity) {
+            return;
+        }
+        _playerEntity->setLocal(true);
+
+        GuiManager::getInstance().setDirty();
     }
-    _camera->set_position(_playerEntity->getState()->pos + _distance * _offset);
+    glm::vec3 pos = _playerEntity->getState()->pos;
+    pos.y += _height;
+    _camera->set_position(pos);
     _camera->Update();
 
 	// Stop events for the server
@@ -134,61 +163,57 @@ void LocalPlayer::update() {
 
 	_moveKeysPressed = false;
 }
-void LocalPlayer::inputReadHandler()
+void LocalPlayer::updateController()
 {
-	GamePadXbox* pad = new GamePadXbox(GamePadIndex_One);
-
-	while (1)
-	{
-		if (pad->isConnected())
+		if (_pad->isConnected())
 		{
-			auto dir = pad->getLS();
-			if (dir != glm::vec2(0))
-			{
-				// Invert z
-				dir.y = -(dir.y);
+			auto dir = _pad->getLS();
+			    if (dir != glm::vec2(0))
+			    {
+				    // Invert z
+				    dir.y = -(dir.y);
 
-				// Send event
-				auto event = std::make_shared<GameEvent>();
-				event->type = EVENT_PLAYER_MOVE;
-				event->playerId = _playerId;
-				event->direction = dir;
-				_networkClient->sendEvent(event);
+				    // Send event
+				    auto event = std::make_shared<GameEvent>();
+				    event->type = EVENT_PLAYER_MOVE;
+				    event->playerId = _playerId;
+				    event->direction = _camera->convert_direction(dir);
+				    _networkClient->sendEvent(event);
 
-				_stopped = false;
-				_moveKeysPressed = true;
-			}
+				    _stopped = false;
+				    _moveKeysPressed = true;
+			    }
 
-			if (pad->isKeyDown(GamePad_Button_DPAD_LEFT)) {
+			if (_pad->isKeyDown(GamePad_Button_DPAD_LEFT)) {
 				InputManager::getInstance().fire(GLFW_KEY_A, KeyState::Press);
 			};
-			if (pad->isKeyUp(GamePad_Button_DPAD_LEFT)) {
+			if (_pad->isKeyUp(GamePad_Button_DPAD_LEFT)) {
 				InputManager::getInstance().fire(GLFW_KEY_A, KeyState::Release);
 			}
-			if (pad->isKeyDown(GamePad_Button_DPAD_RIGHT)) {
+			if (_pad->isKeyDown(GamePad_Button_DPAD_RIGHT)) {
 				InputManager::getInstance().fire(GLFW_KEY_D, KeyState::Press);
 			}
-			if (pad->isKeyUp(GamePad_Button_DPAD_RIGHT)) {
+			if (_pad->isKeyUp(GamePad_Button_DPAD_RIGHT)) {
 				InputManager::getInstance().fire(GLFW_KEY_D, KeyState::Release);
 			}
-			if (pad->isKeyDown(GamePad_Button_DPAD_UP)) {
+			if (_pad->isKeyDown(GamePad_Button_DPAD_UP)) {
 				InputManager::getInstance().fire(GLFW_KEY_W, KeyState::Press);
 			}
-			if (pad->isKeyUp(GamePad_Button_DPAD_UP)) {
+			if (_pad->isKeyUp(GamePad_Button_DPAD_UP)) {
 				InputManager::getInstance().fire(GLFW_KEY_W, KeyState::Release);
 			}
-			if (pad->isKeyDown(GamePad_Button_DPAD_DOWN)) {
+			if (_pad->isKeyDown(GamePad_Button_DPAD_DOWN)) {
 				InputManager::getInstance().fire(GLFW_KEY_S, KeyState::Press);
 			}
-			if (pad->isKeyUp(GamePad_Button_DPAD_DOWN)) {
+			if (_pad->isKeyUp(GamePad_Button_DPAD_DOWN)) {
 				InputManager::getInstance().fire(GLFW_KEY_S, KeyState::Release);
 			}
 		}
-
-		std::this_thread::sleep_for(std::chrono::milliseconds(1));
-	}
-	delete pad;
 }
 std::unique_ptr<Camera> const& LocalPlayer::getCamera() {
     return _camera;
+}
+
+void LocalPlayer::resize(int x, int y) {
+    _camera->resize(x, y);
 }

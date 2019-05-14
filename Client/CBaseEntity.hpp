@@ -65,6 +65,11 @@ public:
 
 		// Scale
 		_state->scale = state->scale;
+
+		// Dimensions for bounding boxes
+		_state->width = state->width;
+		_state->height = state->height;
+		_state->depth = state->depth;
 	}
 
     // This is optional, but might make our lives easier. Remove if you feel
@@ -72,6 +77,16 @@ public:
 	uint32_t getId()
 	{
 		return _state->id;
+	}
+
+    // Getter for culling
+    virtual glm::vec3 getPos() const {
+	    return _state->pos;
+	}
+
+    virtual float getRadius() const {
+	    const auto scale = _state->scale;
+	    return std::max(_state->width, std::max(_state->height, _state->depth));
 	}
 
 	// TODO: add any functionality here that is needed in every client-side

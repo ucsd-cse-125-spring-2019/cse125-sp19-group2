@@ -7,7 +7,8 @@
 class CHouseEntity : public CBaseEntity
 {
 public:
-	CHouseEntity(EntityType type) {
+	CHouseEntity(EntityType type)
+	{
 		// Allocate member variables
 
 		// House model depends on type. We may want a mapping from type enum to
@@ -27,6 +28,5 @@ public:
 		_objectShader->LoadFromFile(GL_FRAGMENT_SHADER, "./Resources/Shaders/basiclight.frag");
 		_objectShader->CreateProgram();
 	}
-	~CHouseEntity() {};
+	~CHouseEntity(){};
 };
-

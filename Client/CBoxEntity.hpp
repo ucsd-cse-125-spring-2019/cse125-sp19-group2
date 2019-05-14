@@ -5,7 +5,8 @@
 class CBoxEntity : public CBaseEntity
 {
 public:
-	CBoxEntity() {
+	CBoxEntity()
+	{
 		// Allocate member variables
 		_objectModel = std::make_unique<Model>("./Resources/Models/wall.fbx");
 		_objectShader = std::make_unique<Shader>();
@@ -26,4 +27,3 @@ public:
 		_objectShader->set_uniform("u_scale", s);
 	}
 };
-

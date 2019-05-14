@@ -9,7 +9,8 @@ class EntityManager {
 private:
     EntityManager();
 
-	std::unordered_map<uint32_t, std::shared_ptr<CBaseEntity>> entityList;
+	std::unordered_map<uint32_t, int> _entityMap;
+    std::vector<std::shared_ptr<CBaseEntity>> _entityList;
 public:
 	/**
 	 * \brief The singleton getter of EntityManager (create one if not exist)
