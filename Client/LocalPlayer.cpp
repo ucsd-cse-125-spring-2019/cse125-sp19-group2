@@ -9,7 +9,7 @@ LocalPlayer::LocalPlayer(uint32_t playerId, std::unique_ptr<NetworkClient> const
 	_playerType = Player_Dog;
 
 	// Spawn threads for server I/O
-	_gamePad = new GamePadXbox(GamePadIndex_One);
+	_gamePad = new GamePadXbox(GamePadIndex_NULL);
 	_readThread = std::thread(
 		&LocalPlayer::inputReadHandler,
 		this);

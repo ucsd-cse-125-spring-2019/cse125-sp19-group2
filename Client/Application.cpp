@@ -202,9 +202,13 @@ void Application::Setup() {
 	gui->addGroup("Controller");
 	// Controller number 
 	auto* controller_num = gui->addVariable("Controller Number", _gamepad_num, enabled);
-	controller_num->setItems({ "1", "2", "3", "4" });
+	controller_num->setItems({ "None", "1", "2", "3", "4" });
 	controller_num->setCallback([=](const GamePadIndex& e) {
 		switch (e) {
+		case GamePadIndex_NULL:
+			_localPlayer->setControllerNum(GamePadIndex_NULL);
+			_gamepad_num = e;
+			break;
 		case GamePadIndex_One:
 			if (_localPlayer->setControllerNum(GamePadIndex_One))
 				_gamepad_num = e;
