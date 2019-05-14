@@ -296,6 +296,7 @@ xcopy /y /d  "$(SolutionDir)Library\lib\x64\Release\*.dll" "$(OutDir)"</Command>
     <ClInclude Include="AudioManager.hpp" />
     <ClInclude Include="AudioSource.hpp" />
     <ClInclude Include="CBaseEntity.hpp" />
+    <ClInclude Include="CBoneEntity.hpp" />
     <ClInclude Include="CBoxEntity.hpp" />
     <ClInclude Include="CDogEntity.hpp" />
     <ClInclude Include="CExampleEntity.hpp" />

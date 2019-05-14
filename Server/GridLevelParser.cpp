@@ -4,6 +4,7 @@
 #include "SBoxEntity.hpp"
 #include "SHouseEntity.hpp"
 #include "SJailEntity.hpp"
+#include "SBoneEntity.hpp"
 
 GridLevelParser::GridLevelParser()
 {
@@ -262,9 +263,8 @@ std::vector<std::shared_ptr<SBaseEntity>> GridLevelParser::parseLevelFromFile(
 					}
 					case TILE_DOGBONE:
 					{
-						// Dog bone to refill dog stamina
-						// TODO
-
+						entity = std::make_shared<SBoneEntity>(
+							glm::vec3(avgPos.x, 0, avgPos.y));
 						break;
 					}
 				}

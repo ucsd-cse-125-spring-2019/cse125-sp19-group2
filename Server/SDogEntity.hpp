@@ -4,6 +4,9 @@
 #include "SPlayerEntity.hpp"
 #include "Shared/DogState.hpp"
 
+#define BASE_VELOCITY 5.0f
+#define RUN_VELOCITY BASE_VELOCITY * 1.5f;
+
 class SDogEntity : public SPlayerEntity
 {
 public:
@@ -23,14 +26,14 @@ public:
 		_state->height = 0.8f;
 		_state->depth = 0.8f;
 
-		_velocity = 5.0f;
+		_velocity = BASE_VELOCITY;
 
 		_jails = jails;
 
 		// Dog-specific stuff
 		auto dogState = std::static_pointer_cast<DogState>(_state);
 		dogState->currentAnimation = ANIMATION_DOG_IDLE;
-		dogState->runStamina = 10;
+		dogState->runStamina = MAX_DOG_STAMINA;
 	};
 
 	~SDogEntity() {};
@@ -43,6 +46,54 @@ public:
 
 		// Save old position
 		glm::vec3 oldPos = _state->pos;
+
+		// Filter for non-movement events
+		auto filteredEvents = std::vector<std::shared_ptr<GameEvent>>();
+		for (auto& event : events)
+		{
+			if (event->type != EVENT_PLAYER_MOVE)
+			{
+				filteredEvents.push_back(event);
+			}
+		}
+
+		// Remove duplicates. This should probably be moved to the EventManager,
+		// because the human will have to do the exact same thing
+		filteredEvents.erase(std::unique(filteredEvents.begin(), filteredEvents.end(),
+			[](const std::shared_ptr<GameEvent> & a, const std::shared_ptr<GameEvent> & b) -> bool
+		{
+			return a->type == b->type;
+		}), filteredEvents.end());
+
+		// If any events left, process them
+		if (filteredEvents.size())
+		{
+			for (auto& event : filteredEvents)
+			{
+				switch (event->type)
+				{
+				case EVENT_PLAYER_RUN:
+					// TODO: find out when dog stops running. Will have the same problem
+					// when tick rate is higher than FPS unless client generates event
+					// when dog stops running.
+					if (dogState->runStamina > 0)
+					{
+						_velocity = RUN_VELOCITY;
+					}
+					dogState->runStamina -= 1 / TICKS_PER_SEC;
+					
+					if (dogState->runStamina < 0)
+					{
+						dogState->runStamina = 0;
+					}
+
+					break;
+				// TODO: event for when player releases running button
+				default:
+					break;
+				}
+			}
+		}
 
 		// Update and check for changes
 		SPlayerEntity::update(events);
@@ -83,7 +134,13 @@ public:
 		}
 		else if (entity->getState()->type == ENTITY_BONE)
 		{
-			dogState->runStamina += 5;
+			// Refill dog stamina
+			dogState->runStamina = MAX_DOG_STAMINA;
+			hasChanged = true;
+
+			// Remove dog bone
+			entity->getState()->isDestroyed = true;
+			entity->hasChanged = true;
 		}
 		else
 		{
