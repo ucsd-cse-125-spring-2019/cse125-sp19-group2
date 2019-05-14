@@ -7,6 +7,7 @@
 #include "CDogHouseEntity.hpp"
 #include "CHydrantEntity.hpp"
 #include "CFountainEntity.hpp"
+#include "CFloorEntity.hpp"
 #include "ColliderManager.hpp"
 #include "Shared/Logger.hpp"
 #include <algorithm>
@@ -71,11 +72,7 @@ std::shared_ptr<CBaseEntity> EntityManager::getEntity(std::shared_ptr<BaseState>
 		entity = std::make_shared<CFountainEntity>();
 		break;
 	case ENTITY_FLOOR:
-		// This is here for reference only, this stuff will likely be handled elsewhere
-		FloorType floorType = (FloorType)((int)(state->height));
-		int xIndex = (int)(state->pos.x);
-		int zIndex = (int)(state->pos.z);
-		float tileWidth = state->width;
+		CFloorEntity::getInstance().updateTile(state);
 		break;
     }
 

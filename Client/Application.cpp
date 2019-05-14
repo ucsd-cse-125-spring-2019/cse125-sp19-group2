@@ -12,6 +12,7 @@
 #include "GuiManager.hpp"
 #include "AudioManager.hpp"
 #include "ColliderManager.hpp"
+#include "CFloorEntity.hpp"
 
 Application::Application(const char* windowTitle, int argc, char** argv) {
   _win_title = windowTitle;
@@ -307,6 +308,9 @@ void Application::Draw() {
     _skyboxShader->set_uniform("u_view", _localPlayer->getCamera()->view_matrix() * glm::scale(glm::mat4(1.0f), glm::vec3(200,200,200)));
       //glm::mat4(glm::mat3(_localPlayer->getCamera()->view_matrix()))
     _skybox->draw(_skyboxShader);
+
+	// Render floor before any entity
+	CFloorEntity::getInstance().render(_localPlayer->getCamera());
 
     EntityManager::getInstance().render(_localPlayer->getCamera());
 

@@ -85,7 +85,7 @@
     <ClCompile Include="ColliderManager.cpp">
       <Filter>Source Files\Entity</Filter>
     </ClCompile>
-    <ClCompile Include="FloorManager.cpp">
+    <ClCompile Include="CFloorEntity.cpp">
       <Filter>Source Files\Entity</Filter>
     </ClCompile>
   </ItemGroup>
@@ -201,9 +201,6 @@
     <ClInclude Include="Drawable.hpp">
       <Filter>Header Files\Graphics</Filter>
     </ClInclude>
-    <ClInclude Include="FloorManager.hpp">
-      <Filter>Header Files\Entity</Filter>
-    </ClInclude>
     <ClInclude Include="CDogHouseEntity.hpp">
       <Filter>Header Files\Entity</Filter>
     </ClInclude>
@@ -211,6 +208,9 @@
       <Filter>Header Files\Entity</Filter>
     </ClInclude>
     <ClInclude Include="CFountainEntity.hpp">
+      <Filter>Header Files\Entity</Filter>
+    </ClInclude>
+    <ClInclude Include="CFloorEntity.hpp">
       <Filter>Header Files\Entity</Filter>
     </ClInclude>
   </ItemGroup>

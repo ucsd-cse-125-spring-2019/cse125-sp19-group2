@@ -246,10 +246,10 @@ xcopy /y /d  "$(SolutionDir)Library\lib\x64\Release\*.dll" "$(OutDir)"</Command>
     <ClCompile Include="AudioManager.cpp" />
     <ClCompile Include="AudioSource.cpp" />
     <ClCompile Include="Camera.cpp" />
+    <ClCompile Include="CFloorEntity.cpp" />
     <ClCompile Include="ColliderManager.cpp" />
     <ClCompile Include="EntityManager.cpp" />
     <ClCompile Include="DirectionalLight.cpp" />
-    <ClCompile Include="FloorManager.cpp" />
     <ClCompile Include="FrameBuffer.cpp" />
     <ClCompile Include="glad.c" />
     <ClCompile Include="GUIManager.cpp" />
@@ -301,6 +301,7 @@ xcopy /y /d  "$(SolutionDir)Library\lib\x64\Release\*.dll" "$(OutDir)"</Command>
     <ClInclude Include="CDogEntity.hpp" />
     <ClInclude Include="CDogHouseEntity.hpp" />
     <ClInclude Include="CExampleEntity.hpp" />
+    <ClInclude Include="CFloorEntity.hpp" />
     <ClInclude Include="CFountainEntity.hpp" />
     <ClInclude Include="CHouseEntity.hpp" />
     <ClInclude Include="CHumanEntity.hpp" />
@@ -309,7 +310,6 @@ xcopy /y /d  "$(SolutionDir)Library\lib\x64\Release\*.dll" "$(OutDir)"</Command>
     <ClInclude Include="CPlayerEntity.hpp" />
     <ClInclude Include="Drawable.hpp" />
     <ClInclude Include="EntityManager.hpp" />
-    <ClInclude Include="FloorManager.hpp" />
     <ClInclude Include="FrameBuffer.h" />
     <ClInclude Include="GamePadXbox.hpp" />
     <ClInclude Include="GUIManager.hpp" />
