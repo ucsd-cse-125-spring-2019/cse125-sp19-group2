@@ -3,6 +3,11 @@
 #include "CHumanEntity.hpp"
 #include "CBoxEntity.hpp"
 #include "CHouseEntity.hpp"
+#include "CBoneEntity.hpp"
+#include "CDogHouseEntity.hpp"
+#include "CHydrantEntity.hpp"
+#include "CFountainEntity.hpp"
+#include "CFloorEntity.hpp"
 #include "ColliderManager.hpp"
 #include "Shared/Logger.hpp"
 #include <algorithm>
@@ -38,6 +43,7 @@ std::shared_ptr<CBaseEntity> EntityManager::getEntity(std::shared_ptr<BaseState>
     // Otherwise create the Entity based on its type
     std::shared_ptr<CBaseEntity> entity = nullptr;
     EntityType type = state->type;
+
     switch (type) {
     case ENTITY_EXAMPLE:
         break;
@@ -50,9 +56,23 @@ std::shared_ptr<CBaseEntity> EntityManager::getEntity(std::shared_ptr<BaseState>
 	case ENTITY_BOX:
 		entity = std::make_shared<CBoxEntity>();
 		break;
-
 	case ENTITY_HOUSE_6X6_A:
 		entity = std::make_shared<CHouseEntity>(type);
+		break;
+	case ENTITY_BONE:
+		entity = std::make_shared<CBoneEntity>();
+		break;
+	case ENTITY_DOGHOUSE:
+		entity = std::make_shared<CDogHouseEntity>();
+		break;
+	case ENTITY_HYDRANT:
+		entity = std::make_shared<CHydrantEntity>();
+		break;
+	case ENTITY_FOUNTAIN:
+		entity = std::make_shared<CFountainEntity>();
+		break;
+	case ENTITY_FLOOR:
+		CFloorEntity::getInstance().updateTile(state);
 		break;
     }
 

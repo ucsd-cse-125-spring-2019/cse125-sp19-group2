@@ -131,6 +131,18 @@
     <ClInclude Include="SHouseEntity.hpp">
       <Filter>Header Files\Entity</Filter>
     </ClInclude>
+    <ClInclude Include="SFloorEntity.hpp">
+      <Filter>Header Files\Entity</Filter>
+    </ClInclude>
+    <ClInclude Include="SDogHouseEntity.hpp">
+      <Filter>Header Files\Entity</Filter>
+    </ClInclude>
+    <ClInclude Include="SHydrantEntity.hpp">
+      <Filter>Header Files\Entity</Filter>
+    </ClInclude>
+    <ClInclude Include="SFountainEntity.hpp">
+      <Filter>Header Files\Entity</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

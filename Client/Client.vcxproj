@@ -246,6 +246,7 @@ xcopy /y /d  "$(SolutionDir)Library\lib\x64\Release\*.dll" "$(OutDir)"</Command>
     <ClCompile Include="AudioManager.cpp" />
     <ClCompile Include="AudioSource.cpp" />
     <ClCompile Include="Camera.cpp" />
+    <ClCompile Include="CFloorEntity.cpp" />
     <ClCompile Include="ColliderManager.cpp" />
     <ClCompile Include="EntityManager.cpp" />
     <ClCompile Include="DirectionalLight.cpp" />
@@ -295,11 +296,16 @@ xcopy /y /d  "$(SolutionDir)Library\lib\x64\Release\*.dll" "$(OutDir)"</Command>
     <ClInclude Include="AudioManager.hpp" />
     <ClInclude Include="AudioSource.hpp" />
     <ClInclude Include="CBaseEntity.hpp" />
+    <ClInclude Include="CBoneEntity.hpp" />
     <ClInclude Include="CBoxEntity.hpp" />
     <ClInclude Include="CDogEntity.hpp" />
+    <ClInclude Include="CDogHouseEntity.hpp" />
     <ClInclude Include="CExampleEntity.hpp" />
+    <ClInclude Include="CFloorEntity.hpp" />
+    <ClInclude Include="CFountainEntity.hpp" />
     <ClInclude Include="CHouseEntity.hpp" />
     <ClInclude Include="CHumanEntity.hpp" />
+    <ClInclude Include="CHydrantEntity.hpp" />
     <ClInclude Include="ColliderManager.hpp" />
     <ClInclude Include="CPlayerEntity.hpp" />
     <ClInclude Include="Drawable.hpp" />
@@ -326,16 +332,16 @@ xcopy /y /d  "$(SolutionDir)Library\lib\x64\Release\*.dll" "$(OutDir)"</Command>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
-    <Import Project="..\packages\glm.0.9.9.500\build\native\glm.targets" Condition="Exists('..\packages\glm.0.9.9.500\build\native\glm.targets')" />
     <Import Project="..\packages\glfw.3.3.0.1\build\native\glfw.targets" Condition="Exists('..\packages\glfw.3.3.0.1\build\native\glfw.targets')" />
+    <Import Project="..\packages\glm.0.9.9.500\build\native\glm.targets" Condition="Exists('..\packages\glm.0.9.9.500\build\native\glm.targets')" />
   </ImportGroup>
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>
       <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
     </PropertyGroup>
     <Error Condition="!Exists('..\packages\soil.1.16.0\build\native\soil.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\soil.1.16.0\build\native\soil.props'))" />
-    <Error Condition="!Exists('..\packages\glm.0.9.9.500\build\native\glm.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\glm.0.9.9.500\build\native\glm.targets'))" />
     <Error Condition="!Exists('..\packages\glfw.3.3.0.1\build\native\glfw.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\glfw.3.3.0.1\build\native\glfw.targets'))" />
+    <Error Condition="!Exists('..\packages\glm.0.9.9.500\build\native\glm.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\glm.0.9.9.500\build\native\glm.targets'))" />
   </Target>
   <Target Name="BeforeClean">
     <Message Text="Cleaning resource files..." />

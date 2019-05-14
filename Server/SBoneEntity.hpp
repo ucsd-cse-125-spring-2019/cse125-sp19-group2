@@ -1,5 +1,6 @@
 #pragma once
 
+#include "IdGenerator.hpp"
 #include "SBaseEntity.hpp"
 #include "CapsuleCollider.hpp"
 
@@ -22,6 +23,8 @@ public:
 		// Capsule collider
 		_collider = std::make_unique<CapsuleCollider>(_state.get());
 		_state->colliderType = COLLIDER_CAPSULE;
+
+		// Tighter bounding spheres for the bones
 		_state->width = 0.6f;
 		_state->depth = 0.6f;
 		_state->height = 0.6f;
@@ -29,4 +32,10 @@ public:
 		// Non-solid object
 		_state->isSolid = false;
 	};
+	~SBoneEntity() {};
+
+	void update(std::vector<std::shared_ptr<GameEvent>> events) override
+	{
+		// Update does nothing for bone entities (for now)
+	}
 };

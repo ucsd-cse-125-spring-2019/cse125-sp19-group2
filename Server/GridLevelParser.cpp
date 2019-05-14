@@ -4,6 +4,11 @@
 #include "SBoxEntity.hpp"
 #include "SHouseEntity.hpp"
 #include "SJailEntity.hpp"
+#include "SBoneEntity.hpp"
+#include "SFloorEntity.hpp"
+#include "SDogHouseEntity.hpp"
+#include "SHydrantEntity.hpp"
+#include "SFountainEntity.hpp"
 
 GridLevelParser::GridLevelParser()
 {
@@ -42,8 +47,8 @@ std::vector<std::shared_ptr<SBaseEntity>> GridLevelParser::parseLevelFromFile(
 	int fileSize = (int)levelFile.tellg();
 	levelFile.seekg(0, std::ios::beg);
 
-	// Each tile has a type and an orientation
-	int tileCount = fileSize / 2;
+	// Each tile has a type, a ground type, and an orientation
+	int tileCount = fileSize / 3;
 
 	// Ensure tile count is a perfect square
 	auto sr = std::sqrt(tileCount);
@@ -73,11 +78,14 @@ std::vector<std::shared_ptr<SBaseEntity>> GridLevelParser::parseLevelFromFile(
 	// Read until end of file
 	while (zIndex < width)
 	{
-		// Read next byte as angle
-		angle = levelFile.get() * 2; // Angles are encoded as 1/3 their value
-
 		// Create a tile and put it into our 2D array
 		Tile* tile = new Tile();
+
+		// Next byte is ground type
+		tile->groundType = (GroundType)levelFile.get();
+
+		// Read next byte as angle
+		angle = levelFile.get() * 2; // Angles are encoded as 1/3 their value
 
 		// Cast uint to enum
 		tile->type = (TileType)tileType;
@@ -257,14 +265,34 @@ std::vector<std::shared_ptr<SBaseEntity>> GridLevelParser::parseLevelFromFile(
 							ENTITY_HOUSE_6X6_A,
 							glm::vec3(avgPos.x, 0, avgPos.y),
 							aggregatedTiles[0]->forward,
-							glm::vec3(6,6,6));
+							glm::vec3(6));
 						break;
 					}
 					case TILE_DOGBONE:
 					{
-						// Dog bone to refill dog stamina
-						// TODO
-
+						entity = std::make_shared<SBoneEntity>(
+							glm::vec3(avgPos.x, 0, avgPos.y));
+						break;
+					}
+					case TILE_DOGHOUSE:
+					{
+						entity = std::make_shared<SDogHouseEntity>(
+							glm::vec3(avgPos.x, 0, avgPos.y),
+							aggregatedTiles[0]->forward);
+						break;
+					}
+					case TILE_HYDRANT:
+					{
+						entity = std::make_shared<SHydrantEntity>(
+							glm::vec3(avgPos.x, 0, avgPos.y),
+							aggregatedTiles[0]->forward);
+						break;
+					}
+					case TILE_FOUNTAIN:
+					{
+						entity = std::make_shared<SFountainEntity>(
+							glm::vec3(avgPos.x, 0, avgPos.y),
+							aggregatedTiles[0]->forward);
 						break;
 					}
 				}
@@ -275,6 +303,17 @@ std::vector<std::shared_ptr<SBaseEntity>> GridLevelParser::parseLevelFromFile(
 					auto children = entity->getChildren();
 					entityList.insert(entityList.begin(), children.begin(), children.end());
 				}
+			}
+
+			// Build floor tile if not default floor
+			if (tile->groundType != 0)
+			{
+				entityList.push_back(
+					std::make_shared<SFloorEntity>(
+						(FloorType)tile->groundType,
+						xIndex,
+						zIndex,
+						tileWidth));
 			}
 		}
 	}

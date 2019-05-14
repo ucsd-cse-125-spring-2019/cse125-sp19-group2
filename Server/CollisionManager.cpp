@@ -32,7 +32,12 @@ void CollisionManager::handleCollisions()
 	auto tree = new QuadTree({ glm::vec2(0), MAP_WIDTH / 2 });
 	for (auto& entityPair : *_entityMap)
 	{
-		tree->insert(entityPair.second->getState().get());
+		// Only insert if it has a collider
+		auto entityState = entityPair.second->getState().get();
+		if (entityState->colliderType != COLLIDER_NONE)
+		{
+			tree->insert(entityState);
+		}
 	}
 
 	auto collisionSet = std::unordered_set<std::pair<BaseState*, BaseState*>, PairHash>();

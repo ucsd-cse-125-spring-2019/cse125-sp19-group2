@@ -84,6 +84,21 @@ LocalPlayer::LocalPlayer(uint32_t playerId, std::unique_ptr<NetworkClient> const
         };
     });
 
+	// Player move right event
+	InputManager::getInstance().getKey(GLFW_KEY_LEFT_SHIFT)->onRepeat([&]
+	{
+		auto event = std::make_shared<GameEvent>();
+		event->playerId = _playerId;
+		event->type = EVENT_PLAYER_RUN;
+
+		// Try sending the update
+		try {
+			networkClient->sendEvent(event);
+		}
+		catch (std::runtime_error e) {
+		};
+	});
+
     _camera = std::make_unique<Camera>();
 	_camera->set_pitch(_pitch);
     _offset = glm::normalize(glm::vec3(0.0f, 0.5f, 0.5f));
