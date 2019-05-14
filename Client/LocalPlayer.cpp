@@ -107,18 +107,31 @@ LocalPlayer::LocalPlayer(uint32_t playerId, std::unique_ptr<NetworkClient> const
 		}
     });
 
+	// Player move right event
+	InputManager::getInstance().getKey(GLFW_KEY_LEFT_SHIFT)->onRepeat([&]
+	{
+		auto event = std::make_shared<GameEvent>();
+		event->playerId = _playerId;
+		event->type = EVENT_PLAYER_RUN;
 
+		// Try sending the update
+		try {
+			networkClient->sendEvent(event);
+		}
+		catch (std::runtime_error e) {
+		};
+	});
 
-    _camera = std::make_unique<Camera>();
+  _camera = std::make_unique<Camera>();
 
 	_networkClient = networkClient.get();
 
 	_moveKeysPressed = false;
 	_stopped = true;
-    _moveCamera = false;
+  _moveCamera = false;
 
-    // TODO: set player model height properly
-    _height = 1.0f;
+  // TODO: set player model height properly
+  _height = 1.0f;
 }
 
 void LocalPlayer::update() {

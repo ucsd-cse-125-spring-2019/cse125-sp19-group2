@@ -24,6 +24,12 @@ public:
 	virtual void render(std::unique_ptr<Camera> const& camera)
 	{
 		_objectShader->Use();
+		setUniforms(camera);
+		_objectModel->render(_objectShader);
+	}
+
+	virtual void setUniforms(std::unique_ptr<Camera> const& camera)
+	{
 		_objectShader->set_uniform("u_projection", camera->projection_matrix());
 		_objectShader->set_uniform("u_view", camera->view_matrix());
 
@@ -45,7 +51,6 @@ public:
 		_objectShader->set_uniform("u_pointlight.linear", 0.09f);
 		_objectShader->set_uniform("u_pointlight.quadratic", 0.032f);
 		_objectShader->set_uniform("u_numpointlights", static_cast<GLuint>(1));
-		_objectModel->render(_objectShader);
 	}
 
     // Every child must override this if they carry additional state
