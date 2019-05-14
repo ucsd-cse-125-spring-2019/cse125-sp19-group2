@@ -29,13 +29,6 @@ public:
 		_state->width = scale.x;
 		_state->height = scale.y;
 		_state->depth = scale.z;
-
-		hasChanged = false;
 	};
 	~SHouseEntity() {};
-
-	void update(std::vector<std::shared_ptr<GameEvent>> events) override
-	{
-		// Update does nothing for houses atm
-	}
 };

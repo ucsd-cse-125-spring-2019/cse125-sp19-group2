@@ -56,11 +56,6 @@ public:
 	};
 	~SJailEntity() {};
 
-	void update(std::vector<std::shared_ptr<GameEvent>> events) override
-	{
-		// Update does nothing for jails at the moment
-	}
-
 	// If walls have children in the future, change this
 	std::vector<std::shared_ptr<SBaseEntity>> getChildren() override
 	{

@@ -243,9 +243,13 @@
     <ClInclude Include="SBaseEntity.hpp" />
     <ClInclude Include="SBoxEntity.hpp" />
     <ClInclude Include="SDogEntity.hpp" />
+    <ClInclude Include="SDogHouseEntity.hpp" />
     <ClInclude Include="SExampleEntity.hpp" />
+    <ClInclude Include="SFloorEntity.hpp" />
+    <ClInclude Include="SFountainEntity.hpp" />
     <ClInclude Include="SHouseEntity.hpp" />
     <ClInclude Include="SHumanEntity.hpp" />
+    <ClInclude Include="SHydrantEntity.hpp" />
     <ClInclude Include="SJailEntity.hpp" />
     <ClInclude Include="SPlayerEntity.hpp" />
     <ClInclude Include="GridLevelParser.hpp" />

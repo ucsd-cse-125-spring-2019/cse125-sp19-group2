@@ -30,7 +30,17 @@ private:
 		TILE_HUMAN_SPAWN,
 		TILE_DOG_SPAWN,
 		TILE_HOUSE_6X6_A,
-		TILE_DOGBONE
+		TILE_DOGBONE,
+		TILE_DOGHOUSE,
+		TILE_HYDRANT,
+		TILE_FOUNTAIN
+	};
+
+	enum GroundType
+	{
+		GROUND_GRASS,
+		GROUND_ROAD,
+		GROUND_DIRT
 	};
 
 	// Direction of aggregation
@@ -47,6 +57,7 @@ private:
 	{
 	public:
 		TileType type;
+		GroundType groundType;
 		glm::vec3 forward;
 		glm::vec2 pos;
 		int xIndex;

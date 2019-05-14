@@ -25,6 +25,7 @@
 enum EntityType
 {
 	ENTITY_STATE,	// Not really an entity but needed to differentiate GameState
+	ENTITY_FLOOR,
     ENTITY_EXAMPLE,
 	ENTITY_DOG,
 	ENTITY_HUMAN,
@@ -33,7 +34,9 @@ enum EntityType
 	ENTITY_JAIL,
 	ENTITY_HOUSE_6X6_A,
 	ENTITY_BONE,
-	ENTITY_FLOOR
+	ENTITY_DOGHOUSE,
+	ENTITY_HYDRANT,
+	ENTITY_FOUNTAIN
 	// TODO: add new types here, e.g. ENTITY_DOGBONE
 };
 

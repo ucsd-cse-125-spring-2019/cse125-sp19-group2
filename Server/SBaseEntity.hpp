@@ -23,7 +23,7 @@ public:
 	bool hasChanged;	// If object state has changed during the last iteration
 
 	// Update function, called every tick
-	virtual void update(std::vector<std::shared_ptr<GameEvent>> events) = 0;
+	virtual void update(std::vector<std::shared_ptr<GameEvent>> events) {};
 
     // All server objects must have a state to send to the client.
 	virtual std::shared_ptr<BaseState> getState()
