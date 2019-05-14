@@ -184,8 +184,7 @@ void LocalPlayer::update()
 			return;
 		}
 		_playerEntity->setLocal(true);
-
-		GuiManager::getInstance().setDirty();
+		_height = _playerEntity->getState()->height * 0.9f;
 	}
 	glm::vec3 pos = _playerEntity->getState()->pos;
 	pos.y += _height;
