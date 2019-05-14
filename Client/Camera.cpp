@@ -160,6 +160,12 @@ bool Camera::isInFrustum(glm::vec3 p, float radius) const {
     return true;
 }
 
+float Camera::getTransparency(glm::vec3 p, float radius) const
+{
+	float dist = glm::length(p - _position);
+	return std::min(std::max(0.0f, (dist - 0.7f) / (radius)), 1.0f);
+}
+
 float Camera::fov() const
 {
 	return _fov;

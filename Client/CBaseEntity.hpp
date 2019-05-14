@@ -32,6 +32,10 @@ public:
 	{
 		_objectShader->set_uniform("u_projection", camera->projection_matrix());
 		_objectShader->set_uniform("u_view", camera->view_matrix());
+		_objectShader->set_uniform("u_viewPos", camera->position());
+
+		// Setting tranparency
+		_objectShader->set_uniform("u_transparency", _state->transparency);
 
 		// Compute model matrix based on state: t * r * s
 		const auto t = glm::translate(glm::mat4(1.0f), _state->pos);
@@ -70,6 +74,9 @@ public:
 		_state->width = state->width;
 		_state->height = state->height;
 		_state->depth = state->depth;
+
+		// Update the transparency
+		_state->transparency = state->transparency;
 	}
 
     // This is optional, but might make our lives easier. Remove if you feel

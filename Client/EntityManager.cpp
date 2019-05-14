@@ -117,12 +117,21 @@ void EntityManager::render(std::unique_ptr<Camera> const& camera) {
         const float radius = _entityList[i]->getRadius();
         test[i] = camera->isInFrustum(pos, radius);
     }
-
+	// save off current state of src / dst blend functions
+	GLint blendSrc;
+	GLint blendDst;
+	glGetIntegerv(GL_BLEND_SRC_ALPHA, &blendSrc);
+	glGetIntegerv(GL_BLEND_DST_ALPHA, &blendDst);
+	//glBlendFunc(GL_ONE, GL_ONE);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     for(uint32_t i = 0 ; i < _entityList.size(); i ++) {
         if(test[i]) {
             _entityList[i]->render(camera);
         }
     }
+
+	// restore blendfunc
+	glBlendFunc(blendSrc, blendDst);
 
 	ColliderManager::getInstance().render(camera);
 }
