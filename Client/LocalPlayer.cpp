@@ -107,6 +107,29 @@ LocalPlayer::LocalPlayer(uint32_t playerId, std::unique_ptr<NetworkClient> const
 		}
     });
 
+	InputManager::getInstance().getKey2D(Key::KEYTYPE::RSTICK)->onMove([&](glm::vec2 v)
+	{
+		//std::cout << glm::to_string(v) << std::endl;
+			_camera->move_camera(v);
+	});
+
+	InputManager::getInstance().getKey2D(Key::KEYTYPE::LSTICK)->onMove([&](glm::vec2 dir)
+	{
+		//std::cout << glm::to_string(v) << std::endl;
+		// Invert z
+		dir.y = -(dir.y);
+
+		// Send event
+		auto event = std::make_shared<GameEvent>();
+		event->type = EVENT_PLAYER_MOVE;
+		event->playerId = _playerId;
+		event->direction = _camera->convert_direction(dir);
+		_networkClient->sendEvent(event);
+
+		_stopped = false;
+		_moveKeysPressed = true;
+	});
+
 	// Player move right event
 	InputManager::getInstance().getKey(GLFW_KEY_LEFT_SHIFT)->onRepeat([&]
 	{
@@ -170,18 +193,19 @@ void LocalPlayer::updateController()
 			auto dir = _pad->getLS();
 			    if (dir != glm::vec2(0))
 			    {
-				    // Invert z
-				    dir.y = -(dir.y);
+					InputManager::getInstance().move(Key::KEYTYPE::LSTICK, dir.x, dir.y);
+				    //// Invert z
+				    //dir.y = -(dir.y);
 
-				    // Send event
-				    auto event = std::make_shared<GameEvent>();
-				    event->type = EVENT_PLAYER_MOVE;
-				    event->playerId = _playerId;
-				    event->direction = _camera->convert_direction(dir);
-				    _networkClient->sendEvent(event);
+				    //// Send event
+				    //auto event = std::make_shared<GameEvent>();
+				    //event->type = EVENT_PLAYER_MOVE;
+				    //event->playerId = _playerId;
+				    //event->direction = _camera->convert_direction(dir);
+				    //_networkClient->sendEvent(event);
 
-				    _stopped = false;
-				    _moveKeysPressed = true;
+				    //_stopped = false;
+				    //_moveKeysPressed = true;
 			    }
 
 			if (_pad->isKeyDown(GamePad_Button_DPAD_LEFT)) {
