@@ -275,5 +275,5 @@ glm::vec2 Camera::convert_direction(glm::vec2 input) {
     const glm::vec2 rotVec = glm::normalize(glm::vec2(_forward.x, _forward.z));
     const float angle = glm::atan(rotVec.y - initial.y,rotVec.x - initial.x);
     glm::vec2 out = glm::rotate(glm::mat3(1.0f), angle * 2.0f) * glm::vec3(input, 0);
-    return out;
+	return glm::normalize(out);
 }

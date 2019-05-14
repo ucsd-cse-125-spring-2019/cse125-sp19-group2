@@ -1,5 +1,6 @@
 ﻿#include "Key.h"
 #include "InputManager.h"
+#include <glm/detail/func_geometric.inl>
 
 Key::Key(int keycode) {
     _keycode = keycode;
@@ -63,7 +64,7 @@ void Key2D::update(glm::vec2 pos) {
         _lastDelta = curr - _lastPos;
 
         // Call events if the delta is larger than something
-        if (_lastDelta.length() > 0.001) {
+        if (glm::length(_lastDelta) > 0.001) {
             for (auto f : _onMove) {
                 f(_lastDelta);
             }
@@ -73,7 +74,7 @@ void Key2D::update(glm::vec2 pos) {
     }else {
         // else use pos directly
         // Call events if the delta is larger than something
-        if (pos.length() > 0.001) {
+        if (glm::length(pos) > 0.001) {
             for (auto f : _onMove) {
                 f(pos);
             }
