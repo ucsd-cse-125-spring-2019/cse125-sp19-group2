@@ -123,4 +123,6 @@ void EntityManager::render(std::unique_ptr<Camera> const& camera) {
             _entityList[i]->render(camera);
         }
     }
+
+	ColliderManager::getInstance().render(camera);
 }
