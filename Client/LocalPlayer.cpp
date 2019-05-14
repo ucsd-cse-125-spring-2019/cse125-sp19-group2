@@ -216,6 +216,10 @@ void LocalPlayer::updateController()
 		auto right = _pad->getRS();
 		InputManager::getInstance().move(Key::KEYTYPE::RSTICK, right.x, right.y);
 
+		auto lt = _pad->getForceLT();
+		auto rt = _pad->getForceRT();
+		auto s = rt - lt;
+		InputManager::getInstance().scroll(s);
 
 		if (_pad->isKeyDown(GamePad_Button_DPAD_LEFT))
 		{
