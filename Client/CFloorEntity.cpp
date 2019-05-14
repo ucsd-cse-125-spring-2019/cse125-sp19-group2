@@ -52,6 +52,7 @@ void CFloorEntity::render(std::unique_ptr<Camera> const & camera)
 	// render the default floor
 	_objectShader->Use();
 	setUniforms(camera);
+    _objectShader->set_uniform("u_transparency", 1.0f);
 	glDisable(GL_DEPTH_TEST);
 	_objectModel->render(_objectShader);
 	glEnable(GL_DEPTH_TEST);

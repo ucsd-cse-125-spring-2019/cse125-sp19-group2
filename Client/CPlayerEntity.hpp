@@ -24,7 +24,7 @@ public:
 		_objectModel->update();
 
 		// Base render
-		CBaseEntity::render(camera);
+        CBaseEntity::render(camera);
 	}
 
     virtual void updateState(std::shared_ptr<BaseState> state) override {

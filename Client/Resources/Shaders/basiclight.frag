@@ -41,9 +41,7 @@ uniform DirLight   u_dirlight;
 uniform PointLight u_pointlight;
 uniform Material   u_material;
 uniform vec3       u_viewPos;
-uniform float      u_transparency;
-
-const float limit = 1.5;
+uniform float      u_transparency = 1.0;
 
 // Output
 out vec4 out_color;
@@ -94,11 +92,6 @@ vec3 CalcPointLight(PointLight light, vec3 normal, vec3 fragPos, vec3 viewDir)
   return ambient + diffuse + specular;
 }
 
-float getTransparency(){
-	float dist = length(u_viewPos - pass_fragPos);
-	return min(max(0.0, (dist - 0.7) / limit), 1.0);
-}
-
 void main(void)
 {
   vec3 normal = normalize(pass_normal);
@@ -117,6 +110,11 @@ void main(void)
   {
     resultCol += CalcPointLight(u_pointlight, normal, pass_fragPos, viewDir);
   }
-  
-  out_color = vec4(resultCol, 1.0f * u_transparency * getTransparency());
+  float alpha = 1.0f * u_transparency;
+
+  if(alpha < 0.01){
+	discard;
+  }
+
+  out_color = vec4(resultCol, alpha);
 }

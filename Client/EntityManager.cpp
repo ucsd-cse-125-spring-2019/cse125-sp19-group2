@@ -111,26 +111,47 @@ void EntityManager::update(std::shared_ptr<BaseState> const& state) {
 
 void EntityManager::render(std::unique_ptr<Camera> const& camera) {
     std::vector<bool> test(_entityList.size());
+    std::vector<int> isTransparent;
+    std::vector<int> isOpaque;
 
     for(uint32_t i = 0 ; i < _entityList.size(); i ++) {
         const glm::vec3 pos = _entityList[i]->getPos();
         const float radius = _entityList[i]->getRadius();
         test[i] = camera->isInFrustum(pos, radius);
+        if(test[i]) {
+            _entityList[i]->setAlpha(camera->getTransparency(pos, radius));
+            if(_entityList[i]->getAlpha() < 1.0f) {
+                isTransparent.push_back(i);
+            }else {
+                isOpaque.push_back(i);
+            }
+        }
     }
+
 	// save off current state of src / dst blend functions
 	GLint blendSrc;
 	GLint blendDst;
 	glGetIntegerv(GL_BLEND_SRC_ALPHA, &blendSrc);
 	glGetIntegerv(GL_BLEND_DST_ALPHA, &blendDst);
-	//glBlendFunc(GL_ONE, GL_ONE);
+
+    glDisable(GL_CULL_FACE);
+    glEnable(GL_SAMPLE_ALPHA_TO_COVERAGE);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    for(uint32_t i = 0 ; i < _entityList.size(); i ++) {
-        if(test[i]) {
-            _entityList[i]->render(camera);
-        }
+
+    // Render Opaque object
+    for(uint32_t i = 0 ; i < isOpaque.size(); i ++) {
+       _entityList[isOpaque[i]]->render(camera);
     }
 
-	// restore blendfunc
+    // Render Transparent object
+    for(uint32_t i = 0 ; i < isOpaque.size(); i ++) {
+       _entityList[isTransparent[i]]->render(camera);
+    }
+
+	// restore 
+    glEnable(GL_CULL_FACE);
+    glDisable(GL_SAMPLE_ALPHA_TO_COVERAGE);
+
 	glBlendFunc(blendSrc, blendDst);
 
 	ColliderManager::getInstance().render(camera);

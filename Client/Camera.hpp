@@ -67,6 +67,7 @@ class Camera
   glm::mat4 projection_matrix() const;
   glm::mat4 view_matrix() const;
   glm::vec3 position() const;
+    glm::vec3 lookat() const;
   bool isInFrustum(glm::vec3 p, float radius) const;
   float getTransparency(glm::vec3 p, float radius) const;
   float fov() const;

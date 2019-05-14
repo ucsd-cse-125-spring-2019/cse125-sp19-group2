@@ -148,6 +148,10 @@ glm::vec3 Camera::position() const
 	return _position;
 }
 
+glm::vec3 Camera::lookat() const {
+    return _lookAtPosition;
+}
+
 bool Camera::isInFrustum(glm::vec3 p, float radius) const {
 	for(int i=0; i < 6; i++) {
         auto & [p0, p1, p2] = _planes[i];
@@ -162,8 +166,18 @@ bool Camera::isInFrustum(glm::vec3 p, float radius) const {
 
 float Camera::getTransparency(glm::vec3 p, float radius) const
 {
+    // Make close object transparent
 	float dist = glm::length(p - _position);
-	return std::min(std::max(0.0f, (dist - 0.7f) / (radius)), 1.0f);
+    float closenessFactor = std::min(std::max(0.0f, (dist - 0.7f) / (radius)), 1.0f);
+
+    // Make intersect object transparent
+    float intersectFactor = 1.0f;
+    glm::vec3 objToCamera = p - _position;
+    glm::vec3 playerToCamera = _lookAtPosition - _position;
+    if(glm::length(objToCamera) < glm::length(playerToCamera)) {
+        
+    }
+	return 0.0f;
 }
 
 float Camera::fov() const

@@ -41,9 +41,7 @@ uniform DirLight   u_dirlight;
 uniform PointLight u_pointlight;
 uniform Material   u_material;
 uniform vec3       u_viewPos;
-uniform float      u_transparency;
-
-const float limit = 1.5;
+uniform float      u_transparency = 1.0;
 
 // Output
 out vec4 out_color;
@@ -69,17 +67,17 @@ vec3 CalcDirLight(DirLight light, vec3 normal, vec3 viewDir)
 vec3 CalcPointLight(PointLight light, vec3 normal, vec3 fragPos, vec3 viewDir)
 {
   // Ambient
-  vec3 ambient = light.ambient * (texture(u_material.diffuse, pass_uv).rgb+ vec3(1.0));
+  vec3 ambient = light.ambient * texture(u_material.diffuse, pass_uv).rgb;
   
   // Diffuse
   vec3 lightDir = normalize(light.position - fragPos);
   float diffAmt = max(dot(normal, lightDir), 0);
-  vec3 diffuse = light.diffuse * diffAmt * (texture(u_material.diffuse, pass_uv).rgb+ vec3(1.0));
+  vec3 diffuse = light.diffuse * diffAmt * texture(u_material.diffuse, pass_uv).rgb;
   
   // Specular
   vec3 reflectDir = reflect(-lightDir, normal);
   float specAmt = pow(max(dot(viewDir, reflectDir), 0), u_material.shininess);
-  vec3 specular = light.specular * specAmt * (texture(u_material.diffuse, pass_uv).rgb+ vec3(1.0));
+  vec3 specular = light.specular * specAmt * texture(u_material.specular, pass_uv).rgb;
   
   // Attenuation
   float dist = length(light.position - fragPos);
@@ -92,11 +90,6 @@ vec3 CalcPointLight(PointLight light, vec3 normal, vec3 fragPos, vec3 viewDir)
   specular *= attenuation;
   
   return ambient + diffuse + specular;
-}
-
-float getTransparency(){
-	float dist = length(u_viewPos - pass_fragPos);
-	return min(max(0.0, (dist - 0.7) / limit), 1.0);
 }
 
 void main(void)
@@ -117,6 +110,11 @@ void main(void)
   {
     resultCol += CalcPointLight(u_pointlight, normal, pass_fragPos, viewDir);
   }
-  
-  out_color = vec4(resultCol, 1.0f * u_transparency * getTransparency());
+  float alpha = 1.0f * u_transparency;
+
+  if(alpha < 0.01){
+	discard;
+  }
+
+  out_color = vec4(resultCol, alpha);
 }

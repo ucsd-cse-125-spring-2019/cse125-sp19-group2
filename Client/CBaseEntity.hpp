@@ -35,7 +35,7 @@ public:
 		_objectShader->set_uniform("u_viewPos", camera->position());
 
 		// Setting tranparency
-		_objectShader->set_uniform("u_transparency", _state->transparency);
+		_objectShader->set_uniform("u_transparency", _state->transparency * _alpha);
 
 		// Compute model matrix based on state: t * r * s
 		const auto t = glm::translate(glm::mat4(1.0f), _state->pos);
@@ -99,12 +99,23 @@ public:
 	// TODO: add any functionality here that is needed in every client-side
 	// object.
 
+    virtual void setAlpha(float transparency) {
+	    _alpha = transparency;
+	}
+
+    virtual float getAlpha() const {
+	    return _alpha * _state->transparency;
+	}
+
 protected:
 	// State pointer for object
 	std::shared_ptr<BaseState> _state;
 
 	// Drawable object. Can be an animation or model
 	std::unique_ptr<Drawable> _objectModel;
+
+    // Transparency information
+    float _alpha = 1.0f;
 
 	// Shader program for object
 	std::unique_ptr<Shader> _objectShader;
