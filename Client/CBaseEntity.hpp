@@ -60,6 +60,11 @@ public:
 
 		// Scale
 		_state->scale = state->scale;
+
+		// Dimensions for bounding boxes
+		_state->width = state->width;
+		_state->height = state->height;
+		_state->depth = state->depth;
 	}
 
     // This is optional, but might make our lives easier. Remove if you feel
@@ -76,7 +81,7 @@ public:
 
     virtual float getRadius() const {
 	    const auto scale = _state->scale;
-	    return std::max(scale.x, std::max(scale.y, scale.z));
+	    return std::max(_state->width, std::max(_state->height, _state->depth));
 	}
 
 	// TODO: add any functionality here that is needed in every client-side
