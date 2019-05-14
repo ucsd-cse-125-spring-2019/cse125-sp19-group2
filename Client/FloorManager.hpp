@@ -1,17 +1,15 @@
 #pragma once
 #include "CBaseEntity.hpp"
-
-struct FloorTile
-{
-	FloorType type;
-
-};
+#include "Camera.hpp"
+#include "Model.hpp"
 
 class FloorManager
 {
 private:
 	FloorManager();
-
+	static std::vector<std::vector<FloorType>> _floorMap;
+	static std::unique_ptr<Model> _floorModel;
+	static std::unique_ptr<Shader> _shader;
 
 public:
 	/**
@@ -25,4 +23,10 @@ public:
 	* \param state(std::shared_ptr<BaseState> const&) Update state
 	*/
 	void update(std::shared_ptr<BaseState> const& state);
+
+	/**
+	* \brief Render all collision boxes in the game world
+	* \param camera(std::unique_ptr<Camera> const&) Local camera
+	*/
+	void render(std::unique_ptr<Camera> const& camera);
 };
