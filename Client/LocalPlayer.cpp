@@ -136,7 +136,6 @@ LocalPlayer::LocalPlayer(uint32_t playerId, std::unique_ptr<NetworkClient> const
 		event->type = EVENT_PLAYER_MOVE;
 		event->playerId = _playerId;
 		event->direction = _camera->convert_direction(v);
-		std::cout << glm::to_string(event->direction) << std::endl;
 		_networkClient->sendEvent(event);
 
 		_stopped = false;
