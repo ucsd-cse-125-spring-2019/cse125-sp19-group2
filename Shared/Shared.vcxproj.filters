@@ -57,6 +57,15 @@
     <ClInclude Include="GameState.hpp">
       <Filter>Header Files\State</Filter>
     </ClInclude>
+    <ClInclude Include="DogState.hpp">
+      <Filter>Header Files\State</Filter>
+    </ClInclude>
+    <ClInclude Include="HumanState.hpp">
+      <Filter>Header Files\State</Filter>
+    </ClInclude>
+    <ClInclude Include="PlayerState.hpp">
+      <Filter>Header Files\State</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Common.cpp">

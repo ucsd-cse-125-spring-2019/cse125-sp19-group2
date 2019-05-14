@@ -2,6 +2,13 @@
 #include "CDogEntity.hpp"
 #include "CHumanEntity.hpp"
 #include "CBoxEntity.hpp"
+#include "CHouseEntity.hpp"
+#include "CBoneEntity.hpp"
+#include "CDogHouseEntity.hpp"
+#include "CHydrantEntity.hpp"
+#include "CFountainEntity.hpp"
+#include "CFloorEntity.hpp"
+#include "ColliderManager.hpp"
 #include "Shared/Logger.hpp"
 #include <algorithm>
 
@@ -36,6 +43,7 @@ std::shared_ptr<CBaseEntity> EntityManager::getEntity(std::shared_ptr<BaseState>
     // Otherwise create the Entity based on its type
     std::shared_ptr<CBaseEntity> entity = nullptr;
     EntityType type = state->type;
+
     switch (type) {
     case ENTITY_EXAMPLE:
         break;
@@ -47,6 +55,24 @@ std::shared_ptr<CBaseEntity> EntityManager::getEntity(std::shared_ptr<BaseState>
 		break;
 	case ENTITY_BOX:
 		entity = std::make_shared<CBoxEntity>();
+		break;
+	case ENTITY_HOUSE_6X6_A:
+		entity = std::make_shared<CHouseEntity>(type);
+		break;
+	case ENTITY_BONE:
+		entity = std::make_shared<CBoneEntity>();
+		break;
+	case ENTITY_DOGHOUSE:
+		entity = std::make_shared<CDogHouseEntity>();
+		break;
+	case ENTITY_HYDRANT:
+		entity = std::make_shared<CHydrantEntity>();
+		break;
+	case ENTITY_FOUNTAIN:
+		entity = std::make_shared<CFountainEntity>();
+		break;
+	case ENTITY_FLOOR:
+		CFloorEntity::getInstance().updateTile(state);
 		break;
     }
 
@@ -66,6 +92,9 @@ void EntityManager::update(std::shared_ptr<BaseState> const& state) {
         if (result != entityList.end()) {
             entityList.erase(result);
         }
+
+		ColliderManager::getInstance().erase(state->id);
+
         return;
     }
 
@@ -75,6 +104,8 @@ void EntityManager::update(std::shared_ptr<BaseState> const& state) {
 	{
 		entity->updateState(state);
 	}
+
+	ColliderManager::getInstance().updateState(state);
 }
 
 void EntityManager::render(std::unique_ptr<Camera> const& camera) {
@@ -83,4 +114,6 @@ void EntityManager::render(std::unique_ptr<Camera> const& camera) {
         {
             entity.second->render(camera);
         });
+
+	ColliderManager::getInstance().render(camera);
 }

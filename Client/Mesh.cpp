@@ -36,8 +36,29 @@ void Mesh::Draw(std::unique_ptr<Shader> const &shader)
   glBindVertexArray(_vao);
   glDrawElements(GL_TRIANGLES, (GLsizei)_indices.size(), GL_UNSIGNED_INT, 0);
   glBindVertexArray(0);
-
   glActiveTexture(GL_TEXTURE0);
+}
+
+void Mesh::Draw(std::unique_ptr<Shader> const &shader, GLuint textureID)
+{
+	// Bind given texture
+	glActiveTexture(GL_TEXTURE0);
+	shader->set_uniform("u_material.diffuse", 0);
+	glBindTexture(GL_TEXTURE_2D, textureID);
+
+	glBindVertexArray(_vao);
+	glDrawElements(GL_TRIANGLES, (GLsizei)_indices.size(), GL_UNSIGNED_INT, 0);
+	glBindVertexArray(0);
+	glActiveTexture(GL_TEXTURE0);
+}
+
+void Mesh::DrawLine(std::unique_ptr<Shader> const &shader) {
+	glBindVertexArray(_vao);
+	glEnable(GL_LINE_SMOOTH);
+	glDrawElements(GL_LINE_STRIP, (GLsizei)_indices.size(), GL_UNSIGNED_INT, 0);
+	glBindVertexArray(0);
+
+	glActiveTexture(GL_TEXTURE0);
 }
 
 // Binds mesh's VAO, VBO, and EBO data to corresponding buffers and sets the

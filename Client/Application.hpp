@@ -106,7 +106,7 @@ private:
   std::unique_ptr<DirectionalLight> _dir_light;
 
     // Test UI
-    bool _playAmbient = true;
+    bool _playAmbient = false;
     bool _playPositional;
     int _integer;
     float _float;

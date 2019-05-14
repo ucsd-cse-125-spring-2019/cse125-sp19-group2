@@ -1,8 +1,19 @@
 #pragma once
 
+#include <glm/glm.hpp>
 #include <stdint.h>
 #include <string>
 #include "Shared/Logger.hpp"
+
+// Allow Cereal serialization of GLM 2-item vectors
+namespace cereal
+{
+	template<class Archive>
+	void serialize(Archive & archive, glm::vec2 &v)
+	{
+        archive(v.x, v.y);
+	}
+}
 
 /*
 ** A few enums outlining the different types of events that could be triggered
@@ -14,10 +25,9 @@ enum EventType
 {
     EVENT_PLAYER_JOIN,
     EVENT_PLAYER_LEAVE, // Created only by the server
-    EVENT_PLAYER_MOVE_FORWARD,
-    EVENT_PLAYER_MOVE_BACKWARD,
-    EVENT_PLAYER_MOVE_LEFT,
-    EVENT_PLAYER_MOVE_RIGHT
+    EVENT_PLAYER_MOVE,	// Movement vector for player
+    EVENT_PLAYER_RUN,	// Used only for dogs at the moment
+    EVENT_PLAYER_STOP
     // TODO: more event types here
 };
 
@@ -30,13 +40,18 @@ struct GameEvent
     EventType type;
     uint32_t playerId; // Not used for EVENT_PLAYER_JOIN
     std::string playerName; // Used only for EVENT_PLAYER_JOIN
+	glm::vec2 direction;	// Used only for PLAYER_TURN and PLAYER_MOVE
     //TODO: add more elements as necessary
 
     // Serialization for Cereal
     template<class Archive>
     void serialize(Archive & archive)
     {
-        archive(type, playerId, playerName);
+        archive(
+			type,
+			playerId,
+			playerName,
+			direction);
     }
 
 	void print()

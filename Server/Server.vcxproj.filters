@@ -104,6 +104,9 @@
     <ClInclude Include="SHumanEntity.hpp">
       <Filter>Header Files\Entity</Filter>
     </ClInclude>
+    <ClInclude Include="SBoneEntity.hpp">
+      <Filter>Header Files\Entity</Filter>
+    </ClInclude>
     <ClInclude Include="LevelParser.hpp">
       <Filter>Header Files\Level</Filter>
     </ClInclude>
@@ -124,6 +127,21 @@
     </ClInclude>
     <ClInclude Include="EventManager.hpp">
       <Filter>Header Files\Game</Filter>
+    </ClInclude>
+    <ClInclude Include="SHouseEntity.hpp">
+      <Filter>Header Files\Entity</Filter>
+    </ClInclude>
+    <ClInclude Include="SFloorEntity.hpp">
+      <Filter>Header Files\Entity</Filter>
+    </ClInclude>
+    <ClInclude Include="SDogHouseEntity.hpp">
+      <Filter>Header Files\Entity</Filter>
+    </ClInclude>
+    <ClInclude Include="SHydrantEntity.hpp">
+      <Filter>Header Files\Entity</Filter>
+    </ClInclude>
+    <ClInclude Include="SFountainEntity.hpp">
+      <Filter>Header Files\Entity</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

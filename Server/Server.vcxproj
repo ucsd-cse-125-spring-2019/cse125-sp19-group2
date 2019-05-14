@@ -236,14 +236,20 @@
     <ClInclude Include="EmptyCollider.hpp" />
     <ClInclude Include="EventManager.hpp" />
     <ClInclude Include="GameServer.hpp" />
+    <ClInclude Include="SBoneEntity.hpp" />
     <ClInclude Include="IdGenerator.hpp" />
     <ClInclude Include="LevelParser.hpp" />
     <ClInclude Include="NetworkServer.hpp" />
     <ClInclude Include="SBaseEntity.hpp" />
     <ClInclude Include="SBoxEntity.hpp" />
     <ClInclude Include="SDogEntity.hpp" />
+    <ClInclude Include="SDogHouseEntity.hpp" />
     <ClInclude Include="SExampleEntity.hpp" />
+    <ClInclude Include="SFloorEntity.hpp" />
+    <ClInclude Include="SFountainEntity.hpp" />
+    <ClInclude Include="SHouseEntity.hpp" />
     <ClInclude Include="SHumanEntity.hpp" />
+    <ClInclude Include="SHydrantEntity.hpp" />
     <ClInclude Include="SJailEntity.hpp" />
     <ClInclude Include="SPlayerEntity.hpp" />
     <ClInclude Include="GridLevelParser.hpp" />
@@ -255,14 +261,14 @@
   <ImportGroup Label="ExtensionTargets">
     <Import Project="..\packages\glm.0.9.9.500\build\native\glm.targets" Condition="Exists('..\packages\glm.0.9.9.500\build\native\glm.targets')" />
   </ImportGroup>
+  <Target Name="BeforeClean">
+    <Message Text="Cleaning level files..." />
+    <Exec Command="rd /s /q $(OutDir)Levels" />
+  </Target>
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>
       <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
     </PropertyGroup>
     <Error Condition="!Exists('..\packages\glm.0.9.9.500\build\native\glm.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\glm.0.9.9.500\build\native\glm.targets'))" />
-  </Target>
-  <Target Name="BeforeClean">
-    <Message Text="Cleaning level files..." />
-    <Exec Command="rd /s /q $(OutDir)Levels" />
   </Target>
 </Project>

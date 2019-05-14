@@ -3,41 +3,26 @@
 #include "IdGenerator.hpp"
 #include "SBaseEntity.hpp"
 #include "CapsuleCollider.hpp"
+#include "Shared\PlayerState.hpp"
+
+// Amount of leway when comparing floats
+const float FP_EPSILON = 0.00001f;
 
 class SPlayerEntity : public SBaseEntity
 {
 public:
-	SPlayerEntity(uint32_t playerId)
-	{
-		// Allocate a state struct and initialize. Modify as necessary for more
-		// sane defaults
-		_state = std::make_shared<BaseState>();
+	SPlayerEntity() {};
 
-		// ID and type
-		_state->id = playerId;
-
-		// At origin by default
-		_state->pos = glm::vec3(0);
-
-		// Looking forward (along Z axis)
-		_state->forward = glm::vec3(0, 0, 1);
-		_state->up = glm::vec3(0, 1, 0);
-
-		// Standard scale
-		_state->scale = glm::vec3(1);
-
-		_state->colliderType = COLLIDER_CAPSULE;
-
-		_state->isDestroyed = false;
-		_state->isStatic = false;
-		_state->isSolid = true;
-
-		// collider to track collision info idk
-		_collider = std::make_unique<CapsuleCollider>(_state.get());
-
-		hasChanged = false;
-	};
 	~SPlayerEntity() {};
+
+	virtual void initState(bool generateId = true) override
+	{
+		// Base init
+		SBaseEntity::initState(false);
+
+		// Players are not static
+		_state->isStatic = false;
+	}
 
 	virtual void update(std::vector<std::shared_ptr<GameEvent>> events) override
 	{
@@ -52,38 +37,39 @@ public:
 		// Only change attributes of this object if not static
 		if (!_state->isStatic)
 		{
-			// Remove duplicate events (events are already sorted)
-			events.erase(std::unique(events.begin(), events.end(),
-				[](const std::shared_ptr<GameEvent> & a, const std::shared_ptr<GameEvent> & b) -> bool
-				{
-					return a->type == b->type;
-				}), events.end());
-
 			// If any events left, process them
 			if (events.size())
 			{
-				// Overall direction of player
+				// Movement
+				std::vector<std::shared_ptr<GameEvent>> movementEvents;
+				std::copy_if(events.begin(), events.end(), std::back_inserter(movementEvents), [&](std::shared_ptr<GameEvent> i)
+				{
+					return i->type == EVENT_PLAYER_MOVE;
+				});
+
+				// Sort by vector
+				std::sort(movementEvents.begin(), movementEvents.end(),
+					[](const std::shared_ptr<GameEvent> & a, const std::shared_ptr<GameEvent> & b) -> bool
+					{
+						if (std::abs(a->direction.x - b->direction.x) < FP_EPSILON)
+							return a->direction.x < b->direction.x;
+						else
+							return a->direction.y < b->direction.y;
+					});
+
+				// Remove duplicate vectors
+				movementEvents.erase(std::unique(movementEvents.begin(), movementEvents.end(),
+					[](const std::shared_ptr<GameEvent> & a, const std::shared_ptr<GameEvent> & b) -> bool
+					{
+						return a->direction == b->direction;
+					}), movementEvents.end());
+
+				// Overall direction of player; take average of all direction vectors
 				glm::vec3 dir = glm::vec3(0);
 
-				for (auto& event : events)
+				for (auto& moveEvent : movementEvents)
 				{
-					switch (event->type)
-					{
-					case EVENT_PLAYER_MOVE_FORWARD:
-						dir += glm::vec3(0, 0, -1);
-						break;
-					case EVENT_PLAYER_MOVE_BACKWARD:
-						dir += glm::vec3(0, 0, 1);
-						break;
-					case EVENT_PLAYER_MOVE_LEFT:
-						dir += glm::vec3(-1, 0, 0);
-						break;
-					case EVENT_PLAYER_MOVE_RIGHT:
-						dir += glm::vec3(1, 0, 0);
-						break;
-					default:
-						break;
-					}
+					dir += glm::vec3(moveEvent->direction.x, 0, moveEvent->direction.y);
 				}
 
 				// Update forward vector with unit direction only if it was modified
@@ -91,6 +77,7 @@ public:
 				{
 					hasChanged = true;
 					_state->forward = dir / glm::length(dir);
+
 
 					// Move player by (direction * velocity) / ticks_per_sec
 					auto oldPos = _state->pos;
@@ -100,15 +87,7 @@ public:
 		}
 	}
 
-	virtual std::shared_ptr<BaseState> getState() override
-	{
-		return _state;
-	}
-
 protected:
-	// TODO: change this to PlayerState or some such
-	std::shared_ptr<BaseState> _state;
-
 	// Player movement velocity in units/second
 	float _velocity;
 };

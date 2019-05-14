@@ -20,7 +20,7 @@ Model::~Model()
   }
 }
 
-void Model::Draw(std::unique_ptr<Shader> const &shader)
+void Model::render(std::unique_ptr<Shader> const &shader)
 {
   for (Mesh mesh : _meshes) mesh.Draw(shader);
 }
@@ -175,4 +175,8 @@ std::vector<Texture> Model::LoadMaterialTextures(aiMaterial *material,
   }
 
   return textures;
+}
+
+Mesh Model::getMeshAt(int i) {
+	return _meshes[i];
 }
