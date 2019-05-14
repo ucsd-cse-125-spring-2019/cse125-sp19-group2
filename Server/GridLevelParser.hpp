@@ -20,7 +20,7 @@ public:
 		std::queue<glm::vec2> & dogSpawns) override;
 
 private:
-	// Different types of tiles
+	// Different types of tiles; order must be exactly same as online editor!
 	enum TileType
 	{
 		TILE_EMPTY,
@@ -36,6 +36,7 @@ private:
 		TILE_FOUNTAIN
 	};
 
+	// Order must be exactly the same as the online editor!
 	enum GroundType
 	{
 		GROUND_GRASS,

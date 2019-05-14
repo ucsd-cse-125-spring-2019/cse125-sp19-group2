@@ -43,8 +43,8 @@ enum EntityType
 enum FloorType
 {
 	FLOOR_GRASS,
-	FLOOR_DIRT,
-	FLOOR_ROAD
+	FLOOR_ROAD,
+	FLOOR_DIRT
 };
 
 // Types of narrow-phase colliders
