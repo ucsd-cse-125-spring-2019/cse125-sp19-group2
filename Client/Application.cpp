@@ -325,7 +325,6 @@ void Application::Draw() {
     _debuglightShader->Use();
     _debuglightShader->set_uniform("u_projection", _localPlayer->getCamera()->projection_matrix());
     _debuglightShader->set_uniform("u_view", _localPlayer->getCamera()->view_matrix());
-    _point_light->draw(_debuglightShader);
 
     // Draw UI
     GuiManager::getInstance().draw();

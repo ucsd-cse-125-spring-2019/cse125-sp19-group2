@@ -42,15 +42,18 @@ public:
 
 		// Pass model matrix into shader
 		_objectShader->set_uniform("u_model", model);
-		_objectShader->set_uniform("u_material.shininess", 0.6f);
-		_objectShader->set_uniform("u_pointlight.position", glm::vec3(-3.0f, 3.0f, -3.0f));
-		_objectShader->set_uniform("u_pointlight.ambient", glm::vec3(0.05f, 0.05f, 0.05f));
-		_objectShader->set_uniform("u_pointlight.diffuse", glm::vec3(0.8f, 0.8f, 0.8f));
-		_objectShader->set_uniform("u_pointlight.specular", glm::vec3(1.0f, 1.0f, 1.0f));
-		_objectShader->set_uniform("u_pointlight.constant", 1.0f);
-		_objectShader->set_uniform("u_pointlight.linear", 0.09f);
-		_objectShader->set_uniform("u_pointlight.quadratic", 0.032f);
-		_objectShader->set_uniform("u_numpointlights", static_cast<GLuint>(1));
+		//_objectShader->set_uniform("u_pointlight.position", glm::vec3(-3.0f, 3.0f, -3.0f));
+		//_objectShader->set_uniform("u_pointlight.ambient", glm::vec3(0.05f, 0.05f, 0.05f));
+		//_objectShader->set_uniform("u_pointlight.diffuse", glm::vec3(0.8f, 0.8f, 0.8f));
+		//_objectShader->set_uniform("u_pointlight.constant", 1.0f);
+		//_objectShader->set_uniform("u_pointlight.linear", 0.09f);
+		//_objectShader->set_uniform("u_pointlight.quadratic", 0.032f);
+		//_objectShader->set_uniform("u_numpointlights", static_cast<GLuint>(1));
+
+		_objectShader->set_uniform("u_dirlight.direction", glm::vec3(0.0f, -1.0f, -0.4f));
+		_objectShader->set_uniform("u_dirlight.ambient", glm::vec3(0.05f, 0.05f, 0.05f));
+		_objectShader->set_uniform("u_dirlight.diffuse", glm::vec3(0.8f, 0.8f, 0.8f));
+		_objectShader->set_uniform("u_numdirlights", static_cast<GLuint>(1));
 	}
 
     // Every child must override this if they carry additional state
