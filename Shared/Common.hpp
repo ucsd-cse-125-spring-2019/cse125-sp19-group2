@@ -29,8 +29,16 @@ enum EntityType
 	ENTITY_WALL,
 	ENTITY_JAIL,
 	ENTITY_HOUSE_6X6_A,
-	ENTITY_BONE
+	ENTITY_BONE,
+	ENTITY_FLOOR
 	// TODO: add new types here, e.g. ENTITY_DOGBONE
+};
+
+enum FloorType
+{
+	FLOOR_GRASS,
+	FLOOR_DIRT,
+	FLOOR_ROAD
 };
 
 // Types of narrow-phase colliders
