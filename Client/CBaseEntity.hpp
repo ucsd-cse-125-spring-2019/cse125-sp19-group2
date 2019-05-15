@@ -73,6 +73,7 @@ public:
 		_state->width = state->width;
 		_state->height = state->height;
 		_state->depth = state->depth;
+		_state->type = state->type;
 	}
 
     // This is optional, but might make our lives easier. Remove if you feel
@@ -80,6 +81,11 @@ public:
 	uint32_t getId()
 	{
 		return _state->id;
+	}
+
+	EntityType getType()
+	{
+		return _state->type;
 	}
 
     // Getter for culling

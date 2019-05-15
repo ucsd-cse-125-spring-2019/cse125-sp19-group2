@@ -106,6 +106,11 @@ void main(void)
   }
 
   resultCol = ToonShading(resultCol);
-
+  
   out_color = vec4(resultCol, 1.0f);
+
+  // for wall transparent part
+  if (texture(u_material.diffuse, pass_uv).a < 0.3)
+	discard;
+  
 }

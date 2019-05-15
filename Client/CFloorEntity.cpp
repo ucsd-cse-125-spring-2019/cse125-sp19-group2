@@ -22,6 +22,7 @@ CFloorEntity::CFloorEntity()
 
 	dirtTextureID = LoadTextureFromFile("brown.jpg", "./Resources/Textures");
 	roadTextureID = LoadTextureFromFile("road.jpg", "./Resources/Textures");
+	fbo = std::make_unique<FrameBuffer>(MAP_WIDTH * 10, MAP_WIDTH * 10);
 }
 
 CFloorEntity & CFloorEntity::getInstance()

@@ -118,11 +118,23 @@ void EntityManager::render(std::unique_ptr<Camera> const& camera) {
         test[i] = camera->isInFrustum(pos, radius);
     }
 
+	std::vector<uint32_t> wallList;
     for(uint32_t i = 0 ; i < _entityList.size(); i ++) {
         if(test[i]) {
+			// store index of all objects that has transparency to render after opaque objects
+			if (_entityList[i]->getType() == ENTITY_BOX) {
+				wallList.push_back(i);
+				continue;
+			}
             _entityList[i]->render(camera);
         }
     }
 
+	// render collider
 	ColliderManager::getInstance().render(camera);
+
+	// render transparent objects
+	for (int i = 0; i < wallList.size(); i++) {
+		_entityList[wallList[i]]->render(camera);
+	}
 }
