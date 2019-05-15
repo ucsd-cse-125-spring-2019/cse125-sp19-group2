@@ -27,28 +27,8 @@ Application::Application(const char* windowTitle, int argc, char** argv) {
     return;
   }
 
-  // Create network client and connect to server. The connect logic should
-  // eventually be moved into the main game loop, but we're not there yet
+  // Create network client. Connection happens in UI button callback
   _networkClient = std::make_unique<NetworkClient>();
-  try
-  {
-    uint32_t playerId = _networkClient->connect("localhost", PORTNUM);
-
-    // First thing we do is create a player join event with player name
-    auto joinEvent = std::make_shared<GameEvent>();
-    joinEvent->playerId = playerId;
-    joinEvent->type = EVENT_PLAYER_JOIN;
-
-    // TODO: change this to player-specified name
-    joinEvent->playerName = "Player" + std::to_string(playerId);
-    _networkClient->sendEvent(joinEvent);
-
-    _localPlayer = std::make_unique<LocalPlayer>(playerId, _networkClient);
-  }
-  catch (std::runtime_error e)
-  {
-    Logger::getInstance()->error(e.what());
-  }
 
   // Initialize GLFW
   if (!glfwInit()) {
@@ -148,7 +128,63 @@ void Application::Setup() {
     // Initialize GuiManager
     GuiManager::getInstance().init(_window);
 
+	// Create login screen
+	auto connectScreen = GuiManager::getInstance().createWidget(WIDGET_CONNECT);
+
+	// Resize handles margins, 50 pixel spacing
+	auto connectLayout = new nanogui::BoxLayout(nanogui::Orientation::Vertical, nanogui::Alignment::Middle, 0, 25);
+	connectScreen->setLayout(connectLayout);
+
+	// Game title
+	auto gameTitle = new nanogui::Label(connectScreen, "Project Bone", "sans", 72);
+
+	// Player name
+	_playerNameTextBox = new nanogui::TextBox(connectScreen, "PlayerName");
+	_playerNameTextBox->setEditable(true);
+	_playerNameTextBox->setFixedSize(nanogui::Vector2i(300, 50));
+	_playerNameTextBox->setFontSize(38);
+	_playerNameTextBox->setAlignment(nanogui::TextBox::Alignment::Center);
+
+	// IP address box
+	_ipTextBox = new nanogui::TextBox(connectScreen, "localhost");
+	_ipTextBox->setEditable(true);
+	_ipTextBox->setFixedSize(nanogui::Vector2i(300, 50));
+	_ipTextBox->setFontSize(38);
+	_ipTextBox->setAlignment(nanogui::TextBox::Alignment::Center);
+
+	// Connect button
+	auto connectButton = new nanogui::Button(connectScreen, "Connect");
+	connectButton->setFontSize(28);
+	connectButton->setCallback([&]() {
+		// Attempt server connection
+		std::string address = _ipTextBox->value();
+		std::string playerName = _playerNameTextBox->value();
+
+		uint32_t playerId;
+		try {
+			playerId = _networkClient->connect(address, PORTNUM);
+		}
+		catch (std::runtime_error e) {
+			Logger::getInstance()->error(e.what());
+			return;
+		}
+
+		// Send join event
+		auto joinEvent = std::make_shared<GameEvent>();
+		joinEvent->playerId = playerId;
+		joinEvent->type = EVENT_PLAYER_JOIN;
+		joinEvent->playerName = playerName;
+		_networkClient->sendEvent(joinEvent);
+
+		// Create local player
+		_localPlayer = std::make_unique<LocalPlayer>(playerId, _networkClient);
+
+		// Hide connect screen
+		GuiManager::getInstance().getWidget(WIDGET_CONNECT)->setVisible(false);
+	});
+
     // Create a testing widget
+	/*
     bool enabled = true;
     auto *gui = GuiManager::getInstance().createFormHelper("Form helper");
     gui->addWindow(Eigen::Vector2i(2, 35), "Form helper");
@@ -162,6 +198,7 @@ void Application::Setup() {
         _integer += 1;
     });
 
+	//gui->window()->setVisible(false);
     
     // Test Sound
     auto ambient = AudioManager::getInstance().getAudioSource("Ambient Sound");
@@ -256,8 +293,9 @@ void Application::Setup() {
 		event->playerType = _localPlayer->getPlayerType();
 		_networkClient->sendEvent(event);
 	});
-    GuiManager::getInstance().setDirty();
+	*/
 
+    GuiManager::getInstance().setDirty();
 }
 
 void Application::Cleanup() {
@@ -335,7 +373,14 @@ void Application::Update()
   }
   catch (std::runtime_error e)
   {
-    // Disconnected from the server
+	  // Disconnected from the server; de-allocate client-side objects and
+	  // show connection screen
+	  _localPlayer = nullptr;
+	  _networkClient->closeConnection();
+	  EntityManager::getInstance().clearAll();
+	  InputManager::getInstance().reset();
+	  GuiManager::getInstance().hideAll();
+	  GuiManager::getInstance().getWidget(WIDGET_CONNECT)->setVisible(true);
   }
 
   InputManager::getInstance().update();
@@ -363,22 +408,26 @@ void Application::Draw() {
     // render scene
     //_frameBuffer->drawQuad(_testShader);
       glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT| GL_STENCIL_BUFFER_BIT);
-    // Render Skybox
-    _skyboxShader->Use();
-    _skyboxShader->set_uniform("u_projection", _localPlayer->getCamera()->projection_matrix());
-    _skyboxShader->set_uniform("u_view", _localPlayer->getCamera()->view_matrix() * glm::scale(glm::mat4(1.0f), glm::vec3(200,200,200)));
-      //glm::mat4(glm::mat3(_localPlayer->getCamera()->view_matrix()))
-    _skybox->draw(_skyboxShader);
 
-	// Render floor before any entity
-	CFloorEntity::getInstance().render(_localPlayer->getCamera());
+	  // Non-UI elements depend on localPlayer
+	  if (_localPlayer) {
+		  // Render Skybox
+		  _skyboxShader->Use();
+		  _skyboxShader->set_uniform("u_projection", _localPlayer->getCamera()->projection_matrix());
+		  _skyboxShader->set_uniform("u_view", _localPlayer->getCamera()->view_matrix() * glm::scale(glm::mat4(1.0f), glm::vec3(200, 200, 200)));
+		  //glm::mat4(glm::mat3(_localPlayer->getCamera()->view_matrix()))
+		  _skybox->draw(_skyboxShader);
 
-    EntityManager::getInstance().render(_localPlayer->getCamera());
+		  // Render floor before any entity
+		  CFloorEntity::getInstance().render(_localPlayer->getCamera());
 
-      // Debug Shader
-    _debuglightShader->Use();
-    _debuglightShader->set_uniform("u_projection", _localPlayer->getCamera()->projection_matrix());
-    _debuglightShader->set_uniform("u_view", _localPlayer->getCamera()->view_matrix());
+		  EntityManager::getInstance().render(_localPlayer->getCamera());
+
+		  // Debug Shader
+		  _debuglightShader->Use();
+		  _debuglightShader->set_uniform("u_projection", _localPlayer->getCamera()->projection_matrix());
+		  _debuglightShader->set_uniform("u_view", _localPlayer->getCamera()->view_matrix());
+	  }
 
     // Draw UI
     GuiManager::getInstance().draw();
@@ -431,8 +480,10 @@ void Application::Resize(int x, int y) {
   _win_height = y;
   glViewport(0, 0, x, y);
   _quadFrameBuffer->resize(x, y);
-  _localPlayer->resize(x, y);
-  GuiManager::getInstance().getScreen()->resizeCallbackEvent(x, y);
+  if (_localPlayer) {
+	  _localPlayer->resize(x, y);
+  }
+  GuiManager::getInstance().resize(x, y);
 }
 
 void Application::Keyboard(int key, int scancode, int action, int mods) {

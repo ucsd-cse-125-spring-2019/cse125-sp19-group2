@@ -181,3 +181,8 @@ void EntityManager::render(std::unique_ptr<Camera> const &camera)
     // render collider
     ColliderManager::getInstance().render(camera);
 }
+
+void EntityManager::clearAll() {
+	_entityList.clear();
+	_entityMap.clear();
+}

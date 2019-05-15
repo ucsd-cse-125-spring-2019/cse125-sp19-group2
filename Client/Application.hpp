@@ -101,6 +101,10 @@ private:
   // Local player
   std::unique_ptr<LocalPlayer> _localPlayer;
 
+  // UI
+  nanogui::TextBox* _ipTextBox;
+  nanogui::TextBox* _playerNameTextBox;
+
   // Test Lights
   std::unique_ptr<PointLight> _point_light;
   std::unique_ptr<DirectionalLight> _dir_light;

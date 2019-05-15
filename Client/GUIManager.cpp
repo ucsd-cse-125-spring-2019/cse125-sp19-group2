@@ -1,4 +1,5 @@
 ﻿#include "GuiManager.hpp"
+#include "Shared/Logger.hpp"
 #include <chrono>
 
 using namespace nanogui;
@@ -51,7 +52,12 @@ void GuiManager::draw() {
 
     if (_dirty) {
         // Recalculate widget
-        _screen->performLayout();
+		//_screen->performLayout();
+
+		for (auto& widgetPair : _widgets) {
+			(widgetPair.second->layout())->performLayout(_screen->nvgContext(), widgetPair.second);
+		}
+
         _dirty = false;
     }
 
@@ -64,6 +70,25 @@ void GuiManager::draw() {
     _screen->drawWidgets();
     glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_LEQUAL);
+}
+
+void GuiManager::resize(int x, int y) {
+	_screen->resizeCallbackEvent(x, y);
+
+	// Resize our widgets
+	for (auto& widgetPair : _widgets) {
+		widgetPair.second->setSize(nanogui::Vector2i(x, y));
+
+		// Resize layout margins
+		switch (widgetPair.first) {
+		case WIDGET_CONNECT:
+			//static_cast<nanogui::BoxLayout*>
+			Logger::getInstance()->debug(std::to_string(static_cast<nanogui::BoxLayout*>(widgetPair.second->layout())->margin()));
+			static_cast<nanogui::BoxLayout*>(widgetPair.second->layout())->setMargin(x * CONNECT_MARGIN);
+			_dirty = true;
+			break;
+		}
+	}
 }
 
 Screen* GuiManager::getScreen() {
@@ -87,4 +112,24 @@ nanogui::FormHelper* GuiManager::getFormHelper(const std::string& name) {
         return _formHelpers[res->second].get();
     }
     return nullptr;
+}
+
+nanogui::Widget* GuiManager::createWidget(WidgetType name) {
+	auto widget = new nanogui::Widget(_screen);
+	_widgets.insert({ name, widget });
+	return widget;
+}
+
+nanogui::Widget* GuiManager::getWidget(WidgetType name) {
+	const auto res = _widgets.find(name);
+	if (res != _widgets.end()) {
+		return res->second;
+	}
+	return nullptr;
+}
+
+void GuiManager::hideAll() {
+	for (auto& widgetPair : _widgets) {
+		widgetPair.second->setVisible(false);
+	}
 }
