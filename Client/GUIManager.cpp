@@ -52,7 +52,7 @@ void GuiManager::draw() {
 
     if (_dirty) {
         // Recalculate widget
-		//_screen->performLayout();
+		_screen->performLayout();
 
 		for (auto& widgetPair : _widgets) {
 			(widgetPair.second->layout())->performLayout(_screen->nvgContext(), widgetPair.second);

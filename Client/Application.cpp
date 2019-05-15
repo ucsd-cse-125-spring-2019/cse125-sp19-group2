@@ -108,23 +108,6 @@ void Application::Setup() {
     // Give InputManager a reference to GLFWwindow
     InputManager::getInstance().setWindow(_window);
 
-  // Test input; to be removed
-  InputManager::getInstance().getKey(GLFW_KEY_G)->onPress([&]
-  {
-    std::cout << "Hello World!" << this->count << std::endl;
-  });
-
-  InputManager::getInstance().getKey(GLFW_KEY_K)->onRepeat([&]
-  {
-    this->count += 1;
-    std::cout << this->count << std::endl;
-  });
-
-  InputManager::getInstance().getKey(GLFW_KEY_T)->onPress([&]
-  {
-	  ColliderManager::getInstance().renderMode = !ColliderManager::getInstance().renderMode;
-  });
-
     // Initialize GuiManager
     GuiManager::getInstance().init(_window);
 
@@ -179,12 +162,14 @@ void Application::Setup() {
 		// Create local player
 		_localPlayer = std::make_unique<LocalPlayer>(playerId, _networkClient);
 
+		// Register global keys
+		registerGlobalKeys();
+
 		// Hide connect screen
 		GuiManager::getInstance().getWidget(WIDGET_CONNECT)->setVisible(false);
 	});
 
     // Create a testing widget
-	/*
     bool enabled = true;
     auto *gui = GuiManager::getInstance().createFormHelper("Form helper");
     gui->addWindow(Eigen::Vector2i(2, 35), "Form helper");
@@ -293,7 +278,7 @@ void Application::Setup() {
 		event->playerType = _localPlayer->getPlayerType();
 		_networkClient->sendEvent(event);
 	});
-	*/
+	
 
     GuiManager::getInstance().setDirty();
 }
@@ -379,6 +364,7 @@ void Application::Update()
 	  _networkClient->closeConnection();
 	  EntityManager::getInstance().clearAll();
 	  InputManager::getInstance().reset();
+	  ColliderManager::getInstance().clear();
 	  GuiManager::getInstance().hideAll();
 	  GuiManager::getInstance().getWidget(WIDGET_CONNECT)->setVisible(true);
   }
@@ -391,7 +377,6 @@ void Application::Update()
     
   // Update sound engine
   AudioManager::getInstance().update();
-
     
   _camera->Update();
   _point_light->update();
@@ -566,4 +551,23 @@ void Application::DestroyWindow() {
   glfwSetCursorPosCallback(_window, nullptr);
   glfwSetFramebufferSizeCallback(_window, nullptr);
   glfwDestroyWindow(_window);
+}
+
+void Application::registerGlobalKeys() {
+	// Test input; to be removed
+	InputManager::getInstance().getKey(GLFW_KEY_G)->onPress([&]
+	{
+		std::cout << "Hello World!" << this->count << std::endl;
+	});
+
+	InputManager::getInstance().getKey(GLFW_KEY_K)->onRepeat([&]
+	{
+		this->count += 1;
+		std::cout << this->count << std::endl;
+	});
+
+	InputManager::getInstance().getKey(GLFW_KEY_T)->onPress([&]
+	{
+		ColliderManager::getInstance().renderMode = !ColliderManager::getInstance().renderMode;
+	});
 }

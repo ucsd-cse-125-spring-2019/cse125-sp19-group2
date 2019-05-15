@@ -60,6 +60,9 @@ private:
   void Setup();
   void Cleanup();
 
+  // Register global keys
+  void registerGlobalKeys();
+
   // Window management data
   GLFWwindow* _window = nullptr;
   const char* _win_title;
