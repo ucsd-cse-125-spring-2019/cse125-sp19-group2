@@ -27,8 +27,6 @@ void Mesh::Draw(std::unique_ptr<Shader> const &shader)
     TextureType tex_type = _textures[i].type;
     if (tex_type == TextureType::DIFFUSE)
       shader->set_uniform("u_material.diffuse", i);
-    else if (tex_type == TextureType::SPECULAR)
-      shader->set_uniform("u_material.specular", i);
 
     glBindTexture(GL_TEXTURE_2D, _textures[i].id);
   }

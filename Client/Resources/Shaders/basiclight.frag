@@ -7,8 +7,6 @@ in vec2 pass_uv;
 struct Material
 {
   sampler2D diffuse;
-  sampler2D specular;
-  float shininess;
 };
 
 struct DirLight
@@ -17,7 +15,6 @@ struct DirLight
 
   vec3 ambient;
   vec3 diffuse;
-  vec3 specular;
 };
 
 struct PointLight
@@ -26,7 +23,6 @@ struct PointLight
   
   vec3 ambient;
   vec3 diffuse;
-  vec3 specular;
   
   float constant;
   float linear;
@@ -43,6 +39,8 @@ uniform Material   u_material;
 uniform vec3       u_viewPos;
 uniform float      u_transparency = 1.0;
 
+// uniform int numBin = 30;
+
 // Output
 out vec4 out_color;
 
@@ -56,28 +54,18 @@ vec3 CalcDirLight(DirLight light, vec3 normal, vec3 viewDir)
   float diffAmt = max(dot(normal, lightDir), 0);
   vec3 diffuse = light.diffuse * diffAmt * texture(u_material.diffuse, pass_uv).rgb;
 
-  // Specular
-  vec3 reflectDir = reflect(-lightDir, normal);
-  float specAmt = pow(max(dot(viewDir, reflectDir), 0), u_material.shininess);
-  vec3 specular = light.specular * specAmt * texture(u_material.specular, pass_uv).rgb;
-
-  return ambient + diffuse + specular;
+  return ambient + diffuse;
 }
 
 vec3 CalcPointLight(PointLight light, vec3 normal, vec3 fragPos, vec3 viewDir)
 {
   // Ambient
-  vec3 ambient = light.ambient * texture(u_material.diffuse, pass_uv).rgb;
+  vec3 ambient = light.ambient * (texture(u_material.diffuse, pass_uv).rgb+ vec3(1.0));
   
   // Diffuse
   vec3 lightDir = normalize(light.position - fragPos);
   float diffAmt = max(dot(normal, lightDir), 0);
-  vec3 diffuse = light.diffuse * diffAmt * texture(u_material.diffuse, pass_uv).rgb;
-  
-  // Specular
-  vec3 reflectDir = reflect(-lightDir, normal);
-  float specAmt = pow(max(dot(viewDir, reflectDir), 0), u_material.shininess);
-  vec3 specular = light.specular * specAmt * texture(u_material.specular, pass_uv).rgb;
+  vec3 diffuse = light.diffuse * diffAmt * (texture(u_material.diffuse, pass_uv).rgb+ vec3(1.0));
   
   // Attenuation
   float dist = length(light.position - fragPos);
@@ -87,9 +75,16 @@ vec3 CalcPointLight(PointLight light, vec3 normal, vec3 fragPos, vec3 viewDir)
   
   ambient  *= attenuation;
   diffuse  *= attenuation;
-  specular *= attenuation;
   
-  return ambient + diffuse + specular;
+  return ambient + diffuse;
+}
+
+vec3 ToonShading(vec3 color) {
+  vec3 origColor = texture(u_material.diffuse, pass_uv).rgb;
+  float ratio = color.x / origColor.x;
+  if (ratio > 0.8)
+	return origColor * 0.9;
+  return origColor * 0.8;
 }
 
 void main(void)
@@ -110,11 +105,19 @@ void main(void)
   {
     resultCol += CalcPointLight(u_pointlight, normal, pass_fragPos, viewDir);
   }
+  
   float alpha = 1.0f * u_transparency;
 
   if(alpha < 0.01){
 	discard;
   }
 
+  resultCol = ToonShading(resultCol);
+  
   out_color = vec4(resultCol, alpha);
+
+  // for wall transparent part
+  if (texture(u_material.diffuse, pass_uv).a < 0.3)
+	discard;
+  
 }

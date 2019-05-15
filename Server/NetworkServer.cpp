@@ -526,12 +526,6 @@ void NetworkServer::closePlayerSession(uint32_t playerId)
 		Logger::getInstance()->info(
 				"Failed to find session for player " +
 				std::to_string(playerId));
-
-		// If this isn't the read thread, throw an exception
-		if (std::this_thread::get_id() != _readThread.get_id())
-		{
-			throw(std::runtime_error("Failed to find session for player " + playerId));
-		}
 	}
 }
 
