@@ -23,7 +23,7 @@ public:
 	bool hasChanged;	// If object state has changed during the last iteration
 
 	// Update function, called every tick
-	virtual void update(std::vector<std::shared_ptr<GameEvent>> events) = 0;
+	virtual void update(std::vector<std::shared_ptr<GameEvent>> events) {};
 
     // All server objects must have a state to send to the client.
 	virtual std::shared_ptr<BaseState> getState()
@@ -73,6 +73,9 @@ public:
 		_state->forward = glm::vec3(0, 0, 1);
 		_state->up = glm::vec3(0, 1, 0);
 		_state->scale = glm::vec3(1);
+
+		// Set default transparency to 1
+		_state->transparency = 1.0f;
 
 		// Defaults to static solid object
 		_state->isDestroyed = false;

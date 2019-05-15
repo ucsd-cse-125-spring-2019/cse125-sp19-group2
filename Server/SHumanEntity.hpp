@@ -19,7 +19,7 @@ public:
 		_collider = std::make_unique<CapsuleCollider>(_state.get());
 		_state->colliderType = COLLIDER_CAPSULE;
 		_state->width = 0.9f;
-		_state->height = 0.9f;
+		_state->height = 2.0f;
 		_state->depth = 0.9f;
 
 		_velocity = 4.8f;

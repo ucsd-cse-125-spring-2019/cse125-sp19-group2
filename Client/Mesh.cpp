@@ -27,8 +27,6 @@ void Mesh::Draw(std::unique_ptr<Shader> const &shader)
     TextureType tex_type = _textures[i].type;
     if (tex_type == TextureType::DIFFUSE)
       shader->set_uniform("u_material.diffuse", i);
-    else if (tex_type == TextureType::SPECULAR)
-      shader->set_uniform("u_material.specular", i);
 
     glBindTexture(GL_TEXTURE_2D, _textures[i].id);
   }
@@ -37,6 +35,19 @@ void Mesh::Draw(std::unique_ptr<Shader> const &shader)
   glDrawElements(GL_TRIANGLES, (GLsizei)_indices.size(), GL_UNSIGNED_INT, 0);
   glBindVertexArray(0);
   glActiveTexture(GL_TEXTURE0);
+}
+
+void Mesh::Draw(std::unique_ptr<Shader> const &shader, GLuint textureID)
+{
+	// Bind given texture
+	glActiveTexture(GL_TEXTURE0);
+	shader->set_uniform("u_material.diffuse", 0);
+	glBindTexture(GL_TEXTURE_2D, textureID);
+
+	glBindVertexArray(_vao);
+	glDrawElements(GL_TRIANGLES, (GLsizei)_indices.size(), GL_UNSIGNED_INT, 0);
+	glBindVertexArray(0);
+	glActiveTexture(GL_TEXTURE0);
 }
 
 void Mesh::DrawLine(std::unique_ptr<Shader> const &shader) {

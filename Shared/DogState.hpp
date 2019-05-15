@@ -7,7 +7,7 @@
 struct DogState : PlayerState
 {
 	DogAnimation currentAnimation;
-	int runStamina;
+	float runStamina;
 
 	template<class Archive>
 	void serialize(Archive & archive)

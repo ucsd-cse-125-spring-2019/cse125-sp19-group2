@@ -33,10 +33,5 @@ public:
 		_state->depth = scale.z;
 	};
 	~SBoxEntity() {};
-
-	void update(std::vector<std::shared_ptr<GameEvent>> events) override
-	{
-		// Update does nothing for box entities
-	}
 };
 

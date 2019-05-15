@@ -5,6 +5,8 @@
 #include <queue>
 #include <iterator>
 #include <mutex>
+#include <glm/vec2.hpp>
+#include <GLFW/glfw3.h>
 
 /**
  * \brief A singleton class that receives and processes keyboard inputs
@@ -28,7 +30,9 @@ public:
      * \param keycode(int) GLFW Keycode
      * \return std::unique_ptr<Key> const&: Key reference to the corresponding keycode.
      */
-    std::unique_ptr<Key> const& getKey(int keycode);
+    Key* getKey(int keycode);
+
+    Key2D* getKey2D(int keycode);
 
     /**
      * \brief Send the input-related event to InputManager's queue
@@ -43,10 +47,23 @@ public:
      */
     void repeat(int keycode);
 
+    void move(int keyType, double x, double y);
+
+    void scroll(double s);
+
     /**
      * \brief Process all input events inside the queue
      */
     void update();
+
+    void setWindow(GLFWwindow* window);
+
+    GLFWwindow* getWindow() const;
+
+    bool isForegroundWindow() const;
+
+    template <typename T>
+    void onScroll(T&& lambda);
 
 private:
     InputManager();
@@ -54,7 +71,16 @@ private:
     std::unordered_map<int, std::unique_ptr<Key>> _keyList;
     std::vector<std::tuple<int, KeyState>> _inputQueue;
     std::vector<std::tuple<int, KeyState>> _repeatQueue;
-    std::mutex lock;
+    std::vector<std::tuple<int, glm::vec2>> _moveQueue;
+    std::vector<std::function<void(float)>> _onScroll;
+
+    std::mutex _lock;
+    GLFWwindow* _window = nullptr;
 };
+
+template <typename T>
+void InputManager::onScroll(T&& lambda) {
+    _onScroll.push_back(lambda);
+}
 
 #endif

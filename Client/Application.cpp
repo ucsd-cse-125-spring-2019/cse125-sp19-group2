@@ -12,6 +12,7 @@
 #include "GuiManager.hpp"
 #include "AudioManager.hpp"
 #include "ColliderManager.hpp"
+#include "CFloorEntity.hpp"
 
 Application::Application(const char* windowTitle, int argc, char** argv) {
   _win_title = windowTitle;
@@ -123,6 +124,9 @@ void Application::Setup() {
       { -1.0f, -1.0f, 0.0f }
     }
   );
+
+    // Give InputManager a reference to GLFWwindow
+    InputManager::getInstance().setWindow(_window);
 
   // Test input; to be removed
   InputManager::getInstance().getKey(GLFW_KEY_G)->onPress([&]
@@ -286,7 +290,7 @@ void Application::Run() {
 
   Setup();
 
-  glfwSwapInterval(1);
+  glfwSwapInterval(0);
   glfwGetFramebufferSize(_window, &_win_width, &_win_height);
   StaticResize(_window, _win_width, _win_height);
 
@@ -306,6 +310,10 @@ void Application::Run() {
 
 void Application::Update()
 {
+  // Get updates from controller
+    if(_localPlayer) {
+        _localPlayer->updateController();
+    }
 
   // Get updates from the server
   try
@@ -362,13 +370,15 @@ void Application::Draw() {
       //glm::mat4(glm::mat3(_localPlayer->getCamera()->view_matrix()))
     _skybox->draw(_skyboxShader);
 
+	// Render floor before any entity
+	CFloorEntity::getInstance().render(_localPlayer->getCamera());
+
     EntityManager::getInstance().render(_localPlayer->getCamera());
 
       // Debug Shader
     _debuglightShader->Use();
     _debuglightShader->set_uniform("u_projection", _localPlayer->getCamera()->projection_matrix());
     _debuglightShader->set_uniform("u_view", _localPlayer->getCamera()->view_matrix());
-    _point_light->draw(_debuglightShader);
 
     // Draw UI
     GuiManager::getInstance().draw();
@@ -416,11 +426,13 @@ void Application::StaticMouseScroll(GLFWwindow* window, double x, double y) {
 }
 
 void Application::Resize(int x, int y) {
-    GuiManager::getInstance().getScreen()->resizeCallbackEvent(x, y);
   glfwGetFramebufferSize(_window, &x, &y);
   _win_width = x;
   _win_height = y;
   glViewport(0, 0, x, y);
+  _quadFrameBuffer->resize(x, y);
+  _localPlayer->resize(x, y);
+  GuiManager::getInstance().getScreen()->resizeCallbackEvent(x, y);
 }
 
 void Application::Keyboard(int key, int scancode, int action, int mods) {
@@ -445,16 +457,29 @@ void Application::Keyboard(int key, int scancode, int action, int mods) {
 
 void Application::MouseButton(int btn, int action, int mods) {
     GuiManager::getInstance().getScreen()->mouseButtonCallbackEvent(btn, action, mods);
+	if(action == GLFW_PRESS)
+	{
+		if(mods == GLFW_MOD_SHIFT)
+		{
+			InputManager::getInstance().fire(btn, KeyState::Press | KeyState::Shift);
+		}else
+		{
+			InputManager::getInstance().fire(btn, KeyState::Press);
+		}
+	}else if(action == GLFW_RELEASE)
+	{
+		InputManager::getInstance().fire(btn, KeyState::Release);
+	}
 }
 
 void Application::MouseMotion(double x, double y) {
     GuiManager::getInstance().getScreen()->cursorPosCallbackEvent(x, y);
-        
+    InputManager::getInstance().move(Key::KEYTYPE::MOUSE, x, y);
 }
 
 void Application::MouseScroll(double x, double y) {
     GuiManager::getInstance().getScreen()->scrollCallbackEvent(x, y);
-        
+    InputManager::getInstance().scroll(y);
 }
 
 void Application::PreCreate() {
