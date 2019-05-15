@@ -111,7 +111,7 @@ void EntityManager::update(std::shared_ptr<BaseState> const& state) {
 
 void EntityManager::render(std::unique_ptr<Camera> const& camera) {
     std::vector<bool> test(_entityList.size());
-    std::vector<int> isTransparent;
+    std::vector<CBaseEntity *> transparentEntities;
     std::vector<int> isOpaque;
 
     for(uint32_t i = 0 ; i < _entityList.size(); i ++) {
@@ -121,7 +121,7 @@ void EntityManager::render(std::unique_ptr<Camera> const& camera) {
         if(test[i]) {
             _entityList[i]->setAlpha(camera->getTransparency(pos, radius));
             if(_entityList[i]->getAlpha() < 1.0f) {
-                isTransparent.push_back(i);
+                transparentEntities.push_back(_entityList[i].get());
             }else {
                 isOpaque.push_back(i);
             }
@@ -134,22 +134,30 @@ void EntityManager::render(std::unique_ptr<Camera> const& camera) {
 	glGetIntegerv(GL_BLEND_SRC_ALPHA, &blendSrc);
 	glGetIntegerv(GL_BLEND_DST_ALPHA, &blendDst);
 
-    glDisable(GL_CULL_FACE);
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
     // Render Opaque object
     for(uint32_t i = 0 ; i < isOpaque.size(); i ++) {
        _entityList[isOpaque[i]]->render(camera);
     }
+    
+    glDisable(GL_CULL_FACE);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-    // Render Transparent object
-    for(uint32_t i = 0 ; i < isTransparent.size(); i ++) {
-       _entityList[isTransparent[i]]->render(camera);
+    // Render Transparent objects from far to close
+    std::sort(transparentEntities.begin(), transparentEntities.end(), 
+		[&](const CBaseEntity * a, const CBaseEntity * b) {
+        glm::vec3 aPos = a->getPos();
+        glm::vec3 bPos = b->getPos();
+        float aDist = glm::length2(aPos - camera->position());
+        float bDist = glm::length2(bPos - camera->position());
+        return aDist < bDist;
+    });
+
+    for(uint32_t i = 0 ; i < transparentEntities.size(); i ++) {
+       transparentEntities[i]->render(camera);
     }
 
 	// restore 
     glEnable(GL_CULL_FACE);
-
 	glBlendFunc(blendSrc, blendDst);
 
 	ColliderManager::getInstance().render(camera);
