@@ -166,7 +166,7 @@ void EntityManager::render(std::unique_ptr<Camera> const &camera)
                   glm::vec3 bPos = b->getPos();
                   float aDist = glm::length2(aPos - camera->position());
                   float bDist = glm::length2(bPos - camera->position());
-                  return aDist < bDist;
+                  return aDist > bDist;
               });
 
     for (uint32_t i = 0; i < transparentEntities.size(); i++)

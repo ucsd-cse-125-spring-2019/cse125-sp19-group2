@@ -167,19 +167,19 @@ float Camera::getTransparency(glm::vec3 p, float radius) const {
         glm::vec3 objToCamera = p - _position;
         glm::vec3 playerToCamera = _lookAtPosition - _position;
         float t = glm::length(playerToCamera);
-        if (glm::length(objToCamera) < t * 1.1) {
+        if (glm::length(objToCamera) < t) {
             glm::vec3 dir = glm::normalize(playerToCamera);
             float proj = glm::dot(objToCamera, dir);
-            if (proj > 0) {
-                glm::vec3 pOnLine = _position + proj * dir;
-                float dist = glm::length(p - pOnLine);
-                if (dist < radius * 1.4) {
-                    std::cout << glm::to_string(p) << std::endl;
-                    std::cout << glm::to_string(_position) << std::endl;
-                    std::cout << glm::to_string(_lookAtPosition) << std::endl;
-                    std::cout << dist << std::endl;
-                    intersectFactor = dist / (radius * 1.4);
-                }
+            glm::vec3 pOnLine = _position + proj * dir;
+            float dist = glm::length(p - pOnLine);
+
+            // 0.63 for dog's height, 0.8 for human's height
+            if (dist < radius * _heightFactor) {
+                //std::cout << glm::to_string(p) << std::endl;
+                //std::cout << glm::to_string(_position) << std::endl;
+                //std::cout << glm::to_string(_lookAtPosition) << std::endl;
+                //std::cout << dist << std::endl;
+                intersectFactor = std::pow(dist / (radius * _heightFactor), 5);
             }
         }
     }
@@ -292,4 +292,8 @@ glm::vec2 Camera::convert_direction(glm::vec2 input) {
     const float angle = glm::atan(rotVec.y - initial.y, rotVec.x - initial.x);
     glm::vec2 out = glm::rotate(glm::mat3(1.0f), angle * 2.0f) * glm::vec3(input, 0);
     return glm::normalize(out);
+}
+
+void Camera::set_heightfactor(float heightFactor) {
+    _heightFactor = heightFactor;
 }

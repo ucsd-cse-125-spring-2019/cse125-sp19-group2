@@ -32,7 +32,6 @@ public:
 	{
 		_objectShader->set_uniform("u_projection", camera->projection_matrix());
 		_objectShader->set_uniform("u_view", camera->view_matrix());
-		_objectShader->set_uniform("u_viewPos", camera->position());
 
 		// Setting tranparency
 		_objectShader->set_uniform("u_transparency", _state->transparency * _alpha);
