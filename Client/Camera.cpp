@@ -168,16 +168,25 @@ float Camera::getTransparency(glm::vec3 p, float radius) const
 {
     // Make close object transparent
 	float dist = glm::length(p - _position);
-    float closenessFactor = std::min(std::max(0.0f, (dist - 0.7f) / (radius)), 1.0f);
+    float closenessFactor = std::min(std::max(0.0f, (dist - 0.05f * radius) / (radius)), 1.0f);
 
     // Make intersect object transparent
     float intersectFactor = 1.0f;
-    glm::vec3 objToCamera = p - _position;
+    glm::vec3 objToCamera = _position - p;
     glm::vec3 playerToCamera = _lookAtPosition - _position;
-    if(glm::length(objToCamera) < glm::length(playerToCamera)) {
-        
+	float t = glm::length(playerToCamera);
+    if(glm::length(objToCamera) < t * 1.1) {
+		glm::vec3 dir = glm::normalize(playerToCamera);
+    	float dp = glm::dot(glm::normalize(objToCamera),dir);
+
+		float dist = glm::length((objToCamera) - dp * dir);
+
+		if(dist < radius * 1.2)
+		{
+			intersectFactor = dist / radius * 1.2;
+		}
     }
-	return 0.0f;
+	return closenessFactor * intersectFactor;
 }
 
 float Camera::fov() const

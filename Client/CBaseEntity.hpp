@@ -48,7 +48,7 @@ public:
 		_objectShader->set_uniform("u_model", model);
 		_objectShader->set_uniform("u_material.shininess", 0.6f);
 		_objectShader->set_uniform("u_pointlight.position", glm::vec3(-3.0f, 3.0f, -3.0f));
-		_objectShader->set_uniform("u_pointlight.ambient", glm::vec3(0.05f, 0.05f, 0.05f));
+		_objectShader->set_uniform("u_pointlight.ambient", glm::vec3(0.8f, 0.8f, 0.8f));
 		_objectShader->set_uniform("u_pointlight.diffuse", glm::vec3(0.8f, 0.8f, 0.8f));
 		_objectShader->set_uniform("u_pointlight.specular", glm::vec3(1.0f, 1.0f, 1.0f));
 		_objectShader->set_uniform("u_pointlight.constant", 1.0f);

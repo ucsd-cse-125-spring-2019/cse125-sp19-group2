@@ -135,7 +135,6 @@ void EntityManager::render(std::unique_ptr<Camera> const& camera) {
 	glGetIntegerv(GL_BLEND_DST_ALPHA, &blendDst);
 
     glDisable(GL_CULL_FACE);
-    glEnable(GL_SAMPLE_ALPHA_TO_COVERAGE);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
     // Render Opaque object
@@ -144,13 +143,12 @@ void EntityManager::render(std::unique_ptr<Camera> const& camera) {
     }
 
     // Render Transparent object
-    for(uint32_t i = 0 ; i < isOpaque.size(); i ++) {
+    for(uint32_t i = 0 ; i < isTransparent.size(); i ++) {
        _entityList[isTransparent[i]]->render(camera);
     }
 
 	// restore 
     glEnable(GL_CULL_FACE);
-    glDisable(GL_SAMPLE_ALPHA_TO_COVERAGE);
 
 	glBlendFunc(blendSrc, blendDst);
 
