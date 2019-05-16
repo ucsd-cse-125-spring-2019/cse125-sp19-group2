@@ -270,6 +270,12 @@
     <None Include="Resources\Shaders\wall.vert">
       <Filter>Resource Files</Filter>
     </None>
+    <None Include="Resources\Shaders\floorTexture.frag">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="Resources\Shaders\floorTexture.vert">
+      <Filter>Resource Files</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Header Files">

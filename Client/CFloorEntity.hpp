@@ -2,6 +2,9 @@
 
 #include "CBaseEntity.hpp"
 #include "Model.hpp"
+#include "FrameBuffer.h"
+
+#define FLOOR_TEXTURE_SCALE 30
 
 class CFloorEntity : public CBaseEntity
 {
@@ -11,6 +14,9 @@ private:
 	float tileScale;
 	unsigned int dirtTextureID;
 	unsigned int roadTextureID;
+	std::unique_ptr<FrameBuffer> fbo;
+	bool updatedTexture;
+	std::unique_ptr<Shader> _textureShader;
 
 public:
 	/**

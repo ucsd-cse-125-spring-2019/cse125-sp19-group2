@@ -283,6 +283,8 @@ xcopy /y /d  "$(SolutionDir)Library\lib\x64\Release\*.dll" "$(OutDir)"</Command>
     <None Include="Resources\Shaders\collider.vert" />
     <None Include="Resources\Shaders\debuglight.frag" />
     <None Include="Resources\Shaders\debuglight.vert" />
+    <None Include="Resources\Shaders\floorTexture.frag" />
+    <None Include="Resources\Shaders\floorTexture.vert" />
     <None Include="Resources\Shaders\pano.frag" />
     <None Include="Resources\Shaders\pano.vert" />
     <None Include="Resources\Shaders\quad.frag" />

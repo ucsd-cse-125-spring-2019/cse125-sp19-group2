@@ -22,7 +22,7 @@ void main(void)
 
   vec3 localPos = vec3(u_scale * worldPosition);
   if (in_normal.x != 0) {
-	pass_uv = vec2(localPos.y, localPos.z);
+	pass_uv = vec2(localPos.z, localPos.y);
   } else if (in_normal.y != 0) {
 	pass_uv = vec2(localPos.x, localPos.z);
   } else {

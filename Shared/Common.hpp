@@ -14,7 +14,7 @@
 #define MAP_WIDTH 48
 
 // Width and height of walls and fences
-#define WALL_WIDTH 0.5f
+#define WALL_WIDTH 0.2f
 #define WALL_HEIGHT 3.0f
 
 // Dog-specific stats

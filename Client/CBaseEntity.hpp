@@ -51,8 +51,8 @@ public:
 		//_objectShader->set_uniform("u_numpointlights", static_cast<GLuint>(1));
 
 		_objectShader->set_uniform("u_dirlight.direction", glm::vec3(0.0f, -1.0f, -0.4f));
-		_objectShader->set_uniform("u_dirlight.ambient", glm::vec3(0.05f, 0.05f, 0.05f));
-		_objectShader->set_uniform("u_dirlight.diffuse", glm::vec3(0.8f, 0.8f, 0.8f));
+		_objectShader->set_uniform("u_dirlight.ambient", glm::vec3(0.2f, 0.2f, 0.3f));
+		_objectShader->set_uniform("u_dirlight.diffuse", glm::vec3(0.8f, 0.8f, 0.9f));
 		_objectShader->set_uniform("u_numdirlights", static_cast<GLuint>(1));
 	}
 
@@ -73,6 +73,7 @@ public:
 		_state->width = state->width;
 		_state->height = state->height;
 		_state->depth = state->depth;
+		_state->type = state->type;
 	}
 
     // This is optional, but might make our lives easier. Remove if you feel
@@ -80,6 +81,11 @@ public:
 	uint32_t getId()
 	{
 		return _state->id;
+	}
+
+	EntityType getType()
+	{
+		return _state->type;
 	}
 
     // Getter for culling

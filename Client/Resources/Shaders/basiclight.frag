@@ -38,6 +38,8 @@ uniform PointLight u_pointlight;
 uniform Material   u_material;
 uniform vec3       u_viewPos;
 
+// uniform int numBin = 30;
+
 // Output
 out vec4 out_color;
 
@@ -48,7 +50,7 @@ vec3 CalcDirLight(DirLight light, vec3 normal, vec3 viewDir)
 
   // Diffuse
   vec3 lightDir = normalize(-light.direction);
-  float diffAmt = max(dot(normal, lightDir), 0.25);
+  float diffAmt = max(dot(normal, lightDir), 0);
   vec3 diffuse = light.diffuse * diffAmt * texture(u_material.diffuse, pass_uv).rgb;
 
   return ambient + diffuse;
@@ -76,6 +78,14 @@ vec3 CalcPointLight(PointLight light, vec3 normal, vec3 fragPos, vec3 viewDir)
   return ambient + diffuse;
 }
 
+vec3 ToonShading(vec3 color) {
+  vec3 origColor = texture(u_material.diffuse, pass_uv).rgb;
+  float ratio = color.x / origColor.x;
+  if (ratio > 0.8)
+	return origColor * 0.9;
+  return origColor * 0.8;
+}
+
 void main(void)
 {
   vec3 normal = normalize(pass_normal);
@@ -94,6 +104,13 @@ void main(void)
   {
     resultCol += CalcPointLight(u_pointlight, normal, pass_fragPos, viewDir);
   }
+
+  resultCol = ToonShading(resultCol);
   
   out_color = vec4(resultCol, 1.0f);
+
+  // for wall transparent part
+  if (texture(u_material.diffuse, pass_uv).a < 0.3)
+	discard;
+  
 }
