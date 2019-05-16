@@ -27,7 +27,8 @@ enum EventType
     EVENT_PLAYER_LEAVE, // Created only by the server
     EVENT_PLAYER_MOVE,	// Movement vector for player
     EVENT_PLAYER_RUN,	// Used only for dogs at the moment
-    EVENT_PLAYER_STOP
+    EVENT_PLAYER_STOP,
+	EVENT_PLAYER_URINATE
     // TODO: more event types here
 };
 

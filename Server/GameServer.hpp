@@ -55,6 +55,9 @@ private:
     // Map of all game entities
     std::unordered_map<uint32_t, std::shared_ptr<SBaseEntity>> _entityMap;
 
+	// Queue of entities created during the last tick that need to be added to the entityMap
+	std::vector<std::shared_ptr<SBaseEntity>> _newEntities;
+
 	// Locations of jails, human spawns, and dog spawns, respectively
 	std::vector<glm::vec2> _jails;
 	std::queue<glm::vec2> _humanSpawns, _dogSpawns;

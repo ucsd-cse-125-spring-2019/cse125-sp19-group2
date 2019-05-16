@@ -19,6 +19,7 @@ class EventManager
 public:
 	EventManager(
 		std::unordered_map<uint32_t, std::shared_ptr<SBaseEntity>>* entityMap,
+		std::vector<std::shared_ptr<SBaseEntity>>* newEntities,
 		NetworkServer* networkInterface,
 		std::vector<glm::vec2>* jails,
 		std::queue<glm::vec2>* humanSpawns,
@@ -37,6 +38,9 @@ private:
 
 	// Raw pointer to global entity map
 	std::unordered_map<uint32_t, std::shared_ptr<SBaseEntity>>* _entityMap;
+
+	// Raw pointer to new entities (Queue of entities created during the last tick that need to be added to the entityMap)
+	std::vector<std::shared_ptr<SBaseEntity>>* _newEntities;
 
 	// Raw pointer to network interface
 	NetworkServer* _networkInterface;

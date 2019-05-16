@@ -101,6 +101,20 @@ LocalPlayer::LocalPlayer(uint32_t playerId, std::unique_ptr<NetworkClient> const
 		_moveCamera = true;
 	});
 
+	InputManager::getInstance().getKey(GLFW_KEY_SPACE)->onPress([&]
+	{
+		auto event = std::make_shared<GameEvent>();
+		event->playerId = _playerId;
+		event->type = EVENT_PLAYER_URINATE;
+		try
+		{
+			networkClient->sendEvent(event);
+		}
+		catch (std::runtime_error e)
+		{
+		};
+	});
+
 	InputManager::getInstance().getKey(GLFW_MOUSE_BUTTON_RIGHT)->onRelease([&]
 	{
 		glfwSetInputMode(InputManager::getInstance().getWindow(), GLFW_CURSOR, GLFW_CURSOR_NORMAL);

@@ -3,6 +3,7 @@
 #include <random>
 #include "SPlayerEntity.hpp"
 #include "Shared/DogState.hpp"
+#include "SPuddleEntity.hpp"
 
 #define BASE_VELOCITY 5.0f
 #define RUN_VELOCITY BASE_VELOCITY * 1.5f;
@@ -10,7 +11,9 @@
 class SDogEntity : public SPlayerEntity
 {
 public:
-	SDogEntity(uint32_t playerId, std::vector<glm::vec2>* jails)
+	SDogEntity(uint32_t playerId,
+			std::vector<glm::vec2>* jails,
+			std::vector<std::shared_ptr<SBaseEntity>>* newEntities)
 	{
 		_state = std::make_shared<DogState>();
 
@@ -29,6 +32,8 @@ public:
 		_velocity = BASE_VELOCITY;
 
 		_jails = jails;
+
+		_newEntities = newEntities;
 
 		// Dog-specific stuff
 		auto dogState = std::static_pointer_cast<DogState>(_state);
@@ -87,6 +92,9 @@ public:
 						dogState->runStamina = 0;
 					}
 
+					break;
+				case EVENT_PLAYER_URINATE:
+					createPuddle();
 					break;
 				// TODO: event for when player releases running button
 				default:
@@ -153,5 +161,12 @@ private:
 	// List of jails the dog could potentially be sent to
 	std::vector<glm::vec2>* _jails;
 	int type = 0;
+	std::vector<std::shared_ptr<SBaseEntity>>* _newEntities;
+
+	void createPuddle()
+	{
+		std::shared_ptr<SPuddleEntity> puddleEntity = std::make_shared<SPuddleEntity>(_state->pos);
+		_newEntities->push_back(puddleEntity);
+	}
 };
 

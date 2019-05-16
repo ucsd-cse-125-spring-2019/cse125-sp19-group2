@@ -89,6 +89,7 @@ void GameServer::start()
 	// Init event handler
 	_eventManager = std::make_unique<EventManager>(
 		&_entityMap,
+		&_newEntities,
 		_networkInterface.get(),
 		&_jails,
 		&_humanSpawns,
@@ -138,6 +139,13 @@ void GameServer::update()
 				std::chrono::duration_cast<std::chrono::nanoseconds>(MAX_GAME_LENGTH)
 				- _gameState->_gameDuration).count();
 	}
+
+	// add new entities from last tick to the entity map
+	for (auto& newEntity : _newEntities)
+	{
+		_entityMap.insert({newEntity->getState()->id, newEntity});
+	}
+	_newEntities.erase(_newEntities.begin(), _newEntities.end());
 
 	// Handle events from clients and update() each entity
 	_eventManager->update();

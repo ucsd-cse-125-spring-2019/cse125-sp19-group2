@@ -253,6 +253,7 @@
     <ClInclude Include="SJailEntity.hpp" />
     <ClInclude Include="SPlayerEntity.hpp" />
     <ClInclude Include="GridLevelParser.hpp" />
+    <ClInclude Include="SPuddleEntity.hpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

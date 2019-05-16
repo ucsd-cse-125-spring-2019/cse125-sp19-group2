@@ -7,6 +7,7 @@
 #include "CDogHouseEntity.hpp"
 #include "CHydrantEntity.hpp"
 #include "CFountainEntity.hpp"
+#include "CPuddleEntity.hpp"
 #include "CFloorEntity.hpp"
 #include "ColliderManager.hpp"
 #include "Shared/Logger.hpp"
@@ -55,7 +56,7 @@ std::shared_ptr<CBaseEntity> EntityManager::getEntity(std::shared_ptr<BaseState>
 		break;
 	case ENTITY_BOX:
 		entity = std::make_shared<CBoxEntity>();
-		break;
+		break;  
 	case ENTITY_HOUSE_6X6_A:
 		entity = std::make_shared<CHouseEntity>(type);
 		break;
@@ -70,6 +71,9 @@ std::shared_ptr<CBaseEntity> EntityManager::getEntity(std::shared_ptr<BaseState>
 		break;
 	case ENTITY_FOUNTAIN:
 		entity = std::make_shared<CFountainEntity>();
+		break;
+	case ENTITY_PUDDLE:
+		entity = std::make_shared<CPuddleEntity>();
 		break;
 	case ENTITY_FLOOR:
 		CFloorEntity::getInstance().updateTile(state);

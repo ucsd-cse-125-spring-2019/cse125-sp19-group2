@@ -4,6 +4,7 @@
 
 EventManager::EventManager(
 	std::unordered_map<uint32_t, std::shared_ptr<SBaseEntity>>* entityMap,
+	std::vector<std::shared_ptr<SBaseEntity>>* newEntities,
 	NetworkServer* networkInterface,
 	std::vector<glm::vec2>* jails,
 	std::queue<glm::vec2>* humanSpawns,
@@ -11,6 +12,7 @@ EventManager::EventManager(
 	std::shared_ptr<GameState> gameState)
 {
 	_entityMap = entityMap;
+	_newEntities = newEntities;
 	_networkInterface = networkInterface;
 	_jails = jails;
 	_humanSpawns = humanSpawns;
@@ -110,7 +112,7 @@ void EventManager::handlePlayerJoin(std::shared_ptr<GameEvent> event)
 		_dogSpawns->push(dogSpawn);
 
 		// Create player entity at position
-		playerEntity = std::make_shared<SDogEntity>(event->playerId, _jails);
+		playerEntity = std::make_shared<SDogEntity>(event->playerId, _jails, _newEntities);
 		playerEntity->getState()->pos = glm::vec3(dogSpawn.x, 0, dogSpawn.y);
 		_gameState->dogs.push_back(playerEntity->getState()->id);
 	}
