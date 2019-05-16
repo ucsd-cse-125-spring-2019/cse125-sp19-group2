@@ -167,8 +167,42 @@ void Application::Setup() {
 
 		// Hide connect screen
 		GuiManager::getInstance().getWidget(WIDGET_CONNECT)->setVisible(false);
+
+		// Show lobby
+		GuiManager::getInstance().getWidget(WIDGET_LOBBY)->setVisible(true);
 	});
 
+	// Lobby screen
+	auto lobbyScreen = GuiManager::getInstance().createWidget(WIDGET_LOBBY);
+
+	// Lobby layout
+	auto lobbyLayout = new nanogui::GridLayout(nanogui::Orientation::Horizontal, 3, nanogui::Alignment::Middle, 0, 50);
+	lobbyLayout->setRowAlignment(nanogui::Alignment::Middle);
+	lobbyScreen->setLayout(lobbyLayout);
+
+	// Title for dogs list
+	auto dogsLabel = new nanogui::Label(lobbyScreen, "Dogs", "sans", 60);
+
+	// Empty widget
+	auto emptyLabel = new nanogui::Label(lobbyScreen, "", "sans", 60);
+
+	// Title for humans list
+	auto humansLabel = new nanogui::Label(lobbyScreen, "Humans", "sans", 60);
+
+	// List of dogs
+	auto dogsList = GuiManager::getInstance().createWidget(WIDGET_LIST_DOGS);
+	auto dogTest = new nanogui::Label(dogsList, "Dog1", "sans", 28);
+
+	// Switch sides button
+	auto switchSidesButton = new nanogui::Button(lobbyScreen, "Switch sides");
+
+	// List of humans
+	auto humansList = GuiManager::getInstance().createWidget(WIDGET_LIST_HUMANS);
+
+	// Hide lobby by default
+	lobbyScreen->setVisible(false);
+
+	/*
     // Create a testing widget
     bool enabled = true;
     auto *gui = GuiManager::getInstance().createFormHelper("Form helper");
@@ -278,7 +312,7 @@ void Application::Setup() {
 		event->playerType = _localPlayer->getPlayerType();
 		_networkClient->sendEvent(event);
 	});
-	
+	*/
 
     GuiManager::getInstance().setDirty();
 }
