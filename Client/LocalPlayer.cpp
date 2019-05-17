@@ -73,6 +73,7 @@ LocalPlayer::LocalPlayer(uint32_t playerId, std::unique_ptr<NetworkClient> const
 	// Player move right event
 	InputManager::getInstance().getKey(GLFW_KEY_D)->onRepeat([&]
 	{
+		Logger::getInstance()->debug("D PRessed");
 		_moveKeysPressed = true;
 		_stopped = false;
 		auto event = std::make_shared<GameEvent>();
@@ -105,7 +106,21 @@ LocalPlayer::LocalPlayer(uint32_t playerId, std::unique_ptr<NetworkClient> const
 	{
 		auto event = std::make_shared<GameEvent>();
 		event->playerId = _playerId;
-		event->type = EVENT_PLAYER_URINATE;
+		event->type = EVENT_PLAYER_URINATE_START;
+		try
+		{
+			networkClient->sendEvent(event);
+		}
+		catch (std::runtime_error e)
+		{
+		};
+	});
+
+	InputManager::getInstance().getKey(GLFW_KEY_SPACE)->onRelease([&]
+	{
+		auto event = std::make_shared<GameEvent>();
+		event->playerId = _playerId;
+		event->type = EVENT_PLAYER_URINATE_END;
 		try
 		{
 			networkClient->sendEvent(event);
@@ -157,11 +172,28 @@ LocalPlayer::LocalPlayer(uint32_t playerId, std::unique_ptr<NetworkClient> const
 	});
 
 	// Player move right event
-	InputManager::getInstance().getKey(GLFW_KEY_LEFT_SHIFT)->onRepeat([&]
+	InputManager::getInstance().getKey(GLFW_KEY_LEFT_SHIFT)->onPress([&]
 	{
 		auto event = std::make_shared<GameEvent>();
 		event->playerId = _playerId;
-		event->type = EVENT_PLAYER_RUN;
+		event->type = EVENT_PLAYER_RUN_START;
+
+		// Try sending the update
+		try
+		{
+			networkClient->sendEvent(event);
+		}
+		catch (std::runtime_error e)
+		{
+		};
+	});
+
+	// Player move right event
+	InputManager::getInstance().getKey(GLFW_KEY_LEFT_SHIFT)->onRelease([&]
+	{
+		auto event = std::make_shared<GameEvent>();
+		event->playerId = _playerId;
+		event->type = EVENT_PLAYER_RUN_END;
 
 		// Try sending the update
 		try

@@ -48,7 +48,7 @@ public:
 	void update(std::vector<std::shared_ptr<GameEvent>> events) override
 	{
 		auto dogState = std::static_pointer_cast<DogState>(_state);
-
+		
 		// Save old position
 		glm::vec3 oldPos = _state->pos;
 
@@ -77,24 +77,19 @@ public:
 			{
 				switch (event->type)
 				{
-				case EVENT_PLAYER_RUN:
-					// TODO: find out when dog stops running. Will have the same problem
-					// when tick rate is higher than FPS unless client generates event
-					// when dog stops running.
-					if (dogState->runStamina > 0)
-					{
-						_velocity = RUN_VELOCITY;
-					}
-					dogState->runStamina -= 1 / TICKS_PER_SEC;
-					
-					if (dogState->runStamina < 0)
-					{
-						dogState->runStamina = 0;
-					}
-
+				case EVENT_PLAYER_RUN_START:
+					_isRunning = true;
 					break;
-				case EVENT_PLAYER_URINATE:
-					createPuddle();
+				case EVENT_PLAYER_RUN_END:
+					_isRunning = false;
+					_velocity = BASE_VELOCITY;
+					break;
+				case EVENT_PLAYER_URINATE_START:
+					_urinatingStartTime = std::chrono::system_clock::now();
+					_isUrinating = true;
+					break;
+				case EVENT_PLAYER_URINATE_END:
+					_isUrinating = false;
 					break;
 				// TODO: event for when player releases running button
 				default:
@@ -103,12 +98,40 @@ public:
 			}
 		}
 
+		if (_isRunning)
+		{
+			if (dogState->runStamina > 0)
+			{
+				_velocity = RUN_VELOCITY;
+			}
+			dogState->runStamina -= 1 / TICKS_PER_SEC;
+
+			if (dogState->runStamina < 0)
+			{
+				dogState->runStamina = 0;
+			}
+		}
+
+		if (_isUrinating)
+		{
+			auto now = std::chrono::system_clock::now();
+			std::chrono::duration<double> diff = now - _urinatingStartTime;
+			if (diff.count() > 1.0)
+			{
+				createPuddle();
+				_isUrinating = false;
+			}
+		}
+
 		// Update and check for changes
 		SPlayerEntity::update(events);
 
+
 		// Set running/not running based on position
+		// also, if you start moving while peeing, cancel the puddle
 		if (_state->pos != oldPos)
 		{
+			_isUrinating = false;
 			dogState->currentAnimation = ANIMATION_DOG_RUNNING;
 		}
 
@@ -161,6 +184,9 @@ private:
 	// List of jails the dog could potentially be sent to
 	std::vector<glm::vec2>* _jails;
 	int type = 0;
+	bool _isUrinating = false;
+	bool _isRunning = false;
+	std::chrono::time_point<std::chrono::system_clock> _urinatingStartTime;
 	std::vector<std::shared_ptr<SBaseEntity>>* _newEntities;
 
 	void createPuddle()
