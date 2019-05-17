@@ -101,6 +101,7 @@ void EntityManager::update(std::shared_ptr<BaseState> const &state)
         auto result = _entityMap.find(state->id);
         if (result != _entityMap.end())
         {
+			Logger::getInstance()->debug("Erasing entity");
             _entityMap.erase(result);
         }
 

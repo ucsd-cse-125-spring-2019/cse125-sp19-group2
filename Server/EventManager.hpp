@@ -33,6 +33,7 @@ public:
 private:
 	// Helper functions
 	void handlePlayerJoin(std::shared_ptr<GameEvent> event);
+	void handlePlayerSwitch(std::shared_ptr<GameEvent> event);
 	void handlePlayerReady(std::shared_ptr<GameEvent> event);
 	void handlePlayerLeave(std::shared_ptr<GameEvent> event);
 

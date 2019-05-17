@@ -37,12 +37,12 @@ void GameServer::start()
 	_gameState->type = ENTITY_STATE;
 	_gameState->gameStarted = false;
 	_gameState->gameOver = false;
-	_gameState->inLobby = false;
+	_gameState->inLobby = true;
 	_gameState->numReady = 0;
 	_gameState->millisecondsToStart = 0;
 	_gameState->millisecondsLeft = 0;
-	_gameState->dogs = std::vector<uint32_t>();
-	_gameState->humans = std::vector<uint32_t>();
+	_gameState->dogs = std::unordered_map<uint32_t, std::string>();
+	_gameState->humans = std::unordered_map<uint32_t, std::string>();
 
 	// Server utilization monitor
 	Logger::getInstance()->initUtilizationMonitor();
@@ -194,6 +194,7 @@ void GameServer::update()
 	// Delete everything in list
 	for (auto& id : deletedEntities)
 	{
+		Logger::getInstance()->debug("Destroying entity");
 		_entityMap.erase(_entityMap.find(id));
 	}
 }
@@ -201,22 +202,16 @@ void GameServer::update()
 
 void GameServer::updateGameState()
 {
-	// If we now have two players, start the game
-	if (!_gameState->gameStarted &&
-		!_gameState->gameOver &&
-		_gameState->dogs.size() && _gameState->humans.size() )
-	{
-		Logger::getInstance()->debug("Game started!");
-		_gameState->gameStarted = true;
-		_gameState->_gameStart = std::chrono::steady_clock::now();
-	}
-
 	// Check if all the dogs have been caught
 	bool dogsCaught = true;
-	for (auto& dogId : _gameState->dogs)
+	for (auto& dogPair : _gameState->dogs)
 	{
-		auto dog = _entityMap.find(dogId)->second;
-		dogsCaught &= std::static_pointer_cast<SDogEntity>(dog)->isCaught;
+		uint32_t dogId = dogPair.first;
+		auto dog = _entityMap.find(dogId);
+		if (dog != _entityMap.end())
+		{
+			dogsCaught &= std::static_pointer_cast<SDogEntity>(dog->second)->isCaught;
+		}
 	}
 
 	// Game end logic

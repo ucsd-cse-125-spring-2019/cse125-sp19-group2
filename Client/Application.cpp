@@ -194,13 +194,36 @@ void Application::Setup() {
 
 	// List of dogs
 	auto dogsList = GuiManager::getInstance().createWidget(WIDGET_LIST_DOGS);
-	auto dogTest = new nanogui::Label(dogsList, "Dog1", "sans", 28);
 
 	// Switch sides button
-	auto switchSidesButton = new nanogui::Button(lobbyScreen, "Switch sides");
+	_switchSidesButton = new nanogui::Button(lobbyScreen, "Switch sides");
+	_switchSidesButton->setCallback([&]() {
+		// Send switch event
+		auto switchEvent = std::make_shared<GameEvent>();
+		switchEvent->type = EVENT_PLAYER_SWITCH;
+		switchEvent->playerId = _localPlayer->getPlayerId();
+		_networkClient->sendEvent(switchEvent);
+	});
 
 	// List of humans
 	auto humansList = GuiManager::getInstance().createWidget(WIDGET_LIST_HUMANS);
+
+	// Empty label for padding in grid
+	new nanogui::Label(lobbyScreen, "", "sans", 60);
+
+	// Ready button
+	_playerReadyBtn = new nanogui::Button(lobbyScreen, "");
+	_playerReadyBtn->setCallback([&]() {
+		// Send ready event
+		auto readyEvent = std::make_shared<GameEvent>();
+		readyEvent->type = EVENT_PLAYER_READY;
+		readyEvent->playerId = _localPlayer->getPlayerId();
+		_networkClient->sendEvent(readyEvent);
+
+		// Gray out ready and switch buttons
+		_playerReadyBtn->setEnabled(false);
+		_switchSidesButton->setEnabled(false);
+	});
 
 	// Hide lobby by default
 	lobbyScreen->setVisible(false);
@@ -390,7 +413,65 @@ void Application::Update()
 
             // TODO: do something with general state
             // Timer, winner of game, in lobby, etc
+			if (gameState->inLobby)
+			{
+				auto dogList = GuiManager::getInstance().getWidget(WIDGET_LIST_DOGS);
+				auto humanList = GuiManager::getInstance().getWidget(WIDGET_LIST_HUMANS);
 
+				if (dogList == nullptr || humanList == nullptr)
+				{
+					Logger::getInstance()->debug("One or both lists are null");
+				}
+
+				// Clear dog UI
+				while (dogList->children().size())
+				{
+					dogList->removeChild(0);
+				}
+
+				// Clear human UI
+				while (humanList->children().size())
+				{
+					humanList->removeChild(0);
+				}
+
+				// Add dogs
+				for (auto& dogPair : gameState->dogs)
+				{
+					auto playerLabel = new nanogui::Label(dogList, dogPair.second, "sans", 28);
+					if (dogPair.first == _localPlayer->getPlayerId())
+					{
+						playerLabel->setColor(nanogui::Color(0.376f, 0.863f, 1.0f, 1.0f));
+					}
+				}
+
+				// Add humans
+				for (auto& humanPair : gameState->humans)
+				{
+					auto playerLabel = new nanogui::Label(humanList, humanPair.second, "sans", 28);
+					if (humanPair.first == _localPlayer->getPlayerId())
+					{
+						playerLabel->setColor(nanogui::Color(0.376f, 0.863f, 1.0f, 1.0f));
+					}
+				}
+
+				// Ready button text
+				int numPlayers = gameState->dogs.size() + gameState->humans.size();
+				_playerReadyBtn->setCaption("Ready (" + std::to_string(gameState->numReady) + std::string("/") + std::to_string(numPlayers) + std::string(")"));
+
+				GuiManager::getInstance().setDirty();
+			}
+
+			// Did a game just start? If so, hide lobby UI
+			if (_inLobby && !gameState->inLobby)
+			{
+				_inLobby = false;
+				GuiManager::getInstance().getWidget(WIDGET_LOBBY)->setVisible(false);
+
+				// TODO: show game HUD
+			}
+
+			_inLobby = gameState->inLobby;
         }
     }
   }
@@ -432,8 +513,8 @@ void Application::Draw() {
     //_frameBuffer->drawQuad(_testShader);
       glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT| GL_STENCIL_BUFFER_BIT);
 
-	  // Non-UI elements depend on localPlayer
-	  if (_localPlayer) {
+	  // Non-UI elements depend on localPlayer and that we're not in the lobby
+	  if (_localPlayer && !_inLobby) {
 		  // Render Skybox
 		  _skyboxShader->Use();
 		  _skyboxShader->set_uniform("u_projection", _localPlayer->getCamera()->projection_matrix());
@@ -530,7 +611,8 @@ void Application::Keyboard(int key, int scancode, int action, int mods) {
 }
 
 void Application::MouseButton(int btn, int action, int mods) {
-    GuiManager::getInstance().getScreen()->mouseButtonCallbackEvent(btn, action, mods);
+	GuiManager::getInstance().getScreen()->mouseButtonCallbackEvent(btn, action, mods);
+
 	if(action == GLFW_PRESS)
 	{
 		if(mods == GLFW_MOD_SHIFT)

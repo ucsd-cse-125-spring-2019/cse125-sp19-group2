@@ -6,7 +6,7 @@
 class SHumanEntity : public SPlayerEntity
 {
 public:
-	SHumanEntity(uint32_t playerId)
+	SHumanEntity(uint32_t playerId, std::string playerName)
 	{
 		_state = std::make_shared<HumanState>();
 
@@ -27,6 +27,9 @@ public:
 		// Human-specific stuff
 		auto humanState = std::static_pointer_cast<HumanState>(_state);
 		humanState->currentAnimation = ANIMATION_HUMAN_IDLE;
+
+		// Player-specific stuff
+		humanState->playerName = playerName;
 	};
 
 	~SHumanEntity() {};

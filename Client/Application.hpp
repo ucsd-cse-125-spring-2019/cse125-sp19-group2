@@ -107,6 +107,11 @@ private:
   // UI
   nanogui::TextBox* _ipTextBox;
   nanogui::TextBox* _playerNameTextBox;
+  nanogui::Button* _switchSidesButton;
+  nanogui::Button* _playerReadyBtn;
+
+  // Game state
+  bool _inLobby = true;
 
   // Test Lights
   std::unique_ptr<PointLight> _point_light;

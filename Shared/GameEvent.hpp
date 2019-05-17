@@ -24,6 +24,7 @@ namespace cereal
 enum EventType
 {
     EVENT_PLAYER_JOIN,
+	EVENT_PLAYER_SWITCH,
 	EVENT_PLAYER_READY,
     EVENT_PLAYER_LEAVE, // Created only by the server
     EVENT_PLAYER_MOVE,	// Movement vector for player
@@ -48,8 +49,8 @@ struct GameEvent
     std::string playerName; // Used only for EVENT_PLAYER_JOIN
 	glm::vec2 direction;	// Used only for PLAYER_TURN and PLAYER_MOVE
     //TODO: add more elements as necessary
-	PlayerType playerType;	// Used only for Event_PLAYER_READY
-    // Serialization for Cereal
+
+	// Serialization for Cereal
     template<class Archive>
     void serialize(Archive & archive)
     {
@@ -57,8 +58,7 @@ struct GameEvent
 			type,
 			playerId,
 			playerName,
-			direction,
-			playerType);
+			direction);
     }
 
 	void print()
