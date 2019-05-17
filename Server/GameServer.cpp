@@ -194,7 +194,6 @@ void GameServer::update()
 	// Delete everything in list
 	for (auto& id : deletedEntities)
 	{
-		Logger::getInstance()->debug("Destroying entity");
 		_entityMap.erase(_entityMap.find(id));
 	}
 }

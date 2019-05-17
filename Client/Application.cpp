@@ -467,6 +467,8 @@ void Application::Update()
 			{
 				_inLobby = false;
 				GuiManager::getInstance().getWidget(WIDGET_LOBBY)->setVisible(false);
+				_playerReadyBtn->setEnabled(true);
+				_switchSidesButton->setEnabled(true);
 
 				// TODO: show game HUD
 			}

@@ -100,10 +100,12 @@ void EntityManager::update(std::shared_ptr<BaseState> const &state)
         // Find in map and destroy if it exists
         auto result = _entityMap.find(state->id);
         if (result != _entityMap.end())
-        {
-			Logger::getInstance()->debug("Erasing entity");
-            _entityMap.erase(result);
-        }
+		{
+			_entityList.erase(_entityList.begin() + result->second);
+
+			// Erase from map
+			_entityMap.erase(result);
+		}
 
         ColliderManager::getInstance().erase(state->id);
 
