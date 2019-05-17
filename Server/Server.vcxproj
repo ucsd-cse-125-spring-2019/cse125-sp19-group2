@@ -249,6 +249,7 @@
     <ClInclude Include="SFenceEntity.hpp" />
     <ClInclude Include="SFloorEntity.hpp" />
     <ClInclude Include="SFountainEntity.hpp" />
+    <ClInclude Include="SGateEntity.hpp" />
     <ClInclude Include="SHouseEntity.hpp" />
     <ClInclude Include="SHumanEntity.hpp" />
     <ClInclude Include="SHydrantEntity.hpp" />

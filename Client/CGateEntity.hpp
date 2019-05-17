@@ -2,13 +2,13 @@
 #include "CBaseEntity.hpp"
 #include "Model.hpp"
 
-class CBarEntity : public CBaseEntity
+class CGateEntity : public CBaseEntity
 {
 public:
-	CBarEntity()
+	CGateEntity()
 	{
 		// Allocate member variables
-		_objectModel = std::make_unique<Model>("./Resources/Models/bar.fbx");
+		_objectModel = std::make_unique<Model>("./Resources/Models/gate.fbx");
 		_objectShader = std::make_unique<Shader>();
 		_state = std::make_shared<BaseState>();
 
@@ -16,7 +16,7 @@ public:
 		_objectShader->LoadFromFile(GL_FRAGMENT_SHADER, "./Resources/Shaders/basiclight.frag");
 		_objectShader->CreateProgram();
 	};
-	~CBarEntity() {};
+	~CGateEntity() {};
 
 	void setUniforms(std::unique_ptr<Camera> const& camera) override
 	{

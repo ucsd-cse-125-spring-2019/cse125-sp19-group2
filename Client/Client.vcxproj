@@ -309,6 +309,7 @@ xcopy /y /d  "$(SolutionDir)Library\lib\x64\Release\*.dll" "$(OutDir)"</Command>
     <ClInclude Include="CFenceEntity.hpp" />
     <ClInclude Include="CFloorEntity.hpp" />
     <ClInclude Include="CFountainEntity.hpp" />
+    <ClInclude Include="CGateEntity.hpp" />
     <ClInclude Include="CHouseEntity.hpp" />
     <ClInclude Include="CHumanEntity.hpp" />
     <ClInclude Include="CHydrantEntity.hpp" />

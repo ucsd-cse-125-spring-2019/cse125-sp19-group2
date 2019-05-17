@@ -2,9 +2,10 @@
 
 #include "SBoxEntity.hpp"
 #include "SBarEntity.hpp"
+#include "SGateEntity.hpp"
 #include "EmptyCollider.hpp"
 
-#define JAIL_WALL_WIDTH 0.25f
+#define JAIL_WALL_WIDTH 0.15f
 
 class SJailEntity : public SBaseEntity
 {
@@ -82,30 +83,29 @@ public:
 			glm::vec3(JAIL_WALL_WIDTH, scale.y, zScale - JAIL_WALL_WIDTH)
 		));
 
-		// TODO: change below to gateEntity after completed
-		//// North gate
-		//_walls.push_back(std::make_shared<SBarEntity>(
-		//	glm::vec3(pos.x, pos.y, pos.z + scale.z / 2 - JAIL_WALL_WIDTH / 2),
-		//	glm::vec3(xScale, scale.y, JAIL_WALL_WIDTH)
-		//	));
+		// North gate
+		_walls.push_back(std::make_shared<SGateEntity>(
+			glm::vec3(pos.x, pos.y, pos.z + scale.z / 2 - JAIL_WALL_WIDTH / 2),
+			glm::vec3(xScale - 0.05, scale.y, JAIL_WALL_WIDTH)
+		));
 
-		//// South gate
-		//_walls.push_back(std::make_shared<SBarEntity>(
-		//	glm::vec3(pos.x, pos.y, pos.z - scale.z / 2 + JAIL_WALL_WIDTH / 2),
-		//	glm::vec3(xScale, scale.y, JAIL_WALL_WIDTH)
-		//	));
+		// South gate
+		_walls.push_back(std::make_shared<SGateEntity>(
+			glm::vec3(pos.x, pos.y, pos.z - scale.z / 2 + JAIL_WALL_WIDTH / 2),
+			glm::vec3(xScale - 0.05, scale.y, JAIL_WALL_WIDTH)
+		));
 
-		//// West gate
-		//_walls.push_back(std::make_shared<SBarEntity>(
-		//	glm::vec3(pos.x - scale.x / 2 + JAIL_WALL_WIDTH / 2, pos.y, pos.z),
-		//	glm::vec3(JAIL_WALL_WIDTH, scale.y, zScale)
-		//));
+		// West gate
+		_walls.push_back(std::make_shared<SGateEntity>(
+			glm::vec3(pos.x - scale.x / 2 + JAIL_WALL_WIDTH / 2, pos.y, pos.z),
+			glm::vec3(JAIL_WALL_WIDTH, scale.y, zScale - 0.05)
+		));
 
-		//// East gate
-		//_walls.push_back(std::make_shared<SBarEntity>(
-		//	glm::vec3(pos.x + scale.x / 2 - JAIL_WALL_WIDTH / 2, pos.y, pos.z),
-		//	glm::vec3(JAIL_WALL_WIDTH, scale.y, zScale)
-		//));
+		// East gate
+		_walls.push_back(std::make_shared<SGateEntity>(
+			glm::vec3(pos.x + scale.x / 2 - JAIL_WALL_WIDTH / 2, pos.y, pos.z),
+			glm::vec3(JAIL_WALL_WIDTH, scale.y, zScale - 0.05)
+		));
 	};
 	~SJailEntity() {};
 
