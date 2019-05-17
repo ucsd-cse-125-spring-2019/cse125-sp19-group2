@@ -2,6 +2,7 @@
 
 #include <queue>
 #include "LevelParser.hpp"
+#include <map>
 
 /**
   * Parser for tile-based level editor, which exports tiles in a newline-
@@ -34,6 +35,20 @@ private:
 		TILE_DOGHOUSE,
 		TILE_HYDRANT,
 		TILE_FOUNTAIN
+	};
+
+	std::map<TileType, int> EntityTileWidth = {
+		{TILE_EMPTY, 0},
+		{TILE_JAIL, 0},
+		{TILE_WALL, 0},
+		{TILE_FENCE, 0},
+		{TILE_HUMAN_SPAWN, 1},
+		{TILE_DOG_SPAWN, 1},
+		{TILE_HOUSE_6X6_A, 4},
+		{TILE_DOGBONE, 1},
+		{TILE_DOGHOUSE, 1},
+		{TILE_HYDRANT, 1},
+		{TILE_FOUNTAIN, 3}
 	};
 
 	// Order must be exactly the same as the online editor!
