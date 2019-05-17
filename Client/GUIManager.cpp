@@ -54,9 +54,8 @@ void GuiManager::draw() {
         // Recalculate widget
 		//_screen->performLayout();
 
-		for (auto& widgetPair : _widgets) {
-			(widgetPair.second->layout())->performLayout(_screen->nvgContext(), widgetPair.second);
-		}
+		// Redraw all children
+		redraw(_screen);
 
         _dirty = false;
     }
@@ -70,6 +69,16 @@ void GuiManager::draw() {
     _screen->drawWidgets();
     glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_LEQUAL);
+}
+
+void GuiManager::redraw(nanogui::Widget* widget) {
+	for (auto& child : widget->children()) {
+		redraw(child);
+	}
+	if (widget->layout()) {
+		Logger::getInstance()->debug("Widget ID: " + widget->id());
+		widget->layout()->performLayout(_screen->nvgContext(), widget);
+	}
 }
 
 void GuiManager::resize(int x, int y) {

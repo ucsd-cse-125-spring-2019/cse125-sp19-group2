@@ -27,6 +27,8 @@ public:
 
     void draw();
 
+	void redraw(nanogui::Widget* widget);
+
 	void resize(int x, int y);
 
     nanogui::Screen* getScreen();
