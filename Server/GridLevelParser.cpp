@@ -138,6 +138,11 @@ std::vector<std::shared_ptr<SBaseEntity>> GridLevelParser::parseLevelFromFile(
 		{
 			Tile* tile = tiles[zIndex][xIndex];
 
+			// get maxWidth and maxDepth of this structure
+			int structureSize = EntityTileWidth[tile->type];
+			int endX = (structureSize) ? structureSize + xIndex : width;
+			int endZ = (structureSize) ? structureSize + zIndex : width;
+
 			// Create vector of aggregated tiles and recursively build it
 			auto aggregatedTiles = std::vector<Tile*>();
 			tile->aggregateTiles(
@@ -145,7 +150,8 @@ std::vector<std::shared_ptr<SBaseEntity>> GridLevelParser::parseLevelFromFile(
 				tile->type,
 				DIR_RIGHT,
 				aggregatedTiles,
-				width);
+				endX,
+				endZ);
 
 			// Build game entity from aggregated tiles
 			if (aggregatedTiles.size())
@@ -359,7 +365,8 @@ void GridLevelParser::Tile::aggregateTiles(
 	TileType type,
 	Direction dir,
 	std::vector<Tile*>& aggregatedTiles,
-	int maxWidth)
+	int maxWidth,
+	int maxDepth)
 {
 	if (this->type != type || this->type == TILE_EMPTY ||
 		(this->isClaimed && aggregatedTiles.size() == 0))
@@ -381,7 +388,8 @@ void GridLevelParser::Tile::aggregateTiles(
 			case DIR_RIGHT:
 			{
 				// Edge case for walls and fences: aggregate single item to left
-				if (xIndex - 1 >= 0 &&
+				if (this->type == TILE_FENCE &&
+					xIndex - 1 >= 0 &&
 					tiles[zIndex][xIndex - 1]->type == this->type &&
 					aggregatedTiles.size() == 1)
 				{
@@ -397,7 +405,8 @@ void GridLevelParser::Tile::aggregateTiles(
 						type,
 						DIR_RIGHT,
 						aggregatedTiles,
-						maxWidth);
+						maxWidth,
+						maxDepth);
 				}
 
 				// If this is a wall or fence and the vector has more than one
@@ -410,7 +419,8 @@ void GridLevelParser::Tile::aggregateTiles(
 				}
 
 				// Edge case for walls and fences: aggregate single item above
-				if (zIndex - 1 >= 0 &&
+				if (this->type == TILE_FENCE &&
+					zIndex - 1 >= 0 &&
 					tiles[zIndex - 1][xIndex]->type == this->type &&
 					aggregatedTiles.size() == 1)
 				{
@@ -418,29 +428,19 @@ void GridLevelParser::Tile::aggregateTiles(
 					aggregatedTiles.push_back(tiles[zIndex - 1][xIndex]);
 				}
 
-				// Also check downwards. It's a little bit of copied code so
-				// I might come back later to try and clean it up
-				if (this->zIndex + 1 < maxWidth)
-				{
-					tiles[zIndex + 1][xIndex]->aggregateTiles(
-						tiles,
-						type,
-						DIR_DOWN,
-						aggregatedTiles,
-						maxWidth);
-				}
-				break;
+				// Also check downwards (don't add break here)
 			}
 			case DIR_DOWN:
 			{
-				if (this->zIndex + 1 < maxWidth)
+				if (this->zIndex + 1 < maxDepth)
 				{
 					tiles[zIndex + 1][xIndex]->aggregateTiles(
 						tiles,
 						type,
 						DIR_DOWN,
 						aggregatedTiles,
-						maxWidth);
+						maxWidth,
+						maxDepth);
 				}
 				break;
 			}

@@ -37,8 +37,9 @@ private:
 		TILE_FOUNTAIN
 	};
 
+	// Different width for different structure (0 means size is not fixed)
 	std::map<TileType, int> EntityTileWidth = {
-		{TILE_EMPTY, 0},
+		{TILE_EMPTY, 1},
 		{TILE_JAIL, 0},
 		{TILE_WALL, 0},
 		{TILE_FENCE, 0},
@@ -86,7 +87,8 @@ private:
 			TileType type,
 			Direction dir,
 			std::vector<Tile*>& aggregatedTiles,
-			int maxWidth);
+			int maxWidth,
+			int maxDepth);
 	};
 
 	// Get average position, width, and depth from tiles. All are passed by
