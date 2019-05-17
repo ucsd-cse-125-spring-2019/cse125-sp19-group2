@@ -46,7 +46,7 @@ Application::~Application() {
 
 void Application::Setup() {
   // OpenGL Graphics Setup
-  glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+  glClearColor(0.3f, 0.3f, 0.3f, 1.0f);
   glEnable(GL_DEPTH_TEST);
   glDepthFunc(GL_LEQUAL);
   glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);

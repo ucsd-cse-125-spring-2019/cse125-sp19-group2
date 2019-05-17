@@ -74,7 +74,6 @@ void CFloorEntity::render(std::unique_ptr<Camera> const & camera)
 		_textureShader->Use();
 		fbo->renderScene([&]
 		{
-			glClearColor(0.3f, 0.3f, 0.3f, 1.0f);
 			Logger::getInstance()->debug("Texture generating");
 			glViewport(0, 0, MAP_WIDTH * FLOOR_TEXTURE_SCALE, MAP_WIDTH * FLOOR_TEXTURE_SCALE);
 			//Mesh floorMesh = (static_cast<Model*>(_objectModel.get()))->getMeshAt(0);

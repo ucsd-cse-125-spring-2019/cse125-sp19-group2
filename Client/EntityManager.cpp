@@ -97,13 +97,15 @@ void EntityManager::update(std::shared_ptr<BaseState> const &state)
     // First check if marked as destroyed
     if (state->isDestroyed)
     {
+
         // Find in map and destroy if it exists
         auto result = _entityMap.find(state->id);
         if (result != _entityMap.end())
 		{
-			_entityList.erase(_entityList.begin() + result->second);
+			//_entityList.erase(_entityList.begin() + result->second);
 
 			// Erase from map
+			_entityList[result->second] = nullptr;
 			_entityMap.erase(result);
 		}
 
@@ -130,21 +132,25 @@ void EntityManager::render(std::unique_ptr<Camera> const &camera)
 
     for (uint32_t i = 0; i < _entityList.size(); i++)
     {
-        const glm::vec3 pos = _entityList[i]->getPos();
-        const float radius = _entityList[i]->getRadius();
-        test[i] = camera->isInFrustum(pos, radius);
-        if (test[i])
-        {
-            _entityList[i]->setAlpha(camera->getTransparency(pos, radius));
-            if (_entityList[i]->getAlpha() < 1.0f || _entityList[i]->getType() == ENTITY_BOX)
-            {
-                transparentEntities.push_back(_entityList[i].get());
-            }
-            else
-            {
-                isOpaque.push_back(i);
-            }
-        }
+		if (_entityList[i]) {
+			const glm::vec3 pos = _entityList[i]->getPos();
+			const float radius = _entityList[i]->getRadius();
+			test[i] = camera->isInFrustum(pos, radius);
+			if (test[i])
+			{
+				_entityList[i]->setAlpha(camera->getTransparency(pos, radius));
+				if (_entityList[i]->getAlpha() < 1.0f || _entityList[i]->getType() == ENTITY_BOX)
+				{
+					if (_entityList[i]->getAlpha() > 0.01f) {
+						transparentEntities.push_back(_entityList[i].get());
+					}
+				}
+				else
+				{
+					isOpaque.push_back(i);
+				}
+			}
+		}
     }
 
     // save off current state of src / dst blend functions
