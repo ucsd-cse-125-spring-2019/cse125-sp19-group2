@@ -4,7 +4,7 @@
 
 #include "Shared/BaseState.hpp"
 
-class GateState : BaseState
+struct GateState : BaseState
 {
 	int jailIndex;
 	float liftRate;
@@ -19,3 +19,6 @@ class GateState : BaseState
 	}
 };
 
+// Register the polymorphic struct with cereal
+#include <cereal/archives/binary.hpp>
+CEREAL_REGISTER_TYPE(GateState);

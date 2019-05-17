@@ -205,6 +205,37 @@ LocalPlayer::LocalPlayer(uint32_t playerId, std::unique_ptr<NetworkClient> const
 		};
 	});
 
+	// Player start lifting
+	InputManager::getInstance().getKey(GLFW_KEY_F)->onPress([&]
+	{
+		auto event = std::make_shared<GameEvent>();
+		event->playerId = _playerId;
+		event->type = EVENT_PLAYER_LIFTING_START;
+
+		try
+		{
+			networkClient->sendEvent(event);
+		}
+		catch (std::runtime_error e)
+		{
+		};
+	});
+
+	// Player end lifting
+	InputManager::getInstance().getKey(GLFW_KEY_F)->onRelease([&]
+	{
+		auto event = std::make_shared<GameEvent>();
+		event->playerId = _playerId;
+		event->type = EVENT_PLAYER_LIFTING_END;
+		try
+		{
+			networkClient->sendEvent(event);
+		}
+		catch (std::runtime_error e)
+		{
+		};
+	});
+
 	_camera = std::make_unique<Camera>();
 
 	_networkClient = networkClient.get();
