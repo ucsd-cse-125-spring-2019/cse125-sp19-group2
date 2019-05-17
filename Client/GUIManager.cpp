@@ -76,7 +76,6 @@ void GuiManager::redraw(nanogui::Widget* widget) {
 		redraw(child);
 	}
 	if (widget->layout()) {
-		Logger::getInstance()->debug("Widget ID: " + widget->id());
 		widget->layout()->performLayout(_screen->nvgContext(), widget);
 	}
 }
@@ -97,8 +96,6 @@ void GuiManager::resize(int x, int y) {
 		// Resize layout margins
 		switch (widgetPair.first) {
 		case WIDGET_CONNECT:
-			//static_cast<nanogui::BoxLayout*>
-			//Logger::getInstance()->debug(std::to_string(static_cast<nanogui::BoxLayout*>(widgetPair.second->layout())->margin()));
 			static_cast<nanogui::BoxLayout*>(widgetPair.second->layout())->setMargin(x * CONNECT_MARGIN);
 			break;
 		}
@@ -135,7 +132,7 @@ nanogui::Widget* GuiManager::createWidget(WidgetType name) {
 	
 	if (name == WIDGET_LIST_DOGS || name == WIDGET_LIST_HUMANS) {
 		widget = new nanogui::Widget(getWidget(WIDGET_LOBBY));
-		auto listLayout = new nanogui::BoxLayout(nanogui::Orientation::Vertical, nanogui::Alignment::Minimum, 0, 20);
+		auto listLayout = new nanogui::BoxLayout(nanogui::Orientation::Vertical, nanogui::Alignment::Fill, 0, 20);
 		widget->setLayout(listLayout);
 	}
 	else {

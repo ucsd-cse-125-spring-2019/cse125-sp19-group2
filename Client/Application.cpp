@@ -170,6 +170,9 @@ void Application::Setup() {
 
 		// Show lobby
 		GuiManager::getInstance().getWidget(WIDGET_LOBBY)->setVisible(true);
+		GuiManager::getInstance().getWidget(WIDGET_LIST_DOGS)->setVisible(true);
+		GuiManager::getInstance().getWidget(WIDGET_LIST_HUMANS)->setVisible(true);
+		GuiManager::getInstance().setDirty();
 	});
 
 	// Lobby screen
@@ -387,6 +390,7 @@ void Application::Update()
 
             // TODO: do something with general state
             // Timer, winner of game, in lobby, etc
+
         }
     }
   }
