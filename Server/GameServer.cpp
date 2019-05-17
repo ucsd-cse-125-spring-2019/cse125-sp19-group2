@@ -44,6 +44,9 @@ void GameServer::start()
 	_gameState->dogs = std::vector<uint32_t>();
 	_gameState->humans = std::vector<uint32_t>();
 
+	// Server utilization monitor
+	Logger::getInstance()->initUtilizationMonitor();
+
 	// Init level parser
 	_levelParser = std::make_unique<GridLevelParser>();
 
@@ -107,6 +110,7 @@ void GameServer::start()
 		// Elapsed time in nanoseconds
 		auto elapsed = timerEnd - timerStart;
 
+		Logger::getInstance()->storeLoopDuration(std::chrono::duration_cast<std::chrono::microseconds>(elapsed).count());
 		//Logger::getInstance()->debug("Elapsed time: " + std::to_string(std::chrono::duration_cast<std::chrono::microseconds>(elapsed).count()));
 
 		// Warn if server is overloaded
