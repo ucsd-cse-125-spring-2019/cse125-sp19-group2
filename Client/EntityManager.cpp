@@ -9,6 +9,8 @@
 #include "CFountainEntity.hpp"
 #include "CPuddleEntity.hpp"
 #include "CFloorEntity.hpp"
+#include "CFenceEntity.hpp"
+#include "CBarEntity.hpp"
 #include "ColliderManager.hpp"
 #include "Shared/Logger.hpp"
 #include <algorithm>
@@ -74,6 +76,12 @@ std::shared_ptr<CBaseEntity> EntityManager::getEntity(std::shared_ptr<BaseState>
 		break;
 	case ENTITY_PUDDLE:
 		entity = std::make_shared<CPuddleEntity>();
+		break;
+	case ENTITY_FENCE:
+		entity = std::make_shared<CFenceEntity>();
+		break;
+	case ENTITY_BAR:
+		entity = std::make_shared<CBarEntity>();
 		break;
 	case ENTITY_FLOOR:
 		CFloorEntity::getInstance().updateTile(state);

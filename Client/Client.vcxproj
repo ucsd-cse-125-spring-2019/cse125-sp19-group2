@@ -299,12 +299,14 @@ xcopy /y /d  "$(SolutionDir)Library\lib\x64\Release\*.dll" "$(OutDir)"</Command>
     <ClInclude Include="AudioClip.hpp" />
     <ClInclude Include="AudioManager.hpp" />
     <ClInclude Include="AudioSource.hpp" />
+    <ClInclude Include="CBarEntity.hpp" />
     <ClInclude Include="CBaseEntity.hpp" />
     <ClInclude Include="CBoneEntity.hpp" />
     <ClInclude Include="CBoxEntity.hpp" />
     <ClInclude Include="CDogEntity.hpp" />
     <ClInclude Include="CDogHouseEntity.hpp" />
     <ClInclude Include="CExampleEntity.hpp" />
+    <ClInclude Include="CFenceEntity.hpp" />
     <ClInclude Include="CFloorEntity.hpp" />
     <ClInclude Include="CFountainEntity.hpp" />
     <ClInclude Include="CHouseEntity.hpp" />

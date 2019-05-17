@@ -26,7 +26,7 @@ private:
 	{
 		TILE_EMPTY,
 		TILE_JAIL,
-		TILE_WALL,
+		TILE_WALL, // should not have this anymore
 		TILE_FENCE,
 		TILE_HUMAN_SPAWN,
 		TILE_DOG_SPAWN,

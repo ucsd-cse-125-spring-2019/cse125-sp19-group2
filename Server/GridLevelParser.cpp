@@ -9,6 +9,7 @@
 #include "SDogHouseEntity.hpp"
 #include "SHydrantEntity.hpp"
 #include "SFountainEntity.hpp"
+#include "SFenceEntity.hpp"
 
 GridLevelParser::GridLevelParser()
 {
@@ -232,7 +233,7 @@ std::vector<std::shared_ptr<SBaseEntity>> GridLevelParser::parseLevelFromFile(
 					case TILE_FENCE:
 					{
 						// For now just create a box entity
-						entity = std::make_shared<SBoxEntity>(
+						entity = std::make_shared<SFenceEntity>(
 							glm::vec3(avgPos.x, 0, avgPos.y),
 							glm::vec3(entityWidth, WALL_HEIGHT, entityDepth));
 						break;
@@ -240,7 +241,7 @@ std::vector<std::shared_ptr<SBaseEntity>> GridLevelParser::parseLevelFromFile(
 					case TILE_WALL:
 					{
 						// Same as above; will be changed eventually
-						entity = std::make_shared<SBoxEntity>(
+						entity = std::make_shared<SFenceEntity>(
 							glm::vec3(avgPos.x, 0, avgPos.y),
 							glm::vec3(entityWidth, WALL_HEIGHT, entityDepth));
 						break;
