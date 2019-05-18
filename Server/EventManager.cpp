@@ -174,7 +174,8 @@ void EventManager::handlePlayerReady(std::shared_ptr<GameEvent> event)
 			auto dogEntity = std::make_shared<SDogEntity>(
 				dogPair.first,
 				dogPair.second,
-				_jails);
+				_jails,
+				_newEntities);
 
 			// Set location
 			dogEntity->getState()->pos = glm::vec3(dogSpawn.x, 0, dogSpawn.y);

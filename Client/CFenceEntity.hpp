@@ -25,5 +25,12 @@ public:
 		// Walls need scale
 		const auto s = glm::scale(glm::mat4(1.0f), _state->scale);
 		_objectShader->set_uniform("u_scale", s);
+
+		// Transparency (don't use alpha)
+		_objectShader->set_uniform("u_transparency", _state->transparency);
+	}
+
+	float getAlpha() const override {
+		return 1.0f;
 	}
 };
