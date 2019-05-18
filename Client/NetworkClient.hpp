@@ -90,6 +90,8 @@ public:
 	*/
 	std::vector<std::shared_ptr<BaseState>> receiveUpdates();
 
+	bool isConnected();
+
 private:
 	/*
 	** Runs in its own thread; adds updates to _updateQueue from socket.
@@ -119,6 +121,6 @@ private:
 	std::mutex _socketMutex;
 
 	// I/O threads
-	std::thread _readThread, _writeThread;
+	std::thread * _readThread, * _writeThread;
 };
 

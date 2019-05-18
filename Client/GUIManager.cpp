@@ -1,4 +1,5 @@
 ﻿#include "GuiManager.hpp"
+#include "Shared/Logger.hpp"
 #include <chrono>
 
 using namespace nanogui;
@@ -51,7 +52,11 @@ void GuiManager::draw() {
 
     if (_dirty) {
         // Recalculate widget
-        _screen->performLayout();
+		//_screen->performLayout();
+
+		// Redraw all children
+		redraw(_screen);
+
         _dirty = false;
     }
 
@@ -64,6 +69,39 @@ void GuiManager::draw() {
     _screen->drawWidgets();
     glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_LEQUAL);
+}
+
+void GuiManager::redraw(nanogui::Widget* widget) {
+	for (auto& child : widget->children()) {
+		redraw(child);
+	}
+	if (widget->layout()) {
+		widget->layout()->performLayout(_screen->nvgContext(), widget);
+	}
+}
+
+void GuiManager::resize(int x, int y) {
+	_screen->resizeCallbackEvent(x, y);
+
+	// Resize our widgets
+	for (auto& widgetPair : _widgets) {
+		// 1/3 of the screen for dog/human lists, full screen otherwise
+		if (widgetPair.first == WIDGET_LIST_DOGS || widgetPair.first == WIDGET_LIST_HUMANS) {
+			widgetPair.second->setSize(nanogui::Vector2i(x / _screen->pixelRatio() / 3, y / _screen->pixelRatio() / 2));
+		}
+		else {
+			widgetPair.second->setSize(nanogui::Vector2i(x / _screen->pixelRatio(), y / _screen->pixelRatio()));
+		}
+
+		// Resize layout margins
+		switch (widgetPair.first) {
+		case WIDGET_CONNECT:
+			static_cast<nanogui::BoxLayout*>(widgetPair.second->layout())->setMargin(x * CONNECT_MARGIN);
+			break;
+		}
+
+		_dirty = true;
+	}
 }
 
 Screen* GuiManager::getScreen() {
@@ -87,4 +125,34 @@ nanogui::FormHelper* GuiManager::getFormHelper(const std::string& name) {
         return _formHelpers[res->second].get();
     }
     return nullptr;
+}
+
+nanogui::Widget* GuiManager::createWidget(WidgetType name) {
+	nanogui::Widget* widget;
+	
+	if (name == WIDGET_LIST_DOGS || name == WIDGET_LIST_HUMANS) {
+		widget = new nanogui::Widget(getWidget(WIDGET_LOBBY));
+		auto listLayout = new nanogui::BoxLayout(nanogui::Orientation::Vertical, nanogui::Alignment::Fill, 0, 20);
+		widget->setLayout(listLayout);
+	}
+	else {
+		widget = new nanogui::Widget(_screen);
+	}
+
+	_widgets.insert({ name, widget });
+	return widget;
+}
+
+nanogui::Widget* GuiManager::getWidget(WidgetType name) {
+	const auto res = _widgets.find(name);
+	if (res != _widgets.end()) {
+		return res->second;
+	}
+	return nullptr;
+}
+
+void GuiManager::hideAll() {
+	for (auto& widgetPair : _widgets) {
+		widgetPair.second->setVisible(false);
+	}
 }

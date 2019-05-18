@@ -101,6 +101,12 @@ bool InputManager::isForegroundWindow() const {
     return windowHwnd == GetFocus();
 }
 
+void InputManager::reset() {
+	_lock.lock();
+	_keyList.clear();
+	_lock.unlock();
+}
+
 InputManager::InputManager() {
 
 }

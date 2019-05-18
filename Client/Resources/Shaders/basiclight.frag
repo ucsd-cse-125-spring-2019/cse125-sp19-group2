@@ -37,6 +37,7 @@ uniform DirLight   u_dirlight;
 uniform PointLight u_pointlight;
 uniform Material   u_material;
 uniform vec3       u_viewPos;
+uniform float      u_transparency = 1.0;
 
 // uniform int numBin = 30;
 
@@ -104,10 +105,16 @@ void main(void)
   {
     resultCol += CalcPointLight(u_pointlight, normal, pass_fragPos, viewDir);
   }
+  
+  float alpha = 1.0f * u_transparency;
+
+  if(alpha < 0.01){
+	discard;
+  }
 
   resultCol = ToonShading(resultCol);
   
-  out_color = vec4(resultCol, 1.0f);
+  out_color = vec4(resultCol, alpha);
 
   // for wall transparent part
   if (texture(u_material.diffuse, pass_uv).a < 0.3)

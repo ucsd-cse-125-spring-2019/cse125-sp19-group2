@@ -43,4 +43,9 @@ public:
      * \param camera(std::unique_ptr<Camera> const&) Local camera
      */
     void render(std::unique_ptr<Camera> const& camera);
+
+	/**
+	 * \brief Deletes all entities from the server
+	 */
+	void clearAll();
 };

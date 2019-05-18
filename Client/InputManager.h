@@ -65,6 +65,9 @@ public:
     template <typename T>
     void onScroll(T&& lambda);
 
+	// Clears all keys
+	void reset();
+
 private:
     InputManager();
 

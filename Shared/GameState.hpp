@@ -3,6 +3,8 @@
 #include <cereal/types/base_class.hpp>
 #include <cereal/types/polymorphic.hpp>
 #include <cereal/types/vector.hpp>
+#include <cereal/types/string.hpp>
+#include <cereal/types/unordered_map.hpp>
 #include <chrono>
 
 #include "Shared/BaseState.hpp"
@@ -19,8 +21,8 @@ struct GameState : public BaseState
 	long millisecondsToStart;	// Countdown to game start
 	long millisecondsLeft;	// Time remaining in game before dogs win
 	EntityType winner;	// Either ENTITY_DOG or ENTITY_HUMAN
-	std::vector<uint32_t> dogs;
-	std::vector<uint32_t> humans;
+	std::unordered_map<uint32_t, std::string> dogs;
+	std::unordered_map<uint32_t, std::string> humans;
 
 	template<class Archive>
 	void serialize(Archive& archive)

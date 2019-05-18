@@ -192,7 +192,7 @@ float GamePadXbox::getForceRS()
 
 bool GamePadXbox::setControllerNum(GamePadIndex player) {
 	// First check range of controller number
-	if (player < GamePadIndex_One || player > GamePadIndex_Four)
+	if (player < GamePadIndex_NULL || player > GamePadIndex_Four)
 	{
 		return false;
 	}
@@ -201,14 +201,15 @@ bool GamePadXbox::setControllerNum(GamePadIndex player) {
 	ZeroMemory(&controllerCurState, sizeof(XINPUT_STATE));
 
 	// Get the state
-	DWORD Result = XInputGetState(player, &controllerCurState);
+	DWORD Result = XInputGetState(player-1, &controllerCurState);
+
+	_playerIndex = player;
+	_controllerNum = player - 1;
+	_controllerState = controllerCurState;
+	this->reset();
 
 	if (Result == ERROR_SUCCESS)
 	{
-		this->reset();
-		_playerIndex = player;
-		_controllerNum = player;
-		_controllerState = controllerCurState;
 		return true;
 	}
 	else 

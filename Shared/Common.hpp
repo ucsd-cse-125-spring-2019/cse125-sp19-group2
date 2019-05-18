@@ -6,7 +6,7 @@
 */
 
 // Not needed in client but many server-side objects need access to this def.
-#define TICKS_PER_SEC 30  // 33.3 ms per update() loop
+#define TICKS_PER_SEC 90  // 33.3 ms per update() loop
 
 #define PORTNUM "4000"
 

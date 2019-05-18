@@ -11,9 +11,11 @@
 class SDogEntity : public SPlayerEntity
 {
 public:
-	SDogEntity(uint32_t playerId,
-			std::vector<glm::vec2>* jails,
-			std::vector<std::shared_ptr<SBaseEntity>>* newEntities)
+	SDogEntity(
+		uint32_t playerId,
+		std::string playerName,
+		std::vector<glm::vec2>* jails,
+    std::vector<std::shared_ptr<SBaseEntity>>* newEntities)
 	{
 		_state = std::make_shared<DogState>();
 
@@ -39,6 +41,9 @@ public:
 		auto dogState = std::static_pointer_cast<DogState>(_state);
 		dogState->currentAnimation = ANIMATION_DOG_IDLE;
 		dogState->runStamina = MAX_DOG_STAMINA;
+
+		// Player-specific stuff
+		dogState->playerName = playerName;
 	};
 
 	~SDogEntity() {};

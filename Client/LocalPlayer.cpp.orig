@@ -1,4 +1,4 @@
-#include "LocalPlayer.hpp"
+﻿#include "LocalPlayer.hpp"
 #include "InputManager.h"
 #include "Shared/GameEvent.hpp"
 #include "EntityManager.hpp"
@@ -6,9 +6,17 @@
 
 LocalPlayer::LocalPlayer(uint32_t playerId, std::unique_ptr<NetworkClient> const& networkClient) {
     _playerId = playerId;
-    _playerType = Player_Dog;
+	_playerType = Player_Dog;
 
-    _gamePad = std::make_unique<GamePadXbox>(GamePadIndex_NULL);
+<<<<<<< HEAD
+	// Spawn threads for server I/O
+	_gamePad = new GamePadXbox(GamePadIndex_NULL);
+	_readThread = std::thread(
+		&LocalPlayer::inputReadHandler,
+		this);
+=======
+    _pad = std::make_unique<GamePadXbox>(GamePadIndex_One);
+>>>>>>> player-input
 
     // Player move forward event
     InputManager::getInstance().getKey(GLFW_KEY_W)->onRepeat(
@@ -135,109 +143,37 @@ LocalPlayer::LocalPlayer(uint32_t playerId, std::unique_ptr<NetworkClient> const
             _moveKeysPressed = true;
         });
 
-   // Player move right event
-	InputManager::getInstance().getKey(GLFW_KEY_LEFT_SHIFT)->onPress([&]
-	{
-		auto event = std::make_shared<GameEvent>();
-		event->playerId = _playerId;
-		event->type = EVENT_PLAYER_RUN_START;
+    // Player move right event
+    InputManager::getInstance().getKey(GLFW_KEY_LEFT_SHIFT)->onRepeat(
+        [&] {
+            auto event = std::make_shared<GameEvent>();
+            event->playerId = _playerId;
+            event->type = EVENT_PLAYER_RUN;
 
-		// Try sending the update
-		try
-		{
-			networkClient->sendEvent(event);
-		}
-		catch (std::runtime_error e)
-		{
-		};
-	});
-
-	// Player move right event
-	InputManager::getInstance().getKey(GLFW_KEY_LEFT_SHIFT)->onRelease([&]
-	{
-		auto event = std::make_shared<GameEvent>();
-		event->playerId = _playerId;
-		event->type = EVENT_PLAYER_RUN_END;
-
-		// Try sending the update
-		try
-		{
-			networkClient->sendEvent(event);
-		}
-		catch (std::runtime_error e)
-		{
-		};
-	});
-
-		InputManager::getInstance().getKey(GLFW_KEY_SPACE)->onPress([&]
-	{
-		auto event = std::make_shared<GameEvent>();
-		event->playerId = _playerId;
-		event->type = EVENT_PLAYER_URINATE_START;
-		try
-		{
-			networkClient->sendEvent(event);
-		}
-		catch (std::runtime_error e)
-		{
-		};
-	});
-
-	InputManager::getInstance().getKey(GLFW_KEY_SPACE)->onRelease([&]
-	{
-		auto event = std::make_shared<GameEvent>();
-		event->playerId = _playerId;
-		event->type = EVENT_PLAYER_URINATE_END;
-		try
-		{
-			networkClient->sendEvent(event);
-		}
-		catch (std::runtime_error e)
-		{
-		};
-	});
-
-	// Player start lifting
-	InputManager::getInstance().getKey(GLFW_KEY_F)->onPress([&]
-	{
-		auto event = std::make_shared<GameEvent>();
-		event->playerId = _playerId;
-		event->type = EVENT_PLAYER_LIFTING_START;
-
-		try
-		{
-			networkClient->sendEvent(event);
-		}
-		catch (std::runtime_error e)
-		{
-		};
-	});
-
-	// Player end lifting
-	InputManager::getInstance().getKey(GLFW_KEY_F)->onRelease([&]
-	{
-		auto event = std::make_shared<GameEvent>();
-		event->playerId = _playerId;
-		event->type = EVENT_PLAYER_LIFTING_END;
-		try
-		{
-			networkClient->sendEvent(event);
-		}
-		catch (std::runtime_error e)
-		{
-		};
-	});
+            // Try sending the update
+            try {
+                networkClient->sendEvent(event);
+            }
+            catch (std::runtime_error e) {
+            };
+        });
 
     _camera = std::make_unique<Camera>();
 
     _networkClient = networkClient.get();
 
+<<<<<<< HEAD
+	_moveKeysPressed = false;
+	_stopped = true;
+
+=======
     _moveKeysPressed = false;
     _stopped = true;
     _moveCamera = false;
 
     // TODO: set player model height properly
     _height = 1.0f;
+>>>>>>> player-input
 }
 
 void LocalPlayer::update() {
@@ -273,51 +209,105 @@ void LocalPlayer::update() {
 
     _moveKeysPressed = false;
 }
+<<<<<<< HEAD
+void LocalPlayer::inputReadHandler()
+{
+	while (1)
+	{
+		if (_gamePad->isConnected())
+		{
+			auto dir = _gamePad->getLS();
+			if (dir != glm::vec2(0))
+			{
+				// Invert z
+				dir.y = -(dir.y);
+
+				// Send event
+				auto event = std::make_shared<GameEvent>();
+				event->type = EVENT_PLAYER_MOVE;
+				event->playerId = _playerId;
+				event->direction = dir;
+				_networkClient->sendEvent(event);
+
+				_stopped = false;
+				_moveKeysPressed = true;
+			}
+
+			if (_gamePad->isKeyDown(GamePad_Button_DPAD_LEFT)) {
+				InputManager::getInstance().fire(GLFW_KEY_A, KeyState::Press);
+			};
+			if (_gamePad->isKeyUp(GamePad_Button_DPAD_LEFT)) {
+				InputManager::getInstance().fire(GLFW_KEY_A, KeyState::Release);
+			}
+			if (_gamePad->isKeyDown(GamePad_Button_DPAD_RIGHT)) {
+				InputManager::getInstance().fire(GLFW_KEY_D, KeyState::Press);
+			}
+			if (_gamePad->isKeyUp(GamePad_Button_DPAD_RIGHT)) {
+				InputManager::getInstance().fire(GLFW_KEY_D, KeyState::Release);
+			}
+			if (_gamePad->isKeyDown(GamePad_Button_DPAD_UP)) {
+				InputManager::getInstance().fire(GLFW_KEY_W, KeyState::Press);
+			}
+			if (_gamePad->isKeyUp(GamePad_Button_DPAD_UP)) {
+				InputManager::getInstance().fire(GLFW_KEY_W, KeyState::Release);
+			}
+			if (_gamePad->isKeyDown(GamePad_Button_DPAD_DOWN)) {
+				InputManager::getInstance().fire(GLFW_KEY_S, KeyState::Press);
+			}
+			if (_gamePad->isKeyUp(GamePad_Button_DPAD_DOWN)) {
+				InputManager::getInstance().fire(GLFW_KEY_S, KeyState::Release);
+			}
+		}
+
+		std::this_thread::sleep_for(std::chrono::milliseconds(1));
+	}
+=======
 
 void LocalPlayer::updateController() {
-    if (_gamePad->isConnected()) {
-        auto left = _gamePad->getLS();
+    if (_pad->isConnected()) {
+        auto left = _pad->getLS();
         InputManager::getInstance().move(Key::KEYTYPE::LSTICK, left.x, left.y);
 
-        auto right = _gamePad->getRS();
+        auto right = _pad->getRS();
         InputManager::getInstance().move(Key::KEYTYPE::RSTICK, right.x, right.y);
 
-        auto lt = _gamePad->getForceLT();
-        auto rt = _gamePad->getForceRT();
+        auto lt = _pad->getForceLT();
+        auto rt = _pad->getForceRT();
         auto s = rt - lt;
         InputManager::getInstance().scroll(s);
 
-        if (_gamePad->isKeyDown(GamePad_Button_DPAD_LEFT)) {
+        if (_pad->isKeyDown(GamePad_Button_DPAD_LEFT)) {
             InputManager::getInstance().fire(GLFW_KEY_A, KeyState::Press);
         };
-        if (_gamePad->isKeyUp(GamePad_Button_DPAD_LEFT)) {
+        if (_pad->isKeyUp(GamePad_Button_DPAD_LEFT)) {
             InputManager::getInstance().fire(GLFW_KEY_A, KeyState::Release);
         }
-        if (_gamePad->isKeyDown(GamePad_Button_DPAD_RIGHT)) {
+        if (_pad->isKeyDown(GamePad_Button_DPAD_RIGHT)) {
             InputManager::getInstance().fire(GLFW_KEY_D, KeyState::Press);
         }
-        if (_gamePad->isKeyUp(GamePad_Button_DPAD_RIGHT)) {
+        if (_pad->isKeyUp(GamePad_Button_DPAD_RIGHT)) {
             InputManager::getInstance().fire(GLFW_KEY_D, KeyState::Release);
         }
-        if (_gamePad->isKeyDown(GamePad_Button_DPAD_UP)) {
+        if (_pad->isKeyDown(GamePad_Button_DPAD_UP)) {
             InputManager::getInstance().fire(GLFW_KEY_W, KeyState::Press);
         }
-        if (_gamePad->isKeyUp(GamePad_Button_DPAD_UP)) {
+        if (_pad->isKeyUp(GamePad_Button_DPAD_UP)) {
             InputManager::getInstance().fire(GLFW_KEY_W, KeyState::Release);
         }
-        if (_gamePad->isKeyDown(GamePad_Button_DPAD_DOWN)) {
+        if (_pad->isKeyDown(GamePad_Button_DPAD_DOWN)) {
             InputManager::getInstance().fire(GLFW_KEY_S, KeyState::Press);
         }
-        if (_gamePad->isKeyUp(GamePad_Button_DPAD_DOWN)) {
+        if (_pad->isKeyUp(GamePad_Button_DPAD_DOWN)) {
             InputManager::getInstance().fire(GLFW_KEY_S, KeyState::Release);
         }
     }
+>>>>>>> player-input
 }
 
 std::unique_ptr<Camera> const& LocalPlayer::getCamera() {
     return _camera;
 }
-
+<<<<<<< HEAD
 bool LocalPlayer::setControllerNum(GamePadIndex player)
 {
 	return _gamePad->setControllerNum(player);
@@ -334,7 +324,9 @@ uint32_t LocalPlayer::getPlayerId()
 {
 	return _playerId;
 }
+=======
 
 void LocalPlayer::resize(int x, int y) {
     _camera->resize(x, y);
 }
+>>>>>>> player-input

@@ -22,7 +22,7 @@
 #include "fmod/fmod.h"
 #include "fmod/fmod.hpp"
 #include "fmod/fmod_errors.h"
-
+#include "Shared/GameEvent.hpp"
 
 class Application {
 public:
@@ -59,6 +59,9 @@ private:
   // Environment management
   void Setup();
   void Cleanup();
+
+  // Register global keys
+  void registerGlobalKeys();
 
   // Window management data
   GLFWwindow* _window = nullptr;
@@ -101,6 +104,15 @@ private:
   // Local player
   std::unique_ptr<LocalPlayer> _localPlayer;
 
+  // UI
+  nanogui::TextBox* _ipTextBox;
+  nanogui::TextBox* _playerNameTextBox;
+  nanogui::Button* _switchSidesButton;
+  nanogui::Button* _playerReadyBtn;
+
+  // Game state
+  bool _inLobby = true;
+
   // Test Lights
   std::unique_ptr<PointLight> _point_light;
   std::unique_ptr<DirectionalLight> _dir_light;
@@ -117,7 +129,8 @@ private:
         Right
     };
     Enum _enum;
-
+	GamePadIndex _gamepad_num;
+	PlayerType _player_type;
 };
 
 #endif

@@ -13,9 +13,7 @@ private:
     uint32_t _playerId;
 
     std::unique_ptr<Camera> _camera;
-    std::unique_ptr<GamePadXbox> _gamePad;
-    PlayerType _playerType;
-
+    std::unique_ptr<GamePadXbox> _pad;
     std::shared_ptr<CPlayerEntity> _playerEntity;
     NetworkClient *_networkClient;
 
@@ -23,6 +21,17 @@ private:
 
     bool _moveKeysPressed, _stopped, _moveCamera;
 
+<<<<<<< HEAD
+	std::thread _readThread; 
+
+	GamePadXbox* _gamePad;
+	PlayerType _playerType;
+	/*
+	** Runs in its own thread; handle input from controller
+	*/
+	void inputReadHandler();
+=======
+>>>>>>> player-input
 public:
     /**
      * \brief Constructor of local player.
@@ -45,7 +54,8 @@ public:
      * \brief Get local camera (for rendering)
      * \return std::unique_ptr<Camera> const&: Local camera
      */
-    std::unique_ptr<Camera> const &getCamera();
+<<<<<<< HEAD
+    std::unique_ptr<Camera> const& getCamera();
 
 	/**
 	 * \brief Set the number of the controller
@@ -66,6 +76,8 @@ public:
 	PlayerType getPlayerType();
 
 	uint32_t getPlayerId();
+=======
+    std::unique_ptr<Camera> const &getCamera();
 
     /**
      * \brief Function needs to be called when the window resizes
@@ -73,4 +85,6 @@ public:
      * \param y(int) Height of the window
      */
     void resize(int x, int y);
+
+>>>>>>> player-input
 };

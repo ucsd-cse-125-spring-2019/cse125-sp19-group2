@@ -121,10 +121,10 @@ uint32_t NetworkClient::connect(std::string address, std::string port)
 		_isAlive = true;
 
 		// Spawn threads for server I/O
-		_readThread = std::thread(
+		_readThread = new std::thread(
 				&NetworkClient::socketReadHandler,
 				this);
-		_writeThread = std::thread(
+		_writeThread = new std::thread(
 				&NetworkClient::socketWriteHandler,
 				this);
 
@@ -307,13 +307,17 @@ void NetworkClient::closeConnection()
 		_eventQueue->push(dummyPtr);
 
 		// Wait for threads to shutdown
-		if (std::this_thread::get_id() != _readThread.get_id())
+		if (_readThread && std::this_thread::get_id() != _readThread->get_id())
 		{
-			_readThread.join();
+			_readThread->join();
+			delete _readThread;
+			_readThread = nullptr;
 		}
-		if (std::this_thread::get_id() != _writeThread.get_id())
+		if (_writeThread && std::this_thread::get_id() != _writeThread->get_id())
 		{
-			_writeThread.join();
+			_writeThread->join();
+			delete _writeThread;
+			_writeThread = nullptr;
 		}
 
 		// Empty queues
@@ -400,4 +404,10 @@ std::vector<std::shared_ptr<BaseState>> NetworkClient::receiveUpdates()
 		}
 		return updateList;
 	}
+}
+
+
+bool NetworkClient::isConnected()
+{
+	return _isAlive;
 }

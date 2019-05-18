@@ -27,28 +27,8 @@ Application::Application(const char* windowTitle, int argc, char** argv) {
     return;
   }
 
-  // Create network client and connect to server. The connect logic should
-  // eventually be moved into the main game loop, but we're not there yet
+  // Create network client. Connection happens in UI button callback
   _networkClient = std::make_unique<NetworkClient>();
-  try
-  {
-    uint32_t playerId = _networkClient->connect("localhost", PORTNUM);
-
-    // First thing we do is create a player join event with player name
-    auto joinEvent = std::make_shared<GameEvent>();
-    joinEvent->playerId = playerId;
-    joinEvent->type = EVENT_PLAYER_JOIN;
-
-    // TODO: change this to player-specified name
-    joinEvent->playerName = "Player" + std::to_string(playerId);
-    _networkClient->sendEvent(joinEvent);
-
-    _localPlayer = std::make_unique<LocalPlayer>(playerId, _networkClient);
-  }
-  catch (std::runtime_error e)
-  {
-    Logger::getInstance()->error(e.what());
-  }
 
   // Initialize GLFW
   if (!glfwInit()) {
@@ -66,7 +46,7 @@ Application::~Application() {
 
 void Application::Setup() {
   // OpenGL Graphics Setup
-  glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+  glClearColor(0.3f, 0.3f, 0.3f, 1.0f);
   glEnable(GL_DEPTH_TEST);
   glDepthFunc(GL_LEQUAL);
   glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
@@ -128,26 +108,127 @@ void Application::Setup() {
     // Give InputManager a reference to GLFWwindow
     InputManager::getInstance().setWindow(_window);
 
-  // Test input; to be removed
-  InputManager::getInstance().getKey(GLFW_KEY_G)->onPress([&]
-  {
-    std::cout << "Hello World!" << this->count << std::endl;
-  });
-
-  InputManager::getInstance().getKey(GLFW_KEY_K)->onRepeat([&]
-  {
-    this->count += 1;
-    std::cout << this->count << std::endl;
-  });
-
-  InputManager::getInstance().getKey(GLFW_KEY_T)->onPress([&]
-  {
-	  ColliderManager::getInstance().renderMode = !ColliderManager::getInstance().renderMode;
-  });
-
     // Initialize GuiManager
     GuiManager::getInstance().init(_window);
 
+	// Create login screen
+	auto connectScreen = GuiManager::getInstance().createWidget(WIDGET_CONNECT);
+
+	// Resize handles margins, 50 pixel spacing
+	auto connectLayout = new nanogui::BoxLayout(nanogui::Orientation::Vertical, nanogui::Alignment::Middle, 0, 25);
+	connectScreen->setLayout(connectLayout);
+
+	// Game title
+	auto gameTitle = new nanogui::Label(connectScreen, "Project Bone", "sans", 72);
+
+	// Player name
+	_playerNameTextBox = new nanogui::TextBox(connectScreen, "PlayerName");
+	_playerNameTextBox->setEditable(true);
+	_playerNameTextBox->setFixedSize(nanogui::Vector2i(300, 50));
+	_playerNameTextBox->setFontSize(38);
+	_playerNameTextBox->setAlignment(nanogui::TextBox::Alignment::Center);
+
+	// IP address box
+	_ipTextBox = new nanogui::TextBox(connectScreen, "localhost");
+	_ipTextBox->setEditable(true);
+	_ipTextBox->setFixedSize(nanogui::Vector2i(300, 50));
+	_ipTextBox->setFontSize(38);
+	_ipTextBox->setAlignment(nanogui::TextBox::Alignment::Center);
+
+	// Connect button
+	auto connectButton = new nanogui::Button(connectScreen, "Connect");
+	connectButton->setFontSize(28);
+	connectButton->setCallback([&]() {
+		// Attempt server connection
+		std::string address = _ipTextBox->value();
+		std::string playerName = _playerNameTextBox->value();
+
+		uint32_t playerId;
+		try {
+			playerId = _networkClient->connect(address, PORTNUM);
+		}
+		catch (std::runtime_error e) {
+			Logger::getInstance()->error(e.what());
+			return;
+		}
+
+		// Send join event
+		auto joinEvent = std::make_shared<GameEvent>();
+		joinEvent->playerId = playerId;
+		joinEvent->type = EVENT_PLAYER_JOIN;
+		joinEvent->playerName = playerName;
+		_networkClient->sendEvent(joinEvent);
+
+		// Create local player
+		_localPlayer = std::make_unique<LocalPlayer>(playerId, _networkClient);
+
+		// Register global keys
+		registerGlobalKeys();
+
+		// Hide connect screen
+		GuiManager::getInstance().getWidget(WIDGET_CONNECT)->setVisible(false);
+
+		// Show lobby
+		GuiManager::getInstance().getWidget(WIDGET_LOBBY)->setVisible(true);
+		GuiManager::getInstance().getWidget(WIDGET_LIST_DOGS)->setVisible(true);
+		GuiManager::getInstance().getWidget(WIDGET_LIST_HUMANS)->setVisible(true);
+		GuiManager::getInstance().setDirty();
+	});
+
+	// Lobby screen
+	auto lobbyScreen = GuiManager::getInstance().createWidget(WIDGET_LOBBY);
+
+	// Lobby layout
+	auto lobbyLayout = new nanogui::GridLayout(nanogui::Orientation::Horizontal, 3, nanogui::Alignment::Middle, 0, 50);
+	lobbyLayout->setRowAlignment(nanogui::Alignment::Middle);
+	lobbyScreen->setLayout(lobbyLayout);
+
+	// Title for dogs list
+	auto dogsLabel = new nanogui::Label(lobbyScreen, "Dogs", "sans", 60);
+
+	// Empty widget
+	auto emptyLabel = new nanogui::Label(lobbyScreen, "", "sans", 60);
+
+	// Title for humans list
+	auto humansLabel = new nanogui::Label(lobbyScreen, "Humans", "sans", 60);
+
+	// List of dogs
+	auto dogsList = GuiManager::getInstance().createWidget(WIDGET_LIST_DOGS);
+
+	// Switch sides button
+	_switchSidesButton = new nanogui::Button(lobbyScreen, "Switch sides");
+	_switchSidesButton->setCallback([&]() {
+		// Send switch event
+		auto switchEvent = std::make_shared<GameEvent>();
+		switchEvent->type = EVENT_PLAYER_SWITCH;
+		switchEvent->playerId = _localPlayer->getPlayerId();
+		_networkClient->sendEvent(switchEvent);
+	});
+
+	// List of humans
+	auto humansList = GuiManager::getInstance().createWidget(WIDGET_LIST_HUMANS);
+
+	// Empty label for padding in grid
+	new nanogui::Label(lobbyScreen, "", "sans", 60);
+
+	// Ready button
+	_playerReadyBtn = new nanogui::Button(lobbyScreen, "");
+	_playerReadyBtn->setCallback([&]() {
+		// Send ready event
+		auto readyEvent = std::make_shared<GameEvent>();
+		readyEvent->type = EVENT_PLAYER_READY;
+		readyEvent->playerId = _localPlayer->getPlayerId();
+		_networkClient->sendEvent(readyEvent);
+
+		// Gray out ready and switch buttons
+		_playerReadyBtn->setEnabled(false);
+		_switchSidesButton->setEnabled(false);
+	});
+
+	// Hide lobby by default
+	lobbyScreen->setVisible(false);
+
+	/*
     // Create a testing widget
     bool enabled = true;
     auto *gui = GuiManager::getInstance().createFormHelper("Form helper");
@@ -162,6 +243,7 @@ void Application::Setup() {
         _integer += 1;
     });
 
+	//gui->window()->setVisible(false);
     
     // Test Sound
     auto ambient = AudioManager::getInstance().getAudioSource("Ambient Sound");
@@ -202,8 +284,63 @@ void Application::Setup() {
         _enum = e;
     });
 
-    GuiManager::getInstance().setDirty();
+	// Add Widget to control controller
+	gui->addGroup("Controller");
+	// Controller number 
+	auto* controller_num = gui->addVariable("Controller Number", _gamepad_num, enabled);
+	controller_num->setItems({ "None", "1", "2", "3", "4" });
+	controller_num->setCallback([=](const GamePadIndex& e) {
+		switch (e) {
+		case GamePadIndex_NULL:
+			_localPlayer->setControllerNum(GamePadIndex_NULL);
+			_gamepad_num = e;
+			break;
+		case GamePadIndex_One:
+			if (_localPlayer->setControllerNum(GamePadIndex_One))
+				_gamepad_num = e;
+			break;
+		case GamePadIndex_Two:
+			if (_localPlayer->setControllerNum(GamePadIndex_Two))
+				_gamepad_num = e;
+			break;
+		case GamePadIndex_Three:
+			if (_localPlayer->setControllerNum(GamePadIndex_Three))
+				_gamepad_num = e;
+			break;
+		case GamePadIndex_Four:
+			if (_localPlayer->setControllerNum(GamePadIndex_Four))
+				_gamepad_num = e;
+			break;
+		}
+	});
+	// Add Widget to control game start
+	gui->addGroup("Game");
+	// get player type 
+	auto* player_type = gui->addVariable("Play as ", _player_type, enabled);
+	player_type->setItems({ "Dog", "Human"});
+	player_type->setCallback([=](const PlayerType& e) {
+		switch (e) {
+		case Player_Dog:
+			_localPlayer->setPlayerType(Player_Dog);
+			_player_type = e;
+			break;
+		case Player_Human:
+			_localPlayer->setPlayerType(Player_Human);
+			_player_type = e;
+			break;
+		}
+	});
+	gui->addButton("Ready", [&]() {
+		auto event = std::make_shared<GameEvent>();
+		event->playerId = _localPlayer->getPlayerId();
+		event->type = EVENT_PLAYER_READY;
+		event->playerName = "Player" + std::to_string(event->playerId);
+		event->playerType = _localPlayer->getPlayerType();
+		_networkClient->sendEvent(event);
+	});
+	*/
 
+    GuiManager::getInstance().setDirty();
 }
 
 void Application::Cleanup() {
@@ -276,12 +413,81 @@ void Application::Update()
 
             // TODO: do something with general state
             // Timer, winner of game, in lobby, etc
+			if (gameState->inLobby)
+			{
+				auto dogList = GuiManager::getInstance().getWidget(WIDGET_LIST_DOGS);
+				auto humanList = GuiManager::getInstance().getWidget(WIDGET_LIST_HUMANS);
+
+				if (dogList == nullptr || humanList == nullptr)
+				{
+					Logger::getInstance()->debug("One or both lists are null");
+				}
+
+				// Clear dog UI
+				while (dogList->children().size())
+				{
+					dogList->removeChild(0);
+				}
+
+				// Clear human UI
+				while (humanList->children().size())
+				{
+					humanList->removeChild(0);
+				}
+
+				// Add dogs
+				for (auto& dogPair : gameState->dogs)
+				{
+					auto playerLabel = new nanogui::Label(dogList, dogPair.second, "sans", 28);
+					if (dogPair.first == _localPlayer->getPlayerId())
+					{
+						playerLabel->setColor(nanogui::Color(0.376f, 0.863f, 1.0f, 1.0f));
+					}
+				}
+
+				// Add humans
+				for (auto& humanPair : gameState->humans)
+				{
+					auto playerLabel = new nanogui::Label(humanList, humanPair.second, "sans", 28);
+					if (humanPair.first == _localPlayer->getPlayerId())
+					{
+						playerLabel->setColor(nanogui::Color(0.376f, 0.863f, 1.0f, 1.0f));
+					}
+				}
+
+				// Ready button text
+				int numPlayers = gameState->dogs.size() + gameState->humans.size();
+				_playerReadyBtn->setCaption("Ready (" + std::to_string(gameState->numReady) + std::string("/") + std::to_string(numPlayers) + std::string(")"));
+
+				GuiManager::getInstance().setDirty();
+			}
+
+			// Did a game just start? If so, hide lobby UI
+			if (_inLobby && !gameState->inLobby)
+			{
+				_inLobby = false;
+				GuiManager::getInstance().getWidget(WIDGET_LOBBY)->setVisible(false);
+				_playerReadyBtn->setEnabled(true);
+				_switchSidesButton->setEnabled(true);
+
+				// TODO: show game HUD
+			}
+
+			_inLobby = gameState->inLobby;
         }
     }
   }
   catch (std::runtime_error e)
   {
-    // Disconnected from the server
+	  // Disconnected from the server; de-allocate client-side objects and
+	  // show connection screen
+	  _localPlayer = nullptr;
+	  _networkClient->closeConnection();
+	  EntityManager::getInstance().clearAll();
+	  InputManager::getInstance().reset();
+	  ColliderManager::getInstance().clear();
+	  GuiManager::getInstance().hideAll();
+	  GuiManager::getInstance().getWidget(WIDGET_CONNECT)->setVisible(true);
   }
 
   InputManager::getInstance().update();
@@ -292,7 +498,6 @@ void Application::Update()
     
   // Update sound engine
   AudioManager::getInstance().update();
-
     
   _camera->Update();
   _point_light->update();
@@ -309,22 +514,26 @@ void Application::Draw() {
     // render scene
     //_frameBuffer->drawQuad(_testShader);
       glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT| GL_STENCIL_BUFFER_BIT);
-    // Render Skybox
-    _skyboxShader->Use();
-    _skyboxShader->set_uniform("u_projection", _localPlayer->getCamera()->projection_matrix());
-    _skyboxShader->set_uniform("u_view", _localPlayer->getCamera()->view_matrix() * glm::scale(glm::mat4(1.0f), glm::vec3(200,200,200)));
-      //glm::mat4(glm::mat3(_localPlayer->getCamera()->view_matrix()))
-    _skybox->draw(_skyboxShader);
 
-	// Render floor before any entity
-	CFloorEntity::getInstance().render(_localPlayer->getCamera());
+	  // Non-UI elements depend on localPlayer and that we're not in the lobby
+	  if (_localPlayer && !_inLobby) {
+		  // Render Skybox
+		  _skyboxShader->Use();
+		  _skyboxShader->set_uniform("u_projection", _localPlayer->getCamera()->projection_matrix());
+		  _skyboxShader->set_uniform("u_view", _localPlayer->getCamera()->view_matrix() * glm::scale(glm::mat4(1.0f), glm::vec3(200, 200, 200)));
+		  //glm::mat4(glm::mat3(_localPlayer->getCamera()->view_matrix()))
+		  _skybox->draw(_skyboxShader);
 
-    EntityManager::getInstance().render(_localPlayer->getCamera());
+		  // Render floor before any entity
+		  CFloorEntity::getInstance().render(_localPlayer->getCamera());
 
-      // Debug Shader
-    _debuglightShader->Use();
-    _debuglightShader->set_uniform("u_projection", _localPlayer->getCamera()->projection_matrix());
-    _debuglightShader->set_uniform("u_view", _localPlayer->getCamera()->view_matrix());
+		  EntityManager::getInstance().render(_localPlayer->getCamera());
+
+		  // Debug Shader
+		  _debuglightShader->Use();
+		  _debuglightShader->set_uniform("u_projection", _localPlayer->getCamera()->projection_matrix());
+		  _debuglightShader->set_uniform("u_view", _localPlayer->getCamera()->view_matrix());
+	  }
 
     // Draw UI
     GuiManager::getInstance().draw();
@@ -377,8 +586,10 @@ void Application::Resize(int x, int y) {
   _win_height = y;
   glViewport(0, 0, x, y);
   _quadFrameBuffer->resize(x, y);
-  _localPlayer->resize(x, y);
-  GuiManager::getInstance().getScreen()->resizeCallbackEvent(x, y);
+  if (_localPlayer) {
+	  _localPlayer->resize(x, y);
+  }
+  GuiManager::getInstance().resize(x, y);
 }
 
 void Application::Keyboard(int key, int scancode, int action, int mods) {
@@ -402,7 +613,8 @@ void Application::Keyboard(int key, int scancode, int action, int mods) {
 }
 
 void Application::MouseButton(int btn, int action, int mods) {
-    GuiManager::getInstance().getScreen()->mouseButtonCallbackEvent(btn, action, mods);
+	GuiManager::getInstance().getScreen()->mouseButtonCallbackEvent(btn, action, mods);
+
 	if(action == GLFW_PRESS)
 	{
 		if(mods == GLFW_MOD_SHIFT)
@@ -461,4 +673,23 @@ void Application::DestroyWindow() {
   glfwSetCursorPosCallback(_window, nullptr);
   glfwSetFramebufferSizeCallback(_window, nullptr);
   glfwDestroyWindow(_window);
+}
+
+void Application::registerGlobalKeys() {
+	// Test input; to be removed
+	InputManager::getInstance().getKey(GLFW_KEY_G)->onPress([&]
+	{
+		std::cout << "Hello World!" << this->count << std::endl;
+	});
+
+	InputManager::getInstance().getKey(GLFW_KEY_K)->onRepeat([&]
+	{
+		this->count += 1;
+		std::cout << this->count << std::endl;
+	});
+
+	InputManager::getInstance().getKey(GLFW_KEY_T)->onPress([&]
+	{
+		ColliderManager::getInstance().renderMode = !ColliderManager::getInstance().renderMode;
+	});
 }

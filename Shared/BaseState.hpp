@@ -45,6 +45,9 @@ struct BaseState
 	float height;		// Height of object in Y-axis
 	ColliderType colliderType;
 
+	// Transparency information
+	float transparency;
+
 	// Object lifetime info
 	bool isDestroyed;	// Object has been deleted on the server
 
@@ -68,6 +71,7 @@ struct BaseState
 				depth,
 				height,
 				colliderType,
+				transparency,
 				isDestroyed,
 				isStatic,
 				isSolid);

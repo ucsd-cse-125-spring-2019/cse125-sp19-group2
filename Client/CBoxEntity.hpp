@@ -26,6 +26,13 @@ public:
 		// Walls need scale
 		const auto s = glm::scale(glm::mat4(1.0f), _state->scale);
 		_objectShader->set_uniform("u_scale", s);
+
+        // Setting tranparency
+		_objectShader->set_uniform("u_transparency", _state->transparency);
+	}
+
+    virtual float getAlpha() const override {
+	    return 1.0f;
 	}
 
 	void render(std::unique_ptr<Camera> const& camera) override

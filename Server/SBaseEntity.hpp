@@ -74,6 +74,9 @@ public:
 		_state->up = glm::vec3(0, 1, 0);
 		_state->scale = glm::vec3(1);
 
+		// Set default transparency to 1
+		_state->transparency = 1.0f;
+
 		// Defaults to static solid object
 		_state->isDestroyed = false;
 		_state->isStatic = true;

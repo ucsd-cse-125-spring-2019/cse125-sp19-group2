@@ -92,3 +92,7 @@ void ColliderManager::render(std::unique_ptr<Camera> const& camera) {
 		}
 	});
 }
+
+void ColliderManager::clear() {
+	colliderList.clear();
+}

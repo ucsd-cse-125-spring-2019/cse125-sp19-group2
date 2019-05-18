@@ -37,6 +37,7 @@ uniform DirLight   u_dirlight;
 uniform PointLight u_pointlight;
 uniform Material   u_material;
 uniform vec3       u_viewPos;
+uniform float      u_transparency = 1.0;
 
 // uniform int numBin = 30;
 
@@ -59,12 +60,12 @@ vec3 CalcDirLight(DirLight light, vec3 normal, vec3 viewDir)
 vec3 CalcPointLight(PointLight light, vec3 normal, vec3 fragPos, vec3 viewDir)
 {
   // Ambient
-  vec3 ambient = light.ambient * (texture(u_material.diffuse, pass_uv).rgb+ vec3(1.0));
+  vec3 ambient = light.ambient * texture(u_material.diffuse, pass_uv).rgb;
   
   // Diffuse
   vec3 lightDir = normalize(light.position - fragPos);
   float diffAmt = max(dot(normal, lightDir), 0);
-  vec3 diffuse = light.diffuse * diffAmt * (texture(u_material.diffuse, pass_uv).rgb+ vec3(1.0));
+  vec3 diffuse = light.diffuse * diffAmt * texture(u_material.diffuse, pass_uv).rgb;
   
   // Attenuation
   float dist = length(light.position - fragPos);
@@ -104,8 +105,15 @@ void main(void)
   {
     resultCol += CalcPointLight(u_pointlight, normal, pass_fragPos, viewDir);
   }
+  
+  float alpha = 1.0f * u_transparency;
+
+  if(alpha < 0.01){
+	discard;
+  }
 
   resultCol = ToonShading(resultCol);
+  
+  out_color = vec4(resultCol, alpha);
 
-  out_color = vec4(resultCol, 1.0f);
 }
