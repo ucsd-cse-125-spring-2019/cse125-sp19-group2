@@ -284,8 +284,8 @@ std::vector<std::shared_ptr<SBaseEntity>> GridLevelParser::parseLevelFromFile(
 					case TILE_DOGHOUSE:
 					{
 						entity = std::make_shared<SDogHouseEntity>(
-							glm::vec3(avgPos.x, 0, avgPos.y),
-							aggregatedTiles[0]->forward);
+							glm::vec3(avgPos.x, 0, avgPos.y));
+						entity->rotate(aggregatedTiles[0]->forward);
 						break;
 					}
 					case TILE_HYDRANT:

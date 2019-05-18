@@ -84,7 +84,7 @@ public:
 
 		// At origin, looking forward, with 1x1x1 scale
 		_state->pos = glm::vec3(0);
-		_state->forward = glm::vec3(0, 0, 1);
+		_state->forward = glm::vec3(0, 0, -1);
 		_state->up = glm::vec3(0, 1, 0);
 		_state->scale = glm::vec3(1);
 
@@ -97,6 +97,24 @@ public:
 		_state->isSolid = true;
 
 		hasChanged = false;
+	};
+
+	// Rotates the object and all its children. Assumes axis-aligned objects.
+	// Value passed defines the new forward vector for the object after
+	// rotation.
+	virtual void rotate(glm::vec3 orientation)
+	{
+		glm::vec3 oldRotation = _state->forward;
+
+		_state->forward = orientation;
+
+		// Swap width and depth of collider if necessary
+		if (oldRotation.x != _state->forward.x)
+		{
+			auto temp = _state->width;
+			_state->width = _state->depth;
+			_state->depth = temp;
+		}
 	};
 		 
 	// TODO: add more server-specific functions that are object-agnostic
