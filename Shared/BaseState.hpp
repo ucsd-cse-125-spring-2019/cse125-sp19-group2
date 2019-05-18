@@ -3,6 +3,7 @@
 #include <glm/glm.hpp>
 #include <string>
 #include <iostream>
+#include <functional>
 
 #include "Shared/Common.hpp"	// GameEntity type enum
 
@@ -56,6 +57,25 @@ struct BaseState
 
 	// Whether or not the object can be passed through
 	bool isSolid;
+
+	bool getSolidity(BaseState* entity)
+	{
+		if (solidFunc == 0)
+		{
+			return isSolid;
+		}
+		else
+		{
+			return solidFunc(this, entity);
+		}
+	}
+
+	void setSolidity(std::function<bool(BaseState* entity, BaseState* collidingEntity)> f)
+	{
+		solidFunc = f;
+	}
+
+	std::function<bool(BaseState* entity, BaseState* collidingEntity)> solidFunc = 0;
 
 	// Serialization for Cereal
 	template<class Archive>

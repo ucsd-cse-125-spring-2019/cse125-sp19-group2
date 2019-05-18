@@ -69,11 +69,6 @@ public:
 		// Cast for player-specific stuff
 		auto humanState = std::static_pointer_cast<HumanState>(_state);
 
-		// Dog getting caught is not handled by the human
-		if (entity->getState()->type != ENTITY_DOG)
-		{
-			SBaseEntity::handleCollisionImpl(entity);
-		}
 	}
 };
 

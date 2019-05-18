@@ -178,11 +178,6 @@ public:
 			entity->getState()->isDestroyed = true;
 			entity->hasChanged = true;
 		}
-		else
-		{
-			// Otherwise, handle collisions as usual
-			SBaseEntity::handleCollisionImpl(entity);
-		}
 	}
 
 private:

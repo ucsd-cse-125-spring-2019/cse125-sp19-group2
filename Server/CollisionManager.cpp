@@ -71,15 +71,10 @@ void CollisionManager::handleCollisions()
 		auto entityA = _entityMap->find(objectA->id)->second;
 		auto entityB = _entityMap->find(objectB->id)->second;
 
-		// B handles collision first
-		entityA->handleCollision(entityB.get());
+		// First handle bounce-off
+		entityA->handlePushBack(entityB.get());
 
-		// Rare but in some cases (like dog caught), we need to run resolution
-		// on B as well
-		if (entityA->isColliding(objectB))
-		{
-			entityB->handleCollision(entityA.get());
-		}
+		entityA->hasChanged = true;
 
 		// Remove duplicates (e.g. <A,B> vs <B,A> if both players)
 		if (!objectB->isStatic)
@@ -90,13 +85,15 @@ void CollisionManager::handleCollisions()
 			entityB->hasChanged = true;
 		}
 
-		entityA->hasChanged = true;
+		// General collision logic
+		entityA->handleCollision(entityB.get());
+		entityB->handleCollision(entityA.get());
 
 		// Re-check for colliding
 		for (auto& collidingEntity : entityA->getColliding(*tree))
 		{
 			// Only re-add if solid
-			if (objectA->isSolid && collidingEntity->isSolid)
+			if (objectA->getSolidity(objectB) && collidingEntity->getSolidity(objectA))
 			{
 				collisionSet.insert({ entityA->getState().get(), collidingEntity });
 			}
