@@ -14,8 +14,8 @@
 #define MAP_WIDTH 48
 
 // Width and height of walls and fences
-#define WALL_WIDTH 0.2f
-#define WALL_HEIGHT 3.0f
+#define FENCE_WIDTH 0.2f
+#define FENCE_HEIGHT 3.0f
 
 // Dog-specific stats
 #define MAX_DOG_STAMINA 3.0f;	// Dog can sprint for three seconds max

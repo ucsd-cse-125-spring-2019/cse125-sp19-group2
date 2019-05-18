@@ -75,7 +75,7 @@ public:
 		BaseState* stateB = state;
 
 		// Only perform handling if this, and the object in question is solid
-		if (stateA->isSolid && stateB->isSolid)
+		if (stateA->getSolidity(stateB) && stateB->getSolidity(stateA))
 		{
 			if (stateB->colliderType == COLLIDER_CAPSULE)
 			{

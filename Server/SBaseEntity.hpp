@@ -74,6 +74,12 @@ public:
 		handleCollisionImpl(entity);
 	};
 
+	void handlePushBack(SBaseEntity* entity)
+	{
+		// Basic "bumping away" logic
+		_collider->handleCollision(entity->getState().get());
+	}
+
 	// Initializes state struct to some sane defaults
 	virtual void initState(bool generateId = true)
 	{
@@ -120,14 +126,8 @@ public:
 	// TODO: add more server-specific functions that are object-agnostic
 
 protected:
-	// If any custom collision logic is needed, override this function. Be sure
-	// to call this base function if standard push-back collision behavior is
-	// desired.
-	virtual void handleCollisionImpl(SBaseEntity* entity)
-	{
-		// Basic "bumping away" logic
-		_collider->handleCollision(entity->getState().get());
-	}
+	// If any custom collision logic is needed, override this function
+	virtual void handleCollisionImpl(SBaseEntity* entity) {};
 
 	// TODO: server-specific state goes here
 	std::unique_ptr<BaseCollider> _collider; // bounding box state info

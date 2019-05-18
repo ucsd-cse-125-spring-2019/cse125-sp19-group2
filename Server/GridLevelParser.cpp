@@ -163,35 +163,34 @@ std::vector<std::shared_ptr<SBaseEntity>> GridLevelParser::parseLevelFromFile(
 				float entityWidth, entityDepth;
 				getTileInfo(aggregatedTiles, avgPos, entityWidth, entityDepth);
 
-				// For fences and walls, one dimension will be 0
-				if (aggregatedTiles[0]->type == TILE_FENCE ||
-					aggregatedTiles[0]->type == TILE_WALL)
+				// For fences, one dimension will be 0
+				if (aggregatedTiles[0]->type == TILE_FENCE)
 				{
-					entityWidth += WALL_WIDTH;
-					entityDepth += WALL_WIDTH;
+					entityWidth += FENCE_WIDTH;
+					entityDepth += FENCE_WIDTH;
 
-					// North <--> South wall
+					// North <--> South fence
 					if (entityDepth > entityWidth)
 					{
 						// Tiles are already sorted by Z. Retract
-						// wall as necessary
+						// fence1 as necessary
 						if (aggregatedTiles[0]->isDoublyClaimed)
 						{
 							// North end
-							entityDepth -= WALL_WIDTH;
-							avgPos.y += WALL_WIDTH / 2;
+							entityDepth -= FENCE_WIDTH;
+							avgPos.y += FENCE_WIDTH / 2;
 						}
 						if (aggregatedTiles.back()->isDoublyClaimed)
 						{
 							// South end
-							entityDepth -= WALL_WIDTH;
-							avgPos.y -= WALL_WIDTH / 2;
+							entityDepth -= FENCE_WIDTH;
+							avgPos.y -= FENCE_WIDTH / 2;
 						}
 
-						// TODO: extend walls to connect to neighboring buildings
+						// TODO: extend fence to connect to neighboring buildings
 					}
 
-					// West <--> East wall
+					// West <--> East fence
 					else if (entityWidth > entityDepth)
 					{
 						// Sort tiles by X
@@ -201,21 +200,21 @@ std::vector<std::shared_ptr<SBaseEntity>> GridLevelParser::parseLevelFromFile(
 							return a->pos.x < b->pos.x;
 						});
 
-						// Retract wall as necessary
+						// Retract fence as necessary
 						if (aggregatedTiles[0]->isDoublyClaimed)
 						{
 							// West end
-							entityWidth -= WALL_WIDTH;
-							avgPos.x += WALL_WIDTH/2;
+							entityWidth -= FENCE_WIDTH;
+							avgPos.x += FENCE_WIDTH/2;
 						}
 						if (aggregatedTiles.back()->isDoublyClaimed)
 						{
 							// East end
-							entityWidth -= WALL_WIDTH;
-							avgPos.x -= WALL_WIDTH/2;
+							entityWidth -= FENCE_WIDTH;
+							avgPos.x -= FENCE_WIDTH/2;
 						}
 
-						// TODO: extend walls to connect to neighboring buildings
+						// TODO: extend fences to connect to neighboring buildings
 					}
 				}
 				else // For everything else, fit the object tightly to its tiles
@@ -235,15 +234,7 @@ std::vector<std::shared_ptr<SBaseEntity>> GridLevelParser::parseLevelFromFile(
 						// For now just create a box entity
 						entity = std::make_shared<SFenceEntity>(
 							glm::vec3(avgPos.x, 0, avgPos.y),
-							glm::vec3(entityWidth, WALL_HEIGHT, entityDepth));
-						break;
-					}
-					case TILE_WALL:
-					{
-						// Same as above; will be changed eventually
-						entity = std::make_shared<SFenceEntity>(
-							glm::vec3(avgPos.x, 0, avgPos.y),
-							glm::vec3(entityWidth, WALL_HEIGHT, entityDepth));
+							glm::vec3(entityWidth, FENCE_HEIGHT, entityDepth));
 						break;
 					}
 					case TILE_JAIL:
@@ -376,7 +367,7 @@ void GridLevelParser::Tile::aggregateTiles(
 	}
 	else
 	{
-		// Edge case for walls; reclaimed tile while moving to right
+		// Edge case for fences; reclaimed tile while moving to right
 		if (this->isClaimed)
 		{
 			this->isDoublyClaimed = true;
@@ -388,7 +379,7 @@ void GridLevelParser::Tile::aggregateTiles(
 		{
 			case DIR_RIGHT:
 			{
-				// Edge case for walls and fences: aggregate single item to left
+				// Edge case for fences: aggregate single item to left
 				if (this->type == TILE_FENCE &&
 					xIndex - 1 >= 0 &&
 					tiles[zIndex][xIndex - 1]->type == this->type &&
@@ -410,16 +401,16 @@ void GridLevelParser::Tile::aggregateTiles(
 						maxDepth);
 				}
 
-				// If this is a wall or fence and the vector has more than one
+				// If this is a fence and the vector has more than one
 				// element, we're done. We don't want fences in multiple
 				// dimensions.
-				if ((this->type == TILE_FENCE || this->type == TILE_WALL) &&
+				if ((this->type == TILE_FENCE) &&
 					aggregatedTiles.size() > 1)
 				{
 					return;
 				}
 
-				// Edge case for walls and fences: aggregate single item above
+				// Edge case for fences: aggregate single item above
 				if (this->type == TILE_FENCE &&
 					zIndex - 1 >= 0 &&
 					tiles[zIndex - 1][xIndex]->type == this->type &&
