@@ -1,4 +1,4 @@
-﻿#include "LocalPlayer.hpp"
+#include "LocalPlayer.hpp"
 #include "InputManager.h"
 #include "Shared/GameEvent.hpp"
 #include "EntityManager.hpp"
@@ -135,28 +135,102 @@ LocalPlayer::LocalPlayer(uint32_t playerId, std::unique_ptr<NetworkClient> const
             _moveKeysPressed = true;
         });
 
-    // Player move right event
-    InputManager::getInstance().getKey(GLFW_KEY_LEFT_SHIFT)->onRepeat(
-        [&] {
-            auto event = std::make_shared<GameEvent>();
-            event->playerId = _playerId;
-            event->type = EVENT_PLAYER_RUN;
+   // Player move right event
+	InputManager::getInstance().getKey(GLFW_KEY_LEFT_SHIFT)->onPress([&]
+	{
+		auto event = std::make_shared<GameEvent>();
+		event->playerId = _playerId;
+		event->type = EVENT_PLAYER_RUN_START;
 
-            // Try sending the update
-            try {
-                networkClient->sendEvent(event);
-            }
-            catch (std::runtime_error e) {
-            };
-        });
+		// Try sending the update
+		try
+		{
+			networkClient->sendEvent(event);
+		}
+		catch (std::runtime_error e)
+		{
+		};
+	});
+
+	// Player move right event
+	InputManager::getInstance().getKey(GLFW_KEY_LEFT_SHIFT)->onRelease([&]
+	{
+		auto event = std::make_shared<GameEvent>();
+		event->playerId = _playerId;
+		event->type = EVENT_PLAYER_RUN_END;
+
+		// Try sending the update
+		try
+		{
+			networkClient->sendEvent(event);
+		}
+		catch (std::runtime_error e)
+		{
+		};
+	});
+
+		InputManager::getInstance().getKey(GLFW_KEY_SPACE)->onPress([&]
+	{
+		auto event = std::make_shared<GameEvent>();
+		event->playerId = _playerId;
+		event->type = EVENT_PLAYER_URINATE_START;
+		try
+		{
+			networkClient->sendEvent(event);
+		}
+		catch (std::runtime_error e)
+		{
+		};
+	});
+
+	InputManager::getInstance().getKey(GLFW_KEY_SPACE)->onRelease([&]
+	{
+		auto event = std::make_shared<GameEvent>();
+		event->playerId = _playerId;
+		event->type = EVENT_PLAYER_URINATE_END;
+		try
+		{
+			networkClient->sendEvent(event);
+		}
+		catch (std::runtime_error e)
+		{
+		};
+	});
+
+	// Player start lifting
+	InputManager::getInstance().getKey(GLFW_KEY_F)->onPress([&]
+	{
+		auto event = std::make_shared<GameEvent>();
+		event->playerId = _playerId;
+		event->type = EVENT_PLAYER_LIFTING_START;
+
+		try
+		{
+			networkClient->sendEvent(event);
+		}
+		catch (std::runtime_error e)
+		{
+		};
+	});
+
+	// Player end lifting
+	InputManager::getInstance().getKey(GLFW_KEY_F)->onRelease([&]
+	{
+		auto event = std::make_shared<GameEvent>();
+		event->playerId = _playerId;
+		event->type = EVENT_PLAYER_LIFTING_END;
+		try
+		{
+			networkClient->sendEvent(event);
+		}
+		catch (std::runtime_error e)
+		{
+		};
+	});
 
     _camera = std::make_unique<Camera>();
 
     _networkClient = networkClient.get();
-
-    _moveKeysPressed = false;
-    _stopped = true;
-    _moveCamera = false;
 
     _moveKeysPressed = false;
     _stopped = true;

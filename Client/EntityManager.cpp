@@ -7,7 +7,11 @@
 #include "CDogHouseEntity.hpp"
 #include "CHydrantEntity.hpp"
 #include "CFountainEntity.hpp"
+#include "CPuddleEntity.hpp"
 #include "CFloorEntity.hpp"
+#include "CFenceEntity.hpp"
+#include "CBarEntity.hpp"
+#include "CGateEntity.hpp"
 #include "ColliderManager.hpp"
 #include "Shared/Logger.hpp"
 #include <algorithm>
@@ -58,29 +62,41 @@ std::shared_ptr<CBaseEntity> EntityManager::getEntity(std::shared_ptr<BaseState>
         entity = std::make_shared<CDogEntity>();
         break;
     case ENTITY_HUMAN:
-        entity = std::make_shared<CHumanEntity>();
-        break;
+      entity = std::make_shared<CHumanEntity>();
+      break;
     case ENTITY_BOX:
-        entity = std::make_shared<CBoxEntity>();
-        break;
+      entity = std::make_shared<CBoxEntity>();
+      break;  
     case ENTITY_HOUSE_6X6_A:
-        entity = std::make_shared<CHouseEntity>(type);
-        break;
+      entity = std::make_shared<CHouseEntity>(type);
+      break;
     case ENTITY_BONE:
-        entity = std::make_shared<CBoneEntity>();
-        break;
+      entity = std::make_shared<CBoneEntity>();
+      break;
     case ENTITY_DOGHOUSE:
-        entity = std::make_shared<CDogHouseEntity>();
-        break;
+      entity = std::make_shared<CDogHouseEntity>();
+      break;
     case ENTITY_HYDRANT:
-        entity = std::make_shared<CHydrantEntity>();
-        break;
+      entity = std::make_shared<CHydrantEntity>();
+      break;
     case ENTITY_FOUNTAIN:
-        entity = std::make_shared<CFountainEntity>();
-        break;
+      entity = std::make_shared<CFountainEntity>();
+      break;
+    case ENTITY_PUDDLE:
+      entity = std::make_shared<CPuddleEntity>();
+      break;
+    case ENTITY_FENCE:
+      entity = std::make_shared<CFenceEntity>();
+      break;
+    case ENTITY_BAR:
+      entity = std::make_shared<CBarEntity>();
+      break;
+    case ENTITY_GATE:
+      entity = std::make_shared<CGateEntity>();
+      break;
     case ENTITY_FLOOR:
-        CFloorEntity::getInstance().updateTile(state);
-        break;
+      CFloorEntity::getInstance().updateTile(state);
+      break;
     }
 
     if (entity)
