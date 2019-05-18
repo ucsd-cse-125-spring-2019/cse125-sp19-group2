@@ -44,9 +44,15 @@ public:
     std::shared_ptr<BaseState> const& getState() { return _state; }
 
     void setLocal(bool flag) {
+        // Player move right event
+	    InputManager::getInstance().getKey(GLFW_KEY_E)->onRepeat([&]
+	    {
+		    Animation* animation = static_cast<Animation*>(_objectModel.get());
+            animation->playOnce(2, 100);
+	    });
         _isLocal = flag;
     }
-
+    
 protected:
     void initAnimation(std::string modelPath) {
         // Read in an animated Mesh
@@ -54,9 +60,6 @@ protected:
 
 		// Cast model as animation
 		Animation* animation = static_cast<Animation*>(_objectModel.get());
-		
-        // Ensuring index is non-garbage value
-        animation->animatedMesh->_takeIndex = 0;
 
         // Call init to let Animation precache uniform location
         animation->init(_objectShader);
