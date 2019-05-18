@@ -71,14 +71,14 @@ void CollisionManager::handleCollisions()
 		auto entityA = _entityMap->find(objectA->id)->second;
 		auto entityB = _entityMap->find(objectB->id)->second;
 
-		// Collision resolution on A & B
-		entityA->handleCollision(entityB);
+		// B handles collision first
+		entityA->handleCollision(entityB.get());
 
 		// Rare but in some cases (like dog caught), we need to run resolution
 		// on B as well
 		if (entityA->isColliding(objectB))
 		{
-			entityB->handleCollision(entityA);
+			entityB->handleCollision(entityA.get());
 		}
 
 		// Remove duplicates (e.g. <A,B> vs <B,A> if both players)

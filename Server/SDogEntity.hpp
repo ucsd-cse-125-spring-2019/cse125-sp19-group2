@@ -152,7 +152,7 @@ public:
 		}
 	}
 
-	void handleCollision(std::shared_ptr<SBaseEntity> entity) override
+	void handleCollisionImpl(SBaseEntity* entity) override
 	{
 		// Cast for dog-specific stuff
 		auto dogState = std::static_pointer_cast<DogState>(_state);
@@ -181,7 +181,7 @@ public:
 		else
 		{
 			// Otherwise, handle collisions as usual
-			SBaseEntity::handleCollision(entity);
+			SBaseEntity::handleCollisionImpl(entity);
 		}
 	}
 

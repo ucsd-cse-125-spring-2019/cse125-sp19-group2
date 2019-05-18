@@ -64,7 +64,7 @@ public:
 		// TODO: net throwing animation
 	}
 
-	void handleCollision(std::shared_ptr<SBaseEntity> entity)
+	void handleCollisionImpl(SBaseEntity* entity) override
 	{
 		// Cast for player-specific stuff
 		auto humanState = std::static_pointer_cast<HumanState>(_state);
@@ -72,7 +72,7 @@ public:
 		// Dog getting caught is not handled by the human
 		if (entity->getState()->type != ENTITY_DOG)
 		{
-			SBaseEntity::handleCollision(entity);
+			SBaseEntity::handleCollisionImpl(entity);
 		}
 	}
 };

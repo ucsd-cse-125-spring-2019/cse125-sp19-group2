@@ -53,11 +53,25 @@ public:
 		return _collider->getColliding(tree);
 	};
 
-	// Called by the CollisionManager; handle collision with specific object
-	virtual void handleCollision(std::shared_ptr<SBaseEntity> entity)
+	// Registers custom collision handler for this object. Called inside
+	// handleCollision()
+	template <typename T>
+	void onCollision(T&& lambda)
 	{
-		// Basic "bumping away" logic
-		_collider->handleCollision(entity->getState().get());
+		_collisionHandlers.push_back(lambda);
+	}
+
+	// Called by the CollisionManager; handle collision with specific object.
+	// Cannot be overridden by children; override handleCollisionImpl() instead.
+	void handleCollision(SBaseEntity* entity)
+	{
+		// Execute lambdas (if any) first
+		for (auto f : _collisionHandlers)
+		{
+			f(this, entity);
+		}
+
+		handleCollisionImpl(entity);
 	};
 
 	// Initializes state struct to some sane defaults
@@ -88,8 +102,23 @@ public:
 	// TODO: add more server-specific functions that are object-agnostic
 
 protected:
+	// If any custom collision logic is needed, override this function. Be sure
+	// to call this base function if standard push-back collision behavior is
+	// desired.
+	virtual void handleCollisionImpl(SBaseEntity* entity)
+	{
+		// Basic "bumping away" logic
+		_collider->handleCollision(entity->getState().get());
+	}
+
 	// TODO: server-specific state goes here
 	std::unique_ptr<BaseCollider> _collider; // bounding box state info
 	std::shared_ptr<BaseState> _state;
+
+	// Lambdas to execute inside handleCollision(); lambdas take a pointer
+	// to this entity and to the entity that is being collided with. Not
+	// using shared pointers because it is not good practice for objects
+	// to generate shared pointers from themselves.
+	std::vector<std::function<void(SBaseEntity*, SBaseEntity*)>> _collisionHandlers;
 };
 
