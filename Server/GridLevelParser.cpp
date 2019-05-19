@@ -1,5 +1,6 @@
 #include <fstream>
 #include <algorithm>
+#include <glm/gtx/string_cast.hpp>
 #include "GridLevelParser.hpp"
 #include "SBoxEntity.hpp"
 #include "SHouseEntity.hpp"
@@ -21,14 +22,16 @@ GridLevelParser::~GridLevelParser()
 }
 
 
-std::vector<std::shared_ptr<SBaseEntity>> GridLevelParser::parseLevelFromFile(
+void GridLevelParser::parseLevelFromFile(
 	std::string path,
-	std::vector<glm::vec2> & jailLocations,
-	std::queue<glm::vec2> & humanSpawns,
-	std::queue<glm::vec2> & dogSpawns)
+	StructureInfo* structureInfo)
 {
-	// List containing game objects parsed from level file
-	auto entityList = std::vector<std::shared_ptr<SBaseEntity>>();
+	// Allocate structureInfo objects
+	structureInfo->entityMap = new std::unordered_map<uint32_t, std::shared_ptr<SBaseEntity>>();
+	structureInfo->newEntities = new std::vector<std::shared_ptr<SBaseEntity>>();
+	structureInfo->jails = new std::vector<glm::vec2>();
+	structureInfo->humanSpawns = new std::queue<glm::vec2>();
+	structureInfo->dogSpawns = new std::queue<glm::vec2>();
 
 	// Open level file
 	std::ifstream levelFile;
@@ -92,21 +95,7 @@ std::vector<std::shared_ptr<SBaseEntity>> GridLevelParser::parseLevelFromFile(
 		tile->type = (TileType)tileType;
 
 		// Set forward based on angle
-		switch (angle)
-		{
-		case 0:
-			tile->forward = glm::vec3(0, 0, -1);
-			break;
-		case 90:
-			tile->forward = glm::vec3(-1, 0, 0);
-			break;
-		case 180:
-			tile->forward = glm::vec3(0, 0, 1);
-			break;
-		case 270:
-			tile->forward = glm::vec3(1, 0, 0);
-			break;
-		}
+		tile->angle = angle / 90;
 
 		// Other properties
 		tile->isClaimed = false;
@@ -241,19 +230,18 @@ std::vector<std::shared_ptr<SBaseEntity>> GridLevelParser::parseLevelFromFile(
 					{
 						entity = std::make_shared<SJailEntity>(
 							glm::vec3(avgPos.x, 0, avgPos.y),
-							aggregatedTiles[0]->forward,
 							glm::vec3(entityWidth, 2, entityDepth));
-						jailLocations.push_back(avgPos);
+						structureInfo->jails->push_back(avgPos);
 						break;
 					}
 					case TILE_HUMAN_SPAWN:
 					{
-						humanSpawns.push(avgPos);
+						structureInfo->humanSpawns->push(avgPos);
 						break;
 					}
 					case TILE_DOG_SPAWN:
 					{
-						dogSpawns.push(avgPos);
+						structureInfo->dogSpawns->push(avgPos);
 						break;
 					}
 					case TILE_HOUSE_6X6_A:
@@ -262,7 +250,6 @@ std::vector<std::shared_ptr<SBaseEntity>> GridLevelParser::parseLevelFromFile(
 						entity = std::make_shared<SHouseEntity>(
 							ENTITY_HOUSE_6X6_A,
 							glm::vec3(avgPos.x, 0, avgPos.y),
-							aggregatedTiles[0]->forward,
 							glm::vec3(6));
 						break;
 					}
@@ -276,47 +263,55 @@ std::vector<std::shared_ptr<SBaseEntity>> GridLevelParser::parseLevelFromFile(
 					{
 						entity = std::make_shared<SDogHouseEntity>(
 							glm::vec3(avgPos.x, 0, avgPos.y));
-						entity->rotate(aggregatedTiles[0]->forward);
 						break;
 					}
 					case TILE_HYDRANT:
 					{
 						entity = std::make_shared<SHydrantEntity>(
-							glm::vec3(avgPos.x, 0, avgPos.y),
-							aggregatedTiles[0]->forward);
+							glm::vec3(avgPos.x, 0, avgPos.y));
 						break;
 					}
 					case TILE_FOUNTAIN:
 					{
 						entity = std::make_shared<SFountainEntity>(
-							glm::vec3(avgPos.x, 0, avgPos.y),
-							aggregatedTiles[0]->forward);
+							glm::vec3(avgPos.x, 0, avgPos.y));
 						break;
 					}
 				}
 
 				if (entity)
 				{
-					entityList.push_back(entity);
+					// Rotate first
+					if (aggregatedTiles[0]->angle != 0)
+					{
+						entity->rotate(entity->getState()->pos, aggregatedTiles[0]->angle);
+
+					}
+
+					// Add entity to map
+					structureInfo->entityMap->insert({ entity->getState()->id, entity });
+
+					// Add children to map
 					auto children = entity->getChildren();
-					entityList.insert(entityList.begin(), children.begin(), children.end());
+					for (auto& child : entity->getChildren())
+					{
+						structureInfo->entityMap->insert({ child->getState()->id, child });
+					}
 				}
 			}
 
 			// Build floor tile if not default floor
 			if (tile->groundType != 0)
 			{
-				entityList.push_back(
-					std::make_shared<SFloorEntity>(
-						(FloorType)tile->groundType,
-						xIndex,
-						zIndex,
-						tileWidth));
+				auto floorTile = std::make_shared<SFloorEntity>(
+					(FloorType)tile->groundType,
+					xIndex,
+					zIndex,
+					tileWidth);
+				structureInfo->entityMap->insert({ floorTile->getState()->id, floorTile });
 			}
 		}
 	}
-
-	return entityList;
 }
 
 void GridLevelParser::getTileInfo(

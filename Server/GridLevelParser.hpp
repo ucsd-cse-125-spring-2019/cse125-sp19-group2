@@ -14,11 +14,9 @@ public:
 	GridLevelParser();
 	~GridLevelParser();
 
-	std::vector<std::shared_ptr<SBaseEntity>> parseLevelFromFile(
+	void parseLevelFromFile(
 		std::string path,
-		std::vector<glm::vec2> & jailLocations,
-		std::queue<glm::vec2> & humanSpawns,
-		std::queue<glm::vec2> & dogSpawns) override;
+		StructureInfo* structureInfo) override;
 
 private:
 	// Different types of tiles; order must be exactly same as online editor!
@@ -75,7 +73,7 @@ private:
 	public:
 		TileType type;
 		GroundType groundType;
-		glm::vec3 forward;
+		int angle; // Number of times to rotate clockwise
 		glm::vec2 pos;
 		int xIndex;
 		int zIndex;

@@ -7,6 +7,7 @@
 #include "Shared/QuadTree.hpp"
 #include "IdGenerator.hpp"
 #include "BaseCollider.hpp"
+#include <glm/gtx/string_cast.hpp>
 
 /*
 ** As with CBaseEntity, this is an abstract class, and cannot be instantiated.
@@ -26,102 +27,41 @@ public:
 	virtual void update(std::vector<std::shared_ptr<GameEvent>> events) {};
 
     // All server objects must have a state to send to the client.
-	virtual std::shared_ptr<BaseState> getState()
-	{
-		return _state;
-	};
+	virtual std::shared_ptr<BaseState> getState();
 
 	// For objects with "scene graphs". By default, no kids
-	virtual	std::vector<std::shared_ptr<SBaseEntity>> getChildren()
-	{
-		return std::vector<std::shared_ptr<SBaseEntity>>();
-	};
+	virtual	std::vector<std::shared_ptr<SBaseEntity>> getChildren();
 
 	// Wrappers for colliders
-	virtual bool isColliding(QuadTree & tree)
-	{
-		return _collider->isColliding(tree);
-	};
+	virtual bool isColliding(QuadTree & tree);
 
-	virtual bool isColliding(BaseState* state)
-	{
-		return _collider->isColliding(state);
-	};
+	virtual bool isColliding(BaseState* state);
 
-	virtual std::vector<BaseState*> getColliding(QuadTree & tree)
-	{
-		return _collider->getColliding(tree);
-	};
+	virtual std::vector<BaseState*> getColliding(QuadTree & tree);
 
 	// Registers custom collision handler for this object. Called inside
 	// handleCollision()
-	template <typename T>
-	void onCollision(T&& lambda)
+	template<typename T>
+	void onCollision(T && lambda)
 	{
 		_collisionHandlers.push_back(lambda);
 	}
 
 	// Called by the CollisionManager; handle collision with specific object.
 	// Cannot be overridden by children; override handleCollisionImpl() instead.
-	void handleCollision(SBaseEntity* entity)
-	{
-		// Execute lambdas (if any) first
-		for (auto f : _collisionHandlers)
-		{
-			f(this, entity);
-		}
+	void handleCollision(SBaseEntity* entity);
 
-		handleCollisionImpl(entity);
-	};
+	// Basic "bumping away" logic
+	void handlePushBack(SBaseEntity* entity);
 
-	void handlePushBack(SBaseEntity* entity)
-	{
-		// Basic "bumping away" logic
-		_collider->handleCollision(entity->getState().get());
-	}
+	// Initializes state struct to some sane defaults. Be sure to call on
+	// any children
+	virtual void initState(bool generateId = true);
 
-	// Initializes state struct to some sane defaults
-	virtual void initState(bool generateId = true)
-	{
-		if (generateId)
-		{
-			_state->id = IdGenerator::getInstance()->getNextId();
-		}
-
-		// At origin, looking forward, with 1x1x1 scale
-		_state->pos = glm::vec3(0);
-		_state->forward = glm::vec3(0, 0, -1);
-		_state->up = glm::vec3(0, 1, 0);
-		_state->scale = glm::vec3(1);
-
-		// Set default transparency to 1
-		_state->transparency = 1.0f;
-
-		// Defaults to static solid object
-		_state->isDestroyed = false;
-		_state->isStatic = true;
-		_state->isSolid = true;
-
-		hasChanged = false;
-	};
-
-	// Rotates the object and all its children. Assumes axis-aligned objects.
-	// Value passed defines the new forward vector for the object after
-	// rotation.
-	virtual void rotate(glm::vec3 orientation)
-	{
-		glm::vec3 oldRotation = _state->forward;
-
-		_state->forward = orientation;
-
-		// Swap width and depth of collider if necessary
-		if (oldRotation.x != _state->forward.x)
-		{
-			auto temp = _state->width;
-			_state->width = _state->depth;
-			_state->depth = temp;
-		}
-	};
+	// Rotates the object and all its children around a point.
+	// Angle is the number of times to be rotated clockwise in
+	// 90 degree steps.
+	virtual void rotate(glm::vec3 center, int angle);
 		 
 	// TODO: add more server-specific functions that are object-agnostic
 
@@ -138,5 +78,8 @@ protected:
 	// using shared pointers because it is not good practice for objects
 	// to generate shared pointers from themselves.
 	std::vector<std::function<void(SBaseEntity*, SBaseEntity*)>> _collisionHandlers;
-};
 
+private:
+	// Helper function to rotate forward vector 90 degrees clockwise
+	glm::vec3 rotateOnce(glm::vec3 vec);
+};

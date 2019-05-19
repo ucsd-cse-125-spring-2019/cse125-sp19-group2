@@ -12,7 +12,6 @@ class SJailEntity : public SBaseEntity
 public:
 	SJailEntity(
 		glm::vec3 pos,
-		glm::vec3 forward,
 		glm::vec3 scale)
 	{
 		_state = std::make_shared<BaseState>();
@@ -22,7 +21,6 @@ public:
 		_state->type = ENTITY_JAIL;
 
 		_state->pos = pos;
-		_state->forward = forward;
 		_state->scale = scale;
 
 		// No collider on the jail object, only on its children

@@ -227,6 +227,7 @@
     <ClCompile Include="NetworkServer.cpp" />
     <ClCompile Include="IdGenerator.cpp" />
     <ClCompile Include="GridLevelParser.cpp" />
+    <ClCompile Include="SBaseEntity.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AABBCollider.hpp" />
@@ -257,6 +258,7 @@
     <ClInclude Include="SPlayerEntity.hpp" />
     <ClInclude Include="GridLevelParser.hpp" />
     <ClInclude Include="SPuddleEntity.hpp" />
+    <ClInclude Include="StructureInfo.hpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

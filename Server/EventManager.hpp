@@ -7,6 +7,7 @@
 #include "Shared/GameEvent.hpp"
 #include "Shared/GameState.hpp"
 #include "SBaseEntity.hpp"
+#include "StructureInfo.hpp"
 #include "NetworkServer.hpp"
 
 /*
@@ -18,12 +19,8 @@ class EventManager
 {
 public:
 	EventManager(
-		std::unordered_map<uint32_t, std::shared_ptr<SBaseEntity>>* entityMap,
-		std::vector<std::shared_ptr<SBaseEntity>>* newEntities,
 		NetworkServer* networkInterface,
-		std::vector<glm::vec2>* jails,
-		std::queue<glm::vec2>* humanSpawns,
-		std::queue<glm::vec2>* dogSpawns,
+		StructureInfo* structureInfo,
 		std::shared_ptr<GameState> gameState);
 	~EventManager();
 
@@ -38,18 +35,11 @@ private:
 	void handlePlayerReady(std::shared_ptr<GameEvent> event);
 	void handlePlayerLeave(std::shared_ptr<GameEvent> event);
 
-	// Raw pointer to global entity map
-	std::unordered_map<uint32_t, std::shared_ptr<SBaseEntity>>* _entityMap;
-
-	// Raw pointer to new entities (Queue of entities created during the last tick that need to be added to the entityMap)
-	std::vector<std::shared_ptr<SBaseEntity>>* _newEntities;
-
 	// Raw pointer to network interface
 	NetworkServer* _networkInterface;
 
-	// Jails and player spawn locations
-	std::vector<glm::vec2>* _jails;
-	std::queue<glm::vec2>* _humanSpawns, * _dogSpawns;
+	// General structure info
+	StructureInfo* _structureInfo;
 
 	// Game state struct
 	std::shared_ptr<GameState> _gameState;

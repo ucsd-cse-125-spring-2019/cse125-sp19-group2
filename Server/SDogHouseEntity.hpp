@@ -21,16 +21,12 @@ public:
 		// Ctor parameters
 		_state->pos = pos;
 
-		// Basic AABB. This will probably have to change to at least
-		// three child AABB colliders, so the dog can actually go
-		// inside the doghouse.
-		//_collider = std::make_unique<AABBCollider>(_state.get());
-		//_state->colliderType = COLLIDER_AABB;
+		// No collider on the doghouse itself
+		_collider = std::make_unique<EmptyCollider>();
+		_state->colliderType = COLLIDER_NONE;
 		_state->width = 1.2f;
 		_state->height = 1.2f;
 		_state->depth = 1.2f;
-		_collider = std::make_unique<EmptyCollider>();
-		_state->colliderType = COLLIDER_NONE;
 
 		// Invisible walls to allow dogs to walk into the front of
 		// the doghouse
@@ -48,17 +44,34 @@ public:
 			glm::vec3(pos.x - sideOffset, 0, pos.z + DOGHOUSE_WALL_WIDTH/2),
 			glm::vec3(_state->width - DOGHOUSE_WALL_WIDTH, _state->height, DOGHOUSE_WALL_WIDTH));
 		_leftWall->getState()->transparency = 0.0f;
-		_leftWall->rotate(glm::vec3(1.0f, 0, 0));
+		_leftWall->rotate(_leftWall->getState()->pos, 1);
 
 		_rightWall = std::make_shared<SBoxEntity>(
 			glm::vec3(pos.x + sideOffset, 0, pos.z + DOGHOUSE_WALL_WIDTH/2),
 			glm::vec3(_state->width - DOGHOUSE_WALL_WIDTH, _state->height, DOGHOUSE_WALL_WIDTH));
 		_rightWall->getState()->transparency = 0.0f;
-		_rightWall->rotate(glm::vec3(1.0f, 0, 0));
+		_rightWall->rotate(_rightWall->getState()->pos, 1);
+
+		// Sensor for dogs. Performs actual logic on the doghouse
+		auto sensorBox = std::make_shared<SBoxEntity>(
+			glm::vec3(pos.x, 0, pos.z - _state->depth / 4),
+			glm::vec3(_state->width - DOGHOUSE_WALL_WIDTH * 2, 0.5, _state->depth / 3));
+		sensorBox->getState()->transparency = 0.0f;
+		sensorBox->getState()->isSolid = false;
+		
+		// Register actual handling
+		sensorBox->onCollision([&](SBaseEntity* entity, SBaseEntity* collidingEntity)
+		{
+			if (collidingEntity->getState()->type == ENTITY_DOG)
+			{
+				Logger::getInstance()->debug("Dog is \"teleporting\"");
+			}
+		});
 
 		_children.push_back(_backWall);
 		_children.push_back(_leftWall);
 		_children.push_back(_rightWall);
+		_children.push_back(sensorBox);
 	};
 	~SDogHouseEntity() {};
 
@@ -68,21 +81,14 @@ public:
 	}
 
 	// Ensure children are also rotated
-	void rotate(glm::vec3 orientation) override
+	void rotate(glm::vec3 center, int angle) override
 	{
-		// Get angle of rotation first
-		float angle = glm::angle(_state->forward, orientation);
+		SBaseEntity::rotate(center, angle);
 
-		// Rotate this object
-		SBaseEntity::rotate(orientation);
-
-		// Then the children
-		_backWall->rotate(orientation);
-		glm::vec2 backDiff = _backWall->getState()->pos - _state->pos;
-		glm::vec2 rotatedBack = glm::rotate(backDiff, angle);
-		rotatedBack /= glm::length(rotatedBack);
-		rotatedBack *= glm::length(backDiff);
-		_backWall->getState()->pos = _state->pos + glm::vec3(rotatedBack.x, 0, rotatedBack.y);
+		for (auto& child : _children)
+		{
+			child->rotate(center, angle);
+		}
 	}
 
 private:
