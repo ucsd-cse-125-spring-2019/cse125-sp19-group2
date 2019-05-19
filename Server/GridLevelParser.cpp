@@ -32,6 +32,7 @@ void GridLevelParser::parseLevelFromFile(
 	structureInfo->jails = new std::vector<glm::vec2>();
 	structureInfo->humanSpawns = new std::queue<glm::vec2>();
 	structureInfo->dogSpawns = new std::queue<glm::vec2>();
+	structureInfo->dogHouses = new std::vector<std::shared_ptr<SBaseEntity>>();
 
 	// Open level file
 	std::ifstream levelFile;
@@ -262,7 +263,9 @@ void GridLevelParser::parseLevelFromFile(
 					case TILE_DOGHOUSE:
 					{
 						entity = std::make_shared<SDogHouseEntity>(
-							glm::vec3(avgPos.x, 0, avgPos.y));
+							glm::vec3(avgPos.x, 0, avgPos.y),
+							structureInfo->dogHouses);
+						structureInfo->dogHouses->push_back(entity);
 						break;
 					}
 					case TILE_HYDRANT:

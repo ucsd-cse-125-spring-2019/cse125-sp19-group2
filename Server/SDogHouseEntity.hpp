@@ -5,14 +5,19 @@
 #include <glm/gtx/rotate_vector.hpp>
 #include <glm/gtx/vector_angle.hpp>
 
+#define DOGHOUSE_COOLDOWN_SECS 5
 #define DOGHOUSE_WALL_WIDTH 0.2f
 
 class SDogHouseEntity : public SBaseEntity
 {
 public:
-	SDogHouseEntity(glm::vec3 pos)
+	SDogHouseEntity(
+		glm::vec3 pos,
+		std::vector<std::shared_ptr<SBaseEntity>>* dogHouses)
 	{
 		_state = std::make_shared<BaseState>();
+
+		_dogHouses = dogHouses;
 
 		// Base defaults
 		SBaseEntity::initState();
@@ -64,7 +69,42 @@ public:
 		{
 			if (collidingEntity->getState()->type == ENTITY_DOG)
 			{
-				Logger::getInstance()->debug("Dog is \"teleporting\"");
+				// Choose another dog house to teleport to
+				for (int i = 0; i < _dogHouses->size(); i++)
+				{
+					if ((*_dogHouses)[i]->getState()->id != _state->id)
+					{
+						auto house = (*_dogHouses)[i];
+						std::shared_ptr<SDogHouseEntity> castHouse = std::static_pointer_cast<SDogHouseEntity>(house);
+
+						// Check cooldown first
+						auto result = _cooldowns.find(collidingEntity->getState()->id);
+						if (result != _cooldowns.end())
+						{
+							// Check cooldown, return if too soon
+							auto elapsed = std::chrono::steady_clock::now() - result->second;
+							if (std::chrono::duration_cast<std::chrono::seconds>(elapsed).count() < DOGHOUSE_COOLDOWN_SECS)
+							{
+								return;
+							}
+							else
+							{
+								_cooldowns.erase(result);
+
+								// Find and erase from other house
+								castHouse->_cooldowns.erase(collidingEntity->getState()->id);
+							}
+						}
+
+						// Teleport to this house
+						collidingEntity->getState()->pos = house->getState()->pos;
+
+						// Reset cooldowns
+						_cooldowns.insert({ collidingEntity->getState()->id, std::chrono::steady_clock::now() });
+						castHouse->_cooldowns.insert({ collidingEntity->getState()->id, std::chrono::steady_clock::now() });
+						break;
+					}
+				}
 			}
 		});
 
@@ -91,7 +131,11 @@ public:
 		}
 	}
 
+	// Map of dog ID's to cooldowns
+	std::unordered_map<uint32_t, std::chrono::time_point<std::chrono::steady_clock>> _cooldowns;
+
 private:
+	std::vector<std::shared_ptr<SBaseEntity>>* _dogHouses;
 	std::vector<std::shared_ptr<SBaseEntity>> _children;
 
 	std::shared_ptr<SBaseEntity> _backWall;
