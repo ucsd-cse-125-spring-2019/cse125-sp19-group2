@@ -259,6 +259,7 @@ xcopy /y /d  "$(SolutionDir)Library\lib\x64\Release\*.dll" "$(OutDir)"</Command>
     <ClCompile Include="Key.cpp" />
     <ClCompile Include="LocalPlayer.cpp" />
     <ClCompile Include="Light.cpp" />
+    <ClCompile Include="ParticleSystem.cpp" />
     <ClCompile Include="PointLight.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="NetworkClient.cpp" />
@@ -326,6 +327,8 @@ xcopy /y /d  "$(SolutionDir)Library\lib\x64\Release\*.dll" "$(OutDir)"</Command>
     <ClInclude Include="LocalPlayer.hpp" />
     <ClInclude Include="DirectionalLight.hpp" />
     <ClInclude Include="Light.hpp" />
+    <ClInclude Include="ParticleSystem.hpp" />
+    <ClInclude Include="Physics.hpp" />
     <ClInclude Include="PointLight.hpp" />
     <ClInclude Include="NetworkClient.hpp" />
     <ClInclude Include="InputManager.h" />
