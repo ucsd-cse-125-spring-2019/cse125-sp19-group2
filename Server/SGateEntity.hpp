@@ -12,9 +12,4 @@ public:
 
 	};
 	~SGateEntity() {};
-
-	virtual void update(std::vector<std::shared_ptr<GameEvent>> events) override
-	{
-		hasChanged = false;
-	}
 };

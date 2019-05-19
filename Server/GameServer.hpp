@@ -39,9 +39,6 @@ private:
 	// Update basic game state info (started, inLobby, etc)
 	void updateGameState();
 
-	// Update jails' gates y position
-	void updateGateHeight();
-
 	/** Variables **/
 
     // Interface for client communication

@@ -9,8 +9,12 @@
 
 #define JAIL_WALL_WIDTH 0.15f
 #define BUTTON_WIDTH 0.4f
+
 #define GATE_OPEN_THRESHOLD 1.0f
 #define GATE_MAX_HEIGHT 1.6f
+
+#define GATE_LIFT_RATE 2.0f // 2 units per second
+#define GATE_LOWER_RATE 1.0f // 1 units per second
 
 class SJailEntity : public SBaseEntity
 {
@@ -207,34 +211,37 @@ public:
 
 	virtual void update(std::vector<std::shared_ptr<GameEvent>> events) override
 	{
-		_lifted = false;
-	}
-
-	void updateGates() {
 		if (_lifted) {
-			if (liftRate < GATE_MAX_HEIGHT) {
-				liftRate += 0.02f;
+			if (gateHeight < GATE_MAX_HEIGHT) {
+				gateHeight += GATE_LIFT_RATE / TICKS_PER_SEC;
 				for (int i = 0; i < _gates.size(); i++) {
-					_gates[i]->getState()->pos.y = liftRate;
+					_gates[i]->getState()->pos.y = gateHeight;
 					_gates[i]->hasChanged = true;
 				}
 			}
 		}
 		else {
-			if (liftRate > 0) {
-				liftRate -= 0.01f;
+			if (gateHeight > 0) {
+				gateHeight -= GATE_LOWER_RATE / TICKS_PER_SEC;
 				for (int i = 0; i < _gates.size(); i++) {
-					_gates[i]->getState()->pos.y = liftRate;
+					_gates[i]->getState()->pos.y = gateHeight;
 					_gates[i]->hasChanged = true;
 				}
 			}
+			else {
+				for (int i = 0; i < _gates.size(); i++) {
+					_gates[i]->hasChanged = false;
+				}
+			}
 		}
+
+		_lifted = false;
 	}
 
 private:
 	std::vector<std::shared_ptr<SBaseEntity>> _children;
 	std::vector<std::shared_ptr<SGateEntity>> _gates;
-	bool _lifted;
-	float liftRate = 0;
+	bool _lifted = false;
+	float gateHeight = 0;
 };
 
