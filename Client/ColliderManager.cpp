@@ -83,6 +83,7 @@ void ColliderManager::render(std::unique_ptr<Camera> const& camera) {
 		ColliderManager::_shader->set_uniform("u_model", model);
 
 		switch (curBox->colliderType) {
+		case COLLIDER_GATE:
 		case COLLIDER_AABB:
 			ColliderManager::_cubeModel->getMeshAt(0).DrawLine(ColliderManager::_shader);
 			break;

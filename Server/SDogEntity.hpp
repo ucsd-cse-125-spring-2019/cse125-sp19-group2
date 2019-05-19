@@ -135,7 +135,8 @@ public:
 		}
 
 		// Update and check for changes
-		SPlayerEntity::update(events);
+		if (!(_isUrinating || _isLifting))
+			SPlayerEntity::update(events);
 
 
 		// Set running/not running based on position

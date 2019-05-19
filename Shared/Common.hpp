@@ -56,7 +56,8 @@ enum ColliderType
 {
 	COLLIDER_NONE,
 	COLLIDER_AABB,
-	COLLIDER_CAPSULE
+	COLLIDER_CAPSULE,
+	COLLIDER_GATE
 };
 
 // Ensure animations are in the same order as their corresponding text files!
