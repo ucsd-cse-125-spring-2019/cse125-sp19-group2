@@ -29,10 +29,11 @@ void GridLevelParser::parseLevelFromFile(
 	// Allocate structureInfo objects
 	structureInfo->entityMap = new std::unordered_map<uint32_t, std::shared_ptr<SBaseEntity>>();
 	structureInfo->newEntities = new std::vector<std::shared_ptr<SBaseEntity>>();
-	structureInfo->jails = new std::vector<glm::vec2>();
+	structureInfo->jailsPos = new std::vector<glm::vec2>();
 	structureInfo->humanSpawns = new std::queue<glm::vec2>();
 	structureInfo->dogSpawns = new std::queue<glm::vec2>();
 	structureInfo->dogHouses = new std::vector<std::shared_ptr<SBaseEntity>>();
+	structureInfo->jails = new std::vector<std::shared_ptr<SJailEntity>>();
 
 	// Open level file
 	std::ifstream levelFile;
@@ -232,7 +233,8 @@ void GridLevelParser::parseLevelFromFile(
 						entity = std::make_shared<SJailEntity>(
 							glm::vec3(avgPos.x, 0, avgPos.y),
 							glm::vec3(entityWidth, 2, entityDepth));
-						structureInfo->jails->push_back(avgPos);
+						structureInfo->jailsPos->push_back(avgPos);
+						structureInfo->jails->push_back(std::static_pointer_cast<SJailEntity>(entity));
 						break;
 					}
 					case TILE_HUMAN_SPAWN:

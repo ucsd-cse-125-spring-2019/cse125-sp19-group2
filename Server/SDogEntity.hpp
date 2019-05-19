@@ -52,6 +52,7 @@ public:
 
 	void update(std::vector<std::shared_ptr<GameEvent>> events) override
 	{
+		isCaught = false;
 		auto dogState = std::static_pointer_cast<DogState>(_state);
 		
 		// Save old position
@@ -96,6 +97,11 @@ public:
 				case EVENT_PLAYER_URINATE_END:
 					_isUrinating = false;
 					break;
+				case EVENT_PLAYER_LIFTING_START:
+					_isLifting = true;
+					break;
+				case EVENT_PLAYER_LIFTING_END:
+					_isLifting = false;
 				// TODO: event for when player releases running button
 				default:
 					break;
@@ -160,9 +166,7 @@ public:
 		// Dog getting caught is handled by the dog, not the human
 		if (entity->getState()->type == ENTITY_HUMAN)
 		{
-			isCaught = true;
-			
-			// Choose a random jail
+			// Teleport to a random jail
 			unsigned int seed = (unsigned int)std::chrono::system_clock::now().time_since_epoch().count();
 			std::shuffle(_jails->begin(), _jails->end(), std::default_random_engine(seed));
 			glm::vec2 jailPos = (*_jails)[0];
@@ -180,12 +184,17 @@ public:
 		}
 	}
 
+	bool isLifting() {
+		return _isLifting;
+	}
+
 private:
 	// List of jails the dog could potentially be sent to
 	std::vector<glm::vec2>* _jails;
 	int type = 0;
 	bool _isUrinating = false;
 	bool _isRunning = false;
+	bool _isLifting = false;
 	std::chrono::time_point<std::chrono::system_clock> _urinatingStartTime;
 	std::vector<std::shared_ptr<SBaseEntity>>* _newEntities;
 

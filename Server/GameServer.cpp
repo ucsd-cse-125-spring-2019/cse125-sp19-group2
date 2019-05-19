@@ -138,6 +138,8 @@ void GameServer::update()
 	// Collision resolution
 	_collisionManager->handleCollisions();
 
+	updateGateHeight();
+
 	// Update general state of the game based on updates and clock
 	updateGameState();
 
@@ -214,5 +216,12 @@ void GameServer::updateGameState()
 		_gameState->gameStarted = false;
 		_gameState->gameOver = true;
 		Logger::getInstance()->debug("Dogs won!");
+	}
+}
+
+void GameServer::updateGateHeight()
+{
+	for (auto jail : *_structureInfo->jails) {
+		jail->updateGates();
 	}
 }
