@@ -40,7 +40,8 @@ enum EntityType
 	ENTITY_PUDDLE,
 	ENTITY_FENCE,
 	ENTITY_BAR,
-	ENTITY_GATE
+	ENTITY_GATE,
+	ENTITY_TRIGGER
 	// TODO: add new types here, e.g. ENTITY_DOGBONE
 };
 

@@ -259,6 +259,7 @@
     <ClInclude Include="SPlayerEntity.hpp" />
     <ClInclude Include="GridLevelParser.hpp" />
     <ClInclude Include="SPuddleEntity.hpp" />
+    <ClInclude Include="STriggerEntity.hpp" />
     <ClInclude Include="StructureInfo.hpp" />
   </ItemGroup>
   <ItemGroup>
