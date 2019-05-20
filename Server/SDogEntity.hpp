@@ -58,23 +58,8 @@ public:
 		// Save old position
 		glm::vec3 oldPos = _state->pos;
 
-		// Filter for non-movement events
-		auto filteredEvents = std::vector<std::shared_ptr<GameEvent>>();
-		for (auto& event : events)
-		{
-			if (event->type != EVENT_PLAYER_MOVE)
-			{
-				filteredEvents.push_back(event);
-			}
-		}
-
-		// Remove duplicates. This should probably be moved to the EventManager,
-		// because the human will have to do the exact same thing
-		filteredEvents.erase(std::unique(filteredEvents.begin(), filteredEvents.end(),
-			[](const std::shared_ptr<GameEvent> & a, const std::shared_ptr<GameEvent> & b) -> bool
-		{
-			return a->type == b->type;
-		}), filteredEvents.end());
+		// Non-movement events, duplicates removed
+		auto filteredEvents = SPlayerEntity::getFilteredEvents(events);
 
 		// If any events left, process them
 		if (filteredEvents.size())
@@ -161,6 +146,9 @@ public:
 
 	void handleCollisionImpl(SBaseEntity* entity) override
 	{
+		// Player handler first
+		SPlayerEntity::handleCollisionImpl(entity);
+
 		// Cast for dog-specific stuff
 		auto dogState = std::static_pointer_cast<DogState>(_state);
 
