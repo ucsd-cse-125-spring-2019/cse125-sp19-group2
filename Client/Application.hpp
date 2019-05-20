@@ -103,6 +103,10 @@ private:
   
   // Local player
   std::unique_ptr<LocalPlayer> _localPlayer;
+  
+  // Player Lists
+  std::unordered_map<std::string, std::string> _dogs;
+  std::unordered_map<std::string, std::string> _humans;
 
   // UI
   nanogui::TextBox* _ipTextBox;

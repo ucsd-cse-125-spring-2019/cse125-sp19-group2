@@ -423,35 +423,74 @@ void Application::Update()
 					Logger::getInstance()->debug("One or both lists are null");
 				}
 
-				// Clear dog UI
-				while (dogList->children().size())
+				// Create a list for widgets that need to be removed
+				std::vector<nanogui::Widget*> removeList;
+				// Find Already Left Dog Players
+				for (auto it = dogList->children().begin(); it != dogList->children().end(); ++it)
 				{
-					dogList->removeChild(0);
+					uint32_t id = atoi((*it)->id().c_str());
+					// if this id can not be found, save its widget to removeList
+					if (gameState->dogs.find(id) == gameState->dogs.end())
+					{
+						removeList.push_back(*it);
+					}
 				}
+				// Remove all widges in the removeList
+				for (auto it = removeList.begin(); it != removeList.end(); ++it) {
+					dogList->removeChild(*it);
+				}
+				removeList.clear();
 
-				// Clear human UI
-				while (humanList->children().size())
+				// Find Already Left Human Players
+				for (auto it = humanList->children().begin(); it != humanList->children().end(); ++it)
 				{
-					humanList->removeChild(0);
+					uint32_t id = atoi((*it)->id().c_str());
+					// if this id can not be found, save its widget to removeList
+					if (gameState->humans.find(id) == gameState->humans.end())
+					{
+						removeList.push_back(*it);
+					}
 				}
+				// Remove all widges in the removeList
+				for (auto it = removeList.begin(); it != removeList.end(); ++it) {
+					humanList->removeChild(*it);
+				}
+				removeList.clear();
 
 				// Add dogs
 				for (auto& dogPair : gameState->dogs)
 				{
-					auto playerLabel = new nanogui::Label(dogList, dogPair.second, "sans", 28);
-					if (dogPair.first == _localPlayer->getPlayerId())
+					auto dogId = std::to_string(dogPair.first);
+					// if current dog is not in our list, add it
+					if (_dogs.find(dogId) == _dogs.end())
 					{
-						playerLabel->setColor(nanogui::Color(0.376f, 0.863f, 1.0f, 1.0f));
+						auto dogName = dogPair.second;
+						auto playerLabel = new nanogui::Label(dogList, dogName, "sans", 28);
+						playerLabel->setId(dogId);
+						_dogs[dogId] = dogName;
+						if (dogPair.first == _localPlayer->getPlayerId())
+						{
+							playerLabel->setColor(nanogui::Color(0.376f, 0.863f, 1.0f, 1.0f));
+						}
 					}
+
 				}
 
 				// Add humans
 				for (auto& humanPair : gameState->humans)
 				{
-					auto playerLabel = new nanogui::Label(humanList, humanPair.second, "sans", 28);
-					if (humanPair.first == _localPlayer->getPlayerId())
+					auto humanId = std::to_string(humanPair.first);
+					// if current dog is not in our list, add it
+					if (_humans.find(humanId) == _humans.end())
 					{
-						playerLabel->setColor(nanogui::Color(0.376f, 0.863f, 1.0f, 1.0f));
+						auto humanName = humanPair.second;
+						auto playerLabel = new nanogui::Label(humanList, humanPair.second, "sans", 28);
+						playerLabel->setId(humanId);
+						_humans[humanId] = humanName;
+						if (humanPair.first == _localPlayer->getPlayerId())
+						{
+							playerLabel->setColor(nanogui::Color(0.376f, 0.863f, 1.0f, 1.0f));
+						}
 					}
 				}
 
