@@ -6,127 +6,51 @@
 
 #include <algorithm>
 
-ParticleSystem::ParticleSystem()
+ParticleSystem::ParticleSystem(unsigned int max_particles, const glm::vec3 &position)
 {
-  _particles.resize(kMaxParticles);
-  _position_data.resize(kMaxParticles);
+  _max_particles = max_particles;
+  _particles.resize(_max_particles);
 }
 
 void ParticleSystem::Reset()
 {
-  glGenVertexArrays(1, &_vao);
-  glBindVertexArray(_vao);
-
-  // Generate buffer of particle positions
-  glGenBuffers(1, &_position_buffer);
-  glBindBuffer(GL_ARRAY_BUFFER, _position_buffer);
-  glBufferData(GL_ARRAY_BUFFER, kMaxParticles * 3 * sizeof(GLfloat), nullptr, GL_STREAM_DRAW);
-
-  glEnableVertexAttribArray(0);
-  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (GLvoid*)0);
-  glVertexAttribDivisor(0, 1);
-
-  glBindVertexArray(0);
+  _particles.clear();
+  _particles.resize(_max_particles);
 }
 
-void ParticleSystem::Update(float delta_time, const glm::vec3 &camera_position)
+unsigned int ParticleSystem::Emit(unsigned int num_particles)
 {
-  unsigned int remaining_particles = _live_particles;
-  unsigned int particle_index = 0;
-
-  // Update physics
-  for (int i = 0; i < _live_particles; i++)
+  while (num_particles && (_live_particles < _max_particles))
   {
-    Particle p = _particles[i];
-
-    p.life -= delta_time;
-    if (p.life > 0.0f)
-    {
-      // Determine acceleration
-      glm::vec3 accel{ 0.0f };
-      accel = physics::gravity;
-
-      // Integrate velocity and position
-      p.velocity += accel * delta_time;
-      p.position += p.velocity * delta_time;
-
-      // Update particle distance from camera for sorting
-      p.camera_distance = glm::length(p.position - camera_position);
-
-      // Update particle position buffer data
-      _position_data[particle_index] = p.position;
-
-      particle_index++;
-    }
-    else
-    {
-      p.is_live = false;
-      p.camera_distance = -1.0f;
-
-      remaining_particles--;
-    }
-
-    // Update particle p
-    _particles[i] = p;
-
-    // Update number of live particles
-    _live_particles = remaining_particles;
+    unsigned int index = FindUnusedParticle();
+    CreateParticle(index);
+    num_particles--;
   }
 
-  // Update buffer data
-  glBindBuffer(GL_ARRAY_BUFFER, _position_buffer);
-  glBufferData(GL_ARRAY_BUFFER, kMaxParticles * 3 * sizeof(GLfloat), nullptr, GL_STREAM_DRAW);
-  glBufferSubData(GL_ARRAY_BUFFER, 0, _live_particles * sizeof(GLfloat) * 3, _position_data.data());
+  return num_particles;
 }
 
-void ParticleSystem::Draw()
+unsigned int ParticleSystem::FindUnusedParticle()
 {
-  glBindVertexArray(_vao);
+  for (unsigned int i = _last_particle; i < _max_particles; i++)
+  {
+    if (_particles[i]->life <= 0.0f)
+    {
+      _last_particle = i;
+      return i;
+    }
+  }
 
-  glDrawArraysInstanced(GL_TRIANGLE_STRIP, 0, 1, _live_particles);
+  for (unsigned int i = 0; i < _last_particle; i++)
+  {
+    if (_particles[i]->life <= 0.0f)
+    {
+      _last_particle = i;
+      return i;
+    }
+  }
 
-  glBindVertexArray(0);
-}
-
-glm::vec2 ParticleSystem::particle_size() const
-{
-  return _particle_size;
-}
-
-float ParticleSystem::lifespan() const
-{
-  return _lifespan;
-}
-
-unsigned int ParticleSystem::rate() const
-{
-  return _rate;
-}
-
-void ParticleSystem::set_particle_size(float x, float y)
-{
-  _particle_size.x = x;
-  _particle_size.y = y;
-}
-
-void ParticleSystem::set_particle_texture(const char * path)
-{
-  _particle_texture.id = LoadTextureFromFile(path, "./Resources/Textures");
-  _particle_texture.type = TextureType::DIFFUSE;
-  _particle_texture.path = std::string(path);
-}
-
-void ParticleSystem::set_lifespan(float lifespan)
-{
-  _lifespan = lifespan;
-}
-
-void ParticleSystem::set_rate(unsigned int rate)
-{
-  _rate = rate;
-}
-
-void ParticleSystem::SortParticles()
-{
-  std::sort(_particles.begin, _particles.end);
+  // All particles alive
+  _last_particle = 0;
+  return 0;
 }

@@ -4,62 +4,44 @@
 
 #pragma once
 
-#include "Texture.hpp"
 #include "Physics.hpp"
 #include <vector>
+#include <memory>
 
 struct Particle
 {
   glm::vec3 position;
   glm::vec3 velocity;
+  glm::vec2 size;
+  float mass;
   float life;
-  float camera_distance = -1.0f;
-  bool is_live = false;
-
-  bool operator<(Particle &p)
-  {
-    this->camera_distance > p.camera_distance;
-  }
 };
 
 class ParticleSystem
 {
 public:
-  ParticleSystem();
+  ParticleSystem(unsigned int max_particles, const glm::vec3 &position);
 
-  void Reset();
-  void Update(float delta_time, const glm::vec3 &camera_position);
-  void Draw();
+  virtual void Update(float delta_time) = 0;
+  virtual void Draw() = 0;
 
-  glm::vec2 particle_size() const;
-  float lifespan() const;
-  unsigned int rate() const;
+  virtual void Reset();
+  virtual unsigned int Emit(unsigned int num_particles);
 
-  void set_particle_size(float x, float y);
-  void set_particle_texture(const char *path);
-  void set_lifespan(float lifespan);
-  void set_rate(unsigned int rate);
+protected:
+  typedef std::shared_ptr<Particle> ParticlePtr;
 
-private:
-  const unsigned int kMaxParticles = 1000;
+  // Overall system properties
+  glm::vec3 _origin;            ///< Position of particle system.
+  glm::vec3 _force;             ///< Force acting on system.
+  unsigned int _max_particles;  ///< Maximum number of particles.
+  unsigned int _live_particles; ///< Total number of active particles.
+  unsigned int _last_particle;
 
-  // System properties
-  glm::vec2 _particle_size;     ///< Dimensions of a particle.
-  Texture _particle_texture;    ///< Particle texture.
-  float _lifespan;              ///< Lifespan of a particle in seconds
-  unsigned int _rate;           ///< Rate of emission in particles per second.
-  unsigned int _live_particles; ///< Total number of active particles
+  float _accum_time; ///< Time accumulator for keeping track of last emission.
 
-  // Physics
-  glm::vec3 _direction; ///< Direction of particle emission.
-  float _particle_mass; ///< Particle mass in kg.
+  std::vector<ParticlePtr> _particles;
 
-  // Rendering
-  GLuint _vao;
-  GLuint _position_buffer;
-
-  std::vector<Particle> _particles;
-  std::vector<glm::vec3> _position_data;
-
-  void SortParticles();
+  virtual void CreateParticle(unsigned int index) = 0;
+  virtual unsigned int FindUnusedParticle();
 };
