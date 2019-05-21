@@ -48,7 +48,7 @@ public:
 	}
 
 	// Called by the CollisionManager; handle collision with specific object.
-	// Cannot be overridden by children; override handleCollisionImpl() instead.
+	// Cannot be overridden by children; override generalHandleCollision() instead.
 	void handleCollision(SBaseEntity* entity);
 
 	// Basic "bumping away" logic
@@ -67,7 +67,7 @@ public:
 
 protected:
 	// If any custom collision logic is needed, override this function
-	virtual void handleCollisionImpl(SBaseEntity* entity) {};
+	virtual void generalHandleCollision(SBaseEntity* entity) {};
 
 	// TODO: server-specific state goes here
 	std::unique_ptr<BaseCollider> _collider; // bounding box state info

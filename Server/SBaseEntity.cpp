@@ -33,12 +33,12 @@ void SBaseEntity::handleCollision(SBaseEntity * entity)
 		f(this, entity);
 	}
 
-	handleCollisionImpl(entity);
+	generalHandleCollision(entity);
 }
 
 void SBaseEntity::handlePushBack(SBaseEntity * entity)
 {
-	_collider->handleCollision(entity->getState().get());
+	_collider->handlePushBack(entity->getState().get());
 }
 
 void SBaseEntity::initState(bool generateId)

@@ -64,7 +64,7 @@ public:
 		// TODO: net throwing animation
 	}
 
-	void handleCollisionImpl(SBaseEntity* entity) override
+	void generalHandleCollision(SBaseEntity* entity) override
 	{
 		// Cast for player-specific stuff
 		auto humanState = std::static_pointer_cast<HumanState>(_state);
