@@ -153,7 +153,7 @@ public:
 		auto dogState = std::static_pointer_cast<DogState>(_state);
 
 		// Dog getting caught is handled by the dog, not the human
-		if (entity->getState()->type == ENTITY_HUMAN)
+		if (entity->getState()->type == ENTITY_HUMAN && !isCaught)
 		{
 			// Teleport to a random jail
 			unsigned int seed = (unsigned int)std::chrono::system_clock::now().time_since_epoch().count();
