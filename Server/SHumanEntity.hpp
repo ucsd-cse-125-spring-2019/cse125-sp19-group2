@@ -96,8 +96,7 @@ public:
 		{
 			SBaseEntity::handleCollision(entity);
 		}
-
-		if (entity->getState()->type == ENTITY_PUDDLE && !_slipInvincibility && !_slipping)
+		else if (entity->getState()->type == ENTITY_PUDDLE && !_slipInvincibility && !_slipping)
 		{
 			_slipping = true;
 			_slippingStartTime = std::chrono::system_clock::now();
