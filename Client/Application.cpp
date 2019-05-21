@@ -437,6 +437,7 @@ void Application::Update()
 				}
 				// Remove all widges in the removeList
 				for (auto it = removeList.begin(); it != removeList.end(); ++it) {
+					_dogs.erase((*it)->id());
 					dogList->removeChild(*it);
 				}
 				removeList.clear();
@@ -453,6 +454,7 @@ void Application::Update()
 				}
 				// Remove all widges in the removeList
 				for (auto it = removeList.begin(); it != removeList.end(); ++it) {
+					_humans.erase((*it)->id());
 					humanList->removeChild(*it);
 				}
 				removeList.clear();

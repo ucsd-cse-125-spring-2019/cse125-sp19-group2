@@ -128,9 +128,8 @@ void EventManager::handlePlayerSwitch(std::shared_ptr<GameEvent> event)
 	}
 	else if (humansResult != _gameState->humans.end())
 	{
-
-  _gameState->dogs.insert({ event->playerId, humansResult->second });
-  _gameState->humans.erase(humansResult);
+		_gameState->dogs.insert({ event->playerId, humansResult->second });
+		_gameState->humans.erase(humansResult);
 	}
 }
 
