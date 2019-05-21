@@ -18,6 +18,12 @@ UrineParticleSystem::UrineParticleSystem(unsigned int max_particles, const glm::
 	_camera = camera;
 	_position_data.resize(_max_particles);
 
+	// Setup shader program
+	_urine_program = Shader();
+	_urine_program.LoadFromFile(GL_VERTEX_SHADER, particle::urine_shader_vert);
+	_urine_program.LoadFromFile(GL_FRAGMENT_SHADER, particle::urine_shader_frag);
+	_urine_program.CreateProgram();
+
 	glGenVertexArrays(1, &_vao);
 	glBindVertexArray(_vao);
 
@@ -64,7 +70,7 @@ void UrineParticleSystem::Update(float delta_time)
 			p->velocity += accel * delta_time;
 			p->position += p->velocity * delta_time;
 
-			// Calculate camera distance
+			// Calculate camera distance for sorting
 			p->camera_distance = glm::length(p->position - _camera->position);
 
 			// Update particle position buffer data
@@ -74,6 +80,7 @@ void UrineParticleSystem::Update(float delta_time)
 		}
 		else
 		{
+			// Particle has died
 			remaining_particles--;
 		}
 	}
@@ -92,10 +99,22 @@ void UrineParticleSystem::Update(float delta_time)
 
 void UrineParticleSystem::Draw()
 {
+	_urine_program.Use();
+
+	// Setup urine sprite texture
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, _texture.id);
+	_urine_program.set_uniform("u_urine_sprite", 0);
+
+	// Particle properties
+	_urine_program.set_uniform("u_size", _size);
+
+	// Camera
+	_urine_program.set_uniform("u_view", _camera->view_matrix());
+	_urine_program.set_uniform("u_projection", _camera->projection_matrix());
+
 	glBindVertexArray(_vao);
-
 	glDrawArraysInstanced(GL_TRIANGLE_STRIP, 0, 1, _live_particles);
-
 	glBindVertexArray(0);
 }
 

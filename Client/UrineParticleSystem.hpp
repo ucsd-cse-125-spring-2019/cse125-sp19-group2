@@ -7,6 +7,7 @@
 #include "ParticleSystem.hpp"
 #include "Texture.hpp"
 #include "Camera.hpp"
+#include "Shader.hpp"
 
 struct UrineParticle : Particle
 {
@@ -21,6 +22,12 @@ struct UrineParticleSort
 			std::dynamic_pointer_cast<UrineParticle>(b)->camera_distance;
 	}
 } UrineSort;
+
+namespace particle
+{
+	const char *urine_shader_vert = "./Resources/Shaders/urine.vert";
+	const char *urine_shader_frag = "./Resources/Shaders/urine.frag";
+}
 
 class UrineParticleSystem : public ParticleSystem
 {
@@ -58,6 +65,7 @@ private:
 	GLuint _vbo;
 	GLuint _position_buffer;
 	std::shared_ptr<Camera> _camera;
+	Shader _urine_program;
 
 	std::vector<glm::vec3> _position_data;
 

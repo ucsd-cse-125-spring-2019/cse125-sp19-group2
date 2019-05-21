@@ -307,6 +307,12 @@
       <Filter>Resource Files</Filter>
     </None>
     <None Include="Resources\Shaders\floorTexture.vert">
+	  <Filter>Resource Files</Filter>
+    </None>
+    <None Include="Resources\Shaders\urine.vert">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="Resources\Shaders\urine.frag">
       <Filter>Resource Files</Filter>
     </None>
   </ItemGroup>
