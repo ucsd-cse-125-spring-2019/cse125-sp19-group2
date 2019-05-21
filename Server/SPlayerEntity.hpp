@@ -98,6 +98,7 @@ public:
 	{
 		_isInterpolating = true;
 		_destination = destination;
+		_finalDirection = finalDirection;
 		_interpVelocity = velocity;
 	}
 
@@ -108,6 +109,7 @@ protected:
 	// Interpolation stuff
 	bool _isInterpolating = false;
 	glm::vec3 _destination;
+	glm::vec3 _finalDirection;
 	float _interpVelocity; // Interpolation velocity, in units/sec
 
 	// Called by update() every tick
@@ -124,6 +126,7 @@ protected:
 			if (glm::length(movementVec) > glm::length(diff))
 			{
 				_state->pos = _destination;
+				_state->forward = _finalDirection;
 				_isInterpolating = false;
 			}
 			else

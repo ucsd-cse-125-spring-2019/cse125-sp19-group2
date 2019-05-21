@@ -46,7 +46,8 @@ public:
 			switch (event->type)
 			{
 			case EVENT_PLAYER_SWING_NET:
-				SPlayerEntity::interpolateMovement(_state->pos + (_state->forward * 1.5f), _state->forward, 10.0f);
+				// Example of lunging. Will probably need to change
+				SPlayerEntity::interpolateMovement(_state->pos + (_state->forward * 1.5f), _state->forward, 15.0f);
 				break;
 			}
 		}
