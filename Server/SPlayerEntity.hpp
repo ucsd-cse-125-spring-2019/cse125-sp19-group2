@@ -37,18 +37,18 @@ public:
 		// Only change attributes of this object if not static
 		if (!_state->isStatic)
 		{
-			// If any events left, process them
-			if (events.size())
+			// Movement events
+			std::vector<std::shared_ptr<GameEvent>> movementEvents;
+			std::copy_if(events.begin(), events.end(), std::back_inserter(movementEvents), [&](std::shared_ptr<GameEvent> i)
+			{
+				return i->type == EVENT_PLAYER_MOVE;
+			});
+
+			// Movement logic
+			if (movementEvents.size())
 			{
 				if (!_isInterpolating)
 				{
-					// Movement
-					std::vector<std::shared_ptr<GameEvent>> movementEvents;
-					std::copy_if(events.begin(), events.end(), std::back_inserter(movementEvents), [&](std::shared_ptr<GameEvent> i)
-						{
-							return i->type == EVENT_PLAYER_MOVE;
-						});
-
 					// Sort by vector
 					std::sort(movementEvents.begin(), movementEvents.end(),
 						[](const std::shared_ptr<GameEvent> & a, const std::shared_ptr<GameEvent> & b) -> bool
@@ -77,6 +77,7 @@ public:
 					// Update forward vector with unit direction only if it was modified
 					if (dir != glm::vec3(0))
 					{
+						_isMoving = true;
 						hasChanged = true;
 						_state->forward = dir / glm::length(dir);
 
@@ -85,8 +86,21 @@ public:
 						auto oldPos = _state->pos;
 						_state->pos = _state->pos + ((_state->forward * _velocity) / (float)TICKS_PER_SEC);
 					}
-				} // movement (!_isInterpolating)
-			} // events
+				} // !_isInterpolating
+			} // player movement
+			else if (_isMoving) // Client running slower than server
+			{
+				_state->pos = _state->pos + ((_state->forward * _velocity) / (float)TICKS_PER_SEC);
+			}
+
+			// Check for player stop event
+			for (auto& event : events)
+			{
+				if (event->type == EVENT_PLAYER_STOP)
+				{
+					_isMoving = false;
+				}
+			}
 
 			handleInterpolation();
 
@@ -105,6 +119,9 @@ public:
 protected:
 	// Player movement velocity in units/second
 	float _velocity;
+
+	// For the case in which client FPS is lower than tick rate
+	bool _isMoving;
 
 	// Interpolation stuff
 	bool _isInterpolating = false;
