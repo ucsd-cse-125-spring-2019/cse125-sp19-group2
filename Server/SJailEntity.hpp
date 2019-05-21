@@ -15,8 +15,8 @@
 #define GATE_OPEN_THRESHOLD 1.0f
 #define GATE_MAX_HEIGHT 1.6f
 
-#define GATE_LIFT_RATE 2.0f // 2 units per second
-#define GATE_LOWER_RATE 1.0f // 1 units per second
+#define GATE_LIFT_RATE 1.6f // 2 units per second
+#define GATE_LOWER_RATE 0.8f // 1 units per second
 
 class SJailEntity : public SBaseEntity
 {
@@ -159,6 +159,7 @@ public:
 		northSensorBox->getState()->isSolid = false;
 		northSensorBox->onCollision(collisionFunc);
 		_children.push_back(northSensorBox);
+		_triggers.push_back(northSensorBox);
 
 		auto southSensorBox = std::make_shared<STriggerEntity>(
 			glm::vec3(pos.x - xScale / 2 - TRIGGER_WIDTH / 2, TRIGGER_HEIGHT, pos.z - scale.z / 2 - TRIGGER_WIDTH / 2),
@@ -169,6 +170,7 @@ public:
 		southSensorBox->getState()->isSolid = false;
 		southSensorBox->onCollision(collisionFunc);
 		_children.push_back(southSensorBox);
+		_triggers.push_back(southSensorBox);
 
 		auto eastSensorBox = std::make_shared<STriggerEntity>(
 			glm::vec3(pos.x + scale.x / 2 + TRIGGER_WIDTH / 2, TRIGGER_HEIGHT, pos.z - zScale /2 - TRIGGER_WIDTH / 2),
@@ -179,6 +181,7 @@ public:
 		eastSensorBox->getState()->isSolid = false;
 		eastSensorBox->onCollision(collisionFunc);
 		_children.push_back(eastSensorBox);
+		_triggers.push_back(eastSensorBox);
 
 		auto westSensorBox = std::make_shared<STriggerEntity>(
 			glm::vec3(pos.x - scale.x / 2 - TRIGGER_WIDTH / 2, TRIGGER_HEIGHT, pos.z + zScale / 2 + TRIGGER_WIDTH / 2),
@@ -189,6 +192,7 @@ public:
 		westSensorBox->getState()->isSolid = false;
 		westSensorBox->onCollision(collisionFunc);
 		_children.push_back(westSensorBox);
+		_triggers.push_back(westSensorBox);
 
 		// sensor for checking if dog is in jail
 		auto jailSensorBox = std::make_shared<SBoxEntity>(
@@ -224,6 +228,9 @@ public:
 					_gates[i]->getState()->pos.y = gateHeight;
 					_gates[i]->hasChanged = true;
 				}
+				for (int i = 0; i < _triggers.size(); i++) {
+					_triggers[i]->updateForward(4);
+				}
 			}
 		}
 		else {
@@ -233,10 +240,16 @@ public:
 					_gates[i]->getState()->pos.y = gateHeight;
 					_gates[i]->hasChanged = true;
 				}
+				for (int i = 0; i < _triggers.size(); i++) {
+					_triggers[i]->updateForward(-2);
+				}
 			}
 			else {
 				for (int i = 0; i < _gates.size(); i++) {
 					_gates[i]->hasChanged = false;
+				}
+				for (int i = 0; i < _triggers.size(); i++) {
+					_triggers[i]->hasChanged = false;
 				}
 			}
 		}
@@ -247,6 +260,7 @@ public:
 private:
 	std::vector<std::shared_ptr<SBaseEntity>> _children;
 	std::vector<std::shared_ptr<SGateEntity>> _gates;
+	std::vector<std::shared_ptr<STriggerEntity>> _triggers;
 	bool _lifted = false;
 	float gateHeight = 0;
 };

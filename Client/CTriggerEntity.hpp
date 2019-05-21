@@ -26,7 +26,12 @@ public:
 		const auto t = glm::translate(glm::mat4(1.0f), _state->pos);
 		const auto r = glm::lookAt(glm::vec3(0.0f), _state->forward, _state->up);
 
-		auto model = t * r;
+		float rotateD = abs(_state->forward.x + _state->forward.z) - 1;
+		//Logger::getInstance()->debug("x: " + std::to_string(_state->forward.x) + "z: " + std::to_string(_state->forward.z));
+
+		auto r1 = glm::rotate(glm::radians(rotateD), glm::vec3(-1,0,0));
+
+		auto model = t * r * r1;
 
 		// Pass model matrix into shader
 		_objectShader->set_uniform("u_model", model);
