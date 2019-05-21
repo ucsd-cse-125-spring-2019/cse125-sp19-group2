@@ -38,6 +38,20 @@ public:
 	{
 		auto humanState = std::static_pointer_cast<HumanState>(_state);
 
+		// Non-movement events, duplicates removed
+		auto filteredEvents = SPlayerEntity::getFilteredEvents(events);
+
+		for (auto& event : filteredEvents)
+		{
+			switch (event->type)
+			{
+			case EVENT_PLAYER_SWING_NET:
+				// Example of lunging. Will probably need to change
+				SPlayerEntity::interpolateMovement(_state->pos + (_state->forward * 1.5f), _state->forward, 15.0f);
+				break;
+			}
+		}
+
 		// Save old position
 		glm::vec3 oldPos = _state->pos;
 
@@ -60,12 +74,13 @@ public:
 				break;
 			}
 		}
-
-		// TODO: net throwing animation
 	}
 
 	void generalHandleCollision(SBaseEntity* entity) override
 	{
+		// Base collision handling first
+		SPlayerEntity::generalHandleCollision(entity);
+
 		// Cast for player-specific stuff
 		auto humanState = std::static_pointer_cast<HumanState>(_state);
 

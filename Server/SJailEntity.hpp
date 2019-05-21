@@ -155,7 +155,6 @@ public:
 			glm::vec3(TRIGGER_WIDTH, 0.5f, TRIGGER_WIDTH),
 			glm::vec3(0, 0, 1)
 		);
-		//northSensorBox->getState()->transparency = 0.0f;
 		northSensorBox->getState()->isSolid = false;
 		northSensorBox->onCollision(collisionFunc);
 		_children.push_back(northSensorBox);
@@ -166,7 +165,6 @@ public:
 			glm::vec3(TRIGGER_WIDTH, 0.5f, TRIGGER_WIDTH),
 			glm::vec3(0, 0, -1)
 		);
-		//southSensorBox->getState()->transparency = 0.0f;
 		southSensorBox->getState()->isSolid = false;
 		southSensorBox->onCollision(collisionFunc);
 		_children.push_back(southSensorBox);
@@ -177,7 +175,6 @@ public:
 			glm::vec3(TRIGGER_WIDTH, 0.5f, TRIGGER_WIDTH),
 			glm::vec3(-1, 0, 0)
 		);
-		//eastSensorBox->getState()->transparency = 0.0f;
 		eastSensorBox->getState()->isSolid = false;
 		eastSensorBox->onCollision(collisionFunc);
 		_children.push_back(eastSensorBox);
@@ -188,16 +185,16 @@ public:
 			glm::vec3(TRIGGER_WIDTH, 0.5f, TRIGGER_WIDTH),
 			glm::vec3(1, 0, 0)
 		);
-		//westSensorBox->getState()->transparency = 0.0f;
 		westSensorBox->getState()->isSolid = false;
 		westSensorBox->onCollision(collisionFunc);
 		_children.push_back(westSensorBox);
 		_triggers.push_back(westSensorBox);
 
+
 		// sensor for checking if dog is in jail
 		auto jailSensorBox = std::make_shared<SBoxEntity>(
 			glm::vec3(pos.x, pos.y, pos.z),
-			glm::vec3(scale.x - 0.6f, 0.5f, scale.z - 0.6f)
+			glm::vec3(scale.x - 0.9f, 0.5f, scale.z - 0.9f)
 		);
 		jailSensorBox->getState()->transparency = 0.0f;
 		jailSensorBox->getState()->isSolid = false;
