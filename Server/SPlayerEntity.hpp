@@ -137,7 +137,7 @@ protected:
 		}
 	}
 
-	void handleCollisionImpl(SBaseEntity* entity) override
+	void generalHandleCollision(SBaseEntity* entity) override
 	{
 		// If interpolating and we hit a solid object, stop
 		if (_isInterpolating && entity->getState()->getSolidity(_state.get()))

@@ -147,7 +147,7 @@ public:
 	void generalHandleCollision(SBaseEntity* entity) override
 	{
 		// Player handler first
-		SPlayerEntity::handleCollisionImpl(entity);
+		SPlayerEntity::generalHandleCollision(entity);
 
 		// Cast for dog-specific stuff
 		auto dogState = std::static_pointer_cast<DogState>(_state);

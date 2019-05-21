@@ -79,7 +79,7 @@ public:
 	void generalHandleCollision(SBaseEntity* entity) override
 	{
 		// Base collision handling first
-		SPlayerEntity::handleCollisionImpl(entity);
+		SPlayerEntity::generalHandleCollision(entity);
 
 		// Cast for player-specific stuff
 		auto humanState = std::static_pointer_cast<HumanState>(_state);
