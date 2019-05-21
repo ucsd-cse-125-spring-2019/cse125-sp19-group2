@@ -61,42 +61,39 @@ void CollisionManager::handleCollisions()
 	while (!collisionSet.empty())
 	{
 		auto collisionPair = (collisionSet.begin());
-		auto objectA = collisionPair->first;
-		auto objectB = collisionPair->second;
+		auto stateA = collisionPair->first;
+		auto stateB = collisionPair->second;
 
 		// Erase from beginning
 		collisionSet.erase(collisionPair);
 
 		// Find A and B entities
-		auto entityA = _entityMap->find(objectA->id)->second;
-		auto entityB = _entityMap->find(objectB->id)->second;
+		auto entityA = _entityMap->find(stateA->id)->second;
+		auto entityB = _entityMap->find(stateB->id)->second;
 
-		// Collision resolution on A & B
-		entityA->handleCollision(entityB);
+		// First handle bounce-off
+		entityA->handlePushBack(entityB.get());
 
-		// Rare but in some cases (like dog caught), we need to run resolution
-		// on B as well
-		if (entityA->isColliding(objectB))
-		{
-			entityB->handleCollision(entityA);
-		}
+		entityA->hasChanged = true;
 
 		// Remove duplicates (e.g. <A,B> vs <B,A> if both players)
-		if (!objectB->isStatic)
+		if (!stateB->isStatic)
 		{
-			collisionSet.erase({ objectB, objectA });
+			collisionSet.erase({ stateB, stateA });
 
 			// Mark as changed
 			entityB->hasChanged = true;
 		}
 
-		entityA->hasChanged = true;
+		// General collision logic
+		entityA->handleCollision(entityB.get());
+		entityB->handleCollision(entityA.get());
 
 		// Re-check for colliding
 		for (auto& collidingEntity : entityA->getColliding(*tree))
 		{
 			// Only re-add if solid
-			if (objectA->isSolid && collidingEntity->isSolid)
+			if (stateA->getSolidity(collidingEntity) && collidingEntity->getSolidity(stateA))
 			{
 				collisionSet.insert({ entityA->getState().get(), collidingEntity });
 			}

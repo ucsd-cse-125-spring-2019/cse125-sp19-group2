@@ -6,9 +6,7 @@
 class SHydrantEntity : public SBaseEntity
 {
 public:
-	SHydrantEntity(
-		glm::vec3 pos,
-		glm::vec3 forward)
+	SHydrantEntity(glm::vec3 pos)
 	{
 		_state = std::make_shared<BaseState>();
 
@@ -17,7 +15,6 @@ public:
 		_state->type = ENTITY_HYDRANT;
 
 		_state->pos = pos;
-		_state->forward = forward;
 
 		// Basic capsule collider
 		_collider = std::make_unique<CapsuleCollider>(_state.get());

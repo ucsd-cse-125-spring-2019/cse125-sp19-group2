@@ -52,28 +52,14 @@ public:
 
 	void update(std::vector<std::shared_ptr<GameEvent>> events) override
 	{
+		isCaught = false;
 		auto dogState = std::static_pointer_cast<DogState>(_state);
 		
 		// Save old position
 		glm::vec3 oldPos = _state->pos;
 
-		// Filter for non-movement events
-		auto filteredEvents = std::vector<std::shared_ptr<GameEvent>>();
-		for (auto& event : events)
-		{
-			if (event->type != EVENT_PLAYER_MOVE)
-			{
-				filteredEvents.push_back(event);
-			}
-		}
-
-		// Remove duplicates. This should probably be moved to the EventManager,
-		// because the human will have to do the exact same thing
-		filteredEvents.erase(std::unique(filteredEvents.begin(), filteredEvents.end(),
-			[](const std::shared_ptr<GameEvent> & a, const std::shared_ptr<GameEvent> & b) -> bool
-		{
-			return a->type == b->type;
-		}), filteredEvents.end());
+		// Non-movement events, duplicates removed
+		auto filteredEvents = SPlayerEntity::getFilteredEvents(events);
 
 		// If any events left, process them
 		if (filteredEvents.size())
@@ -96,6 +82,11 @@ public:
 				case EVENT_PLAYER_URINATE_END:
 					_isUrinating = false;
 					break;
+				case EVENT_PLAYER_LIFTING_START:
+					_isLifting = true;
+					break;
+				case EVENT_PLAYER_LIFTING_END:
+					_isLifting = false;
 				// TODO: event for when player releases running button
 				default:
 					break;
@@ -129,7 +120,8 @@ public:
 		}
 
 		// Update and check for changes
-		SPlayerEntity::update(events);
+		if (!(_isUrinating || _isLifting))
+			SPlayerEntity::update(events);
 
 
 		// Set running/not running based on position
@@ -152,17 +144,18 @@ public:
 		}
 	}
 
-	void handleCollision(std::shared_ptr<SBaseEntity> entity) override
+	void generalHandleCollision(SBaseEntity* entity) override
 	{
+		// Player handler first
+		SPlayerEntity::generalHandleCollision(entity);
+
 		// Cast for dog-specific stuff
 		auto dogState = std::static_pointer_cast<DogState>(_state);
 
 		// Dog getting caught is handled by the dog, not the human
-		if (entity->getState()->type == ENTITY_HUMAN)
+		if (entity->getState()->type == ENTITY_HUMAN && !isCaught)
 		{
-			isCaught = true;
-			
-			// Choose a random jail
+			// Teleport to a random jail
 			unsigned int seed = (unsigned int)std::chrono::system_clock::now().time_since_epoch().count();
 			std::shuffle(_jails->begin(), _jails->end(), std::default_random_engine(seed));
 			glm::vec2 jailPos = (*_jails)[0];
@@ -178,11 +171,10 @@ public:
 			entity->getState()->isDestroyed = true;
 			entity->hasChanged = true;
 		}
-		else
-		{
-			// Otherwise, handle collisions as usual
-			SBaseEntity::handleCollision(entity);
-		}
+	}
+
+	bool isLifting() {
+		return _isLifting;
 	}
 
 private:
@@ -191,6 +183,7 @@ private:
 	int type = 0;
 	bool _isUrinating = false;
 	bool _isRunning = false;
+	bool _isLifting = false;
 	std::chrono::time_point<std::chrono::system_clock> _urinatingStartTime;
 	std::vector<std::shared_ptr<SBaseEntity>>* _newEntities;
 
