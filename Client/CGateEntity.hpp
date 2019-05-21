@@ -1,7 +1,6 @@
 #pragma once
 #include "CBaseEntity.hpp"
 #include "Model.hpp"
-#include "Shared/GateState.hpp"
 
 class CGateEntity : public CBaseEntity
 {
@@ -10,8 +9,9 @@ public:
 	{
 		// Allocate member variables
 		_objectModel = std::make_unique<Model>("./Resources/Models/gate.fbx");
+		_bottomModel = std::make_unique<Model>("./Resources/Models/gate_bottom.fbx");
 		_objectShader = std::make_unique<Shader>();
-		_state = std::make_shared<GateState>();
+		_state = std::make_shared<BaseState>();
 
 		_objectShader->LoadFromFile(GL_VERTEX_SHADER, "./Resources/Shaders/wall.vert");
 		_objectShader->LoadFromFile(GL_FRAGMENT_SHADER, "./Resources/Shaders/basiclight.frag");
@@ -28,18 +28,26 @@ public:
 		_objectShader->set_uniform("u_scale", s);
 	}
 
-	void updateState(std::shared_ptr<BaseState> state) override {
-		// Set generic stuff first
-		CBaseEntity::updateState(state);
+	void render(std::unique_ptr<Camera> const &camera) override
+	{
+		CBaseEntity::render(camera);
 
-		// Set dog-specific state variables
-		auto currentState = std::static_pointer_cast<GateState>(_state);
-		auto newState = std::static_pointer_cast<GateState>(state);
+		auto t = glm::translate(glm::mat4(1.0f), _state->pos);
+		const auto r = glm::lookAt(glm::vec3(0.0f), _state->forward, _state->up);
+		auto bottomScale = _state->scale;
+		bottomScale.y = BOTTOM_HEIGHT;
+		auto s = glm::scale(glm::mat4(1.0f), bottomScale);
 
-		// jail index
-		currentState->jailIndex = newState->jailIndex;
+		auto model = t * r * s;
+		_objectShader->set_uniform("u_model", model);
+		_bottomModel->render(_objectShader);
 
-		// lift rate
-		currentState->liftRate = newState->liftRate;
+		t = glm::translate(glm::mat4(1.0f), _state->pos + glm::vec3(0, _state->scale.y - BOTTOM_HEIGHT, 0));
+		model = t * r * s;
+		_objectShader->set_uniform("u_model", model);
+		_bottomModel->render(_objectShader);
 	}
+
+private:
+	std::unique_ptr<Drawable> _bottomModel;
 };

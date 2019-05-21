@@ -6,9 +6,7 @@
 class SFountainEntity : public SBaseEntity
 {
 public:
-	SFountainEntity(
-		glm::vec3 pos,
-		glm::vec3 forward)
+	SFountainEntity(glm::vec3 pos)
 	{
 		_state = std::make_shared<BaseState>();
 
@@ -17,7 +15,6 @@ public:
 		_state->type = ENTITY_FOUNTAIN;
 
 		_state->pos = pos;
-		_state->forward = forward;
 
 		_collider = std::make_unique<CapsuleCollider>(_state.get());
 		_state->colliderType = COLLIDER_CAPSULE;

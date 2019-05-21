@@ -10,7 +10,6 @@ public:
 	SHouseEntity(
 		EntityType houseType,
 		glm::vec3 pos,
-		glm::vec3 forward,
 		glm::vec3 scale)
 	{
 		_state = std::make_shared<BaseState>();
@@ -21,7 +20,6 @@ public:
 		// Ctor args
 		_state->type = houseType;
 		_state->pos = pos;
-		_state->forward = forward;
 
 		// Base collider info on scale
 		_collider = std::make_unique<AABBCollider>(_state.get());

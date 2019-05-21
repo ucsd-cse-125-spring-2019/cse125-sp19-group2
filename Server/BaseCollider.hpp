@@ -59,7 +59,7 @@ public:
 	};
 
 	// Handle push-back between entities. By default, does nothing
-	virtual void handleCollision(BaseState* state) {};
+	virtual void handlePushBack(BaseState* state) {};
 
 protected:
 	BaseState* _state;

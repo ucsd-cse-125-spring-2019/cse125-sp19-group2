@@ -1,5 +1,6 @@
 #include <fstream>
 #include <algorithm>
+#include <glm/gtx/string_cast.hpp>
 #include "GridLevelParser.hpp"
 #include "SBoxEntity.hpp"
 #include "SHouseEntity.hpp"
@@ -21,14 +22,18 @@ GridLevelParser::~GridLevelParser()
 }
 
 
-std::vector<std::shared_ptr<SBaseEntity>> GridLevelParser::parseLevelFromFile(
+void GridLevelParser::parseLevelFromFile(
 	std::string path,
-	std::vector<glm::vec2> & jailLocations,
-	std::queue<glm::vec2> & humanSpawns,
-	std::queue<glm::vec2> & dogSpawns)
+	StructureInfo* structureInfo)
 {
-	// List containing game objects parsed from level file
-	auto entityList = std::vector<std::shared_ptr<SBaseEntity>>();
+	// Allocate structureInfo objects
+	structureInfo->entityMap = new std::unordered_map<uint32_t, std::shared_ptr<SBaseEntity>>();
+	structureInfo->newEntities = new std::vector<std::shared_ptr<SBaseEntity>>();
+	structureInfo->jailsPos = new std::vector<glm::vec2>();
+	structureInfo->humanSpawns = new std::queue<glm::vec2>();
+	structureInfo->dogSpawns = new std::queue<glm::vec2>();
+	structureInfo->dogHouses = new std::vector<std::shared_ptr<SBaseEntity>>();
+	structureInfo->jails = new std::vector<std::shared_ptr<SJailEntity>>();
 
 	// Open level file
 	std::ifstream levelFile;
@@ -92,21 +97,7 @@ std::vector<std::shared_ptr<SBaseEntity>> GridLevelParser::parseLevelFromFile(
 		tile->type = (TileType)tileType;
 
 		// Set forward based on angle
-		switch (angle)
-		{
-		case 0:
-			tile->forward = glm::vec3(0, 0, -1);
-			break;
-		case 90:
-			tile->forward = glm::vec3(-1, 0, 0);
-			break;
-		case 180:
-			tile->forward = glm::vec3(0, 0, 1);
-			break;
-		case 270:
-			tile->forward = glm::vec3(1, 0, 0);
-			break;
-		}
+		tile->angle = angle / 90;
 
 		// Other properties
 		tile->isClaimed = false;
@@ -163,35 +154,34 @@ std::vector<std::shared_ptr<SBaseEntity>> GridLevelParser::parseLevelFromFile(
 				float entityWidth, entityDepth;
 				getTileInfo(aggregatedTiles, avgPos, entityWidth, entityDepth);
 
-				// For fences and walls, one dimension will be 0
-				if (aggregatedTiles[0]->type == TILE_FENCE ||
-					aggregatedTiles[0]->type == TILE_WALL)
+				// For fences, one dimension will be 0
+				if (aggregatedTiles[0]->type == TILE_FENCE)
 				{
-					entityWidth += WALL_WIDTH;
-					entityDepth += WALL_WIDTH;
+					entityWidth += FENCE_WIDTH;
+					entityDepth += FENCE_WIDTH;
 
-					// North <--> South wall
+					// North <--> South fence
 					if (entityDepth > entityWidth)
 					{
 						// Tiles are already sorted by Z. Retract
-						// wall as necessary
+						// fence1 as necessary
 						if (aggregatedTiles[0]->isDoublyClaimed)
 						{
 							// North end
-							entityDepth -= WALL_WIDTH;
-							avgPos.y += WALL_WIDTH / 2;
+							entityDepth -= FENCE_WIDTH;
+							avgPos.y += FENCE_WIDTH / 2;
 						}
 						if (aggregatedTiles.back()->isDoublyClaimed)
 						{
 							// South end
-							entityDepth -= WALL_WIDTH;
-							avgPos.y -= WALL_WIDTH / 2;
+							entityDepth -= FENCE_WIDTH;
+							avgPos.y -= FENCE_WIDTH / 2;
 						}
 
-						// TODO: extend walls to connect to neighboring buildings
+						// TODO: extend fence to connect to neighboring buildings
 					}
 
-					// West <--> East wall
+					// West <--> East fence
 					else if (entityWidth > entityDepth)
 					{
 						// Sort tiles by X
@@ -201,21 +191,21 @@ std::vector<std::shared_ptr<SBaseEntity>> GridLevelParser::parseLevelFromFile(
 							return a->pos.x < b->pos.x;
 						});
 
-						// Retract wall as necessary
+						// Retract fence as necessary
 						if (aggregatedTiles[0]->isDoublyClaimed)
 						{
 							// West end
-							entityWidth -= WALL_WIDTH;
-							avgPos.x += WALL_WIDTH/2;
+							entityWidth -= FENCE_WIDTH;
+							avgPos.x += FENCE_WIDTH/2;
 						}
 						if (aggregatedTiles.back()->isDoublyClaimed)
 						{
 							// East end
-							entityWidth -= WALL_WIDTH;
-							avgPos.x -= WALL_WIDTH/2;
+							entityWidth -= FENCE_WIDTH;
+							avgPos.x -= FENCE_WIDTH/2;
 						}
 
-						// TODO: extend walls to connect to neighboring buildings
+						// TODO: extend fences to connect to neighboring buildings
 					}
 				}
 				else // For everything else, fit the object tightly to its tiles
@@ -235,34 +225,26 @@ std::vector<std::shared_ptr<SBaseEntity>> GridLevelParser::parseLevelFromFile(
 						// For now just create a box entity
 						entity = std::make_shared<SFenceEntity>(
 							glm::vec3(avgPos.x, 0, avgPos.y),
-							glm::vec3(entityWidth, WALL_HEIGHT, entityDepth));
-						break;
-					}
-					case TILE_WALL:
-					{
-						// Same as above; will be changed eventually
-						entity = std::make_shared<SFenceEntity>(
-							glm::vec3(avgPos.x, 0, avgPos.y),
-							glm::vec3(entityWidth, WALL_HEIGHT, entityDepth));
+							glm::vec3(entityWidth, FENCE_HEIGHT, entityDepth));
 						break;
 					}
 					case TILE_JAIL:
 					{
 						entity = std::make_shared<SJailEntity>(
 							glm::vec3(avgPos.x, 0, avgPos.y),
-							aggregatedTiles[0]->forward,
 							glm::vec3(entityWidth, 2, entityDepth));
-						jailLocations.push_back(avgPos);
+						structureInfo->jailsPos->push_back(avgPos);
+						structureInfo->jails->push_back(std::static_pointer_cast<SJailEntity>(entity));
 						break;
 					}
 					case TILE_HUMAN_SPAWN:
 					{
-						humanSpawns.push(avgPos);
+						structureInfo->humanSpawns->push(avgPos);
 						break;
 					}
 					case TILE_DOG_SPAWN:
 					{
-						dogSpawns.push(avgPos);
+						structureInfo->dogSpawns->push(avgPos);
 						break;
 					}
 					case TILE_HOUSE_6X6_A:
@@ -271,7 +253,6 @@ std::vector<std::shared_ptr<SBaseEntity>> GridLevelParser::parseLevelFromFile(
 						entity = std::make_shared<SHouseEntity>(
 							ENTITY_HOUSE_6X6_A,
 							glm::vec3(avgPos.x, 0, avgPos.y),
-							aggregatedTiles[0]->forward,
 							glm::vec3(6));
 						break;
 					}
@@ -285,47 +266,57 @@ std::vector<std::shared_ptr<SBaseEntity>> GridLevelParser::parseLevelFromFile(
 					{
 						entity = std::make_shared<SDogHouseEntity>(
 							glm::vec3(avgPos.x, 0, avgPos.y),
-							aggregatedTiles[0]->forward);
+							structureInfo->dogHouses);
+						structureInfo->dogHouses->push_back(entity);
 						break;
 					}
 					case TILE_HYDRANT:
 					{
 						entity = std::make_shared<SHydrantEntity>(
-							glm::vec3(avgPos.x, 0, avgPos.y),
-							aggregatedTiles[0]->forward);
+							glm::vec3(avgPos.x, 0, avgPos.y));
 						break;
 					}
 					case TILE_FOUNTAIN:
 					{
 						entity = std::make_shared<SFountainEntity>(
-							glm::vec3(avgPos.x, 0, avgPos.y),
-							aggregatedTiles[0]->forward);
+							glm::vec3(avgPos.x, 0, avgPos.y));
 						break;
 					}
 				}
 
 				if (entity)
 				{
-					entityList.push_back(entity);
+					// Rotate first
+					if (aggregatedTiles[0]->angle != 0)
+					{
+						entity->rotate(entity->getState()->pos, aggregatedTiles[0]->angle);
+
+					}
+
+					// Add entity to map
+					structureInfo->entityMap->insert({ entity->getState()->id, entity });
+
+					// Add children to map
 					auto children = entity->getChildren();
-					entityList.insert(entityList.begin(), children.begin(), children.end());
+					for (auto& child : entity->getChildren())
+					{
+						structureInfo->entityMap->insert({ child->getState()->id, child });
+					}
 				}
 			}
 
 			// Build floor tile if not default floor
 			if (tile->groundType != 0)
 			{
-				entityList.push_back(
-					std::make_shared<SFloorEntity>(
-						(FloorType)tile->groundType,
-						xIndex,
-						zIndex,
-						tileWidth));
+				auto floorTile = std::make_shared<SFloorEntity>(
+					(FloorType)tile->groundType,
+					xIndex,
+					zIndex,
+					tileWidth);
+				structureInfo->entityMap->insert({ floorTile->getState()->id, floorTile });
 			}
 		}
 	}
-
-	return entityList;
 }
 
 void GridLevelParser::getTileInfo(
@@ -376,7 +367,7 @@ void GridLevelParser::Tile::aggregateTiles(
 	}
 	else
 	{
-		// Edge case for walls; reclaimed tile while moving to right
+		// Edge case for fences; reclaimed tile while moving to right
 		if (this->isClaimed)
 		{
 			this->isDoublyClaimed = true;
@@ -388,7 +379,7 @@ void GridLevelParser::Tile::aggregateTiles(
 		{
 			case DIR_RIGHT:
 			{
-				// Edge case for walls and fences: aggregate single item to left
+				// Edge case for fences: aggregate single item to left
 				if (this->type == TILE_FENCE &&
 					xIndex - 1 >= 0 &&
 					tiles[zIndex][xIndex - 1]->type == this->type &&
@@ -410,16 +401,16 @@ void GridLevelParser::Tile::aggregateTiles(
 						maxDepth);
 				}
 
-				// If this is a wall or fence and the vector has more than one
+				// If this is a fence and the vector has more than one
 				// element, we're done. We don't want fences in multiple
 				// dimensions.
-				if ((this->type == TILE_FENCE || this->type == TILE_WALL) &&
+				if ((this->type == TILE_FENCE) &&
 					aggregatedTiles.size() > 1)
 				{
 					return;
 				}
 
-				// Edge case for walls and fences: aggregate single item above
+				// Edge case for fences: aggregate single item above
 				if (this->type == TILE_FENCE &&
 					zIndex - 1 >= 0 &&
 					tiles[zIndex - 1][xIndex]->type == this->type &&

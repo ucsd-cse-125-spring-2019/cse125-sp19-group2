@@ -3,20 +3,12 @@
 #include "SDogEntity.hpp"
 
 EventManager::EventManager(
-	std::unordered_map<uint32_t, std::shared_ptr<SBaseEntity>>* entityMap,
-	std::vector<std::shared_ptr<SBaseEntity>>* newEntities,
 	NetworkServer* networkInterface,
-	std::vector<glm::vec2>* jails,
-	std::queue<glm::vec2>* humanSpawns,
-	std::queue<glm::vec2>* dogSpawns,
+	StructureInfo* structureInfo,
 	std::shared_ptr<GameState> gameState)
 {
-	_entityMap = entityMap;
-	_newEntities = newEntities;
 	_networkInterface = networkInterface;
-	_jails = jails;
-	_humanSpawns = humanSpawns;
-	_dogSpawns = dogSpawns;
+	_structureInfo = structureInfo;
 	_gameState = gameState;
 }
 
@@ -71,7 +63,7 @@ void EventManager::update()
 	}
 
 	// Call update() on all entities
-	for (auto& entityPair : *_entityMap)
+	for (auto& entityPair : *_structureInfo->entityMap)
 	{
 		// There are some cases where the map does not have a vector
 		auto it = eventMap.find(entityPair.first);
@@ -147,9 +139,9 @@ void EventManager::handlePlayerReady(std::shared_ptr<GameEvent> event)
 		for (auto& humanPair : _gameState->humans)
 		{
 			// Get first element from human spawn locations and push it back
-			glm::vec2 humanSpawn = _humanSpawns->front();
-			_humanSpawns->pop();
-			_humanSpawns->push(humanSpawn);
+			glm::vec2 humanSpawn = _structureInfo->humanSpawns->front();
+			_structureInfo->humanSpawns->pop();
+			_structureInfo->humanSpawns->push(humanSpawn);
 
 			auto humanEntity = std::make_shared<SHumanEntity>(
 				humanPair.first,
@@ -159,33 +151,33 @@ void EventManager::handlePlayerReady(std::shared_ptr<GameEvent> event)
 			humanEntity->getState()->pos = glm::vec3(humanSpawn.x, 0, humanSpawn.y);
 
 			// Insert into global map
-			_entityMap->insert({ humanPair.first, humanEntity });
+			_structureInfo->entityMap->insert({ humanPair.first, humanEntity });
 		}
 
 		// Build player entities for each dog
 		for (auto& dogPair : _gameState->dogs)
 		{
 			// Get first element from dog spawn locations and push it back
-			glm::vec2 dogSpawn = _dogSpawns->front();
-			_dogSpawns->pop();
-			_dogSpawns->push(dogSpawn);
+			glm::vec2 dogSpawn = _structureInfo->dogSpawns->front();
+			_structureInfo->dogSpawns->pop();
+			_structureInfo->dogSpawns->push(dogSpawn);
 
 			auto dogEntity = std::make_shared<SDogEntity>(
-				dogPair.first,
-				dogPair.second,
-				_jails,
-				_newEntities);
+				dogPair.first, // ID
+				dogPair.second, // Name
+				_structureInfo->jailsPos,
+				_structureInfo->newEntities);
 
 			// Set location
 			dogEntity->getState()->pos = glm::vec3(dogSpawn.x, 0, dogSpawn.y);
 
 			// Insert into global map
-			_entityMap->insert({ dogPair.first, dogEntity });
+			_structureInfo->entityMap->insert({ dogPair.first, dogEntity });
 		}
 
 		// Send state of every object to every player
 		auto updateVec = std::vector<std::shared_ptr<BaseState>>();
-		for (auto& entityPair : *_entityMap)
+		for (auto& entityPair : *_structureInfo->entityMap)
 		{
 			updateVec.push_back(entityPair.second->getState());
 		}
@@ -235,8 +227,8 @@ void EventManager::handlePlayerLeave(std::shared_ptr<GameEvent> event)
 	}
 
 	// Mark entity for deletion if it exists
-	auto result = _entityMap->find(event->playerId);
-	if (result != _entityMap->end()) {
+	auto result = _structureInfo->entityMap->find(event->playerId);
+	if (result != _structureInfo->entityMap->end()) {
 		auto entity = result->second;
 		entity->getState()->isDestroyed = true;
 		entity->hasChanged = true;
