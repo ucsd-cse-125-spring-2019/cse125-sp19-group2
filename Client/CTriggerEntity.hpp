@@ -26,8 +26,8 @@ public:
 		const auto t = glm::translate(glm::mat4(1.0f), _state->pos);
 		const auto r = glm::lookAt(glm::vec3(0.0f), _state->forward, _state->up);
 
+		// magnitude of forward - 1 is the amount of degree to rotate
 		float rotateD = abs(_state->forward.x + _state->forward.z) - 1;
-		//Logger::getInstance()->debug("x: " + std::to_string(_state->forward.x) + "z: " + std::to_string(_state->forward.z));
 
 		auto r1 = glm::rotate(glm::radians(rotateD), glm::vec3(-1,0,0));
 

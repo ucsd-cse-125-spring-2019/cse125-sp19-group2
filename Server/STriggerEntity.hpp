@@ -16,16 +16,11 @@ public:
 	};
 
 	void updateForward(int degree) {
-		curDegree += degree;
+		curDegree += degree + 360;
 		curDegree %= 360;
 		_state->forward = origForward * (float)curDegree + origForward;
 		hasChanged = true;
 	}
-
-	//virtual void update(std::vector<std::shared_ptr<GameEvent>> events) override
-	//{
-	//	hasChanged = false;
-	//}
 
 	~STriggerEntity() {};
 
