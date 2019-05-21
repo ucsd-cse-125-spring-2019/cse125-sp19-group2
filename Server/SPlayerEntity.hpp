@@ -114,6 +114,7 @@ public:
 		_destination = destination;
 		_finalDirection = finalDirection;
 		_interpVelocity = velocity;
+
 	}
 
 protected:
@@ -121,7 +122,7 @@ protected:
 	float _velocity;
 
 	// For the case in which client FPS is lower than tick rate
-	bool _isMoving;
+	bool _isMoving = false;
 
 	// Interpolation stuff
 	bool _isInterpolating = false;
@@ -137,6 +138,14 @@ protected:
 			// Vector to final position
 			glm::vec3 diff = _destination - _state->pos;
 			glm::vec3 unitDiff = diff / glm::length(diff);
+
+			if (glm::length(diff) == 0)
+			{
+				_isInterpolating = false;
+				_state->forward = _finalDirection;
+				hasChanged = true;
+				return;
+			}
 
 			glm::vec3 movementVec = unitDiff * (_interpVelocity / TICKS_PER_SEC);
 
