@@ -86,7 +86,7 @@ void Application::Setup() {
   _debuglightShader->LoadFromFile(GL_FRAGMENT_SHADER, "./Resources/Shaders/debuglight.frag");
   _debuglightShader->CreateProgram();
 
-  _skybox = std::make_unique<Skybox>("thefog");
+  _skybox = std::make_unique<Skybox>("skybox");
 
   // Create light
   _point_light = std::make_unique<PointLight>(
