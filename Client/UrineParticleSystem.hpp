@@ -9,17 +9,11 @@
 #include "Camera.hpp"
 #include "Shader.hpp"
 
-struct UrineParticle : Particle
-{
-	float camera_distance = -1.0f;
-};
-
 struct UrineParticleSort
 {
 	bool operator()(const std::shared_ptr<Particle>& a, const std::shared_ptr<Particle>& b)
 	{
-		return std::dynamic_pointer_cast<UrineParticle>(a)->camera_distance >
-			std::dynamic_pointer_cast<UrineParticle>(b)->camera_distance;
+		return a->camera_distance > b->camera_distance;
 	}
 } UrineSort;
 
@@ -51,8 +45,6 @@ public:
 	void set_lifespan(float lifespan);
 
 private:
-	typedef std::shared_ptr<UrineParticle> UrineParticlePtr;
-
 	// Urine particle properties
 	glm::vec3 _velocity; ///< Urine's initial velocity;
 	glm::vec2 _size;     ///< Dimensions of a urine particle.

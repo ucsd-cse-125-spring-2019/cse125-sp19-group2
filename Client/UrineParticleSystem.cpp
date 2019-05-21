@@ -54,9 +54,9 @@ void UrineParticleSystem::Update(float delta_time)
 	unsigned int particle_index = 0;
 
 	// Update physics
-	for (int i = 0; i < _live_particles; i++)
+	for (unsigned int i = 0; i < _live_particles; i++)
 	{
-		UrineParticlePtr p = std::dynamic_pointer_cast<UrineParticle>(_particles[i]);
+		ParticlePtr p = _particles[i];
 
 		p->life -= delta_time;
 		if (p->life > 0.0f)
@@ -71,7 +71,7 @@ void UrineParticleSystem::Update(float delta_time)
 			p->position += p->velocity * delta_time;
 
 			// Calculate camera distance for sorting
-			p->camera_distance = glm::length(p->position - _camera->position);
+			p->camera_distance = glm::length(p->position - _camera->position());
 
 			// Update particle position buffer data
 			_position_data[particle_index] = p->position;

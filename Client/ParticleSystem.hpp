@@ -15,6 +15,7 @@ struct Particle
 	glm::vec2 size;
 	float mass;
 	float life;
+	float camera_distance = -1.0f;
 };
 
 class ParticleSystem
