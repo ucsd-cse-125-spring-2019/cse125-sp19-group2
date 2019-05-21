@@ -82,6 +82,9 @@
     <ClCompile Include="AudioManager.cpp">
       <Filter>Source Files\Graphics</Filter>
     </ClCompile>
+    <ClCompile Include="ParticleSystem.cpp">
+      <Filter>Source Files\Graphics</Filter>
+    </ClCompile>
     <ClCompile Include="ColliderManager.cpp">
       <Filter>Source Files\Entity</Filter>
     </ClCompile>
@@ -89,6 +92,9 @@
       <Filter>Source Files\Entity</Filter>
 	</ClCompile>
     <ClCompile Include="ParticleSystem.cpp">
+      <Filter>Source Files\Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="UrineParticleSystem.cpp">
       <Filter>Source Files\Graphics</Filter>
     </ClCompile>
   </ItemGroup>
@@ -232,6 +238,9 @@
       <Filter>Header Files\Graphics</Filter>
     </ClInclude>
     <ClInclude Include="Physics.hpp">
+	  <Filter>Header Files\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="UrineParticleSystem.hpp">
       <Filter>Header Files\Graphics</Filter>
     </ClInclude>
     <ClInclude Include="CTriggerEntity.hpp">

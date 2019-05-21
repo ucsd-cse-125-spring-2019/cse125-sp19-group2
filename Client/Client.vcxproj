@@ -271,6 +271,7 @@ xcopy /y /d  "$(SolutionDir)Library\lib\x64\Release\*.dll" "$(OutDir)"</Command>
     <ClCompile Include="stb_image.cpp" />
     <ClCompile Include="Texture.cpp" />
     <ClCompile Include="GamePadXbox.cpp" />
+    <ClCompile Include="UrineParticleSystem.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
@@ -341,6 +342,7 @@ xcopy /y /d  "$(SolutionDir)Library\lib\x64\Release\*.dll" "$(OutDir)"</Command>
     <ClInclude Include="Model.hpp" />
     <ClInclude Include="Shader.hpp" />
     <ClInclude Include="Camera.hpp" />
+    <ClInclude Include="UrineParticleSystem.hpp" />
     <ClInclude Include="Vertex.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
