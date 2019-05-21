@@ -12,6 +12,7 @@
 #include "CFenceEntity.hpp"
 #include "CBarEntity.hpp"
 #include "CGateEntity.hpp"
+#include "CTriggerEntity.hpp"
 #include "ColliderManager.hpp"
 #include "Shared/Logger.hpp"
 #include <algorithm>
@@ -94,6 +95,9 @@ std::shared_ptr<CBaseEntity> EntityManager::getEntity(std::shared_ptr<BaseState>
     case ENTITY_GATE:
       entity = std::make_shared<CGateEntity>();
       break;
+	case ENTITY_TRIGGER:
+	  entity = std::make_shared<CTriggerEntity>();
+	  break;
     case ENTITY_FLOOR:
       CFloorEntity::getInstance().updateTile(state);
       break;

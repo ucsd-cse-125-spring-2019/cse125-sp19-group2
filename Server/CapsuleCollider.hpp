@@ -70,7 +70,7 @@ public:
 	}
 
 	// Push-back between non-static entities (this) and other entities
-	void handleCollision(BaseState* state) override
+	void handlePushBack(BaseState* state) override
 	{
 		BaseState* stateA = _state;
 		BaseState* stateB = state;

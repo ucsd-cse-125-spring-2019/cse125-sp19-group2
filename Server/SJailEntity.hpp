@@ -3,18 +3,20 @@
 #include "SBoxEntity.hpp"
 #include "SBarEntity.hpp"
 #include "SGateEntity.hpp"
+#include "STriggerEntity.hpp"
 #include "SDogEntity.hpp"
 #include "EmptyCollider.hpp"
 #include <algorithm>
 
 #define JAIL_WALL_WIDTH 0.15f
-#define BUTTON_WIDTH 0.4f
+#define TRIGGER_WIDTH 0.4f
+#define TRIGGER_HEIGHT 0.6f
 
 #define GATE_OPEN_THRESHOLD 1.0f
 #define GATE_MAX_HEIGHT 1.6f
 
-#define GATE_LIFT_RATE 2.0f // 2 units per second
-#define GATE_LOWER_RATE 1.0f // 1 units per second
+#define GATE_LIFT_RATE 1.6f // 2 units per second
+#define GATE_LOWER_RATE 0.8f // 1 units per second
 
 class SJailEntity : public SBaseEntity
 {
@@ -148,41 +150,49 @@ public:
 		};
 
 		// Sensor for trigger
-		auto northSensorBox = std::make_shared<SBoxEntity>(
-			glm::vec3(pos.x + xScale / 2 + BUTTON_WIDTH / 2, pos.y, pos.z + scale.z / 2 + BUTTON_WIDTH / 2),
-			glm::vec3(BUTTON_WIDTH, 0.5f, BUTTON_WIDTH)
+		auto northSensorBox = std::make_shared<STriggerEntity>(
+			glm::vec3(pos.x + xScale / 2 + TRIGGER_WIDTH / 2, TRIGGER_HEIGHT, pos.z + scale.z / 2 + TRIGGER_WIDTH / 2),
+			glm::vec3(TRIGGER_WIDTH, 0.5f, TRIGGER_WIDTH),
+			glm::vec3(0, 0, 1)
 		);
-		northSensorBox->getState()->transparency = 0.0f;
+		//northSensorBox->getState()->transparency = 0.0f;
 		northSensorBox->getState()->isSolid = false;
 		northSensorBox->onCollision(collisionFunc);
 		_children.push_back(northSensorBox);
+		_triggers.push_back(northSensorBox);
 
-		auto southSensorBox = std::make_shared<SBoxEntity>(
-			glm::vec3(pos.x - xScale / 2 - BUTTON_WIDTH / 2, pos.y, pos.z - scale.z / 2 - BUTTON_WIDTH / 2),
-			glm::vec3(BUTTON_WIDTH, 0.5f, BUTTON_WIDTH)
+		auto southSensorBox = std::make_shared<STriggerEntity>(
+			glm::vec3(pos.x - xScale / 2 - TRIGGER_WIDTH / 2, TRIGGER_HEIGHT, pos.z - scale.z / 2 - TRIGGER_WIDTH / 2),
+			glm::vec3(TRIGGER_WIDTH, 0.5f, TRIGGER_WIDTH),
+			glm::vec3(0, 0, -1)
 		);
-		southSensorBox->getState()->transparency = 0.0f;
+		//southSensorBox->getState()->transparency = 0.0f;
 		southSensorBox->getState()->isSolid = false;
 		southSensorBox->onCollision(collisionFunc);
 		_children.push_back(southSensorBox);
+		_triggers.push_back(southSensorBox);
 
-		auto eastSensorBox = std::make_shared<SBoxEntity>(
-			glm::vec3(pos.x + scale.x / 2 + BUTTON_WIDTH / 2, pos.y, pos.z - zScale /2 - BUTTON_WIDTH / 2),
-			glm::vec3(BUTTON_WIDTH, 0.5f, BUTTON_WIDTH)
+		auto eastSensorBox = std::make_shared<STriggerEntity>(
+			glm::vec3(pos.x + scale.x / 2 + TRIGGER_WIDTH / 2, TRIGGER_HEIGHT, pos.z - zScale /2 - TRIGGER_WIDTH / 2),
+			glm::vec3(TRIGGER_WIDTH, 0.5f, TRIGGER_WIDTH),
+			glm::vec3(-1, 0, 0)
 		);
-		eastSensorBox->getState()->transparency = 0.0f;
+		//eastSensorBox->getState()->transparency = 0.0f;
 		eastSensorBox->getState()->isSolid = false;
 		eastSensorBox->onCollision(collisionFunc);
 		_children.push_back(eastSensorBox);
+		_triggers.push_back(eastSensorBox);
 
-		auto westSensorBox = std::make_shared<SBoxEntity>(
-			glm::vec3(pos.x - scale.x / 2 - BUTTON_WIDTH / 2, pos.y, pos.z + zScale / 2 + BUTTON_WIDTH / 2),
-			glm::vec3(BUTTON_WIDTH, 0.5f, BUTTON_WIDTH)
+		auto westSensorBox = std::make_shared<STriggerEntity>(
+			glm::vec3(pos.x - scale.x / 2 - TRIGGER_WIDTH / 2, TRIGGER_HEIGHT, pos.z + zScale / 2 + TRIGGER_WIDTH / 2),
+			glm::vec3(TRIGGER_WIDTH, 0.5f, TRIGGER_WIDTH),
+			glm::vec3(1, 0, 0)
 		);
-		westSensorBox->getState()->transparency = 0.0f;
+		//westSensorBox->getState()->transparency = 0.0f;
 		westSensorBox->getState()->isSolid = false;
 		westSensorBox->onCollision(collisionFunc);
 		_children.push_back(westSensorBox);
+		_triggers.push_back(westSensorBox);
 
 		// sensor for checking if dog is in jail
 		auto jailSensorBox = std::make_shared<SBoxEntity>(
@@ -218,6 +228,9 @@ public:
 					_gates[i]->getState()->pos.y = gateHeight;
 					_gates[i]->hasChanged = true;
 				}
+				for (int i = 0; i < _triggers.size(); i++) {
+					_triggers[i]->updateForward(4);
+				}
 			}
 		}
 		else {
@@ -227,10 +240,16 @@ public:
 					_gates[i]->getState()->pos.y = gateHeight;
 					_gates[i]->hasChanged = true;
 				}
+				for (int i = 0; i < _triggers.size(); i++) {
+					_triggers[i]->updateForward(-2);
+				}
 			}
 			else {
 				for (int i = 0; i < _gates.size(); i++) {
 					_gates[i]->hasChanged = false;
+				}
+				for (int i = 0; i < _triggers.size(); i++) {
+					_triggers[i]->hasChanged = false;
 				}
 			}
 		}
@@ -241,6 +260,7 @@ public:
 private:
 	std::vector<std::shared_ptr<SBaseEntity>> _children;
 	std::vector<std::shared_ptr<SGateEntity>> _gates;
+	std::vector<std::shared_ptr<STriggerEntity>> _triggers;
 	bool _lifted = false;
 	float gateHeight = 0;
 };

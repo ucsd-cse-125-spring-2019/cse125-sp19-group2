@@ -144,7 +144,7 @@ public:
 		}
 	}
 
-	void handleCollisionImpl(SBaseEntity* entity) override
+	void generalHandleCollision(SBaseEntity* entity) override
 	{
 		// Player handler first
 		SPlayerEntity::handleCollisionImpl(entity);
