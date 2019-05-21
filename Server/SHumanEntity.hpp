@@ -50,6 +50,28 @@ public:
 			humanState->currentAnimation = ANIMATION_HUMAN_RUNNING;
 		}
 
+		if (_slipping)
+		{
+			_state->pos = oldPos;
+			auto now = std::chrono::system_clock::now();
+			std::chrono::duration<double> diff = now - _slippingStartTime;
+			if (diff.count() > 2.0)
+			{
+				_slipping = false;
+				_slipInvincibilityStartTime = now;
+				_slipInvincibility = true;
+			}
+		}
+		if (_slipInvincibility)
+		{
+			auto now = std::chrono::system_clock::now();
+			std::chrono::duration<double> diff = now - _slipInvincibilityStartTime;
+			if (diff.count() > 2.0)
+			{
+				_slipInvincibility = false;
+			}
+		}
+
 		// Check for stop event
 		for (auto& event : events)
 		{
@@ -69,6 +91,23 @@ public:
 		// Cast for player-specific stuff
 		auto humanState = std::static_pointer_cast<HumanState>(_state);
 
+		// Dog getting caught is not handled by the human
+		if (entity->getState()->type != ENTITY_DOG && entity->getState()->type != ENTITY_PUDDLE)
+		{
+			SBaseEntity::handleCollision(entity);
+		}
+
+		if (entity->getState()->type == ENTITY_PUDDLE && !_slipInvincibility && !_slipping)
+		{
+			_slipping = true;
+			_slippingStartTime = std::chrono::system_clock::now();
+		}
 	}
+private:
+	bool _slipping = false;
+	bool _slipInvincibility = false;
+	std::chrono::time_point<std::chrono::system_clock> _slippingStartTime;
+	std::chrono::time_point<std::chrono::system_clock> _slipInvincibilityStartTime;
+
 };
 
