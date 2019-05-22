@@ -66,9 +66,6 @@
     <ClInclude Include="PlayerState.hpp">
       <Filter>Header Files\State</Filter>
     </ClInclude>
-    <ClInclude Include="GateState.hpp">
-      <Filter>Header Files\State</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Common.cpp">

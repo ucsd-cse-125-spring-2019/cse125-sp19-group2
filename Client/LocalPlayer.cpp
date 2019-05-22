@@ -135,7 +135,7 @@ LocalPlayer::LocalPlayer(uint32_t playerId, std::unique_ptr<NetworkClient> const
             _moveKeysPressed = true;
         });
 
-   // Player move right event
+   // Dog sprinting start
 	InputManager::getInstance().getKey(GLFW_KEY_LEFT_SHIFT)->onPress([&]
 	{
 		auto event = std::make_shared<GameEvent>();
@@ -152,7 +152,7 @@ LocalPlayer::LocalPlayer(uint32_t playerId, std::unique_ptr<NetworkClient> const
 		};
 	});
 
-	// Player move right event
+	// Dog sprinting finish
 	InputManager::getInstance().getKey(GLFW_KEY_LEFT_SHIFT)->onRelease([&]
 	{
 		auto event = std::make_shared<GameEvent>();
@@ -169,7 +169,8 @@ LocalPlayer::LocalPlayer(uint32_t playerId, std::unique_ptr<NetworkClient> const
 		};
 	});
 
-		InputManager::getInstance().getKey(GLFW_KEY_SPACE)->onPress([&]
+	// Dog peeing start
+	InputManager::getInstance().getKey(GLFW_KEY_SPACE)->onPress([&]
 	{
 		auto event = std::make_shared<GameEvent>();
 		event->playerId = _playerId;
@@ -183,6 +184,7 @@ LocalPlayer::LocalPlayer(uint32_t playerId, std::unique_ptr<NetworkClient> const
 		};
 	});
 
+	// Dog peeing end
 	InputManager::getInstance().getKey(GLFW_KEY_SPACE)->onRelease([&]
 	{
 		auto event = std::make_shared<GameEvent>();
@@ -219,6 +221,21 @@ LocalPlayer::LocalPlayer(uint32_t playerId, std::unique_ptr<NetworkClient> const
 		auto event = std::make_shared<GameEvent>();
 		event->playerId = _playerId;
 		event->type = EVENT_PLAYER_LIFTING_END;
+		try
+		{
+			networkClient->sendEvent(event);
+		}
+		catch (std::runtime_error e)
+		{
+		};
+	});
+
+	// Human swinging net
+	InputManager::getInstance().getKey(GLFW_MOUSE_BUTTON_LEFT)->onPress([&]
+	{
+		auto event = std::make_shared<GameEvent>();
+		event->playerId = _playerId;
+		event->type = EVENT_PLAYER_SWING_NET;
 		try
 		{
 			networkClient->sendEvent(event);

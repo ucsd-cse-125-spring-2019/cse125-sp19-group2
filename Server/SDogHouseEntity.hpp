@@ -39,23 +39,26 @@ public:
 		float sideOffset = (_state->width / 2) - (DOGHOUSE_WALL_WIDTH / 2);
 		
 		// Wall behind the doghouse
-		_backWall = std::make_shared<SBoxEntity>(
+		auto backWall = std::make_shared<SBoxEntity>(
 			glm::vec3(pos.x, 0, pos.z - backOffset),
 			glm::vec3(_state->width, _state->height, DOGHOUSE_WALL_WIDTH));
-		_backWall->getState()->transparency = 0.0f;
+		backWall->getState()->transparency = 0.0f;
+		_walls.push_back(backWall);
 
 		// Walls on either side of the doghouse (naming not strictly accurate)
-		_leftWall = std::make_shared<SBoxEntity>(
+		auto leftWall = std::make_shared<SBoxEntity>(
 			glm::vec3(pos.x - sideOffset, 0, pos.z + DOGHOUSE_WALL_WIDTH/2),
 			glm::vec3(_state->width - DOGHOUSE_WALL_WIDTH, _state->height, DOGHOUSE_WALL_WIDTH));
-		_leftWall->getState()->transparency = 0.0f;
-		_leftWall->rotate(_leftWall->getState()->pos, 1);
+		leftWall->getState()->transparency = 0.0f;
+		leftWall->rotate(leftWall->getState()->pos, 1);
+		_walls.push_back(leftWall);
 
-		_rightWall = std::make_shared<SBoxEntity>(
+		auto rightWall = std::make_shared<SBoxEntity>(
 			glm::vec3(pos.x + sideOffset, 0, pos.z + DOGHOUSE_WALL_WIDTH/2),
 			glm::vec3(_state->width - DOGHOUSE_WALL_WIDTH, _state->height, DOGHOUSE_WALL_WIDTH));
-		_rightWall->getState()->transparency = 0.0f;
-		_rightWall->rotate(_rightWall->getState()->pos, 1);
+		rightWall->getState()->transparency = 0.0f;
+		rightWall->rotate(rightWall->getState()->pos, 1);
+		_walls.push_back(rightWall);
 
 		// Sensor for dogs. Performs actual logic on the doghouse
 		auto sensorBox = std::make_shared<SBoxEntity>(
@@ -102,18 +105,34 @@ public:
 						// Reset cooldowns
 						_cooldowns.insert({ collidingEntity->getState()->id, std::chrono::steady_clock::now() });
 						castHouse->_cooldowns.insert({ collidingEntity->getState()->id, std::chrono::steady_clock::now() });
+
+						// Set source house as non-solid for next tick
+						SPlayerEntity* dogEntity = static_cast<SPlayerEntity*>(collidingEntity);
+						for (auto& wall : _walls)
+						{
+							wall->getState()->isSolid = false;
+						}
 						break;
 					}
 				}
 			}
 		});
 
-		_children.push_back(_backWall);
-		_children.push_back(_leftWall);
-		_children.push_back(_rightWall);
+		_children.push_back(backWall);
+		_children.push_back(leftWall);
+		_children.push_back(rightWall);
 		_children.push_back(sensorBox);
 	};
 	~SDogHouseEntity() {};
+
+	// Reset solidity of doghouse walls
+	void update(std::vector<std::shared_ptr<GameEvent>> events) override
+	{
+		for (auto& wall : _walls)
+		{
+			wall->getState()->isSolid = true;
+		}
+	}
 
 	std::vector<std::shared_ptr<SBaseEntity>> getChildren() override
 	{
@@ -137,9 +156,6 @@ public:
 private:
 	std::vector<std::shared_ptr<SBaseEntity>>* _dogHouses;
 	std::vector<std::shared_ptr<SBaseEntity>> _children;
-
-	std::shared_ptr<SBaseEntity> _backWall;
-	std::shared_ptr<SBaseEntity> _leftWall;
-	std::shared_ptr<SBaseEntity> _rightWall;
+	std::vector<std::shared_ptr<SBaseEntity>> _walls;
 };
 

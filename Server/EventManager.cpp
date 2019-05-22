@@ -166,7 +166,7 @@ void EventManager::handlePlayerReady(std::shared_ptr<GameEvent> event)
 			auto dogEntity = std::make_shared<SDogEntity>(
 				dogPair.first, // ID
 				dogPair.second, // Name
-				_structureInfo->jails,
+				_structureInfo->jailsPos,
 				_structureInfo->newEntities);
 
 			// Set location

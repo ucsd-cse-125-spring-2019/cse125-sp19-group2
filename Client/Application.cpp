@@ -86,7 +86,7 @@ void Application::Setup() {
   _debuglightShader->LoadFromFile(GL_FRAGMENT_SHADER, "./Resources/Shaders/debuglight.frag");
   _debuglightShader->CreateProgram();
 
-  _skybox = std::make_unique<Skybox>("thefog");
+  _skybox = std::make_unique<Skybox>("skybox");
 
   // Create light
   _point_light = std::make_unique<PointLight>(
@@ -603,12 +603,7 @@ void Application::Keyboard(int key, int scancode, int action, int mods) {
     }
   }
   else if (action == GLFW_RELEASE) {
-    if (mods == GLFW_MOD_SHIFT) {
-
-    }
-    else {
-      InputManager::getInstance().fire(key, KeyState::Release);
-    }
+	  InputManager::getInstance().fire(key, KeyState::Release);
   }
 }
 

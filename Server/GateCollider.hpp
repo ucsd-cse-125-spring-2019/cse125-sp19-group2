@@ -1,12 +1,13 @@
 #pragma once
+#pragma once
 
 #include "BaseCollider.hpp"
 
-class AABBCollider : public BaseCollider
+class GateCollider : public BaseCollider
 {
 public:
-	AABBCollider(BaseState* state) : BaseCollider(state) {};
-	~AABBCollider() {};
+	GateCollider(BaseState* state) : BaseCollider(state) {};
+	~GateCollider() {};
 
 	bool narrowPhase(BaseState* candidate)
 	{
@@ -16,7 +17,7 @@ public:
 			switch (candidate->colliderType)
 			{
 
-			// Case 1: candidate is also a box collider
+				// Case 1: candidate is also a box collider
 			case COLLIDER_GATE:
 			case COLLIDER_AABB:
 			{

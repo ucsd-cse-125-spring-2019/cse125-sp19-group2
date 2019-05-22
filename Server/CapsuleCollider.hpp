@@ -34,6 +34,7 @@ public:
 			}
 
 			// Case 2: candidate is a box collider
+			case COLLIDER_GATE:
 			case COLLIDER_AABB:
 			{
 				// Distance from sphere to center of AABB
@@ -69,7 +70,7 @@ public:
 	}
 
 	// Push-back between non-static entities (this) and other entities
-	void handleCollision(BaseState* state) override
+	void handlePushBack(BaseState* state) override
 	{
 		BaseState* stateA = _state;
 		BaseState* stateB = state;
@@ -225,6 +226,40 @@ public:
 					stateA->pos += correctionVec;
 				}
 			} // Capsule <-> AABB
+
+			else if (stateB->colliderType == COLLIDER_GATE)
+			{
+				float rA = (float)std::fmax(stateA->width, stateA->depth) / 2;
+
+				glm::vec3 correctionVec = glm::vec3(0);
+
+				// Check gate pushing is on x-axis or z-axis
+				if (stateB->width <= stateB->depth) {
+					// pushing only on x-axis
+					float eastDist = stateA->pos.x - (stateB->pos.x + stateB->width / 2);
+					float westDist = (stateB->pos.x - stateB->width / 2) - stateA->pos.x;
+					if (abs(westDist) <= abs(eastDist)) {
+						correctionVec.x = -(rA - westDist);
+					}
+					else {
+						correctionVec.x = rA - eastDist;
+					}
+				}
+				else
+				{
+					// pushing only on z-axis
+					float northDist = stateA->pos.z - (stateB->pos.z + stateB->depth / 2);
+					float southDist = (stateB->pos.z - stateB->depth / 2) - stateA->pos.z;
+					if (abs(northDist) <= abs(southDist)) {
+						correctionVec.z = rA - northDist;
+					}
+					else {
+						correctionVec.z = -(rA - southDist);
+					}
+				}
+
+				stateA->pos += correctionVec;
+			} // Capsule <-> GATE
 		} // isSolid
 	}
 };
