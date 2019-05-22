@@ -4,7 +4,7 @@
 #include "CapsuleCollider.hpp"
 #include "EmptyCollider.hpp"
 
-#define LAUNCHING_VELOCITY 2.0f
+#define LAUNCHING_VELOCITY 15.0f
 
 class SPlungerEntity : public SBaseEntity
 {
@@ -27,9 +27,9 @@ public:
 		_state->colliderType = COLLIDER_CAPSULE;
 
 		// Slightly tighter bounding box
-		_state->width = 0.3f;
+		_state->width = 0.35f;
 		_state->height = 0.6f;
-		_state->depth = 0.3f;
+		_state->depth = 0.35f;
 
 		_state->setSolidity([&](BaseState* entity, BaseState* collidingEntity)
 		{
@@ -45,25 +45,73 @@ public:
 
 	void update(std::vector<std::shared_ptr<GameEvent>> events) override
 	{
+		if (_state->isDestroyed)
+		{
+			return;
+		}
+
 		if (launching) {
 			_state->pos += _state->forward * (LAUNCHING_VELOCITY / TICKS_PER_SEC);
-			hasChanged = true;
 		}
+		hasChanged = true;
 	}
 
 	void generalHandleCollision(SBaseEntity* entity) override
 	{
-		_collider = std::make_unique<EmptyCollider>();
-		_state->colliderType = COLLIDER_NONE;
-		_state->isStatic = true;
-		launching = false;
+		if (entity->getState()->type == ENTITY_HIT_PLUNGER) {
+			_collider = std::make_unique<EmptyCollider>();
+			_state->colliderType = COLLIDER_NONE;
+			_state->isStatic = true;
+			launching = false;
 
-		// TODO: make plunger face to the wall
-		if (entity->getState()->colliderType == COLLIDER_AABB) {
+			auto stateB = entity->getState();
 
-		}
-		else if (entity->getState()->colliderType == COLLIDER_CAPSULE) {
-			_state->forward = glm::normalize(entity->getState()->pos - _state->pos);
+			// make plunger face the wall
+			if (stateB->colliderType == COLLIDER_AABB) {
+				float dists[4];
+				dists[0] = (stateB->pos.x - stateB->width / 2) - _state->pos.x; // West
+				dists[1] = _state->pos.x - (stateB->pos.x + stateB->width / 2); // East
+				dists[2] = _state->pos.z - (stateB->pos.z + stateB->depth / 2); // North
+				dists[3] = (stateB->pos.z - stateB->depth / 2) - _state->pos.z; // South
+				int minIndex = -1;
+				float min = FLT_MAX;
+
+				// Get closest edge
+				for (int i = 0; i < 4; i++)
+				{
+					if (dists[i] > 0)
+					{
+						minIndex = i;
+						break;
+					}
+
+					if (dists[i] < min)
+					{
+						min = dists[i];
+						minIndex = i;
+					}
+				}
+
+				switch (minIndex)
+				{
+				case 0: // West
+					_state->forward = glm::vec3(1, 0, 0);
+					break;
+				case 1: // East
+					_state->forward = glm::vec3(-1, 0, 0);
+					break;
+				case 2: // North
+					_state->forward = glm::vec3(0, 0, -1);
+					break;
+				case 3: // South
+					_state->forward = glm::vec3(0, 0, 1);
+					break;
+				}
+
+			}
+			else if (stateB->colliderType == COLLIDER_CAPSULE) {
+				_state->forward = glm::normalize(stateB->pos - _state->pos);
+			}
 		}
 	}
 };

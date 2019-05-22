@@ -18,6 +18,8 @@
 #include "Shared/Logger.hpp"
 #include <algorithm>
 
+std::unique_ptr<Shader> CPlungerEntity::plungerShader;
+
 EntityManager::EntityManager()
 {
 }

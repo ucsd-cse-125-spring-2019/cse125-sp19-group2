@@ -2,6 +2,7 @@
 
 #include "SBaseEntity.hpp"
 #include "CapsuleCollider.hpp"
+#include "SCylinderPlungerEntity.hpp"
 
 class SHydrantEntity : public SBaseEntity
 {
@@ -24,7 +25,17 @@ public:
 		_state->width = 0.6f;
 		_state->height = 0.6f;
 		_state->depth = 0.6f;
+
+		_children.push_back(std::make_shared<SCylinderPlungerEntity>(pos, glm::vec3(0.5f, 0.6f, 0.5f)));
 	};
 	~SHydrantEntity() {};
+
+	std::vector<std::shared_ptr<SBaseEntity>> getChildren() override
+	{
+		return _children;
+	}
+
+private:
+	std::vector<std::shared_ptr<SBaseEntity>> _children;
 };
 

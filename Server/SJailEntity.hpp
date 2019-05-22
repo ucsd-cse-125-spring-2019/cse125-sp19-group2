@@ -6,6 +6,7 @@
 #include "STriggerEntity.hpp"
 #include "SDogEntity.hpp"
 #include "EmptyCollider.hpp"
+#include "SBoxPlungerEntity.hpp"
 #include <algorithm>
 
 #define JAIL_WALL_WIDTH 0.15f
@@ -212,6 +213,8 @@ public:
 			}
 		});
 		_children.push_back(jailSensorBox);
+
+		_children.push_back(std::make_shared<SBoxPlungerEntity>(pos, scale));
 	};
 	~SJailEntity() {};
 

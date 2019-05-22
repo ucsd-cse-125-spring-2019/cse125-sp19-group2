@@ -52,6 +52,9 @@ void SHumanEntity::update(std::vector<std::shared_ptr<GameEvent>> events)
 			break;
 		case EVENT_PLAYER_LAUNCH_END:
 			_isLaunching = false;
+			plungerEntity->getState()->isDestroyed = true;
+
+			plungerEntity = nullptr;
 			break;
 		}
 	}
@@ -84,13 +87,19 @@ void SHumanEntity::update(std::vector<std::shared_ptr<GameEvent>> events)
 			humanState->currentAnimation = ANIMATION_HUMAN_SHOOT;
 			hasChanged = true;
 		}
-		std::shared_ptr<SPlungerEntity> plungerEntity = std::make_shared<SPlungerEntity>(_state->pos, _state->forward);
-		_newEntities->push_back(plungerEntity);
-		_isLaunching = false;
+
+		if (plungerEntity == nullptr) {
+			plungerEntity = std::make_shared<SPlungerEntity>(_state->pos, _state->forward);
+			_newEntities->push_back(plungerEntity);
+		}
+
 		break;
 	}
 
+
+
 	handleInterpolation();
+	//Logger::getInstance()->debug("Human   x: " + std::to_string(_state->forward.x) + " y: " + std::to_string(_state->forward.y) + " z: " + std::to_string(_state->forward.z));
 }
 
 void SHumanEntity::generalHandleCollision(SBaseEntity * entity)

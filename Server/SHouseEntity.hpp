@@ -3,6 +3,7 @@
 #include "SBaseEntity.hpp"
 #include "IdGenerator.hpp"
 #include "AABBCollider.hpp"
+#include "SBoxPlungerEntity.hpp"
 
 class SHouseEntity : public SBaseEntity
 {
@@ -27,6 +28,16 @@ public:
 		_state->width = scale.x;
 		_state->height = scale.y;
 		_state->depth = scale.z;
+
+		_children.push_back(std::make_shared<SBoxPlungerEntity>(pos, glm::vec3(scale.x - 0.65f, scale.y, scale.z - 0.65f)));
 	};
 	~SHouseEntity() {};
+
+	std::vector<std::shared_ptr<SBaseEntity>> getChildren() override
+	{
+		return _children;
+	}
+
+private:
+	std::vector<std::shared_ptr<SBaseEntity>> _children;
 };

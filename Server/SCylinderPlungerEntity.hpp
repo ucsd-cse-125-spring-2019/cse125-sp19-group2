@@ -2,15 +2,20 @@
 
 #include "SCylinderEntity.hpp"
 
-class SBoxPlungerEntity : public SCylinderEntity
+class SCylinderPlungerEntity : public SCylinderEntity
 {
 public:
-	SBoxPlungerEntity(
+	SCylinderPlungerEntity(
 		glm::vec3 pos,
 		glm::vec3 scale) : SCylinderEntity(pos, scale)
 	{
 		_state->type = ENTITY_HIT_PLUNGER;
+
+		_state->setSolidity([&](BaseState* entity, BaseState* collidingEntity)
+		{
+			return (collidingEntity->type == ENTITY_PLUNGER);
+		});
 	};
-	~SBoxPlungerEntity() {};
+	~SCylinderPlungerEntity() {};
 };
 
