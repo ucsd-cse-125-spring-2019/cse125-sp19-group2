@@ -1,4 +1,33 @@
+#include <algorithm>
 #include "SBaseEntity.hpp"
+
+void SBaseEntity::update(std::vector<std::shared_ptr<GameEvent>> events)
+{
+	bool dirty = false;
+
+	// Update all timers and delete them if they're finished
+	for (int i = 0; i < _timers.size(); i++)
+	{
+		if (_timers[i])
+		{
+			_timers[i]->update();
+			if (_timers[i]->isComplete())
+			{
+				delete _timers[i];
+				_timers[i] = nullptr;
+				dirty = true;
+			}
+		}
+	}
+
+	// Remove all completed timers from vector
+	if (dirty)
+	{
+		_timers.erase(std::remove(_timers.begin(), _timers.end(), nullptr), _timers.end());
+	}
+
+	updateImpl(events);
+}
 
 std::shared_ptr<BaseState> SBaseEntity::getState()
 {
@@ -63,6 +92,13 @@ void SBaseEntity::initState(bool generateId)
 	_state->isSolid = true;
 
 	hasChanged = false;
+}
+
+Timer * SBaseEntity::registerTimer(long durationMilliseconds, std::function<void()> f)
+{
+	auto timer = new Timer(durationMilliseconds, f);
+	_timers.push_back(timer);
+	return timer;
 }
 
 void SBaseEntity::rotate(glm::vec3 center, int angle)

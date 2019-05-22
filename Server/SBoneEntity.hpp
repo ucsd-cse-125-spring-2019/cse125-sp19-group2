@@ -33,9 +33,4 @@ public:
 		_state->isSolid = false;
 	};
 	~SBoneEntity() {};
-
-	void update(std::vector<std::shared_ptr<GameEvent>> events) override
-	{
-		// Update does nothing for bone entities (for now)
-	}
 };

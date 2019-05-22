@@ -31,7 +31,7 @@ SDogEntity::SDogEntity(uint32_t playerId, std::string playerName, std::vector<gl
 	dogState->playerName = playerName;
 }
 
-void SDogEntity::update(std::vector<std::shared_ptr<GameEvent>> events)
+void SDogEntity::updateImpl(std::vector<std::shared_ptr<GameEvent>> events)
 {
 	isCaught = false;
 	if (!_isLifting)
@@ -61,11 +61,16 @@ void SDogEntity::update(std::vector<std::shared_ptr<GameEvent>> events)
 				_isRunning = false;
 				break;
 			case EVENT_PLAYER_URINATE_START:
-				_urinatingStartTime = std::chrono::system_clock::now();
 				_isUrinating = true;
 				break;
 			case EVENT_PLAYER_URINATE_END:
 				_isUrinating = false;
+
+				// Abort timer if it exists
+				if (_peeTimer)
+				{
+					_peeTimer->abort();
+				}
 				break;
 			case EVENT_PLAYER_LIFTING_START:
 				_isLifting = true;
@@ -79,7 +84,7 @@ void SDogEntity::update(std::vector<std::shared_ptr<GameEvent>> events)
 	}
 
 	// Update and check for changes (destroyed and _isMoving)
-	SPlayerEntity::update(events);
+	SPlayerEntity::updateImpl(events);
 
 	// update current action
 	bool actionChanged = updateAction();
@@ -88,18 +93,6 @@ void SDogEntity::update(std::vector<std::shared_ptr<GameEvent>> events)
 	if (actionChanged) {
 		actionStage = 0;
 	}
-
-	// TODO: update the logic for peeing after having Timer class
-	if (_isUrinating) {
-		auto now = std::chrono::system_clock::now();
-		std::chrono::duration<double> diff = now - _urinatingStartTime;
-		if (diff.count() > 1.0)
-		{
-			createPuddle();
-			_isUrinating = false;
-		}
-	}
-
 
 	switch (_curAction)
 	{
@@ -135,8 +128,18 @@ void SDogEntity::update(std::vector<std::shared_ptr<GameEvent>> events)
 		if (actionChanged) {
 			dogState->currentAnimation = ANIMATION_DOG_PEEING;
 			hasChanged = true;
+
+			// Register a timer and place the pee object after 1 second
+			_peeTimer = registerTimer(1000 /* Milliseconds */, [&]()
+				{
+					if (_curAction == ACTION_DOG_PEEING)
+					{
+						createPuddle();
+						_isUrinating = false;
+						_peeTimer = nullptr;
+					}
+				});
 		}
-		// TODO: put pee logic here
 		break;
 	case ACTION_DOG_SCRATCHING:
 		// Stage 0: interpolating to the trigger and look at it

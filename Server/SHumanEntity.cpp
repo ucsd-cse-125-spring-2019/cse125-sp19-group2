@@ -26,7 +26,7 @@ SHumanEntity::SHumanEntity(uint32_t playerId, std::string playerName)
 	humanState->playerName = playerName;
 }
 
-void SHumanEntity::update(std::vector<std::shared_ptr<GameEvent>> events)
+void SHumanEntity::updateImpl(std::vector<std::shared_ptr<GameEvent>> events)
 {
 	auto humanState = std::static_pointer_cast<HumanState>(_state);
 
@@ -39,11 +39,7 @@ void SHumanEntity::update(std::vector<std::shared_ptr<GameEvent>> events)
 		{
 		case EVENT_PLAYER_SWING_NET:
 			// Example of lunging. Will probably need to change
-			interpolateMovement(_state->pos + (_state->forward * 1.5f), _state->forward, 15.0f,
-				[&] {
-				Logger::getInstance()->debug("aaaaaaaaa");
-				}
-			);
+			interpolateMovement(_state->pos + (_state->forward * 1.5f), _state->forward, 15.0f);
 			break;
 		}
 	}
@@ -52,7 +48,7 @@ void SHumanEntity::update(std::vector<std::shared_ptr<GameEvent>> events)
 	glm::vec3 oldPos = _state->pos;
 
 	// Update and check for changes
-	SPlayerEntity::update(events);
+	SPlayerEntity::updateImpl(events);
 
 	bool actionChanged = updateAction();
 

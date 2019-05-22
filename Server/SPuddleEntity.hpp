@@ -35,9 +35,4 @@ public:
 		hasChanged = true;
 	};
 	~SPuddleEntity() {};
-
-	void update(std::vector<std::shared_ptr<GameEvent>> events) override
-	{
-		// Update does nothing for bone entities (for now)
-	}
 };

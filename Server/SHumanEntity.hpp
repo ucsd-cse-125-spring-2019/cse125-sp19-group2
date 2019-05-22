@@ -10,7 +10,7 @@ public:
 
 	~SHumanEntity() {};
 
-	void update(std::vector<std::shared_ptr<GameEvent>> events) override;
+	void updateImpl(std::vector<std::shared_ptr<GameEvent>> events) override;
 
 	void generalHandleCollision(SBaseEntity* entity) override;
 

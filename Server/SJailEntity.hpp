@@ -221,7 +221,7 @@ public:
 		return _children;
 	}
 
-	virtual void update(std::vector<std::shared_ptr<GameEvent>> events) override
+	virtual void updateImpl(std::vector<std::shared_ptr<GameEvent>> events) override
 	{
 		if (_lifted) {
 			if (gateHeight < GATE_MAX_HEIGHT) {

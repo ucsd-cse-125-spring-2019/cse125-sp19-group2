@@ -25,7 +25,7 @@ public:
 		_state->isStatic = false;
 	}
 
-	virtual void update(std::vector<std::shared_ptr<GameEvent>> events) override
+	virtual void updateImpl(std::vector<std::shared_ptr<GameEvent>> events) override
 	{
 		// Do nothing if we are set to be destroyed
 		if (_state->isDestroyed)

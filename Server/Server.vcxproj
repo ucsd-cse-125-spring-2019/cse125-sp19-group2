@@ -250,7 +250,6 @@
     <ClInclude Include="SCylinderEntity.hpp" />
     <ClInclude Include="SDogEntity.hpp" />
     <ClInclude Include="SDogHouseEntity.hpp" />
-    <ClInclude Include="SExampleEntity.hpp" />
     <ClInclude Include="SFenceEntity.hpp" />
     <ClInclude Include="SFloorEntity.hpp" />
     <ClInclude Include="SFountainEntity.hpp" />

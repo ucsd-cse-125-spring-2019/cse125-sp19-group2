@@ -21,7 +21,7 @@ public:
 
 	bool isCaught = false;
 
-	void update(std::vector<std::shared_ptr<GameEvent>> events) override;
+	void updateImpl(std::vector<std::shared_ptr<GameEvent>> events) override;
 
 	void generalHandleCollision(SBaseEntity* entity) override;
 
@@ -48,8 +48,10 @@ private:
 	bool _isDrinking = false;
 	bool _nearTrigger = false;
 	DogAction _curAction = ACTION_DOG_IDLE;
-	std::chrono::time_point<std::chrono::system_clock> _urinatingStartTime;
 	std::vector<std::shared_ptr<SBaseEntity>>* _newEntities;
+
+	// Timer for dog pee
+	Timer* _peeTimer;
 
 	void createPuddle();
 
