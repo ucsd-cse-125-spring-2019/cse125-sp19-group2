@@ -25,7 +25,7 @@ public:
 		_state->isStatic = false;
 	}
 
-	virtual void updateImpl(std::vector<std::shared_ptr<GameEvent>> events) override
+	virtual void update(std::vector<std::shared_ptr<GameEvent>> events) override
 	{
 		// Do nothing if we are set to be destroyed
 		if (_state->isDestroyed)
@@ -96,6 +96,10 @@ public:
 				}
 			}
 		} // isStatic
+
+		// Update all timers for the player
+		updateTimers();
+
 	} // update()
 
 	// Call this function to move a player to a destination

@@ -26,7 +26,7 @@ SHumanEntity::SHumanEntity(uint32_t playerId, std::string playerName)
 	humanState->playerName = playerName;
 }
 
-void SHumanEntity::updateImpl(std::vector<std::shared_ptr<GameEvent>> events)
+void SHumanEntity::update(std::vector<std::shared_ptr<GameEvent>> events)
 {
 	auto humanState = std::static_pointer_cast<HumanState>(_state);
 
@@ -48,7 +48,7 @@ void SHumanEntity::updateImpl(std::vector<std::shared_ptr<GameEvent>> events)
 	glm::vec3 oldPos = _state->pos;
 
 	// Update and check for changes
-	SPlayerEntity::updateImpl(events);
+	SPlayerEntity::update(events);
 
 	bool actionChanged = updateAction();
 

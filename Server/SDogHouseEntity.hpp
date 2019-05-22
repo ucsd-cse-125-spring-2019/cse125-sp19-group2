@@ -126,7 +126,7 @@ public:
 	~SDogHouseEntity() {};
 
 	// Reset solidity of doghouse walls
-	void updateImpl(std::vector<std::shared_ptr<GameEvent>> events) override
+	void update(std::vector<std::shared_ptr<GameEvent>> events) override
 	{
 		for (auto& wall : _walls)
 		{

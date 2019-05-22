@@ -24,11 +24,9 @@ class SBaseEntity
 public:
 	bool hasChanged;	// If object state has changed during the last iteration
 
-	// Update function, called every tick. Do not override; override
-	// updateImpl() instead.
-	void update(std::vector<std::shared_ptr<GameEvent>> events);
-
-	virtual void updateImpl(std::vector<std::shared_ptr<GameEvent>> events) {};
+	// Update function, called every tick. Override if additional functionality
+	// is desired
+	virtual void update(std::vector<std::shared_ptr<GameEvent>> events) {};
 
     // All server objects must have a state to send to the client.
 	virtual std::shared_ptr<BaseState> getState();
@@ -64,6 +62,10 @@ public:
 
 	// Registers a timer with the entity
 	Timer * registerTimer(long durationMilliseconds, std::function<void()> f);
+
+	// Updates existing timers. This must be manually called every tick in
+	// order for timers to work!
+	void updateTimers();
 
 	// Rotates the object and all its children around a point.
 	// Angle is the number of times to be rotated clockwise in

@@ -31,7 +31,7 @@ SDogEntity::SDogEntity(uint32_t playerId, std::string playerName, std::vector<gl
 	dogState->playerName = playerName;
 }
 
-void SDogEntity::updateImpl(std::vector<std::shared_ptr<GameEvent>> events)
+void SDogEntity::update(std::vector<std::shared_ptr<GameEvent>> events)
 {
 	isCaught = false;
 	if (!_isLifting)
@@ -85,7 +85,7 @@ void SDogEntity::updateImpl(std::vector<std::shared_ptr<GameEvent>> events)
 	}
 
 	// Update and check for changes (destroyed and _isMoving)
-	SPlayerEntity::updateImpl(events);
+	SPlayerEntity::update(events);
 
 	// update current action
 	bool actionChanged = updateAction();

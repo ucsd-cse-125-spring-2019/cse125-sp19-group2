@@ -21,7 +21,7 @@ public:
 
 	bool isCaught = false;
 
-	void updateImpl(std::vector<std::shared_ptr<GameEvent>> events) override;
+	void update(std::vector<std::shared_ptr<GameEvent>> events) override;
 
 	void generalHandleCollision(SBaseEntity* entity) override;
 
