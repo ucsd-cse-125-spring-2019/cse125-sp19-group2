@@ -44,7 +44,8 @@ void GuiManager::draw() {
     }else {
         auto curr = high_resolution_clock::now();
         auto dt = curr - _lastTime;
-        auto fps = 1000000.0  / chrono::duration_cast<microseconds>(dt).count();
+		_lastFrameLength = std::chrono::duration_cast<microseconds>(dt).count();
+		auto fps = 1000000.0 / _lastFrameLength;
         _fpsCounter->setCaption("fps:" + std::to_string(int(fps)));
         _fpsCounter->setSize(_fpsCounter->preferredSize(_screen->nvgContext()));
         _lastTime = high_resolution_clock::now();
@@ -115,6 +116,11 @@ void GuiManager::setDirty() {
     _dirty = true;
 }
 
+long GuiManager::getLastFrameLength()
+{
+	return _lastFrameLength;
+}
+
 FormHelper* GuiManager::createFormHelper(const string & name) {
     auto f = make_unique<FormHelper>(_screen);
     _formHelpers.push_back(std::move(f));
@@ -175,6 +181,11 @@ void GuiManager::registerSwitchSidesCallback(const std::function<void()> f) {
 
 void GuiManager::registerReadyCallback(const std::function<void()> f) {
 	_readyButton->setCallback(f);
+}
+
+void GuiManager::registerControllerCallback(const std::function<void(GamePadIndex)> f)
+{
+	_gamepadSelect->setCallback(f);
 }
 
 std::string GuiManager::getPlayerName() {
@@ -367,7 +378,10 @@ void GuiManager::initHUD() {
 void GuiManager::initControlMenu() {
 	auto controlsWidget = createWidget(WIDGET_OPTIONS);
 	controlsWidget->setLayout(new nanogui::GroupLayout());
-	auto testLabel = new nanogui::Label(controlsWidget, "test", "sans", 30);
+
+	auto controllerLabel = new Label(controlsWidget, "Select Controller", "sans", 16);
+	_gamepadSelect = new nanogui::detail::FormWidget<GamePadIndex, std::integral_constant<bool, true>>(controlsWidget);
+	_gamepadSelect->setItems({ "None", "1", "2", "3", "4" });
 
 	auto windowCast = static_cast<nanogui::Window*>(controlsWidget);
 	windowCast->performLayout(_screen->nvgContext());

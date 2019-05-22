@@ -173,70 +173,8 @@ void Application::Setup() {
 		GuiManager::getInstance().setSwitchEnabled(false);
 	});
 
-	GuiManager::getInstance().setVisibility(WIDGET_OPTIONS, true);
-
-	/*
-    // Create a testing widget
-    bool enabled = true;
-    auto *gui = GuiManager::getInstance().createFormHelper("Form helper");
-    gui->addWindow(Eigen::Vector2i(2, 35), "Form helper");
-    
-    gui->addGroup("Validating fields");
-    auto * v = gui->addVariable("int", _integer);
-    v->setSpinnable(true);
-
-    gui->addVariable("float", _float)->setTooltip("Test.");
-    gui->addButton("Add One", [&]() {
-        _integer += 1;
-    });
-
-	//gui->window()->setVisible(false);
-    
-    // Test Sound
-    auto ambient = AudioManager::getInstance().getAudioSource("Ambient Sound");
-    ambient->init("Resources/Sounds/Mario - Overworld.mp3");
-    ambient->setVolume(0.4f);
-    ambient->play(_playAmbient);
-
-    auto positional = AudioManager::getInstance().getAudioSource("Positional Sound");
-    positional->init("Resources/Sounds/footsteps.mp3", true, true);
-    positional->play(_playPositional);
-
-    // Add Widget to control sound
-    gui->addGroup("Sound");
-    gui->addVariable("Play Ambient Sound", _playAmbient)->setCallback([=](const bool flag) {
-        _playAmbient = flag;
-        ambient->play(flag);
-    });
-    gui->addVariable("Play Positional Sound", _playPositional)->setCallback([=](const bool flag) {
-        _playPositional = flag;
-        positional->play(flag);
-    });
-
-    // Control sound position
-    auto * pos = gui->addVariable("Sound Location", _enum, enabled);
-    pos->setItems({ "Left", "Front", "Right" });
-    pos->setCallback([=](const Enum & e) {
-        switch (e) {
-        case Left:
-            positional->setPosition(glm::vec3(-2, 0 , 0));
-            break;
-        case Front:
-            positional->setPosition(glm::vec3(0, 0 , -2));
-            break;
-        case Right:
-            positional->setPosition(glm::vec3(2, 0 , 0));
-            break;
-        }
-        _enum = e;
-    });
-
-	// Add Widget to control controller
-	gui->addGroup("Controller");
-	// Controller number 
-	auto* controller_num = gui->addVariable("Controller Number", _gamepad_num, enabled);
-	controller_num->setItems({ "None", "1", "2", "3", "4" });
-	controller_num->setCallback([=](const GamePadIndex& e) {
+	// Controls menu stuff
+	GuiManager::getInstance().registerControllerCallback([=](GamePadIndex e) {
 		switch (e) {
 		case GamePadIndex_NULL:
 			_localPlayer->setControllerNum(GamePadIndex_NULL);
@@ -260,32 +198,6 @@ void Application::Setup() {
 			break;
 		}
 	});
-	// Add Widget to control game start
-	gui->addGroup("Game");
-	// get player type 
-	auto* player_type = gui->addVariable("Play as ", _player_type, enabled);
-	player_type->setItems({ "Dog", "Human"});
-	player_type->setCallback([=](const PlayerType& e) {
-		switch (e) {
-		case Player_Dog:
-			_localPlayer->setPlayerType(Player_Dog);
-			_player_type = e;
-			break;
-		case Player_Human:
-			_localPlayer->setPlayerType(Player_Human);
-			_player_type = e;
-			break;
-		}
-	});
-	gui->addButton("Ready", [&]() {
-		auto event = std::make_shared<GameEvent>();
-		event->playerId = _localPlayer->getPlayerId();
-		event->type = EVENT_PLAYER_READY;
-		event->playerName = "Player" + std::to_string(event->playerId);
-		event->playerType = _localPlayer->getPlayerType();
-		_networkClient->sendEvent(event);
-	});
-	*/
 
     GuiManager::getInstance().setDirty();
 }
@@ -613,7 +525,7 @@ void Application::registerGlobalKeys() {
 
 	InputManager::getInstance().getKey(GLFW_KEY_ESCAPE)->onPress([&]
 	{
-		if (_localPlayer) {
+		if (_localPlayer && !_inLobby) {
 			bool curState = _localPlayer->getMouseCaptured();
 			GuiManager::getInstance().setVisibility(WIDGET_OPTIONS, curState);
 			_localPlayer->setMouseCaptured(!curState);

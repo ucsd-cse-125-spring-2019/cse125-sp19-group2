@@ -1,4 +1,6 @@
-﻿#include <windows.h>
+﻿#pragma once
+
+#include <windows.h>
 #include <XInput.h>     // XInput API
 #include "glm/glm.hpp"
 #include "Shared/Logger.hpp"

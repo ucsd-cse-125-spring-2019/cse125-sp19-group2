@@ -1,6 +1,7 @@
 ﻿#pragma once
 #include <nanogui/nanogui.h>
 #include <chrono>
+#include "GamePadXbox.hpp"
 
 enum WidgetType {
 	WIDGET_CONNECT,
@@ -35,6 +36,9 @@ public:
 
     void setDirty();
 
+	// Length of last frame in microseconds
+	long getLastFrameLength();
+
     nanogui::FormHelper* createFormHelper(const std::string & name);
 
     nanogui::FormHelper* getFormHelper(const std::string & name);
@@ -50,6 +54,7 @@ public:
 	void registerConnectCallback(const std::function<void()> f);
 	void registerSwitchSidesCallback(const std::function<void()> f);
 	void registerReadyCallback(const std::function<void()> f);
+	void registerControllerCallback(const std::function<void(GamePadIndex)> f);
 
 	// Returns text in player name and address boxes
 	std::string getPlayerName();
@@ -102,6 +107,9 @@ private:
     // Timer
     std::chrono::steady_clock::time_point _lastTime;
 
+	// Time since last frame in microseconds
+	long _lastFrameLength;
+
     // Test Text Label
     nanogui::Label * _fpsCounter;
 
@@ -119,4 +127,7 @@ private:
 	// Lobby screen
 	nanogui::Button* _switchSidesButton;
 	nanogui::Button* _readyButton;
+
+	// Controls menu
+	nanogui::detail::FormWidget<GamePadIndex, std::integral_constant<bool, true>>* _gamepadSelect;
 };

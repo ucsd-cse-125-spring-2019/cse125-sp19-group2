@@ -6,7 +6,6 @@
 
 LocalPlayer::LocalPlayer(uint32_t playerId, std::unique_ptr<NetworkClient> const& networkClient) {
     _playerId = playerId;
-    _playerType = Player_Dog;
 
     _gamePad = std::make_unique<GamePadXbox>(GamePadIndex_NULL);
 
@@ -116,7 +115,9 @@ LocalPlayer::LocalPlayer(uint32_t playerId, std::unique_ptr<NetworkClient> const
             //std::cout << glm::to_string(v) << std::endl;
             auto vec = v;
             vec.y = -vec.y;
-            _camera->move_camera(vec * 20.0f);
+
+			// Scale look movement with time
+            _camera->move_camera(vec * (float)(GuiManager::getInstance().getLastFrameLength() / 1000));
         });
 
     InputManager::getInstance().getKey2D(Key::KEYTYPE::LSTICK)->onMove(
@@ -308,6 +309,7 @@ void LocalPlayer::updateController() {
         auto lt = _gamePad->getForceLT();
         auto rt = _gamePad->getForceRT();
         auto s = rt - lt;
+
         InputManager::getInstance().scroll(s);
 
         if (_gamePad->isKeyDown(GamePad_Button_DPAD_LEFT)) {
@@ -334,6 +336,33 @@ void LocalPlayer::updateController() {
         if (_gamePad->isKeyUp(GamePad_Button_DPAD_DOWN)) {
             InputManager::getInstance().fire(GLFW_KEY_S, KeyState::Release);
         }
+
+		// Map "A" on xbox to "F" and left click on keyboard. Change if "F" and left
+		// click ever have different functionalities.
+		if (_gamePad->isKeyDown(GamePad_Button_A)) {
+			InputManager::getInstance().fire(GLFW_KEY_F, KeyState::Press);
+			InputManager::getInstance().fire(GLFW_MOUSE_BUTTON_LEFT, KeyState::Press);
+		}
+		if (_gamePad->isKeyUp(GamePad_Button_A)) {
+			InputManager::getInstance().fire(GLFW_KEY_F, KeyState::Release);
+			InputManager::getInstance().fire(GLFW_MOUSE_BUTTON_LEFT, KeyState::Release);
+		}
+
+		// Map "Y" on xbox to "Space" on keyboard
+		if (_gamePad->isKeyDown(GamePad_Button_Y)) {
+			InputManager::getInstance().fire(GLFW_KEY_SPACE, KeyState::Press);
+		}
+		if (_gamePad->isKeyUp(GamePad_Button_Y)) {
+			InputManager::getInstance().fire(GLFW_KEY_SPACE, KeyState::Release);
+		}
+
+		// Map left bumper on xbox to "LShift" on keyboard
+		if (_gamePad->isKeyDown(GamePad_Button_LEFT_THUMB)) {
+			InputManager::getInstance().fire(GLFW_KEY_LEFT_SHIFT, KeyState::Press);
+		}
+		if (_gamePad->isKeyUp(GamePad_Button_LEFT_THUMB)) {
+			InputManager::getInstance().fire(GLFW_KEY_LEFT_SHIFT, KeyState::Release);
+		}
     }
 }
 
