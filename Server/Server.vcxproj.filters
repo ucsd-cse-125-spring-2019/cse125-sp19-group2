@@ -176,6 +176,9 @@
     <ClInclude Include="STriggerEntity.hpp">
       <Filter>Header Files\Entity</Filter>
     </ClInclude>
+    <ClInclude Include="SCylinderEntity.hpp">
+      <Filter>Header Files\Entity</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
