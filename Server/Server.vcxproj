@@ -247,7 +247,9 @@
     <ClInclude Include="NetworkServer.hpp" />
     <ClInclude Include="SBaseEntity.hpp" />
     <ClInclude Include="SBoxEntity.hpp" />
+    <ClInclude Include="SBoxPlungerEntity.hpp" />
     <ClInclude Include="SCylinderEntity.hpp" />
+    <ClInclude Include="SCylinderPlungerEntity.hpp" />
     <ClInclude Include="SDogEntity.hpp" />
     <ClInclude Include="SDogHouseEntity.hpp" />
     <ClInclude Include="SExampleEntity.hpp" />
@@ -261,6 +263,7 @@
     <ClInclude Include="SJailEntity.hpp" />
     <ClInclude Include="SPlayerEntity.hpp" />
     <ClInclude Include="GridLevelParser.hpp" />
+    <ClInclude Include="SPlungerEntity.hpp" />
     <ClInclude Include="SPuddleEntity.hpp" />
     <ClInclude Include="STriggerEntity.hpp" />
     <ClInclude Include="StructureInfo.hpp" />

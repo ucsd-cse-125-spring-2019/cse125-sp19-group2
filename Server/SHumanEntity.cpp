@@ -1,6 +1,6 @@
 #include "SHumanEntity.hpp"
 
-SHumanEntity::SHumanEntity(uint32_t playerId, std::string playerName)
+SHumanEntity::SHumanEntity(uint32_t playerId, std::string playerName, std::vector<std::shared_ptr<SBaseEntity>>* newEntities)
 {
 	_state = std::make_shared<HumanState>();
 
@@ -17,6 +17,8 @@ SHumanEntity::SHumanEntity(uint32_t playerId, std::string playerName)
 	_state->depth = 0.9f;
 
 	_velocity = 4.8f;
+
+	_newEntities = newEntities;
 
 	// Human-specific stuff
 	auto humanState = std::static_pointer_cast<HumanState>(_state);
@@ -45,6 +47,12 @@ void SHumanEntity::update(std::vector<std::shared_ptr<GameEvent>> events)
 				}
 			);
 			break;
+		case EVENT_PLAYER_LAUNCH_START:
+			_isLaunching = true;
+			break;
+		case EVENT_PLAYER_LAUNCH_END:
+			_isLaunching = false;
+			break;
 		}
 	}
 
@@ -71,6 +79,15 @@ void SHumanEntity::update(std::vector<std::shared_ptr<GameEvent>> events)
 		}
 		handleActionMoving();
 		break;
+	case ACTION_HUMAN_LAUNCHING:
+		if (actionChanged) {
+			humanState->currentAnimation = ANIMATION_HUMAN_SHOOT;
+			hasChanged = true;
+		}
+		std::shared_ptr<SPlungerEntity> plungerEntity = std::make_shared<SPlungerEntity>(_state->pos, _state->forward);
+		_newEntities->push_back(plungerEntity);
+		_isLaunching = false;
+		break;
 	}
 
 	handleInterpolation();
@@ -90,16 +107,19 @@ bool SHumanEntity::updateAction()
 {
 	HumanAction oldAction = _curAction;
 
-	// TODO: lower the priority of action if possible
-
+	// lower the priority of action if possible
+	if (_curAction == ACTION_HUMAN_LAUNCHING && !_isLaunching)
+	{
+		_curAction = ACTION_HUMAN_IDLE;
+	}
 
 	// all other actions has higher priority than idle and moving
 	if (_curAction == ACTION_HUMAN_IDLE || _curAction == ACTION_HUMAN_MOVING) {
 		// change action based on attempting to move or not
 		_curAction = (_isMoving) ? ACTION_HUMAN_MOVING : ACTION_HUMAN_IDLE;
 
-		// TODO: update action again if higher priority action is happening
-
+		// update action again if higher priority action is happening
+		if (_isLaunching) _curAction = ACTION_HUMAN_LAUNCHING;
 	}
 
 	return oldAction != _curAction;

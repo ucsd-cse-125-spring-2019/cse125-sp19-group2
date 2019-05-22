@@ -315,6 +315,7 @@ xcopy /y /d  "$(SolutionDir)Library\lib\x64\Release\*.dll" "$(OutDir)"</Command>
     <ClInclude Include="CHydrantEntity.hpp" />
     <ClInclude Include="ColliderManager.hpp" />
     <ClInclude Include="CPlayerEntity.hpp" />
+    <ClInclude Include="CPlungerEntity.hpp" />
     <ClInclude Include="CPuddleEntity.hpp" />
     <ClInclude Include="CTriggerEntity.hpp" />
     <ClInclude Include="Drawable.hpp" />

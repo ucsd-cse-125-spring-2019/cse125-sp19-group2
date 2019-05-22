@@ -182,6 +182,17 @@ LocalPlayer::LocalPlayer(uint32_t playerId, std::unique_ptr<NetworkClient> const
 		catch (std::runtime_error e)
 		{
 		};
+		
+		event = std::make_shared<GameEvent>();
+		event->playerId = _playerId;
+		event->type = EVENT_PLAYER_LAUNCH_START;
+		try
+		{
+			networkClient->sendEvent(event);
+		}
+		catch (std::runtime_error e)
+		{
+		};
 	});
 
 	// Dog peeing end
@@ -190,6 +201,17 @@ LocalPlayer::LocalPlayer(uint32_t playerId, std::unique_ptr<NetworkClient> const
 		auto event = std::make_shared<GameEvent>();
 		event->playerId = _playerId;
 		event->type = EVENT_PLAYER_URINATE_END;
+		try
+		{
+			networkClient->sendEvent(event);
+		}
+		catch (std::runtime_error e)
+		{
+		};
+
+		event = std::make_shared<GameEvent>();
+		event->playerId = _playerId;
+		event->type = EVENT_PLAYER_LAUNCH_END;
 		try
 		{
 			networkClient->sendEvent(event);

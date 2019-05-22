@@ -15,7 +15,7 @@ public:
 		uint32_t playerId,
 		std::string playerName,
 		std::vector<glm::vec2>* jails,
-		std::vector<std::shared_ptr<SBaseEntity>>* newEntities);;
+		std::vector<std::shared_ptr<SBaseEntity>>* newEntities);
 
 	~SDogEntity() {};
 
