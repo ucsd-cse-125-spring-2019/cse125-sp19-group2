@@ -106,12 +106,7 @@ public:
 		// Cast for player-specific stuff
 		auto humanState = std::static_pointer_cast<HumanState>(_state);
 
-		// Dog getting caught is not handled by the human
-		if (entity->getState()->type != ENTITY_DOG && entity->getState()->type != ENTITY_PUDDLE)
-		{
-			SBaseEntity::handleCollision(entity);
-		}
-		else if (entity->getState()->type == ENTITY_PUDDLE && !_slipInvincibility && !_slipping)
+		if (entity->getState()->type == ENTITY_PUDDLE && !_slipInvincibility && !_slipping)
 		{
 			_slipping = true;
 			_slippingStartTime = std::chrono::system_clock::now();
