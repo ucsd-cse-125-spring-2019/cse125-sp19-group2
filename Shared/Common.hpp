@@ -129,4 +129,4 @@ enum DogAnimation
 	ANIMATION_DOG_IDLE_RUNNING // transition
 };
 
-//Logger::getInstance()->debug("x: " + std::to_string(collidingDog->targetPos.x) + " y: " + std::to_string(collidingDog->targetPos.y) + " z: " + std::to_string(collidingDog->targetPos.z));
+//Logger::getInstance()->debug("x: " + std::to_string(dir.x) + " y: " + std::to_string(dir.y) + " z: " + std::to_string(dir.z));

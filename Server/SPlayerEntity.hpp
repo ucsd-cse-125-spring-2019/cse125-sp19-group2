@@ -76,10 +76,13 @@ public:
 					}
 
 					// Update forward vector with unit direction only if it was modified
-					if (dir != glm::vec3(0))
+					if (glm::length(dir) > 0.0001f)
 					{
 						_isMoving = true;
 						_newDir = glm::normalize(dir);
+					}
+					else {
+						_isMoving = false;
 					}
 				} // !_isInterpolating
 			} // player movement

@@ -59,7 +59,6 @@ void SDogEntity::update(std::vector<std::shared_ptr<GameEvent>> events)
 				break;
 			case EVENT_PLAYER_RUN_END:
 				_isRunning = false;
-				_velocity = BASE_VELOCITY;
 				break;
 			case EVENT_PLAYER_URINATE_START:
 				_urinatingStartTime = std::chrono::system_clock::now();
@@ -73,29 +72,25 @@ void SDogEntity::update(std::vector<std::shared_ptr<GameEvent>> events)
 				break;
 			case EVENT_PLAYER_LIFTING_END:
 				_isLifting = false;
-				// TODO: event for when player releases running button
 			default:
 				break;
 			}
 		}
 	}
 
-	if (_isRunning)
-	{
-		if (dogState->runStamina > 0)
-		{
-			_velocity = RUN_VELOCITY;
-		}
-		dogState->runStamina -= 1 / TICKS_PER_SEC;
+	// Update and check for changes (destroyed and _isMoving)
+	SPlayerEntity::update(events);
 
-		if (dogState->runStamina < 0)
-		{
-			dogState->runStamina = 0;
-		}
+	// update current action
+	bool actionChanged = updateAction();
+
+	// Reset stage of action if changed to a new action
+	if (actionChanged) {
+		actionStage = 0;
 	}
 
-	if (_isUrinating)
-	{
+	// TODO: update the logic for peeing after having Timer class
+	if (_isUrinating) {
 		auto now = std::chrono::system_clock::now();
 		std::chrono::duration<double> diff = now - _urinatingStartTime;
 		if (diff.count() > 1.0)
@@ -105,15 +100,6 @@ void SDogEntity::update(std::vector<std::shared_ptr<GameEvent>> events)
 		}
 	}
 
-	// Update and check for changes
-	SPlayerEntity::update(events);
-
-	bool actionChanged = updateAction();
-
-	// Reset stage of action if changed to a new action
-	if (actionChanged) {
-		actionStage = 0;
-	}
 
 	switch (_curAction)
 	{
@@ -128,6 +114,21 @@ void SDogEntity::update(std::vector<std::shared_ptr<GameEvent>> events)
 			dogState->currentAnimation = ANIMATION_DOG_RUNNING;
 			hasChanged = true;
 		}
+		if (_isRunning) {
+			if (dogState->runStamina > 0)
+			{
+				_velocity = RUN_VELOCITY;
+				dogState->runStamina -= 1.0f / TICKS_PER_SEC;
+				Logger::getInstance()->debug(std::to_string(dogState->runStamina));
+			}
+			else {
+				dogState->runStamina = 0;
+				_velocity = BASE_VELOCITY;
+			}
+		}
+		else {
+			_velocity = BASE_VELOCITY;
+		}
 		handleActionMoving();
 		break;
 	case ACTION_DOG_PEEING:
@@ -135,13 +136,14 @@ void SDogEntity::update(std::vector<std::shared_ptr<GameEvent>> events)
 			dogState->currentAnimation = ANIMATION_DOG_PEEING;
 			hasChanged = true;
 		}
-		// TODO: put everything related to the logic for peeing in here
+		// TODO: put pee logic here
 		break;
 	case ACTION_DOG_SCRATCHING:
 		// Stage 0: interpolating to the trigger and look at it
 		if (actionStage == 0) {
 			targetPos.y = 0;
 			glm::vec3 dest = targetPos + glm::normalize(_state->pos - targetPos) * 0.55f;
+			dogState->currentAnimation = ANIMATION_DOG_RUNNING;
 			interpolateMovement(dest, glm::normalize(targetPos - _state->pos), BASE_VELOCITY / 2,
 				[&] {
 				// Stage 1: start scratching animation and lifting the gate
