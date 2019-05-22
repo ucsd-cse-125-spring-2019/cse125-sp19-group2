@@ -143,7 +143,12 @@ public:
 			if (collidingEntity->getState()->type == ENTITY_DOG)
 			{
 				SDogEntity* collidingDog = static_cast<SDogEntity*>(collidingEntity);
-				if (collidingDog->isLifting()) {
+				collidingDog->setNearTrigger(true);
+				// sending position of trigger to dogEntity for interpolate
+				collidingDog->targetPos = entity->getState()->pos;
+				
+				// start lifting the gate in Stage 1
+				if (collidingDog->isLifting() && collidingDog->actionStage == 1) {
 					_lifted = true;
 				}
 			}
@@ -225,9 +230,9 @@ public:
 					_gates[i]->getState()->pos.y = gateHeight;
 					_gates[i]->hasChanged = true;
 				}
-				for (int i = 0; i < _triggers.size(); i++) {
-					_triggers[i]->updateForward(4);
-				}
+			}
+			for (int i = 0; i < _triggers.size(); i++) {
+				_triggers[i]->updateForward(4);
 			}
 		}
 		else {

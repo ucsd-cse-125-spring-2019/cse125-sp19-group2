@@ -228,6 +228,8 @@
     <ClCompile Include="IdGenerator.cpp" />
     <ClCompile Include="GridLevelParser.cpp" />
     <ClCompile Include="SBaseEntity.cpp" />
+    <ClCompile Include="SDogEntity.cpp" />
+    <ClCompile Include="SHumanEntity.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AABBCollider.hpp" />

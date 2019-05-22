@@ -4,6 +4,7 @@
 #include "SBaseEntity.hpp"
 #include "CapsuleCollider.hpp"
 #include "Shared\PlayerState.hpp"
+#include <algorithm>
 
 // Amount of leway when comparing floats
 const float FP_EPSILON = 0.00001f;
@@ -78,20 +79,10 @@ public:
 					if (dir != glm::vec3(0))
 					{
 						_isMoving = true;
-						hasChanged = true;
-						_state->forward = dir / glm::length(dir);
-
-
-						// Move player by (direction * velocity) / ticks_per_sec
-						auto oldPos = _state->pos;
-						_state->pos = _state->pos + ((_state->forward * _velocity) / (float)TICKS_PER_SEC);
+						_newDir = glm::normalize(dir);
 					}
 				} // !_isInterpolating
 			} // player movement
-			else if (_isMoving) // Client running slower than server
-			{
-				_state->pos = _state->pos + ((_state->forward * _velocity) / (float)TICKS_PER_SEC);
-			}
 
 			// Check for player stop event
 			for (auto& event : events)
@@ -101,25 +92,32 @@ public:
 					_isMoving = false;
 				}
 			}
-
-			handleInterpolation();
-
 		} // isStatic
 	} // update()
 
 	// Call this function to move a player to a destination
-	void interpolateMovement(glm::vec3 destination, glm::vec3 finalDirection, float velocity)
+	void interpolateMovement(
+		glm::vec3 destination,
+		glm::vec3 finalDirection,
+		float velocity,
+		std::function<void()> onComplete = 0)
 	{
-		_isInterpolating = true;
-		_destination = destination;
-		_finalDirection = finalDirection;
-		_interpVelocity = velocity;
-
+		if (!_isInterpolating)
+		{
+			_isInterpolating = true;
+			_destination = destination;
+			_finalDirection = finalDirection;
+			_interpVelocity = velocity;
+			_interpFunc = onComplete;
+		}
 	}
+
+	glm::vec3 targetPos;
 
 protected:
 	// Player movement velocity in units/second
 	float _velocity;
+	glm::vec3 _newDir;
 
 	// For the case in which client FPS is lower than tick rate
 	bool _isMoving = false;
@@ -129,6 +127,8 @@ protected:
 	glm::vec3 _destination;
 	glm::vec3 _finalDirection;
 	float _interpVelocity; // Interpolation velocity, in units/sec
+	// Function to be called when interpolation is complete
+	std::function<void()> _interpFunc;
 
 	// Called by update() every tick
 	void handleInterpolation()
@@ -144,6 +144,10 @@ protected:
 				_isInterpolating = false;
 				_state->forward = _finalDirection;
 				hasChanged = true;
+				if (_interpFunc)
+				{
+					_interpFunc();
+				}
 				return;
 			}
 
@@ -154,10 +158,15 @@ protected:
 				_state->pos = _destination;
 				_state->forward = _finalDirection;
 				_isInterpolating = false;
+				if (_interpFunc)
+				{
+					_interpFunc();
+				}
 			}
 			else
 			{
 				_state->pos += movementVec;
+				_state->forward = unitDiff;
 			}
 			hasChanged = true;
 		}
@@ -194,6 +203,13 @@ protected:
 		}), filteredEvents.end());
 
 		return filteredEvents;
+	}
+
+	void handleActionMoving() {
+		_state->forward = _newDir;
+		// Move player by (direction * velocity) / ticks_per_sec
+		_state->pos = _state->pos + ((_state->forward * _velocity) / (float)TICKS_PER_SEC);
+		hasChanged = true;
 	}
 };
 
