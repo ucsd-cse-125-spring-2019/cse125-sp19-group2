@@ -85,9 +85,12 @@ void GuiManager::resize(int x, int y) {
 
 	// Resize our widgets
 	for (auto& widgetPair : _widgets) {
-		// 1/3 of the screen for dog/human lists, full screen otherwise
+		// 1/3 of the screen for dog/human lists, 1/2 screen for options, full screen otherwise
 		if (widgetPair.first == WIDGET_LIST_DOGS || widgetPair.first == WIDGET_LIST_HUMANS) {
 			widgetPair.second->setSize(nanogui::Vector2i(x / _screen->pixelRatio() / 3, y / _screen->pixelRatio() / 2));
+		}
+		else if (widgetPair.first == WIDGET_OPTIONS) {
+			widgetPair.second->setSize(nanogui::Vector2i(x / _screen->pixelRatio() / 3, y / _screen->pixelRatio() / 1.5));
 		}
 		else {
 			widgetPair.second->setSize(nanogui::Vector2i(x / _screen->pixelRatio(), y / _screen->pixelRatio()));
@@ -134,6 +137,9 @@ nanogui::Widget* GuiManager::createWidget(WidgetType name) {
 		widget = new nanogui::Widget(getWidget(WIDGET_LOBBY));
 		auto listLayout = new nanogui::BoxLayout(nanogui::Orientation::Vertical, nanogui::Alignment::Fill, 0, 20);
 		widget->setLayout(listLayout);
+	}
+	else if (name == WIDGET_OPTIONS) {
+		widget = new nanogui::Window(_screen, "Options");
 	}
 	else {
 		widget = new nanogui::Widget(_screen);
@@ -359,7 +365,12 @@ void GuiManager::initHUD() {
 }
 
 void GuiManager::initControlMenu() {
-	// TODO
+	auto controlsWidget = createWidget(WIDGET_OPTIONS);
+	controlsWidget->setLayout(new nanogui::GroupLayout());
+	auto testLabel = new nanogui::Label(controlsWidget, "test", "sans", 30);
+
+	auto windowCast = static_cast<nanogui::Window*>(controlsWidget);
+	windowCast->performLayout(_screen->nvgContext());
 }
 
 void GuiManager::setVisibility(nanogui::Widget* widget, bool visibility) {

@@ -78,6 +78,8 @@ private:
   // Player ID
   uint32_t _playerId;
 
+  bool _mouseCaptured = false;
+
   // Test Shader
   std::unique_ptr<Shader> _testShader;
   std::unique_ptr<Shader> _quadShader;

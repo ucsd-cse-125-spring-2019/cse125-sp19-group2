@@ -63,6 +63,8 @@ public:
 	 */
 	void setPlayerType(PlayerType typeNum);
 
+	void setMoveCamera(bool moveCamera);
+
 	PlayerType getPlayerType();
 
 	uint32_t getPlayerId();

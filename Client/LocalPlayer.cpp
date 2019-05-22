@@ -87,6 +87,7 @@ LocalPlayer::LocalPlayer(uint32_t playerId, std::unique_ptr<NetworkClient> const
             _camera->set_distance(-y);
         });
 
+	/*
     InputManager::getInstance().getKey(GLFW_MOUSE_BUTTON_RIGHT)->onPress(
         [&] {
             glfwSetInputMode(
@@ -100,6 +101,7 @@ LocalPlayer::LocalPlayer(uint32_t playerId, std::unique_ptr<NetworkClient> const
                 InputManager::getInstance().getWindow(), GLFW_CURSOR, GLFW_CURSOR_NORMAL);
             _moveCamera = false;
         });
+	*/
 
     InputManager::getInstance().getKey2D(Key::KEYTYPE::MOUSE)->onMove(
         [&](glm::vec2 v) {
@@ -342,6 +344,10 @@ bool LocalPlayer::setControllerNum(GamePadIndex player)
 void LocalPlayer::setPlayerType(PlayerType typeNum) 
 {
 	_playerType = typeNum;
+}
+void LocalPlayer::setMoveCamera(bool moveCamera)
+{
+	_moveCamera = moveCamera;
 }
 PlayerType LocalPlayer::getPlayerType()
 {

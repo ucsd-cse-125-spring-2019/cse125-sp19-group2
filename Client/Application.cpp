@@ -173,6 +173,8 @@ void Application::Setup() {
 		GuiManager::getInstance().setSwitchEnabled(false);
 	});
 
+	GuiManager::getInstance().setVisibility(WIDGET_OPTIONS, true);
+
 	/*
     // Create a testing widget
     bool enabled = true;
@@ -383,6 +385,12 @@ void Application::Update()
 				GuiManager::getInstance().getWidget(WIDGET_LOBBY)->setVisible(false);
 				GuiManager::getInstance().setReadyEnabled(true);
 				GuiManager::getInstance().setSwitchEnabled(true);
+
+				// Capture mouse
+				_mouseCaptured = true;
+				_localPlayer->setMoveCamera(true);
+				glfwSetInputMode(
+					InputManager::getInstance().getWindow(), GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
 				// TODO: show game HUD
 			}
@@ -600,5 +608,22 @@ void Application::registerGlobalKeys() {
 	InputManager::getInstance().getKey(GLFW_KEY_T)->onPress([&]
 	{
 		ColliderManager::getInstance().renderMode = !ColliderManager::getInstance().renderMode;
+	});
+
+	InputManager::getInstance().getKey(GLFW_KEY_ESCAPE)->onPress([&]
+	{
+		_mouseCaptured = !_mouseCaptured;
+		GuiManager::getInstance().setVisibility(WIDGET_OPTIONS, !_mouseCaptured);
+		if (_mouseCaptured) {
+			glfwSetInputMode(
+				InputManager::getInstance().getWindow(), GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+		}
+		else {
+			glfwSetInputMode(
+				InputManager::getInstance().getWindow(), GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+		}
+		if (_localPlayer) {
+			_localPlayer->setMoveCamera(_mouseCaptured);
+		}
 	});
 }
