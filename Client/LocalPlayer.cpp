@@ -235,16 +235,20 @@ LocalPlayer::LocalPlayer(uint32_t playerId, std::unique_ptr<NetworkClient> const
 	// Human swinging net
 	InputManager::getInstance().getKey(GLFW_MOUSE_BUTTON_LEFT)->onPress([&]
 	{
-		auto event = std::make_shared<GameEvent>();
-		event->playerId = _playerId;
-		event->type = EVENT_PLAYER_SWING_NET;
-		try
+		// We don't want to register clicks if the mouse isn't captured
+		if (_moveCamera)
 		{
-			networkClient->sendEvent(event);
+			auto event = std::make_shared<GameEvent>();
+			event->playerId = _playerId;
+			event->type = EVENT_PLAYER_SWING_NET;
+			try
+			{
+				networkClient->sendEvent(event);
+			}
+			catch (std::runtime_error e)
+			{
+			};
 		}
-		catch (std::runtime_error e)
-		{
-		};
 	});
 
     _camera = std::make_unique<Camera>();
@@ -345,9 +349,22 @@ void LocalPlayer::setPlayerType(PlayerType typeNum)
 {
 	_playerType = typeNum;
 }
-void LocalPlayer::setMoveCamera(bool moveCamera)
+void LocalPlayer::setMouseCaptured(bool mouseCaptured)
 {
-	_moveCamera = moveCamera;
+	_moveCamera = mouseCaptured;
+
+	if (!mouseCaptured) {
+		glfwSetInputMode(
+			InputManager::getInstance().getWindow(), GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+	}
+	else {
+		glfwSetInputMode(
+			InputManager::getInstance().getWindow(), GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+	}
+}
+bool LocalPlayer::getMouseCaptured()
+{
+	return _moveCamera;
 }
 PlayerType LocalPlayer::getPlayerType()
 {

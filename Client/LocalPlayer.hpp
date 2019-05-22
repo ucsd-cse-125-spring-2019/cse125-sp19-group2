@@ -63,7 +63,9 @@ public:
 	 */
 	void setPlayerType(PlayerType typeNum);
 
-	void setMoveCamera(bool moveCamera);
+	void setMouseCaptured(bool mouseCaptured);
+
+	bool getMouseCaptured();
 
 	PlayerType getPlayerType();
 
