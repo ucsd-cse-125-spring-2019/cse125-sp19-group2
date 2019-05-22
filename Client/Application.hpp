@@ -104,16 +104,6 @@ private:
   // Local player
   std::unique_ptr<LocalPlayer> _localPlayer;
   
-  // Player Lists
-  std::unordered_map<std::string, std::string> _dogs;
-  std::unordered_map<std::string, std::string> _humans;
-
-  // UI
-  nanogui::TextBox* _ipTextBox;
-  nanogui::TextBox* _playerNameTextBox;
-  nanogui::Button* _switchSidesButton;
-  nanogui::Button* _playerReadyBtn;
-
   // Game state
   bool _inLobby = true;
 

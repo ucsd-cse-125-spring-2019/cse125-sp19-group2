@@ -111,37 +111,14 @@ void Application::Setup() {
     // Initialize GuiManager
     GuiManager::getInstance().init(_window);
 
-	// Create login screen
-	auto connectScreen = GuiManager::getInstance().createWidget(WIDGET_CONNECT);
+	// Create widget screens
+	GuiManager::getInstance().initWidgets();
 
-	// Resize handles margins, 50 pixel spacing
-	auto connectLayout = new nanogui::BoxLayout(nanogui::Orientation::Vertical, nanogui::Alignment::Middle, 0, 25);
-	connectScreen->setLayout(connectLayout);
-
-	// Game title
-	auto gameTitle = new nanogui::Label(connectScreen, "Project Bone", "sans", 72);
-
-	// Player name
-	_playerNameTextBox = new nanogui::TextBox(connectScreen, "PlayerName");
-	_playerNameTextBox->setEditable(true);
-	_playerNameTextBox->setFixedSize(nanogui::Vector2i(300, 50));
-	_playerNameTextBox->setFontSize(38);
-	_playerNameTextBox->setAlignment(nanogui::TextBox::Alignment::Center);
-
-	// IP address box
-	_ipTextBox = new nanogui::TextBox(connectScreen, "localhost");
-	_ipTextBox->setEditable(true);
-	_ipTextBox->setFixedSize(nanogui::Vector2i(300, 50));
-	_ipTextBox->setFontSize(38);
-	_ipTextBox->setAlignment(nanogui::TextBox::Alignment::Center);
-
-	// Connect button
-	auto connectButton = new nanogui::Button(connectScreen, "Connect");
-	connectButton->setFontSize(28);
-	connectButton->setCallback([&]() {
+	// Connect screen button callback
+	GuiManager::getInstance().registerConnectCallback([&]() {
 		// Attempt server connection
-		std::string address = _ipTextBox->value();
-		std::string playerName = _playerNameTextBox->value();
+		std::string address = GuiManager::getInstance().getAddress();
+		std::string playerName = GuiManager::getInstance().getPlayerName();
 
 		uint32_t playerId;
 		try {
@@ -166,38 +143,17 @@ void Application::Setup() {
 		registerGlobalKeys();
 
 		// Hide connect screen
-		GuiManager::getInstance().getWidget(WIDGET_CONNECT)->setVisible(false);
+		GuiManager::getInstance().hideAll();
 
 		// Show lobby
-		GuiManager::getInstance().getWidget(WIDGET_LOBBY)->setVisible(true);
-		GuiManager::getInstance().getWidget(WIDGET_LIST_DOGS)->setVisible(true);
-		GuiManager::getInstance().getWidget(WIDGET_LIST_HUMANS)->setVisible(true);
+		GuiManager::getInstance().setVisibility(WIDGET_LOBBY, true);
+
+		// Redraw
 		GuiManager::getInstance().setDirty();
 	});
 
-	// Lobby screen
-	auto lobbyScreen = GuiManager::getInstance().createWidget(WIDGET_LOBBY);
-
-	// Lobby layout
-	auto lobbyLayout = new nanogui::GridLayout(nanogui::Orientation::Horizontal, 3, nanogui::Alignment::Middle, 0, 50);
-	lobbyLayout->setRowAlignment(nanogui::Alignment::Middle);
-	lobbyScreen->setLayout(lobbyLayout);
-
-	// Title for dogs list
-	auto dogsLabel = new nanogui::Label(lobbyScreen, "Dogs", "sans", 60);
-
-	// Empty widget
-	auto emptyLabel = new nanogui::Label(lobbyScreen, "", "sans", 60);
-
-	// Title for humans list
-	auto humansLabel = new nanogui::Label(lobbyScreen, "Humans", "sans", 60);
-
-	// List of dogs
-	auto dogsList = GuiManager::getInstance().createWidget(WIDGET_LIST_DOGS);
-
-	// Switch sides button
-	_switchSidesButton = new nanogui::Button(lobbyScreen, "Switch sides");
-	_switchSidesButton->setCallback([&]() {
+	// Switch sides button callback
+	GuiManager::getInstance().registerSwitchSidesCallback([&]() {
 		// Send switch event
 		auto switchEvent = std::make_shared<GameEvent>();
 		switchEvent->type = EVENT_PLAYER_SWITCH;
@@ -205,15 +161,7 @@ void Application::Setup() {
 		_networkClient->sendEvent(switchEvent);
 	});
 
-	// List of humans
-	auto humansList = GuiManager::getInstance().createWidget(WIDGET_LIST_HUMANS);
-
-	// Empty label for padding in grid
-	new nanogui::Label(lobbyScreen, "", "sans", 60);
-
-	// Ready button
-	_playerReadyBtn = new nanogui::Button(lobbyScreen, "");
-	_playerReadyBtn->setCallback([&]() {
+	GuiManager::getInstance().registerReadyCallback([&]() {
 		// Send ready event
 		auto readyEvent = std::make_shared<GameEvent>();
 		readyEvent->type = EVENT_PLAYER_READY;
@@ -221,12 +169,9 @@ void Application::Setup() {
 		_networkClient->sendEvent(readyEvent);
 
 		// Gray out ready and switch buttons
-		_playerReadyBtn->setEnabled(false);
-		_switchSidesButton->setEnabled(false);
+		GuiManager::getInstance().setReadyEnabled(false);
+		GuiManager::getInstance().setSwitchEnabled(false);
 	});
-
-	// Hide lobby by default
-	lobbyScreen->setVisible(false);
 
 	/*
     // Create a testing widget
@@ -411,95 +356,23 @@ void Application::Update()
         {
             auto gameState = std::static_pointer_cast<GameState>(state);
 
-            // TODO: do something with general state
+			// Update client-side state and UI
             // Timer, winner of game, in lobby, etc
 			if (gameState->inLobby)
 			{
-				auto dogList = GuiManager::getInstance().getWidget(WIDGET_LIST_DOGS);
-				auto humanList = GuiManager::getInstance().getWidget(WIDGET_LIST_HUMANS);
+				GuiManager::getInstance().updateDogsList(
+					gameState->dogs,
+					_localPlayer->getPlayerId());
 
-				if (dogList == nullptr || humanList == nullptr)
-				{
-					Logger::getInstance()->debug("One or both lists are null");
-				}
-
-				// Create a list for widgets that need to be removed
-				std::vector<nanogui::Widget*> removeList;
-				// Find Already Left Dog Players
-				for (auto it = dogList->children().begin(); it != dogList->children().end(); ++it)
-				{
-					uint32_t id = atoi((*it)->id().c_str());
-					// if this id can not be found, save its widget to removeList
-					if (gameState->dogs.find(id) == gameState->dogs.end())
-					{
-						removeList.push_back(*it);
-					}
-				}
-				// Remove all widges in the removeList
-				for (auto it = removeList.begin(); it != removeList.end(); ++it) {
-					_dogs.erase((*it)->id());
-					dogList->removeChild(*it);
-				}
-				removeList.clear();
-
-				// Find Already Left Human Players
-				for (auto it = humanList->children().begin(); it != humanList->children().end(); ++it)
-				{
-					uint32_t id = atoi((*it)->id().c_str());
-					// if this id can not be found, save its widget to removeList
-					if (gameState->humans.find(id) == gameState->humans.end())
-					{
-						removeList.push_back(*it);
-					}
-				}
-				// Remove all widges in the removeList
-				for (auto it = removeList.begin(); it != removeList.end(); ++it) {
-					_humans.erase((*it)->id());
-					humanList->removeChild(*it);
-				}
-				removeList.clear();
-
-				// Add dogs
-				for (auto& dogPair : gameState->dogs)
-				{
-					auto dogId = std::to_string(dogPair.first);
-					// if current dog is not in our list, add it
-					if (_dogs.find(dogId) == _dogs.end())
-					{
-						auto dogName = dogPair.second;
-						auto playerLabel = new nanogui::Label(dogList, dogName, "sans", 28);
-						playerLabel->setId(dogId);
-						_dogs[dogId] = dogName;
-						if (dogPair.first == _localPlayer->getPlayerId())
-						{
-							playerLabel->setColor(nanogui::Color(0.376f, 0.863f, 1.0f, 1.0f));
-						}
-					}
-
-				}
-
-				// Add humans
-				for (auto& humanPair : gameState->humans)
-				{
-					auto humanId = std::to_string(humanPair.first);
-					// if current dog is not in our list, add it
-					if (_humans.find(humanId) == _humans.end())
-					{
-						auto humanName = humanPair.second;
-						auto playerLabel = new nanogui::Label(humanList, humanPair.second, "sans", 28);
-						playerLabel->setId(humanId);
-						_humans[humanId] = humanName;
-						if (humanPair.first == _localPlayer->getPlayerId())
-						{
-							playerLabel->setColor(nanogui::Color(0.376f, 0.863f, 1.0f, 1.0f));
-						}
-					}
-				}
+				GuiManager::getInstance().updateHumansList(
+					gameState->humans,
+					_localPlayer->getPlayerId());
 
 				// Ready button text
 				int numPlayers = gameState->dogs.size() + gameState->humans.size();
-				_playerReadyBtn->setCaption("Ready (" + std::to_string(gameState->numReady) + std::string("/") + std::to_string(numPlayers) + std::string(")"));
+				GuiManager::getInstance().setReadyText("Ready (" + std::to_string(gameState->numReady) + std::string("/") + std::to_string(numPlayers) + std::string(")"));
 
+				// Redraw
 				GuiManager::getInstance().setDirty();
 			}
 
@@ -508,8 +381,8 @@ void Application::Update()
 			{
 				_inLobby = false;
 				GuiManager::getInstance().getWidget(WIDGET_LOBBY)->setVisible(false);
-				_playerReadyBtn->setEnabled(true);
-				_switchSidesButton->setEnabled(true);
+				GuiManager::getInstance().setReadyEnabled(true);
+				GuiManager::getInstance().setSwitchEnabled(true);
 
 				// TODO: show game HUD
 			}
@@ -528,7 +401,7 @@ void Application::Update()
 	  InputManager::getInstance().reset();
 	  ColliderManager::getInstance().clear();
 	  GuiManager::getInstance().hideAll();
-	  GuiManager::getInstance().getWidget(WIDGET_CONNECT)->setVisible(true);
+	  GuiManager::getInstance().setVisibility(WIDGET_CONNECT, true);
   }
 
   InputManager::getInstance().update();
