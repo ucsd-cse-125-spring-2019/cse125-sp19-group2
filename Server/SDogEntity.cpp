@@ -70,6 +70,7 @@ void SDogEntity::updateImpl(std::vector<std::shared_ptr<GameEvent>> events)
 				if (_peeTimer)
 				{
 					_peeTimer->abort();
+					_peeTimer = nullptr;
 				}
 				break;
 			case EVENT_PLAYER_LIFTING_START:
