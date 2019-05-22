@@ -410,6 +410,11 @@ void Application::Update()
 	  ColliderManager::getInstance().clear();
 	  GuiManager::getInstance().hideAll();
 	  GuiManager::getInstance().setVisibility(WIDGET_CONNECT, true);
+	  
+	  // Un-capture mouse
+ 	  _mouseCaptured = false;
+ 	  glfwSetInputMode(
+ 	  InputManager::getInstance().getWindow(), GLFW_CURSOR, GLFW_CURSOR_NORMAL);
   }
 
   InputManager::getInstance().update();
