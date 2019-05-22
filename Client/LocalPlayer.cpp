@@ -117,7 +117,7 @@ LocalPlayer::LocalPlayer(uint32_t playerId, std::unique_ptr<NetworkClient> const
             vec.y = -vec.y;
 
 			// Scale look movement with time
-            _camera->move_camera(vec * (float)(GuiManager::getInstance().getLastFrameLength() / 1000));
+            _camera->move_camera(vec * ((float)GuiManager::getInstance().getLastFrameLength() / 1000));
         });
 
     InputManager::getInstance().getKey2D(Key::KEYTYPE::LSTICK)->onMove(
@@ -310,7 +310,9 @@ void LocalPlayer::updateController() {
         auto rt = _gamePad->getForceRT();
         auto s = rt - lt;
 
-        InputManager::getInstance().scroll(s);
+		// Scale trigger by time
+		float scaledTrigger = s * ((float)GuiManager::getInstance().getLastFrameLength() / 50000);
+        InputManager::getInstance().scroll(scaledTrigger);
 
         if (_gamePad->isKeyDown(GamePad_Button_DPAD_LEFT)) {
             InputManager::getInstance().fire(GLFW_KEY_A, KeyState::Press);
