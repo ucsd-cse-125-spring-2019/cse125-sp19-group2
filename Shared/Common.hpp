@@ -18,7 +18,8 @@
 #define FENCE_HEIGHT 3.0f
 
 // Dog-specific stats
-#define MAX_DOG_STAMINA 3.0f;	// Dog can sprint for three seconds max
+#define MAX_DOG_STAMINA 3.0f	// Dog can sprint for three seconds max
+#define MAX_DOG_URINE 1.0f		// Dog can make one puddle per urine bar
 
 // This is absolutely filthy code but it is necessary when multiple machines
 // enter the picture.

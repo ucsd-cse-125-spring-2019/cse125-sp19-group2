@@ -6,7 +6,7 @@
 #include "SPuddleEntity.hpp"
 
 #define BASE_VELOCITY 5.0f
-#define RUN_VELOCITY BASE_VELOCITY * 1.5f;
+#define RUN_VELOCITY BASE_VELOCITY * 1.5f
 
 class SDogEntity : public SPlayerEntity
 {
@@ -25,14 +25,17 @@ public:
 
 	void generalHandleCollision(SBaseEntity* entity) override;
 
-	bool isLifting() {
-		return _isLifting;
+	bool isInteracting() {
+		return _isInteracting;
 	}
 
 	void setNearTrigger(bool val) {
 		_nearTrigger = val;
 	}
 
+	void setNearFountain(bool val) {
+		_nearFountain = val;
+	}
 
 	// dirty booleans
 	int actionStage = 0;
@@ -41,16 +44,23 @@ private:
 	// List of jails the dog could potentially be sent to
 	std::vector<glm::vec2>* _jails;
 	int type = 0;
+
 	// _isSomething is just player's attempt of doing it, may not be the final action
 	bool _isUrinating = false;
 	bool _isRunning = false;
-	bool _isLifting = false;
-	bool _isDrinking = false;
-	bool _nearTrigger = false;
+	bool _isInteracting = false;
+
 	DogAction _curAction = ACTION_DOG_IDLE;
+
 	std::vector<std::shared_ptr<SBaseEntity>>* _newEntities;
 
-	// Timer for dog pee
+	// State for jail triggers
+	bool _nearTrigger = false;
+
+	// State for fountains
+	bool _nearFountain = false;
+
+	// Dog pee timer
 	Timer* _peeTimer;
 
 	void createPuddle();

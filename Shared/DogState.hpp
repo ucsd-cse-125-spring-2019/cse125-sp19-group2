@@ -8,6 +8,7 @@ struct DogState : PlayerState
 {
 	DogAnimation currentAnimation;
 	float runStamina;
+	float urineMeter;
 
 	template<class Archive>
 	void serialize(Archive & archive)
@@ -15,7 +16,8 @@ struct DogState : PlayerState
 		archive(
 			cereal::base_class<PlayerState>(this),
 			currentAnimation,
-			runStamina);
+			runStamina,
+			urineMeter);
 	}
 };
 

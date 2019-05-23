@@ -1,6 +1,7 @@
 #pragma once
 
 #include "SBaseEntity.hpp"
+#include "SCylinderEntity.hpp"
 #include "CapsuleCollider.hpp"
 
 class SFountainEntity : public SBaseEntity
@@ -21,7 +22,40 @@ public:
 		_state->width = 4.4f;
 		_state->height = 2.0f;
 		_state->depth = 4.4f;
+
+		// Create cylinder with slightly larger radius
+		auto dogSensor = std::make_shared<SCylinderEntity>(
+			pos,
+			glm::vec3(_state->width + 1.5f, 0.1f, _state->depth + 1.5f));
+		dogSensor->getState()->isSolid = false;
+
+		// Collision sensor for dogs
+		dogSensor->onCollision([&](SBaseEntity * entity, SBaseEntity * collidingEntity)
+			{
+				if (collidingEntity->getState()->type == ENTITY_DOG)
+				{
+					SDogEntity* collidingDog = static_cast<SDogEntity*>(collidingEntity);
+					collidingDog->setNearFountain(true);
+
+					// Get unit vector of dog to fountain
+					glm::vec3 fountainDir = glm::normalize(_state->pos - collidingDog->getState()->pos);
+					collidingDog->targetDir = fountainDir;
+
+					// Send position to interpolate to (edge of fountain)
+					collidingDog->targetPos = _state->pos + ((-fountainDir) * (_state->width/2 + collidingDog->getState()->width/2 + 0.01f));
+				}
+			});
+
+		_children.push_back(dogSensor);
 	};
 	~SFountainEntity() {};
+
+	std::vector<std::shared_ptr<SBaseEntity>> getChildren() override
+	{
+		return _children;
+	}
+
+private:
+	std::vector<std::shared_ptr<SBaseEntity>> _children;
 };
 

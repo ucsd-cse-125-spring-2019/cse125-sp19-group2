@@ -120,6 +120,7 @@ public:
 	}
 
 	glm::vec3 targetPos;
+	glm::vec3 targetDir;
 
 protected:
 	// Player movement velocity in units/second

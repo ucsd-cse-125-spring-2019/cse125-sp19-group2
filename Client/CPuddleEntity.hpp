@@ -22,6 +22,12 @@ public:
 	};
 
 	~CPuddleEntity() {};
-};
+	
+	void setUniforms(std::unique_ptr<Camera> const& camera) override
+	{
+		CBaseEntity::setUniforms(camera);
 
-#pragma once
+		// Transparency (don't use alpha)
+		_objectShader->set_uniform("u_transparency", _state->transparency);
+	}
+};

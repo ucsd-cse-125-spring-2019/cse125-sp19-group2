@@ -148,7 +148,7 @@ public:
 				collidingDog->targetPos = entity->getState()->pos;
 				
 				// start lifting the gate in Stage 1
-				if (collidingDog->isLifting() && collidingDog->actionStage == 1) {
+				if (collidingDog->isInteracting() && collidingDog->actionStage == 1) {
 					_lifted = true;
 				}
 			}
