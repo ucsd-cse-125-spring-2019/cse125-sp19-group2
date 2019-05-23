@@ -193,8 +193,11 @@ protected:
 		{
 			_isInterpolating = false;
 
-			// Run onInterrupt lambda
-			_interpOnInterrupt();
+			// Run onInterrupt lambda if it exists
+			if (_interpOnInterrupt)
+			{
+				_interpOnInterrupt();
+			}
 		}
 	}
 
