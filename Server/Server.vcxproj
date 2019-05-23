@@ -228,6 +228,8 @@
     <ClCompile Include="IdGenerator.cpp" />
     <ClCompile Include="GridLevelParser.cpp" />
     <ClCompile Include="SBaseEntity.cpp" />
+    <ClCompile Include="SDogEntity.cpp" />
+    <ClCompile Include="SHumanEntity.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AABBCollider.hpp" />
@@ -245,9 +247,9 @@
     <ClInclude Include="NetworkServer.hpp" />
     <ClInclude Include="SBaseEntity.hpp" />
     <ClInclude Include="SBoxEntity.hpp" />
+    <ClInclude Include="SCylinderEntity.hpp" />
     <ClInclude Include="SDogEntity.hpp" />
     <ClInclude Include="SDogHouseEntity.hpp" />
-    <ClInclude Include="SExampleEntity.hpp" />
     <ClInclude Include="SFenceEntity.hpp" />
     <ClInclude Include="SFloorEntity.hpp" />
     <ClInclude Include="SFountainEntity.hpp" />

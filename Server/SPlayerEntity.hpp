@@ -4,6 +4,7 @@
 #include "SBaseEntity.hpp"
 #include "CapsuleCollider.hpp"
 #include "Shared\PlayerState.hpp"
+#include <algorithm>
 
 // Amount of leway when comparing floats
 const float FP_EPSILON = 0.00001f;
@@ -75,23 +76,16 @@ public:
 					}
 
 					// Update forward vector with unit direction only if it was modified
-					if (dir != glm::vec3(0))
+					if (glm::length(dir) > 0.0001f)
 					{
 						_isMoving = true;
-						hasChanged = true;
-						_state->forward = dir / glm::length(dir);
-
-
-						// Move player by (direction * velocity) / ticks_per_sec
-						auto oldPos = _state->pos;
-						_state->pos = _state->pos + ((_state->forward * _velocity) / (float)TICKS_PER_SEC);
+						_newDir = glm::normalize(dir);
+					}
+					else {
+						_isMoving = false;
 					}
 				} // !_isInterpolating
 			} // player movement
-			else if (_isMoving) // Client running slower than server
-			{
-				_state->pos = _state->pos + ((_state->forward * _velocity) / (float)TICKS_PER_SEC);
-			}
 
 			// Check for player stop event
 			for (auto& event : events)
@@ -101,25 +95,43 @@ public:
 					_isMoving = false;
 				}
 			}
-
-			handleInterpolation();
-
 		} // isStatic
+
+		// Update all timers for the player
+		updateTimers();
+
 	} // update()
 
 	// Call this function to move a player to a destination
-	void interpolateMovement(glm::vec3 destination, glm::vec3 finalDirection, float velocity)
+	void interpolateMovement(
+		glm::vec3 destination,
+		glm::vec3 finalDirection,
+		float velocity,
+		std::function<void()> onComplete = 0,
+		std::function<void()> onInterrupt = 0) 
 	{
-		_isInterpolating = true;
-		_destination = destination;
-		_finalDirection = finalDirection;
-		_interpVelocity = velocity;
-
+		if (!_isInterpolating)
+		{
+			_isInterpolating = true;
+			_destination = destination;
+			_finalDirection = finalDirection;
+			_interpVelocity = velocity;
+			_interpOnComplete = onComplete;
+			_interpOnInterrupt = onInterrupt;
+		}
 	}
+
+	// Stage of current action
+	int actionStage = 0;
+
+	// Used when interpolating to a colliding object
+	glm::vec3 targetPos;
+	glm::vec3 targetDir;
 
 protected:
 	// Player movement velocity in units/second
 	float _velocity;
+	glm::vec3 _newDir;
 
 	// For the case in which client FPS is lower than tick rate
 	bool _isMoving = false;
@@ -129,6 +141,12 @@ protected:
 	glm::vec3 _destination;
 	glm::vec3 _finalDirection;
 	float _interpVelocity; // Interpolation velocity, in units/sec
+
+	// Function to be called when interpolation is complete
+	std::function<void()> _interpOnComplete;
+
+	// Function to be called when interpolation is interrupted
+	std::function<void()> _interpOnInterrupt;
 
 	// Called by update() every tick
 	void handleInterpolation()
@@ -144,6 +162,10 @@ protected:
 				_isInterpolating = false;
 				_state->forward = _finalDirection;
 				hasChanged = true;
+				if (_interpOnComplete)
+				{
+					_interpOnComplete();
+				}
 				return;
 			}
 
@@ -154,10 +176,15 @@ protected:
 				_state->pos = _destination;
 				_state->forward = _finalDirection;
 				_isInterpolating = false;
+				if (_interpOnComplete)
+				{
+					_interpOnComplete();
+				}
 			}
 			else
 			{
 				_state->pos += movementVec;
+				_state->forward = unitDiff;
 			}
 			hasChanged = true;
 		}
@@ -169,6 +196,12 @@ protected:
 		if (_isInterpolating && entity->getState()->getSolidity(_state.get()))
 		{
 			_isInterpolating = false;
+
+			// Run onInterrupt lambda if it exists
+			if (_interpOnInterrupt)
+			{
+				_interpOnInterrupt();
+			}
 		}
 	}
 
@@ -194,6 +227,13 @@ protected:
 		}), filteredEvents.end());
 
 		return filteredEvents;
+	}
+
+	void handleActionMoving() {
+		_state->forward = _newDir;
+		// Move player by (direction * velocity) / ticks_per_sec
+		_state->pos = _state->pos + ((_state->forward * _velocity) / (float)TICKS_PER_SEC);
+		hasChanged = true;
 	}
 };
 

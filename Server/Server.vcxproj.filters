@@ -75,15 +75,18 @@
     <ClCompile Include="SBaseEntity.cpp">
       <Filter>Source Files\Entity</Filter>
     </ClCompile>
+    <ClCompile Include="SDogEntity.cpp">
+      <Filter>Source Files\Entity</Filter>
+    </ClCompile>
+    <ClCompile Include="SHumanEntity.cpp">
+      <Filter>Source Files\Entity</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="NetworkServer.hpp">
       <Filter>Header Files\Network</Filter>
     </ClInclude>
     <ClInclude Include="SBaseEntity.hpp">
-      <Filter>Header Files\Entity</Filter>
-    </ClInclude>
-    <ClInclude Include="SExampleEntity.hpp">
       <Filter>Header Files\Entity</Filter>
     </ClInclude>
     <ClInclude Include="IdGenerator.hpp">
@@ -168,6 +171,9 @@
       <Filter>Header Files\Physics</Filter>
     </ClInclude>
     <ClInclude Include="STriggerEntity.hpp">
+      <Filter>Header Files\Entity</Filter>
+    </ClInclude>
+    <ClInclude Include="SCylinderEntity.hpp">
       <Filter>Header Files\Entity</Filter>
     </ClInclude>
   </ItemGroup>
