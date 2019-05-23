@@ -12,7 +12,7 @@ class CPuddleEntity : public CBaseEntity
 public:
 	CPuddleEntity() {
 		// Allocate member variables
-		_objectModel = std::make_unique<Model>("./Resources/Models/dogbone.fbx");
+		_objectModel = std::make_unique<Model>("./Resources/Models/pee.fbx");
 		_objectShader = std::make_unique<Shader>();
 		_state = std::make_shared<BaseState>();
 

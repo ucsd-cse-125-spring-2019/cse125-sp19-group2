@@ -110,6 +110,7 @@ public:
 
 		if (_isUrinating)
 		{
+			dogState->currentAnimation = ANIMATION_DOG_PEEING;
 			auto now = std::chrono::system_clock::now();
 			std::chrono::duration<double> diff = now - _urinatingStartTime;
 			if (diff.count() > 1.0)
