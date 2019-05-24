@@ -43,7 +43,7 @@ public:
 
     nanogui::FormHelper* getFormHelper(const std::string & name);
 
-	nanogui::Widget* createWidget(WidgetType name);
+	nanogui::Widget* createWidget(nanogui::Widget* parent, WidgetType name);
 
 	nanogui::Widget* getWidget(WidgetType name);
 

@@ -1,5 +1,6 @@
 ﻿#include "GuiManager.hpp"
 #include "Shared/Logger.hpp"
+#include "stb_image.h"
 #include <chrono>
 
 using namespace nanogui;
@@ -136,19 +137,14 @@ nanogui::FormHelper* GuiManager::getFormHelper(const std::string& name) {
     return nullptr;
 }
 
-nanogui::Widget* GuiManager::createWidget(WidgetType name) {
+nanogui::Widget* GuiManager::createWidget(nanogui::Widget* parent, WidgetType name) {
 	nanogui::Widget* widget;
-	
-	if (name == WIDGET_LIST_DOGS || name == WIDGET_LIST_HUMANS) {
-		widget = new nanogui::Widget(getWidget(WIDGET_LOBBY));
-		auto listLayout = new nanogui::BoxLayout(nanogui::Orientation::Vertical, nanogui::Alignment::Fill, 0, 20);
-		widget->setLayout(listLayout);
-	}
-	else if (name == WIDGET_OPTIONS) {
-		widget = new nanogui::Window(_screen, "Options");
+
+	if (name == WIDGET_OPTIONS) {
+		widget = new nanogui::Window(parent, "Options");
 	}
 	else {
-		widget = new nanogui::Widget(_screen);
+		widget = new nanogui::Widget(parent);
 	}
 
 	_widgets.insert({ name, widget });
@@ -310,7 +306,7 @@ void GuiManager::hideAll() {
 
 /*** Private functions ***/
 void GuiManager::initConnectScreen() {
-	auto connectScreen = createWidget(WIDGET_CONNECT);
+	auto connectScreen = createWidget(_screen, WIDGET_CONNECT);
 
 	// Resize handles margins, 50 pixel spacing
 	auto connectLayout = new nanogui::BoxLayout(nanogui::Orientation::Vertical, nanogui::Alignment::Middle, 0, 25);
@@ -339,12 +335,14 @@ void GuiManager::initConnectScreen() {
 }
 
 void GuiManager::initLobbyScreen() {
-	auto lobbyScreen = createWidget(WIDGET_LOBBY);
+	auto lobbyScreen = createWidget(_screen, WIDGET_LOBBY);
 
 	// Lobby layout
-	auto lobbyLayout = new nanogui::GridLayout(nanogui::Orientation::Horizontal, 3, nanogui::Alignment::Middle, 0, 50);
+	auto lobbyLayout = new nanogui::GridLayout(nanogui::Orientation::Horizontal, 3, nanogui::Alignment::Middle, 50, 0);
 	lobbyLayout->setRowAlignment(nanogui::Alignment::Middle);
 	lobbyScreen->setLayout(lobbyLayout);
+
+	/** Row 1 **/
 
 	// Title for dogs list
 	auto dogsLabel = new nanogui::Label(lobbyScreen, "Dogs", "sans", 60);
@@ -355,14 +353,40 @@ void GuiManager::initLobbyScreen() {
 	// Title for humans list
 	auto humansLabel = new nanogui::Label(lobbyScreen, "Humans", "sans", 60);
 
+	/** Row 2: Fixed-width padding **/
+
+	int maxWidth = std::max(dogsLabel->preferredSize(_screen->nvgContext()).x(), humansLabel->preferredSize(_screen->nvgContext()).x());
+
+	// Three empty widgets to fix size of each column
+	auto emptyLabel1 = new nanogui::Label(lobbyScreen, "", "sans", 5);
+	emptyLabel1->setFixedWidth(maxWidth);
+
+	auto emptyLabel2 = new nanogui::Label(lobbyScreen, "", "sans", 5);
+
+	auto emptyLabel3 = new nanogui::Label(lobbyScreen, "", "sans", 5);
+	emptyLabel3->setFixedWidth(maxWidth);
+
+	/** Row 3 **/
+
 	// List of dogs
-	auto dogsList = createWidget(WIDGET_LIST_DOGS);
+	auto dogsList = createWidget(lobbyScreen, WIDGET_LIST_DOGS);
+	auto dogsLayout = new nanogui::BoxLayout(nanogui::Orientation::Vertical, nanogui::Alignment::Fill, 0, 20);
+	dogsList->setLayout(dogsLayout);
 
 	// Switch sides button
 	_switchSidesButton = new nanogui::Button(lobbyScreen, "Switch sides");
 
 	// List of humans
-	auto humansList = GuiManager::getInstance().createWidget(WIDGET_LIST_HUMANS);
+	auto humansList = GuiManager::getInstance().createWidget(lobbyScreen, WIDGET_LIST_HUMANS);
+	auto humansLayout = new nanogui::BoxLayout(nanogui::Orientation::Vertical, nanogui::Alignment::Fill, 0, 20);
+	humansList->setLayout(humansLayout);
+
+	/** Row 4: padding **/
+	for (int i = 0; i < 3; i++) {
+		new nanogui::Label(lobbyScreen, "", "sans", 5);
+	}
+
+	/** Row 5 **/
 
 	// Empty label for padding in grid
 	new nanogui::Label(lobbyScreen, "", "sans", 60);
@@ -376,7 +400,7 @@ void GuiManager::initHUD() {
 }
 
 void GuiManager::initControlMenu() {
-	auto controlsWidget = createWidget(WIDGET_OPTIONS);
+	auto controlsWidget = createWidget(_screen, WIDGET_OPTIONS);
 	controlsWidget->setLayout(new nanogui::GroupLayout());
 
 	auto controllerLabel = new Label(controlsWidget, "Select Controller", "sans", 16);
