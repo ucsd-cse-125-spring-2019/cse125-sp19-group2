@@ -53,16 +53,7 @@ void GuiManager::draw() {
         _lastTime = high_resolution_clock::now();
     }
 
-    if (_dirty) {
-        // Recalculate widget
-		//_screen->performLayout();
-
-		// Redraw all children
-		redraw(_screen);
-
-        _dirty = false;
-    }
-
+	// Recompute layout
     _screen->performLayout();
 
     for (auto & element : _formHelpers) {
@@ -74,15 +65,6 @@ void GuiManager::draw() {
     _screen->drawWidgets();
     glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_LEQUAL);
-}
-
-void GuiManager::redraw(nanogui::Widget* widget) {
-	for (auto& child : widget->children()) {
-		redraw(child);
-	}
-
-	if (widget->layout()) {
-	}
 }
 
 void GuiManager::resize(int x, int y) {
@@ -115,17 +97,11 @@ void GuiManager::resize(int x, int y) {
 			static_cast<nanogui::BoxLayout*>(widgetPair.second->layout())->setSpacing(spacing / 2);
 			break;
 		}
-
-		_dirty = true;
 	}
 }
 
 Screen* GuiManager::getScreen() {
     return _screen;
-}
-
-void GuiManager::setDirty() {
-    _dirty = true;
 }
 
 long GuiManager::getLastFrameLength()

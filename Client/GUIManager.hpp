@@ -37,8 +37,6 @@ public:
 
     nanogui::Screen* getScreen();
 
-    void setDirty();
-
 	// Length of last frame in microseconds
 	long getLastFrameLength();
 
@@ -97,7 +95,6 @@ private:
 	void setVisibility(nanogui::Widget* widget, bool visibility);
 
 	/*** Variables ***/
-    bool _dirty = false;
 
     // nanogui 
     nanogui::Screen * _screen;

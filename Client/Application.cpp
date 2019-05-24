@@ -148,11 +148,6 @@ void Application::Setup() {
 
 		// Show lobby
 		GuiManager::getInstance().setVisibility(WIDGET_LOBBY, true);
-
-		// Redraw
-		GuiManager::getInstance().setDirty();
-
-
 	});
 
 	// Switch sides button callback
@@ -201,8 +196,6 @@ void Application::Setup() {
 			break;
 		}
 	});
-
-    GuiManager::getInstance().setDirty();
 }
 
 void Application::Cleanup() {
@@ -288,9 +281,6 @@ void Application::Update()
 				// Ready button text
 				int numPlayers = gameState->dogs.size() + gameState->humans.size();
 				GuiManager::getInstance().setReadyText("Ready (" + std::to_string(gameState->readyPlayers.size()) + std::string("/") + std::to_string(numPlayers) + std::string(")"));
-
-				// Redraw
-				GuiManager::getInstance().setDirty();
 			}
 
 			// Did a game just start? If so, hide lobby UI
@@ -306,9 +296,6 @@ void Application::Update()
 
 				// Show game HUD
 				GuiManager::getInstance().setVisibility(WIDGET_HUD, true);
-
-				// Redraw
-				GuiManager::getInstance().setDirty();
 			}
 			// Conversely, did a game just end and send us back to the lobby?
 			else if (gameState->inLobby && !_inLobby)
@@ -421,8 +408,6 @@ void Application::Update()
 	  ColliderManager::getInstance().clear();
 	  GuiManager::getInstance().hideAll();
 	  GuiManager::getInstance().setVisibility(WIDGET_CONNECT, true);
-
-	  
 
 	  // Un-capture mouse
  	  glfwSetInputMode(
