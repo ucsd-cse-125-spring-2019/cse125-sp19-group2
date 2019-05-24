@@ -48,9 +48,23 @@ void SHumanEntity::update(std::vector<std::shared_ptr<GameEvent>> events)
 			break;
 		case EVENT_PLAYER_LAUNCH_END:
 			_isLaunching = false;
-			plungerEntity->getState()->isDestroyed = true;
+			if (plungerEntity != nullptr)
+			{
+				plungerEntity->getState()->isDestroyed = true;
+				plungerEntity = nullptr;
 
-			plungerEntity = nullptr;
+				// stop human from flying
+				if (actionStage == 3) {
+					_isInterpolating = false;
+
+					// Run onInterrupt lambda if it exists
+					if (_interpOnInterrupt)
+					{
+						_interpOnInterrupt();
+					}
+				}
+			}
+			
 			break;
 		}
 	}
@@ -87,11 +101,48 @@ void SHumanEntity::update(std::vector<std::shared_ptr<GameEvent>> events)
 		if (actionChanged) {
 			humanState->currentAnimation = ANIMATION_HUMAN_SHOOT;
 			hasChanged = true;
+			// Timer until shooting animation end
+			registerTimer(360, [&]()
+			{
+				humanState->currentAnimation = ANIMATION_HUMAN_IDLE_LAUNCHER;
+				hasChanged = true;
+				actionStage++;
+			});
 		}
 
-		if (plungerEntity == nullptr) {
-			plungerEntity = std::make_shared<SPlungerEntity>(_state->pos, _state->forward);
-			_newEntities->push_back(plungerEntity);
+		// stage 1: create plunger entity and wait until it hit the wall
+		if (actionStage == 1) {
+			if (plungerEntity == nullptr) {
+				plungerEntity = std::make_shared<SPlungerEntity>(_state->pos, _state->forward);
+				_newEntities->push_back(plungerEntity);
+			}
+			if (!plungerEntity->launching) {
+				actionStage++;
+			}
+		}
+
+		// stage 2: human fly to plunger
+		if (actionStage == 2) {
+			humanState->currentAnimation = ANIMATION_HUMAN_FLYING;
+			hasChanged = true;
+			interpolateMovement(plungerEntity->getState()->pos, plungerEntity->getState()->forward, 20.0f, 
+				[&] {
+				_isLaunching = false;
+				if (plungerEntity != nullptr)
+				{
+					plungerEntity->getState()->isDestroyed = true;
+					plungerEntity = nullptr;
+				}
+			},
+				[&] {
+				_isLaunching = false;
+				if (plungerEntity != nullptr)
+				{
+					plungerEntity->getState()->isDestroyed = true;
+					plungerEntity = nullptr;
+				}
+			});
+			actionStage++;
 		}
 
 		break;

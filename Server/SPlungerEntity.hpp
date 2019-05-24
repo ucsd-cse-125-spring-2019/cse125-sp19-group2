@@ -4,7 +4,7 @@
 #include "CapsuleCollider.hpp"
 #include "EmptyCollider.hpp"
 
-#define LAUNCHING_VELOCITY 15.0f
+#define LAUNCHING_VELOCITY 22.0f
 
 class SPlungerEntity : public SBaseEntity
 {
