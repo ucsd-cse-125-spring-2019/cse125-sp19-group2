@@ -166,7 +166,8 @@ void EventManager::handlePlayerLeave(std::shared_ptr<GameEvent> event)
 		_gameState->readyPlayers.end());
 
 	// If everyone is now ready, start the game
-	if (_gameState->readyPlayers.size() ==
+	if (_gameState->inLobby &&
+		_gameState->readyPlayers.size() ==
 		_gameState->dogs.size() + _gameState->humans.size())
 	{
 		startGame();

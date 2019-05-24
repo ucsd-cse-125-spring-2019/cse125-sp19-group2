@@ -96,14 +96,6 @@ void GuiManager::resize(int x, int y) {
 			// Options menu
 			widgetPair.second->setSize(nanogui::Vector2i(x / _screen->pixelRatio() / 3, y / _screen->pixelRatio() / 1.5));
 		}
-		else if (widgetPair.first == WIDGET_HUD_MIDDLE) {			
-			// Middle HUD takes 80% of the vertical screen space
-			widgetPair.second->setSize(nanogui::Vector2i(x / _screen->pixelRatio(), (y / _screen->pixelRatio()) * 0.8f));
-		}
-		else if (widgetPair.first == WIDGET_HUD_TOP || widgetPair.first == WIDGET_HUD_BOTTOM)
-		{
-			widgetPair.second->setSize(nanogui::Vector2i(x / _screen->pixelRatio(), (y / _screen->pixelRatio()) * 0.1f));
-		}
 		else {
 			widgetPair.second->setSize(nanogui::Vector2i(x / _screen->pixelRatio(), y / _screen->pixelRatio()));
 		}
@@ -112,6 +104,15 @@ void GuiManager::resize(int x, int y) {
 		switch (widgetPair.first) {
 		case WIDGET_CONNECT:
 			static_cast<nanogui::BoxLayout*>(widgetPair.second->layout())->setMargin(x * CONNECT_MARGIN);
+			break;
+		case WIDGET_HUD:
+			// Set spacing for parent HUD widget to "clamp" bottom and top HUD widgets
+			int topHeight = getWidget(WIDGET_HUD_TOP)->preferredSize(_screen->nvgContext()).y();
+			int middleHeight = getWidget(WIDGET_HUD_MIDDLE)->preferredSize(_screen->nvgContext()).y();
+			int bottomHeight = getWidget(WIDGET_HUD_BOTTOM)->preferredSize(_screen->nvgContext()).y();
+
+			int spacing = (y / _screen->pixelRatio() - middleHeight - topHeight - bottomHeight);
+			static_cast<nanogui::BoxLayout*>(widgetPair.second->layout())->setSpacing(spacing / 2);
 			break;
 		}
 
@@ -413,8 +414,7 @@ void GuiManager::initHUD() {
 
 	// Top HUD
 	auto topHUD = createWidget(hudContainer, WIDGET_HUD_TOP);
-	auto topHUDLayout = new nanogui::GridLayout(nanogui::Orientation::Horizontal, 3 /* Number of cols */);
-	topHUDLayout->setColAlignment({ nanogui::Alignment::Maximum, nanogui::Alignment::Middle, nanogui::Alignment::Maximum });
+	auto topHUDLayout = new nanogui::GridLayout(nanogui::Orientation::Horizontal, 3);
 	topHUD->setLayout(topHUDLayout);
 
 	// Empty left widget
@@ -424,7 +424,7 @@ void GuiManager::initHUD() {
 	new nanogui::Label(topHUD, "Clock goes here", "sans", 52);
 
 	// Empty right widget
-	new nanogui::Label(topHUD, "", "sans", 5);
+	//new nanogui::Label(topHUD, "", "sans", 5);
 
 	// Middle HUD
 	auto middleHUD = createWidget(hudContainer, WIDGET_HUD_MIDDLE);
@@ -432,13 +432,13 @@ void GuiManager::initHUD() {
 	middleHUD->setLayout(middleHUDLayout);
 
 	new nanogui::Label(middleHUD, "Middle HUD", "sans", 72);
+	new nanogui::Label(middleHUD, "More stuff", "sans", 48);
 
 	// TODO: game over text & timer for game start/lobby
 
 	// Bottom HUD
 	auto bottomHUD = createWidget(hudContainer, WIDGET_HUD_BOTTOM);
-	auto bottomHUDLayout = new nanogui::GridLayout(nanogui::Orientation::Horizontal, 3 /* Number of cols */);
-	bottomHUDLayout->setColAlignment({ nanogui::Alignment::Maximum, nanogui::Alignment::Middle, nanogui::Alignment::Maximum });
+	auto bottomHUDLayout = new nanogui::GridLayout(nanogui::Orientation::Horizontal, 3, nanogui::Alignment::Middle, 5);
 	bottomHUD->setLayout(bottomHUDLayout);
 
 	// Empty left widget
@@ -449,9 +449,6 @@ void GuiManager::initHUD() {
 
 	// Empty right widget
 	new nanogui::Label(bottomHUD, "", "sans", 5);
-
-	// TODO: dog/human abilities in middle (or on sides)
-	
 }
 
 void GuiManager::initControlMenu() {

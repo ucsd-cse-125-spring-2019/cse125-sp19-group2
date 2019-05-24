@@ -303,6 +303,9 @@ void Application::Update()
 
 				// Show game HUD
 				GuiManager::getInstance().setVisibility(WIDGET_HUD, true);
+
+				// Redraw
+				GuiManager::getInstance().setDirty();
 			}
 
 			_inLobby = gameState->inLobby;

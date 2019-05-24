@@ -88,7 +88,7 @@ private:
 	void initControlMenu();
 
 	void setVisibility(nanogui::Widget* widget, bool visibility);
-	
+
 	/*** Variables ***/
     bool _dirty = false;
 
