@@ -35,6 +35,8 @@ private:
 	void handlePlayerReady(std::shared_ptr<GameEvent> event);
 	void handlePlayerLeave(std::shared_ptr<GameEvent> event);
 
+	void startGame();
+
 	// Raw pointer to network interface
 	NetworkServer* _networkInterface;
 

@@ -17,12 +17,12 @@ struct GameState : public BaseState
 	bool gameStarted;
 	bool gameOver;
 	bool inLobby;
-	int numReady;	// Number of players ready to start the game
 	long millisecondsToStart;	// Countdown to game start
 	long millisecondsLeft;	// Time remaining in game before dogs win
 	EntityType winner;	// Either ENTITY_DOG or ENTITY_HUMAN
 	std::unordered_map<uint32_t, std::string> dogs;
 	std::unordered_map<uint32_t, std::string> humans;
+	std::vector<uint32_t> readyPlayers;	// Players ready to start the game
 
 	template<class Archive>
 	void serialize(Archive& archive)
@@ -31,12 +31,12 @@ struct GameState : public BaseState
 			cereal::base_class<BaseState>(this),
 			gameStarted,
 			inLobby,
-			numReady,
 			millisecondsToStart,
 			millisecondsLeft,
 			winner,
 			dogs,
-			humans);
+			humans,
+			readyPlayers);
 	}
 
 	// Some items used by server, not serialized for the client

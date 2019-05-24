@@ -127,75 +127,20 @@ void EventManager::handlePlayerSwitch(std::shared_ptr<GameEvent> event)
 
 void EventManager::handlePlayerReady(std::shared_ptr<GameEvent> event)
 {
-	_gameState->numReady += 1;
-
-	// Immediately send a new GameState
-	_networkInterface->sendUpdate(_gameState);
+	// Disregard duplicate events
+	for (auto& player : _gameState->readyPlayers)
+	{
+		if (player == event->playerId)
+		{
+			return;
+		}
+	}
+	_gameState->readyPlayers.push_back(event->playerId);
 
 	// Check if everyone is ready
-	if (_gameState->dogs.size() + _gameState->humans.size() == _gameState->numReady)
+	if (_gameState->dogs.size() + _gameState->humans.size() == _gameState->readyPlayers.size())
 	{
-		// Build player entities for each human
-		for (auto& humanPair : _gameState->humans)
-		{
-			// Get first element from human spawn locations and push it back
-			glm::vec2 humanSpawn = _structureInfo->humanSpawns->front();
-			_structureInfo->humanSpawns->pop();
-			_structureInfo->humanSpawns->push(humanSpawn);
-
-			auto humanEntity = std::make_shared<SHumanEntity>(
-				humanPair.first,
-				humanPair.second);
-
-			// Set location
-			humanEntity->getState()->pos = glm::vec3(humanSpawn.x, 0, humanSpawn.y);
-
-			// Insert into global map
-			_structureInfo->entityMap->insert({ humanPair.first, humanEntity });
-		}
-
-		// Build player entities for each dog
-		for (auto& dogPair : _gameState->dogs)
-		{
-			// Get first element from dog spawn locations and push it back
-			glm::vec2 dogSpawn = _structureInfo->dogSpawns->front();
-			_structureInfo->dogSpawns->pop();
-			_structureInfo->dogSpawns->push(dogSpawn);
-
-			auto dogEntity = std::make_shared<SDogEntity>(
-				dogPair.first, // ID
-				dogPair.second, // Name
-				_structureInfo->jailsPos,
-				_structureInfo->newEntities);
-
-			// Set location
-			dogEntity->getState()->pos = glm::vec3(dogSpawn.x, 0, dogSpawn.y);
-
-			// Insert into global map
-			_structureInfo->entityMap->insert({ dogPair.first, dogEntity });
-		}
-
-		// Send state of every object to every player
-		auto updateVec = std::vector<std::shared_ptr<BaseState>>();
-		for (auto& entityPair : *_structureInfo->entityMap)
-		{
-			updateVec.push_back(entityPair.second->getState());
-		}
-		_networkInterface->sendUpdates(updateVec);
-
-		_gameState->inLobby = false;
-
-		// Only start the game if at least one dog and human
-		// If not, players will still be able to run around in the world
-		// for debugging purposes, but there will be no winning or losing
-
-		if (_gameState->dogs.size() && _gameState->humans.size())
-		{
-			// Game has started!
-			Logger::getInstance()->debug("Game started!");
-			_gameState->gameStarted = true;
-			_gameState->_gameStart = std::chrono::steady_clock::now();
-		}
+		startGame();
 	}
 }
 
@@ -212,9 +157,19 @@ void EventManager::handlePlayerLeave(std::shared_ptr<GameEvent> event)
 			_gameState->humans.find(event->playerId));
 	}
 
-	if (_gameState->inLobby)
+	// Remove from ready vector if it exists
+	_gameState->readyPlayers.erase(
+		std::remove(
+			_gameState->readyPlayers.begin(),
+			_gameState->readyPlayers.end(),
+			event->playerId),
+		_gameState->readyPlayers.end());
+
+	// If everyone is now ready, start the game
+	if (_gameState->readyPlayers.size() ==
+		_gameState->dogs.size() + _gameState->humans.size())
 	{
-		_gameState->numReady -= 1;
+		startGame();
 	}
 
 	// Reset the game if no other players
@@ -223,7 +178,7 @@ void EventManager::handlePlayerLeave(std::shared_ptr<GameEvent> event)
 		_gameState->inLobby = true;
 		_gameState->gameStarted = false;
 		_gameState->gameOver = false;
-		_gameState->numReady = 0;
+		_gameState->readyPlayers.clear();
 	}
 
 	// Mark entity for deletion if it exists
@@ -232,5 +187,74 @@ void EventManager::handlePlayerLeave(std::shared_ptr<GameEvent> event)
 		auto entity = result->second;
 		entity->getState()->isDestroyed = true;
 		entity->hasChanged = true;
+	}
+}
+
+void EventManager::startGame()
+{
+	// Immediately send a new GameState to try and update ready button before
+	// the game loads on the client
+	_networkInterface->sendUpdate(_gameState);
+
+	// Build player entities for each human
+	for (auto& humanPair : _gameState->humans)
+	{
+		// Get first element from human spawn locations and push it back
+		glm::vec2 humanSpawn = _structureInfo->humanSpawns->front();
+		_structureInfo->humanSpawns->pop();
+		_structureInfo->humanSpawns->push(humanSpawn);
+
+		auto humanEntity = std::make_shared<SHumanEntity>(
+			humanPair.first,
+			humanPair.second);
+
+		// Set location
+		humanEntity->getState()->pos = glm::vec3(humanSpawn.x, 0, humanSpawn.y);
+
+		// Insert into global map
+		_structureInfo->entityMap->insert({ humanPair.first, humanEntity });
+	}
+
+	// Build player entities for each dog
+	for (auto& dogPair : _gameState->dogs)
+	{
+		// Get first element from dog spawn locations and push it back
+		glm::vec2 dogSpawn = _structureInfo->dogSpawns->front();
+		_structureInfo->dogSpawns->pop();
+		_structureInfo->dogSpawns->push(dogSpawn);
+
+		auto dogEntity = std::make_shared<SDogEntity>(
+			dogPair.first, // ID
+			dogPair.second, // Name
+			_structureInfo->jailsPos,
+			_structureInfo->newEntities);
+
+		// Set location
+		dogEntity->getState()->pos = glm::vec3(dogSpawn.x, 0, dogSpawn.y);
+
+		// Insert into global map
+		_structureInfo->entityMap->insert({ dogPair.first, dogEntity });
+	}
+
+	// Send state of every object to every player
+	auto updateVec = std::vector<std::shared_ptr<BaseState>>();
+	for (auto& entityPair : *_structureInfo->entityMap)
+	{
+		updateVec.push_back(entityPair.second->getState());
+	}
+	_networkInterface->sendUpdates(updateVec);
+
+	_gameState->inLobby = false;
+
+	// Only start the game if at least one dog and human
+	// If not, players will still be able to run around in the world
+	// for debugging purposes, but there will be no winning or losing
+
+	if (_gameState->dogs.size() && _gameState->humans.size())
+	{
+		// Game has started!
+		Logger::getInstance()->debug("Game started!");
+		_gameState->gameStarted = true;
+		_gameState->_gameStart = std::chrono::steady_clock::now();
 	}
 }

@@ -30,11 +30,11 @@ void GameServer::start()
 	_gameState->gameStarted = false;
 	_gameState->gameOver = false;
 	_gameState->inLobby = true;
-	_gameState->numReady = 0;
 	_gameState->millisecondsToStart = 0;
 	_gameState->millisecondsLeft = 0;
 	_gameState->dogs = std::unordered_map<uint32_t, std::string>();
 	_gameState->humans = std::unordered_map<uint32_t, std::string>();
+	_gameState->readyPlayers = std::vector<uint32_t>();
 
 	// Server utilization monitor
 	Logger::getInstance()->initUtilizationMonitor();
@@ -207,12 +207,16 @@ void GameServer::updateGameState()
 	{
 		_gameState->gameStarted = false;
 		_gameState->gameOver = true;
+		_gameState->winner = ENTITY_HUMAN;
 		Logger::getInstance()->debug("Humans won!");
 	}
 	else if (_gameState->gameStarted && _gameState->_gameDuration >= MAX_GAME_LENGTH)
 	{
 		_gameState->gameStarted = false;
 		_gameState->gameOver = true;
+		_gameState->winner = ENTITY_DOG;
 		Logger::getInstance()->debug("Dogs won!");
 	}
+
+	// TODO: if game over, send everyone back to lobby after 15 seconds or so
 }
