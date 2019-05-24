@@ -1,5 +1,7 @@
 #pragma once
 
+#include <chrono>
+
 /*
 ** This header file is intended to house any miscellaneous resources needed in
 ** the project.
@@ -16,6 +18,15 @@
 // Width and height of walls and fences
 #define FENCE_WIDTH 0.2f
 #define FENCE_HEIGHT 3.0f
+
+// Pregame countdown
+const std::chrono::seconds PREGAME_LENGTH(10);
+
+// Max game length
+const std::chrono::seconds MAX_GAME_LENGTH(30);
+
+// Back to lobby countdown
+const std::chrono::seconds POSTGAME_LENGTH(15);
 
 // Dog-specific stats
 #define MAX_DOG_STAMINA 3.0f;	// Dog can sprint for three seconds max

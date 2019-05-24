@@ -106,6 +106,11 @@ private:
   
   // Game state
   bool _inLobby = true;
+  bool _inCountdown = false;
+  bool _startHidden = false;
+
+  // Time when pregame countdown ended
+  std::chrono::time_point<std::chrono::steady_clock> _countdownEnd;
 
   // Test Lights
   std::unique_ptr<PointLight> _point_light;

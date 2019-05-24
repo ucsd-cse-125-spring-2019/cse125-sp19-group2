@@ -74,6 +74,13 @@ public:
 	void setSwitchEnabled(bool enabled);
 	void setReadyEnabled(bool enabled);
 
+	// Update clock with milliseconds
+	void updateTimer(long milliseconds);
+
+	// Primary and secondary messages for main HUD
+	void setPrimaryMessage(std::string message);
+	void setSecondaryMessage(std::string message);
+
 	// Sets visibility recursively for a given widget
 	void setVisibility(WidgetType name, bool visiblity);
 
@@ -135,8 +142,11 @@ private:
 	nanogui::detail::FormWidget<GamePadIndex, std::integral_constant<bool, true>>* _gamepadSelect;
 
 	// Upper HUD
+	nanogui::Label* _timer;	// Countdown timer
 
 	// Middle HUD
+	nanogui::Label* _primaryMessage;	// Game over, etc.
+	nanogui::Label* _secondaryMessage;	// Time to start, etc.
 
 	// Lower HUD
 };

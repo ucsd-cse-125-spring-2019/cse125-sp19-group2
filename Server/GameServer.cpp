@@ -30,8 +30,10 @@ void GameServer::start()
 	_gameState->gameStarted = false;
 	_gameState->gameOver = false;
 	_gameState->inLobby = true;
+	_gameState->pregameCountdown = false;
 	_gameState->millisecondsToStart = 0;
-	_gameState->millisecondsLeft = 0;
+	_gameState->millisecondsLeft = std::chrono::duration_cast<std::chrono::milliseconds>(MAX_GAME_LENGTH).count();
+	_gameState->millisecondsToLobby = 0;
 	_gameState->dogs = std::unordered_map<uint32_t, std::string>();
 	_gameState->humans = std::unordered_map<uint32_t, std::string>();
 	_gameState->readyPlayers = std::vector<uint32_t>();
@@ -115,6 +117,24 @@ void GameServer::update()
 {
 	// General game state and network updates
 
+	// Increment pregame countdown timer
+	if (_gameState->pregameCountdown)
+	{
+		auto duration = std::chrono::steady_clock::now() - _gameState->_pregameStart;
+		_gameState->millisecondsToStart =
+			(long)std::chrono::duration_cast<std::chrono::milliseconds>(
+				std::chrono::duration_cast<std::chrono::nanoseconds>(PREGAME_LENGTH)
+				- duration).count();
+
+		// If new value is zero or negative, start the game
+		if (_gameState->millisecondsToStart <= 0)
+		{
+			_gameState->gameStarted = true;
+			_gameState->pregameCountdown = false;
+			_gameState->_gameStart = std::chrono::steady_clock::now();
+		}
+	}
+
 	// Increment game timer if game is started
 	if (_gameState->gameStarted)
 	{
@@ -123,6 +143,28 @@ void GameServer::update()
 			(long)std::chrono::duration_cast<std::chrono::milliseconds>(
 				std::chrono::duration_cast<std::chrono::nanoseconds>(MAX_GAME_LENGTH)
 				- _gameState->_gameDuration).count();
+
+		if (_gameState->millisecondsLeft < 0)
+		{
+			_gameState->millisecondsLeft = 0;
+		}
+	}
+
+	// Increment postgame countdown timer
+	if (_gameState->gameOver)
+	{
+		auto duration = std::chrono::steady_clock::now() - _gameState->_endgameStart;
+		_gameState->millisecondsToLobby =
+			(long)std::chrono::duration_cast<std::chrono::milliseconds>(
+				std::chrono::duration_cast<std::chrono::nanoseconds>(POSTGAME_LENGTH)
+				- duration).count();
+
+		if (_gameState->millisecondsToLobby <= 0)
+		{
+			_gameState->inLobby = true;
+			_gameState->gameOver = false;
+			_gameState->readyPlayers.clear();
+		}
 	}
 
 	// add new entities from last tick to the entity map
@@ -208,6 +250,7 @@ void GameServer::updateGameState()
 		_gameState->gameStarted = false;
 		_gameState->gameOver = true;
 		_gameState->winner = ENTITY_HUMAN;
+		_gameState->_endgameStart = std::chrono::steady_clock::now();
 		Logger::getInstance()->debug("Humans won!");
 	}
 	else if (_gameState->gameStarted && _gameState->_gameDuration >= MAX_GAME_LENGTH)
@@ -215,6 +258,7 @@ void GameServer::updateGameState()
 		_gameState->gameStarted = false;
 		_gameState->gameOver = true;
 		_gameState->winner = ENTITY_DOG;
+		_gameState->_endgameStart = std::chrono::steady_clock::now();
 		Logger::getInstance()->debug("Dogs won!");
 	}
 

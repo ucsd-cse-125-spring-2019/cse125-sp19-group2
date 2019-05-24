@@ -62,26 +62,29 @@ void EventManager::update()
 		}
 	}
 
-	// Call update() on all entities
-	for (auto& entityPair : *_structureInfo->entityMap)
+	// Call update() on all entities if we are not in the pregame countdown
+	if (!_gameState->pregameCountdown)
 	{
-		// There are some cases where the map does not have a vector
-		auto it = eventMap.find(entityPair.first);
-		if (it == eventMap.end())
+		for (auto& entityPair : *_structureInfo->entityMap)
 		{
-			eventMap.insert({ entityPair.first, std::vector<std::shared_ptr<GameEvent>>() });
-		}
-
-		auto eventVec = eventMap.find(entityPair.first)->second;
-
-		// Sort by event type
-		std::sort(eventVec.begin(), eventVec.end(),
-			[](const std::shared_ptr<GameEvent> & a, const std::shared_ptr<GameEvent> & b) -> bool
+			// There are some cases where the map does not have a vector
+			auto it = eventMap.find(entityPair.first);
+			if (it == eventMap.end())
 			{
-				return a->type < b->type;
-			});
+				eventMap.insert({ entityPair.first, std::vector<std::shared_ptr<GameEvent>>() });
+			}
 
-		entityPair.second->update(eventVec);
+			auto eventVec = eventMap.find(entityPair.first)->second;
+
+			// Sort by event type
+			std::sort(eventVec.begin(), eventVec.end(),
+				[](const std::shared_ptr<GameEvent> & a, const std::shared_ptr<GameEvent> & b) -> bool
+				{
+					return a->type < b->type;
+				});
+
+			entityPair.second->update(eventVec);
+		}
 	}
 }
 
@@ -180,6 +183,7 @@ void EventManager::handlePlayerLeave(std::shared_ptr<GameEvent> event)
 		_gameState->gameStarted = false;
 		_gameState->gameOver = false;
 		_gameState->readyPlayers.clear();
+		_gameState->millisecondsLeft = std::chrono::duration_cast<std::chrono::milliseconds>(MAX_GAME_LENGTH).count();
 	}
 
 	// Mark entity for deletion if it exists
@@ -250,12 +254,10 @@ void EventManager::startGame()
 	// Only start the game if at least one dog and human
 	// If not, players will still be able to run around in the world
 	// for debugging purposes, but there will be no winning or losing
-
 	if (_gameState->dogs.size() && _gameState->humans.size())
 	{
 		// Game has started!
-		Logger::getInstance()->debug("Game started!");
-		_gameState->gameStarted = true;
-		_gameState->_gameStart = std::chrono::steady_clock::now();
+		_gameState->pregameCountdown = true;
+		_gameState->_pregameStart = std::chrono::steady_clock::now();
 	}
 }

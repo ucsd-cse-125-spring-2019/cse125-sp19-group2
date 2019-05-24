@@ -307,6 +307,98 @@ void Application::Update()
 				// Redraw
 				GuiManager::getInstance().setDirty();
 			}
+			// Conversely, did a game just end and send us back to the lobby?
+			else if (gameState->inLobby && !_inLobby)
+			{
+				/** WARNING: This is not working right now! There is a weird
+				    interaction with LocalPlayer in which the camera rotates
+					but does not move with the player. **/
+
+				// Deallocate world objects
+				EntityManager::getInstance().clearAll();
+				ColliderManager::getInstance().clear();
+
+				// Reset UI
+				_inLobby = true;
+				GuiManager::getInstance().hideAll();
+				GuiManager::getInstance().getWidget(WIDGET_LOBBY)->setVisible(true);
+				GuiManager::getInstance().getWidget(WIDGET_LIST_DOGS)->setVisible(true);
+				GuiManager::getInstance().getWidget(WIDGET_LIST_HUMANS)->setVisible(true);
+
+				// Uncapture mouse
+				_localPlayer->setMouseCaptured(false);
+
+				// Redraw
+				GuiManager::getInstance().setDirty();
+			}
+
+			// Update pregame timer
+			if (gameState->pregameCountdown)
+			{
+				_inCountdown = true;
+				auto secondsLeft = (int)(std::ceil(gameState->millisecondsToStart / 1000.0f));
+
+				if (secondsLeft <= 3)
+				{
+					GuiManager::getInstance().setPrimaryMessage("Get set!");
+				}
+				else
+				{
+					GuiManager::getInstance().setPrimaryMessage("On your marks!");
+
+				}
+				GuiManager::getInstance().setSecondaryMessage(std::to_string(secondsLeft));
+
+				auto screen = GuiManager::getInstance().getScreen();
+				GuiManager::getInstance().resize(screen->size().x(), screen->size().y());
+			}
+			else if (_inCountdown)
+			{
+				_countdownEnd = std::chrono::steady_clock::now();
+				_inCountdown = false;
+				_startHidden = false;
+				GuiManager::getInstance().setPrimaryMessage("Go!");
+				GuiManager::getInstance().setSecondaryMessage("");
+
+				auto screen = GuiManager::getInstance().getScreen();
+				GuiManager::getInstance().resize(screen->size().x(), screen->size().y());
+			}
+			else if (!_startHidden)
+			{
+				// Hide Go! message after 1 second
+				auto elapsed = std::chrono::steady_clock::now() - _countdownEnd;
+
+				if (std::chrono::duration_cast<std::chrono::seconds>(elapsed) >
+					std::chrono::seconds(1))
+				{
+					GuiManager::getInstance().setPrimaryMessage("");
+					_startHidden = true;
+
+					auto screen = GuiManager::getInstance().getScreen();
+					GuiManager::getInstance().resize(screen->size().x(), screen->size().y());
+				}
+			}
+
+			// Show winners if the game is over
+			if (gameState->gameOver)
+			{
+				if (gameState->winner == ENTITY_DOG)
+				{
+					GuiManager::getInstance().setPrimaryMessage("Dogs Win!");
+				}
+				else if (gameState->winner == ENTITY_HUMAN)
+				{
+					GuiManager::getInstance().setPrimaryMessage("Humans Win!");
+				}
+				auto secondsLeft = (int)(std::ceil(gameState->millisecondsToLobby / 1000.0f));
+				GuiManager::getInstance().setSecondaryMessage("Returning to lobby in " + std::to_string(secondsLeft) + "...");
+
+				auto screen = GuiManager::getInstance().getScreen();
+				GuiManager::getInstance().resize(screen->size().x(), screen->size().y());
+			}
+
+			// Update countdown timer
+			GuiManager::getInstance().updateTimer(gameState->millisecondsLeft);
 
 			_inLobby = gameState->inLobby;
         }

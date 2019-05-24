@@ -16,9 +16,6 @@
 
 using tick = std::chrono::duration<double, std::ratio<1, TICKS_PER_SEC>>;
 
-// Max game length
-const std::chrono::seconds MAX_GAME_LENGTH(30);
-
 struct PairHash;	// Forward declaration
 
 class GameServer

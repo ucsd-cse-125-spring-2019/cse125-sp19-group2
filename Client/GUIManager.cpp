@@ -305,6 +305,26 @@ void GuiManager::setReadyEnabled(bool enabled) {
 	_readyButton->setEnabled(enabled);
 }
 
+void GuiManager::updateTimer(long milliseconds) {
+	// Format milliseconds first
+	long seconds = (milliseconds / 1000) % 60;
+	long minutes = (milliseconds / (1000 * 60)) % 60;
+
+	// String buffer
+	char buf[10];
+	snprintf(buf, 10, "%02d:%02d.%03d", minutes, seconds, milliseconds % 1000);
+
+	_timer->setCaption(std::string(buf));
+}
+
+void GuiManager::setPrimaryMessage(std::string message) {
+	_primaryMessage->setCaption(message);
+}
+
+void GuiManager::setSecondaryMessage(std::string message) {
+	_secondaryMessage->setCaption(message);
+}
+
 void GuiManager::setVisibility(WidgetType name, bool visibility) {
 	setVisibility(_widgets.find(name)->second, visibility);
 }
@@ -421,7 +441,8 @@ void GuiManager::initHUD() {
 	new nanogui::Label(topHUD, "", "sans", 5);
 
 	// Clock
-	new nanogui::Label(topHUD, "Clock goes here", "sans", 52);
+	_timer = new nanogui::Label(topHUD, "00:00.000", "sans", 52);
+    _timer->setColor(Color(Vector4f(1,1,1,1)));
 
 	// Empty right widget
 	//new nanogui::Label(topHUD, "", "sans", 5);
@@ -431,10 +452,10 @@ void GuiManager::initHUD() {
 	auto middleHUDLayout = new nanogui::BoxLayout(nanogui::Orientation::Vertical, nanogui::Alignment::Middle, 0, 50);
 	middleHUD->setLayout(middleHUDLayout);
 
-	new nanogui::Label(middleHUD, "Middle HUD", "sans", 72);
-	new nanogui::Label(middleHUD, "More stuff", "sans", 48);
-
-	// TODO: game over text & timer for game start/lobby
+	_primaryMessage = new nanogui::Label(middleHUD, "", "sans", 72);
+    _primaryMessage->setColor(Color(Vector4f(1,1,1,1)));
+	_secondaryMessage = new nanogui::Label(middleHUD, "", "sans", 48);
+    _secondaryMessage->setColor(Color(Vector4f(1,1,1,1)));
 
 	// Bottom HUD
 	auto bottomHUD = createWidget(hudContainer, WIDGET_HUD_BOTTOM);

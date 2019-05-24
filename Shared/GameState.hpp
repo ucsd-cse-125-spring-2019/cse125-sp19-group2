@@ -17,8 +17,10 @@ struct GameState : public BaseState
 	bool gameStarted;
 	bool gameOver;
 	bool inLobby;
+	bool pregameCountdown;
 	long millisecondsToStart;	// Countdown to game start
 	long millisecondsLeft;	// Time remaining in game before dogs win
+	long millisecondsToLobby;	// Time remaining before everyone is returned to the lobby
 	EntityType winner;	// Either ENTITY_DOG or ENTITY_HUMAN
 	std::unordered_map<uint32_t, std::string> dogs;
 	std::unordered_map<uint32_t, std::string> humans;
@@ -30,9 +32,12 @@ struct GameState : public BaseState
 		archive(
 			cereal::base_class<BaseState>(this),
 			gameStarted,
+			gameOver,
 			inLobby,
+			pregameCountdown,
 			millisecondsToStart,
 			millisecondsLeft,
+			millisecondsToLobby,
 			winner,
 			dogs,
 			humans,
@@ -40,7 +45,9 @@ struct GameState : public BaseState
 	}
 
 	// Some items used by server, not serialized for the client
+	std::chrono::time_point<std::chrono::steady_clock> _pregameStart;
 	std::chrono::time_point<std::chrono::steady_clock> _gameStart;
+	std::chrono::time_point<std::chrono::steady_clock> _endgameStart;
 	std::chrono::nanoseconds _gameDuration;
 };
 
