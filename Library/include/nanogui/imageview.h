@@ -37,6 +37,7 @@ public:
     Vector2f positionF() const { return mPos.cast<float>(); }
     Vector2f sizeF() const { return mSize.cast<float>(); }
 
+
     const Vector2i& imageSize() const { return mImageSize; }
     Vector2i scaledImageSize() const { return (mScale * mImageSize.cast<float>()).cast<int>(); }
     Vector2f imageSizeF() const { return mImageSize.cast<float>(); }
@@ -131,7 +132,12 @@ public:
     Vector2i preferredSize(NVGcontext* ctx) const override;
     void performLayout(NVGcontext* ctx) override;
     void draw(NVGcontext* ctx) override;
+  void drawBG(NVGcontext* ctx);
 
+    Widget* attach = nullptr;
+  
+    Vector2i mImageSize;
+    float alpha = 0.8;
 private:
     // Helper image methods.
     void updateImageParameters();
@@ -149,7 +155,6 @@ private:
     // Image parameters.
     GLShader mShader;
     GLuint mImageID;
-    Vector2i mImageSize;
 
     // Image display parameters.
     float mScale;

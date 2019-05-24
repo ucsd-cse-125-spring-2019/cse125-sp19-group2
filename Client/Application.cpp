@@ -142,6 +142,7 @@ void Application::Setup() {
 		// Register global keys
 		registerGlobalKeys();
 
+
 		// Hide connect screen
 		GuiManager::getInstance().hideAll();
 
@@ -150,6 +151,8 @@ void Application::Setup() {
 
 		// Redraw
 		GuiManager::getInstance().setDirty();
+
+
 	});
 
 	// Switch sides button callback
@@ -320,7 +323,9 @@ void Application::Update()
 	  ColliderManager::getInstance().clear();
 	  GuiManager::getInstance().hideAll();
 	  GuiManager::getInstance().setVisibility(WIDGET_CONNECT, true);
+
 	  
+
 	  // Un-capture mouse
  	  glfwSetInputMode(
 		InputManager::getInstance().getWindow(), GLFW_CURSOR, GLFW_CURSOR_NORMAL);
