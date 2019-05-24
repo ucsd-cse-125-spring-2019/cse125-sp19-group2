@@ -77,6 +77,7 @@ void GuiManager::redraw(nanogui::Widget* widget) {
 	for (auto& child : widget->children()) {
 		redraw(child);
 	}
+
 	if (widget->layout()) {
 		widget->layout()->performLayout(_screen->nvgContext(), widget);
 	}
@@ -87,12 +88,21 @@ void GuiManager::resize(int x, int y) {
 
 	// Resize our widgets
 	for (auto& widgetPair : _widgets) {
-		// 1/3 of the screen for dog/human lists, 1/2 screen for options, full screen otherwise
 		if (widgetPair.first == WIDGET_LIST_DOGS || widgetPair.first == WIDGET_LIST_HUMANS) {
+			// Dog/Human lists
 			widgetPair.second->setSize(nanogui::Vector2i(x / _screen->pixelRatio() / 3, y / _screen->pixelRatio() / 2));
 		}
 		else if (widgetPair.first == WIDGET_OPTIONS) {
+			// Options menu
 			widgetPair.second->setSize(nanogui::Vector2i(x / _screen->pixelRatio() / 3, y / _screen->pixelRatio() / 1.5));
+		}
+		else if (widgetPair.first == WIDGET_HUD_MIDDLE) {			
+			// Middle HUD takes 80% of the vertical screen space
+			widgetPair.second->setSize(nanogui::Vector2i(x / _screen->pixelRatio(), (y / _screen->pixelRatio()) * 0.8f));
+		}
+		else if (widgetPair.first == WIDGET_HUD_TOP || widgetPair.first == WIDGET_HUD_BOTTOM)
+		{
+			widgetPair.second->setSize(nanogui::Vector2i(x / _screen->pixelRatio(), (y / _screen->pixelRatio()) * 0.1f));
 		}
 		else {
 			widgetPair.second->setSize(nanogui::Vector2i(x / _screen->pixelRatio(), y / _screen->pixelRatio()));
@@ -396,7 +406,52 @@ void GuiManager::initLobbyScreen() {
 }
 
 void GuiManager::initHUD() {
-	// TODO
+	// HUD container
+	auto hudContainer = createWidget(_screen, WIDGET_HUD);
+	auto hudLayout = new nanogui::BoxLayout(nanogui::Orientation::Vertical);
+	hudContainer->setLayout(hudLayout);
+
+	// Top HUD
+	auto topHUD = createWidget(hudContainer, WIDGET_HUD_TOP);
+	auto topHUDLayout = new nanogui::GridLayout(nanogui::Orientation::Horizontal, 3 /* Number of cols */);
+	topHUDLayout->setColAlignment({ nanogui::Alignment::Maximum, nanogui::Alignment::Middle, nanogui::Alignment::Maximum });
+	topHUD->setLayout(topHUDLayout);
+
+	// Empty left widget
+	new nanogui::Label(topHUD, "", "sans", 5);
+
+	// Clock
+	new nanogui::Label(topHUD, "Clock goes here", "sans", 52);
+
+	// Empty right widget
+	new nanogui::Label(topHUD, "", "sans", 5);
+
+	// Middle HUD
+	auto middleHUD = createWidget(hudContainer, WIDGET_HUD_MIDDLE);
+	auto middleHUDLayout = new nanogui::BoxLayout(nanogui::Orientation::Vertical, nanogui::Alignment::Middle, 0, 50);
+	middleHUD->setLayout(middleHUDLayout);
+
+	new nanogui::Label(middleHUD, "Middle HUD", "sans", 72);
+
+	// TODO: game over text & timer for game start/lobby
+
+	// Bottom HUD
+	auto bottomHUD = createWidget(hudContainer, WIDGET_HUD_BOTTOM);
+	auto bottomHUDLayout = new nanogui::GridLayout(nanogui::Orientation::Horizontal, 3 /* Number of cols */);
+	bottomHUDLayout->setColAlignment({ nanogui::Alignment::Maximum, nanogui::Alignment::Middle, nanogui::Alignment::Maximum });
+	bottomHUD->setLayout(bottomHUDLayout);
+
+	// Empty left widget
+	new nanogui::Label(bottomHUD, "", "sans", 5);
+
+	// Skills/Abilities go here
+	new nanogui::Label(bottomHUD, "Skills go here", "sans", 52);
+
+	// Empty right widget
+	new nanogui::Label(bottomHUD, "", "sans", 5);
+
+	// TODO: dog/human abilities in middle (or on sides)
+	
 }
 
 void GuiManager::initControlMenu() {

@@ -9,7 +9,10 @@ enum WidgetType {
 	WIDGET_LIST_DOGS,
 	WIDGET_LIST_HUMANS,
 	WIDGET_OPTIONS,
-	WIDGET_HUD
+	WIDGET_HUD,
+	WIDGET_HUD_TOP,
+	WIDGET_HUD_MIDDLE,
+	WIDGET_HUD_BOTTOM
 };
 
 #define CONNECT_MARGIN 0.15f
@@ -130,4 +133,10 @@ private:
 
 	// Controls menu
 	nanogui::detail::FormWidget<GamePadIndex, std::integral_constant<bool, true>>* _gamepadSelect;
+
+	// Upper HUD
+
+	// Middle HUD
+
+	// Lower HUD
 };

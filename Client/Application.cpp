@@ -301,7 +301,8 @@ void Application::Update()
 				// Capture mouse
 				_localPlayer->setMouseCaptured(true);
 
-				// TODO: show game HUD
+				// Show game HUD
+				GuiManager::getInstance().setVisibility(WIDGET_HUD, true);
 			}
 
 			_inLobby = gameState->inLobby;
