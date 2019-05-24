@@ -376,6 +376,9 @@ bool LocalPlayer::setControllerNum(GamePadIndex player)
 {
 	return _gamePad->setControllerNum(player);
 }
+void LocalPlayer::unpairEntity() {
+	_playerEntity = nullptr;
+}
 void LocalPlayer::setPlayerType(PlayerType typeNum) 
 {
 	_playerType = typeNum;

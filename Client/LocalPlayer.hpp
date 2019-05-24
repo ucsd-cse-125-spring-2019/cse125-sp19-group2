@@ -55,6 +55,10 @@ public:
 	 */
 	bool setControllerNum(GamePadIndex player);
 
+	// Sets the _playerEntity pointer to null, and allows the LocalPlayer to
+	// register a new player entity
+	void unpairEntity();
+
 	/**
 	 * \brief Set the type of player
 	 * Usage: setPlayerType(Player_Dog)

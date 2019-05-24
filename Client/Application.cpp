@@ -310,13 +310,12 @@ void Application::Update()
 			// Conversely, did a game just end and send us back to the lobby?
 			else if (gameState->inLobby && !_inLobby)
 			{
-				/** WARNING: This is not working right now! There is a weird
-				    interaction with LocalPlayer in which the camera rotates
-					but does not move with the player. **/
-
 				// Deallocate world objects
 				EntityManager::getInstance().clearAll();
 				ColliderManager::getInstance().clear();
+
+				// Set localPlayer's _playerEntity to null
+				_localPlayer->unpairEntity();
 
 				// Reset UI
 				_inLobby = true;
@@ -325,11 +324,15 @@ void Application::Update()
 				GuiManager::getInstance().getWidget(WIDGET_LIST_DOGS)->setVisible(true);
 				GuiManager::getInstance().getWidget(WIDGET_LIST_HUMANS)->setVisible(true);
 
+				GuiManager::getInstance().setPrimaryMessage("");
+				GuiManager::getInstance().setSecondaryMessage("");
+
 				// Uncapture mouse
 				_localPlayer->setMouseCaptured(false);
 
 				// Redraw
-				GuiManager::getInstance().setDirty();
+				auto screen = GuiManager::getInstance().getScreen();
+				GuiManager::getInstance().resize(screen->size().x(), screen->size().y());
 			}
 
 			// Update pregame timer

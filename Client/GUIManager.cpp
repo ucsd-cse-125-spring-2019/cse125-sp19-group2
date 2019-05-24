@@ -466,7 +466,8 @@ void GuiManager::initHUD() {
 	new nanogui::Label(bottomHUD, "", "sans", 5);
 
 	// Skills/Abilities go here
-	new nanogui::Label(bottomHUD, "Skills go here", "sans", 52);
+	auto skillsPlaceholder = new nanogui::Label(bottomHUD, "Skills go here", "sans", 52);
+    skillsPlaceholder->setColor(Color(Vector4f(1,1,1,0.2f)));
 
 	// Empty right widget
 	new nanogui::Label(bottomHUD, "", "sans", 5);
