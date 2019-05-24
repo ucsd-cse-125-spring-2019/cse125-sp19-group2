@@ -2,6 +2,7 @@
 #include "Shared/Logger.hpp"
 #include "stb_image.h"
 #include <chrono>
+#include "Texture.hpp"
 
 using namespace nanogui;
 using namespace std;
@@ -62,6 +63,8 @@ void GuiManager::draw() {
         _dirty = false;
     }
 
+    _screen->performLayout();
+
     for (auto & element : _formHelpers) {
         element->refresh();
     }
@@ -79,7 +82,6 @@ void GuiManager::redraw(nanogui::Widget* widget) {
 	}
 
 	if (widget->layout()) {
-		widget->layout()->performLayout(_screen->nvgContext(), widget);
 	}
 }
 
@@ -88,16 +90,14 @@ void GuiManager::resize(int x, int y) {
 
 	// Resize our widgets
 	for (auto& widgetPair : _widgets) {
-		if (widgetPair.first == WIDGET_LIST_DOGS || widgetPair.first == WIDGET_LIST_HUMANS) {
-			// Dog/Human lists
-			widgetPair.second->setSize(nanogui::Vector2i(x / _screen->pixelRatio() / 3, y / _screen->pixelRatio() / 2));
-		}
-		else if (widgetPair.first == WIDGET_OPTIONS) {
+		if (widgetPair.first == WIDGET_OPTIONS) {
 			// Options menu
-			widgetPair.second->setSize(nanogui::Vector2i(x / _screen->pixelRatio() / 3, y / _screen->pixelRatio() / 1.5));
+			widgetPair.second->setFixedSize(nanogui::Vector2i(x / _screen->pixelRatio() / 3, y / _screen->pixelRatio() / 1.5));
 		}
-		else {
-			widgetPair.second->setSize(nanogui::Vector2i(x / _screen->pixelRatio(), y / _screen->pixelRatio()));
+		else if (widgetPair.first == WIDGET_CONNECT ||
+			widgetPair.first == WIDGET_LOBBY ||
+			widgetPair.first == WIDGET_HUD) {
+			widgetPair.second->setFixedSize(nanogui::Vector2i(x / _screen->pixelRatio(), y / _screen->pixelRatio()));
 		}
 
 		// Resize layout margins
@@ -106,7 +106,7 @@ void GuiManager::resize(int x, int y) {
 			static_cast<nanogui::BoxLayout*>(widgetPair.second->layout())->setMargin(x * CONNECT_MARGIN);
 			break;
 		case WIDGET_HUD:
-			// Set spacing for parent HUD widget to "clamp" bottom and top HUD widgets
+			// Set spacing for parent HUD widget to "clamp" bottom and top HUD 
 			int topHeight = getWidget(WIDGET_HUD_TOP)->preferredSize(_screen->nvgContext()).y();
 			int middleHeight = getWidget(WIDGET_HUD_MIDDLE)->preferredSize(_screen->nvgContext()).y();
 			int bottomHeight = getWidget(WIDGET_HUD_BOTTOM)->preferredSize(_screen->nvgContext()).y();
@@ -338,6 +338,7 @@ void GuiManager::hideAll() {
 /*** Private functions ***/
 void GuiManager::initConnectScreen() {
 	auto connectScreen = createWidget(_screen, WIDGET_CONNECT);
+    connectScreen->setVisible(false);
 
 	// Resize handles margins, 50 pixel spacing
 	auto connectLayout = new nanogui::BoxLayout(nanogui::Orientation::Vertical, nanogui::Alignment::Middle, 0, 25);
@@ -349,20 +350,26 @@ void GuiManager::initConnectScreen() {
 	// Player name
 	_playerNameBox = new nanogui::TextBox(connectScreen, "PlayerName");
 	_playerNameBox->setEditable(true);
-	_playerNameBox->setFixedSize(nanogui::Vector2i(300, 50));
 	_playerNameBox->setFontSize(38);
 	_playerNameBox->setAlignment(nanogui::TextBox::Alignment::Center);
 
 	// IP address box
 	_addressBox = new nanogui::TextBox(connectScreen, "localhost");
 	_addressBox->setEditable(true);
-	_addressBox->setFixedSize(nanogui::Vector2i(300, 50));
 	_addressBox->setFontSize(38);
 	_addressBox->setAlignment(nanogui::TextBox::Alignment::Center);
 
 	// Connect button
 	_connectButton = new nanogui::Button(connectScreen, "Connect");
 	_connectButton->setFontSize(28);
+	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+    	auto unfocused = LoadTextureFromFile("1.jpg", "./Resources/Textures/Menu/");
+    	auto focused = LoadTextureFromFile("2.jpg", "./Resources/Textures/Menu/");
+    	auto pushed = LoadTextureFromFile("3.jpg", "./Resources/Textures/Menu/");
+    	_connectButton->setBackgroundTexture(unfocused, focused, pushed);
+    	_connectButton->alpha = 0.5;
+    	_connectButton->setTheme(new nanogui::Theme(_screen->nvgContext()));
+    	_connectButton->theme()->mTextColor = nanogui::Color(0, 0, 255, 255);
 }
 
 void GuiManager::initLobbyScreen() {
@@ -442,7 +449,7 @@ void GuiManager::initHUD() {
 
 	// Clock
 	_timer = new nanogui::Label(topHUD, "00:00.000", "sans", 52);
-    _timer->setColor(Color(Vector4f(1,1,1,1)));
+	_timer->setColor(Color(Vector4f(1,1,1,1)));
 
 	// Empty right widget
 	//new nanogui::Label(topHUD, "", "sans", 5);
@@ -453,9 +460,9 @@ void GuiManager::initHUD() {
 	middleHUD->setLayout(middleHUDLayout);
 
 	_primaryMessage = new nanogui::Label(middleHUD, "", "sans", 72);
-    _primaryMessage->setColor(Color(Vector4f(1,1,1,1)));
+	_primaryMessage->setColor(Color(Vector4f(1,1,1,1)));
 	_secondaryMessage = new nanogui::Label(middleHUD, "", "sans", 48);
-    _secondaryMessage->setColor(Color(Vector4f(1,1,1,1)));
+	_secondaryMessage->setColor(Color(Vector4f(1,1,1,1)));
 
 	// Bottom HUD
 	auto bottomHUD = createWidget(hudContainer, WIDGET_HUD_BOTTOM);
@@ -467,7 +474,7 @@ void GuiManager::initHUD() {
 
 	// Skills/Abilities go here
 	auto skillsPlaceholder = new nanogui::Label(bottomHUD, "Skills go here", "sans", 52);
-    skillsPlaceholder->setColor(Color(Vector4f(1,1,1,0.2f)));
+	skillsPlaceholder->setColor(Color(Vector4f(1,1,1,0.2f)));
 
 	// Empty right widget
 	new nanogui::Label(bottomHUD, "", "sans", 5);
@@ -482,7 +489,6 @@ void GuiManager::initControlMenu() {
 	_gamepadSelect->setItems({ "None", "1", "2", "3", "4" });
 
 	auto windowCast = static_cast<nanogui::Window*>(controlsWidget);
-	windowCast->performLayout(_screen->nvgContext());
 }
 
 void GuiManager::setVisibility(nanogui::Widget* widget, bool visibility) {

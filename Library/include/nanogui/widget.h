@@ -257,7 +257,8 @@ public:
 
     /// Restore the state of the widget from the given \ref Serializer instance
     virtual bool load(Serializer &s);
-
+    
+    Widget* passthrough = nullptr;
 protected:
     /// Free all resources used by the widget and any children
     virtual ~Widget();
@@ -273,7 +274,7 @@ protected:
      *     strategy may not be appropriate with fonts other than ``entypo.ttf``.
      */
     inline float icon_scale() const { return mTheme->mIconScale * mIconExtraScale; }
-
+    
 protected:
     Widget *mParent;
     ref<Theme> mTheme;
@@ -281,7 +282,7 @@ protected:
     std::string mId;
     Vector2i mPos, mSize, mFixedSize;
     std::vector<Widget *> mChildren;
-
+    
     /**
      * Whether or not this Widget is currently visible.  When a Widget is not
      * currently visible, no time is wasted executing its drawing method.
