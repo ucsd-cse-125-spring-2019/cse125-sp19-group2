@@ -25,7 +25,7 @@ enum EventType
 {
     EVENT_PLAYER_JOIN,
     EVENT_PLAYER_SWITCH,
-	EVENT_PLAYER_READY,
+		EVENT_PLAYER_READY,
     EVENT_PLAYER_LEAVE, // Created only by the server
     EVENT_PLAYER_MOVE,	// Movement vector for player
     EVENT_PLAYER_RUN_START,	// Used only for dogs at the moment
@@ -33,11 +33,11 @@ enum EventType
     EVENT_PLAYER_STOP,
     EVENT_PLAYER_URINATE_START,
     EVENT_PLAYER_URINATE_END,
-    EVENT_PLAYER_LIFTING_START, // Jail gates
-    EVENT_PLAYER_LIFTING_END,
-	EVENT_PLAYER_SWING_NET,
-	EVENT_PLAYER_LAUNCH_START,
-	EVENT_PLAYER_LAUNCH_END
+		EVENT_PLAYER_INTERACT_START, // Jail gates, fountains, etc.
+		EVENT_PLAYER_INTERACT_END,
+		EVENT_PLAYER_SWING_NET,
+		EVENT_PLAYER_LAUNCH_START,
+		EVENT_PLAYER_LAUNCH_END
     // TODO: more event types here
 };
 // GamePad Indexes
@@ -74,4 +74,3 @@ struct GameEvent
 		Logger::getInstance()->debug("[playerEvent type: " + std::to_string(type) + " playerID: " + std::to_string(playerId) + " playerName: " + playerName + "]");
 	}
 };
-

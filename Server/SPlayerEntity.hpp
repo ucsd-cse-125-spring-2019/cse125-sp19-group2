@@ -96,6 +96,10 @@ public:
 				}
 			}
 		} // isStatic
+
+		// Update all timers for the player
+		updateTimers();
+
 	} // update()
 
 	// Call this function to move a player to a destination
@@ -103,7 +107,8 @@ public:
 		glm::vec3 destination,
 		glm::vec3 finalDirection,
 		float velocity,
-		std::function<void()> onComplete = 0)
+		std::function<void()> onComplete = 0,
+		std::function<void()> onInterrupt = 0) 
 	{
 		if (!_isInterpolating)
 		{
@@ -111,11 +116,17 @@ public:
 			_destination = destination;
 			_finalDirection = finalDirection;
 			_interpVelocity = velocity;
-			_interpFunc = onComplete;
+			_interpOnComplete = onComplete;
+			_interpOnInterrupt = onInterrupt;
 		}
 	}
 
+	// Stage of current action
+	int actionStage = 0;
+
+	// Used when interpolating to a colliding object
 	glm::vec3 targetPos;
+	glm::vec3 targetDir;
 
 protected:
 	// Player movement velocity in units/second
@@ -130,8 +141,12 @@ protected:
 	glm::vec3 _destination;
 	glm::vec3 _finalDirection;
 	float _interpVelocity; // Interpolation velocity, in units/sec
+
 	// Function to be called when interpolation is complete
-	std::function<void()> _interpFunc;
+	std::function<void()> _interpOnComplete;
+
+	// Function to be called when interpolation is interrupted
+	std::function<void()> _interpOnInterrupt;
 
 	// Called by update() every tick
 	void handleInterpolation()
@@ -147,9 +162,9 @@ protected:
 				_isInterpolating = false;
 				_state->forward = _finalDirection;
 				hasChanged = true;
-				if (_interpFunc)
+				if (_interpOnComplete)
 				{
-					_interpFunc();
+					_interpOnComplete();
 				}
 				return;
 			}
@@ -161,9 +176,9 @@ protected:
 				_state->pos = _destination;
 				_state->forward = _finalDirection;
 				_isInterpolating = false;
-				if (_interpFunc)
+				if (_interpOnComplete)
 				{
-					_interpFunc();
+					_interpOnComplete();
 				}
 			}
 			else
@@ -181,6 +196,12 @@ protected:
 		if (_isInterpolating && entity->getState()->getSolidity(_state.get()))
 		{
 			_isInterpolating = false;
+
+			// Run onInterrupt lambda if it exists
+			if (_interpOnInterrupt)
+			{
+				_interpOnInterrupt();
+			}
 		}
 	}
 

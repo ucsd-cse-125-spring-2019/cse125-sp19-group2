@@ -26,6 +26,7 @@ SDogEntity::SDogEntity(uint32_t playerId, std::string playerName, std::vector<gl
 	auto dogState = std::static_pointer_cast<DogState>(_state);
 	dogState->currentAnimation = ANIMATION_DOG_IDLE;
 	dogState->runStamina = MAX_DOG_STAMINA;
+	dogState->urineMeter = MAX_DOG_URINE;
 
 	// Player-specific stuff
 	dogState->playerName = playerName;
@@ -34,15 +35,25 @@ SDogEntity::SDogEntity(uint32_t playerId, std::string playerName, std::vector<gl
 void SDogEntity::update(std::vector<std::shared_ptr<GameEvent>> events)
 {
 	isCaught = false;
-	if (!_isLifting)
+	if (!_isInteracting)
 	{
 		_nearTrigger = false;
+		_nearFountain = false;
 	}
 
 	auto dogState = std::static_pointer_cast<DogState>(_state);
 
-	// Save old position
-	glm::vec3 oldPos = _state->pos;
+	// Refill a little stamina
+	if (dogState->runStamina < MAX_DOG_STAMINA)
+	{
+		// Four seconds to charge 1 second of sprinting
+		dogState->runStamina += 1.0f / 4 / TICKS_PER_SEC;
+		hasChanged = true;
+	}
+	else
+	{
+		dogState->runStamina = MAX_DOG_STAMINA;
+	}
 
 	// Non-movement events, duplicates removed
 	auto filteredEvents = SPlayerEntity::getFilteredEvents(events);
@@ -61,17 +72,23 @@ void SDogEntity::update(std::vector<std::shared_ptr<GameEvent>> events)
 				_isRunning = false;
 				break;
 			case EVENT_PLAYER_URINATE_START:
-				_urinatingStartTime = std::chrono::system_clock::now();
 				_isUrinating = true;
 				break;
 			case EVENT_PLAYER_URINATE_END:
 				_isUrinating = false;
+
+				// Abort timer if it exists
+				if (_peeTimer)
+				{
+					_peeTimer->abort();
+					_peeTimer = nullptr;
+				}
 				break;
-			case EVENT_PLAYER_LIFTING_START:
-				_isLifting = true;
+			case EVENT_PLAYER_INTERACT_START:
+				_isInteracting = true;
 				break;
-			case EVENT_PLAYER_LIFTING_END:
-				_isLifting = false;
+			case EVENT_PLAYER_INTERACT_END:
+				_isInteracting = false;
 			default:
 				break;
 			}
@@ -89,18 +106,6 @@ void SDogEntity::update(std::vector<std::shared_ptr<GameEvent>> events)
 		actionStage = 0;
 	}
 
-	// TODO: update the logic for peeing after having Timer class
-	if (_isUrinating) {
-		auto now = std::chrono::system_clock::now();
-		std::chrono::duration<double> diff = now - _urinatingStartTime;
-		if (diff.count() > 1.0)
-		{
-			createPuddle();
-			_isUrinating = false;
-		}
-	}
-
-
 	switch (_curAction)
 	{
 	case ACTION_DOG_IDLE:
@@ -115,11 +120,10 @@ void SDogEntity::update(std::vector<std::shared_ptr<GameEvent>> events)
 			hasChanged = true;
 		}
 		if (_isRunning) {
-			if (dogState->runStamina > 0)
+			if (dogState->runStamina >= 1.0f / TICKS_PER_SEC)
 			{
 				_velocity = RUN_VELOCITY;
 				dogState->runStamina -= 1.0f / TICKS_PER_SEC;
-				Logger::getInstance()->debug(std::to_string(dogState->runStamina));
 			}
 			else {
 				dogState->runStamina = 0;
@@ -135,8 +139,19 @@ void SDogEntity::update(std::vector<std::shared_ptr<GameEvent>> events)
 		if (actionChanged) {
 			dogState->currentAnimation = ANIMATION_DOG_PEEING;
 			hasChanged = true;
+
+			// Register a timer and place the pee object after 1 second
+			_peeTimer = registerTimer(1000 /* Milliseconds */, [&]()
+				{
+					if (_curAction == ACTION_DOG_PEEING)
+					{
+						createPuddle();
+						dogState->urineMeter = 0.0f;
+						_isUrinating = false;
+						_peeTimer = nullptr;
+					}
+				});
 		}
-		// TODO: put pee logic here
 		break;
 	case ACTION_DOG_SCRATCHING:
 		// Stage 0: interpolating to the trigger and look at it
@@ -153,8 +168,31 @@ void SDogEntity::update(std::vector<std::shared_ptr<GameEvent>> events)
 			});
 		}
 		break;
+	case ACTION_DOG_DRINKING:
+		// Stage 0: interpolating to the fountain and look at it
+		if (actionStage == 0) {
+			dogState->currentAnimation = ANIMATION_DOG_RUNNING;
+			interpolateMovement(targetPos, targetDir, BASE_VELOCITY / 2, [&]()
+				{
+					// Stage 1: start drinking animation and filling meter
+					actionStage++;
+					dogState->currentAnimation = ANIMATION_DOG_DRINKING;
+					hasChanged = true;
+				});
+		}
+		else if (actionStage == 1) {
+			// Increase pee meter
+			if (dogState->urineMeter < MAX_DOG_URINE)
+			{
+				dogState->urineMeter += MAX_DOG_URINE / 3 / TICKS_PER_SEC; // Refilled in 3 seconds
+			}
+			else
+			{
+				dogState->urineMeter = MAX_DOG_URINE;
+			}
+		}
+		break;
 	}
-
 
 	handleInterpolation();
 }
@@ -188,8 +226,6 @@ void SDogEntity::generalHandleCollision(SBaseEntity * entity)
 	}
 }
 
-// decide what action the player is actually in (not including action caused by external reason)
-
 void SDogEntity::createPuddle()
 {
 	std::shared_ptr<SPuddleEntity> puddleEntity = std::make_shared<SPuddleEntity>(_state->pos);
@@ -198,12 +234,15 @@ void SDogEntity::createPuddle()
 
 bool SDogEntity::updateAction()
 {
+	// Cast for dog-specific stuff
+	auto dogState = std::static_pointer_cast<DogState>(_state);
+
 	DogAction oldAction = _curAction;
 
 	// lower the priority of action if possible
 	if (_curAction == ACTION_DOG_PEEING && !_isUrinating ||
-		_curAction == ACTION_DOG_DRINKING && !_isDrinking ||
-		_curAction == ACTION_DOG_SCRATCHING && !_isLifting)
+		_curAction == ACTION_DOG_DRINKING && !_isInteracting ||
+		_curAction == ACTION_DOG_SCRATCHING && !_isInteracting)
 	{
 		_curAction = ACTION_DOG_IDLE;
 	}
@@ -214,9 +253,9 @@ bool SDogEntity::updateAction()
 		_curAction = (_isMoving) ? ACTION_DOG_MOVING : ACTION_DOG_IDLE;
 
 		// update action again if higher priority action is happening
-		if (_isUrinating) _curAction = ACTION_DOG_PEEING;
-		else if (_isLifting && _nearTrigger) _curAction = ACTION_DOG_SCRATCHING;
-		else if (_isDrinking) _curAction = ACTION_DOG_DRINKING;
+		if (_isUrinating && dogState->urineMeter == 1.0f) _curAction = ACTION_DOG_PEEING;
+		else if (_isInteracting && _nearTrigger) _curAction = ACTION_DOG_SCRATCHING;
+		else if (_isInteracting && _nearFountain) _curAction = ACTION_DOG_DRINKING;
 	}
 
 	return oldAction != _curAction;

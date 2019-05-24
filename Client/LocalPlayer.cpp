@@ -221,12 +221,12 @@ LocalPlayer::LocalPlayer(uint32_t playerId, std::unique_ptr<NetworkClient> const
 		};
 	});
 
-	// Player start lifting
+	// Player start interacting (jail, fountains, etc.)
 	InputManager::getInstance().getKey(GLFW_KEY_F)->onPress([&]
 	{
 		auto event = std::make_shared<GameEvent>();
 		event->playerId = _playerId;
-		event->type = EVENT_PLAYER_LIFTING_START;
+		event->type = EVENT_PLAYER_INTERACT_START;
 
 		try
 		{
@@ -237,12 +237,12 @@ LocalPlayer::LocalPlayer(uint32_t playerId, std::unique_ptr<NetworkClient> const
 		};
 	});
 
-	// Player end lifting
+	// Player end interacting (jail, fountains, etc.)
 	InputManager::getInstance().getKey(GLFW_KEY_F)->onRelease([&]
 	{
 		auto event = std::make_shared<GameEvent>();
 		event->playerId = _playerId;
-		event->type = EVENT_PLAYER_LIFTING_END;
+		event->type = EVENT_PLAYER_INTERACT_END;
 		try
 		{
 			networkClient->sendEvent(event);

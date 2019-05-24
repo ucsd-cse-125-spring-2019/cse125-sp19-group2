@@ -89,9 +89,6 @@
     <ClInclude Include="SBaseEntity.hpp">
       <Filter>Header Files\Entity</Filter>
     </ClInclude>
-    <ClInclude Include="SExampleEntity.hpp">
-      <Filter>Header Files\Entity</Filter>
-    </ClInclude>
     <ClInclude Include="IdGenerator.hpp">
       <Filter>Header Files\Util</Filter>
     </ClInclude>

@@ -41,11 +41,7 @@ void SHumanEntity::update(std::vector<std::shared_ptr<GameEvent>> events)
 		{
 		case EVENT_PLAYER_SWING_NET:
 			// Example of lunging. Will probably need to change
-			interpolateMovement(_state->pos + (_state->forward * 1.5f), _state->forward, 15.0f,
-				[&] {
-				Logger::getInstance()->debug("aaaaaaaaa");
-				}
-			);
+			interpolateMovement(_state->pos + (_state->forward * 1.5f), _state->forward, 15.0f);
 			break;
 		case EVENT_PLAYER_LAUNCH_START:
 			_isLaunching = true;
@@ -66,6 +62,11 @@ void SHumanEntity::update(std::vector<std::shared_ptr<GameEvent>> events)
 	SPlayerEntity::update(events);
 
 	bool actionChanged = updateAction();
+
+	// Reset stage of action if changed to a new action
+	if (actionChanged) {
+		actionStage = 0;
+	}
 
 	switch (_curAction)
 	{
@@ -94,18 +95,54 @@ void SHumanEntity::update(std::vector<std::shared_ptr<GameEvent>> events)
 		}
 
 		break;
+	case ACTION_HUMAN_SLIPPING:
+		if (actionChanged) {
+			humanState->currentAnimation = ANIMATION_HUMAN_SLIPPING;
+			hasChanged = true;
+
+			// Timer until immobility stops
+			registerTimer(2000, [&]()
+				{
+					_isSlipping = false;
+					_isSlipImmune = true;
+					hasChanged = true;
+
+					// Disable slipping for another two seconds after
+					// initial slip
+					registerTimer(2000, [&]()
+						{
+							_isSlipImmune = false;
+							hasChanged = true;
+						});
+				});
+		}
+		break;
 	}
 
 
 
 	handleInterpolation();
 	//Logger::getInstance()->debug("Human   x: " + std::to_string(_state->forward.x) + " y: " + std::to_string(_state->forward.y) + " z: " + std::to_string(_state->forward.z));
+
+	// Reset slipping state
+	_isSlipping = false;
 }
 
 void SHumanEntity::generalHandleCollision(SBaseEntity * entity)
 {
 	// Base collision handling first
 	SPlayerEntity::generalHandleCollision(entity);
+
+	// Player slipping in puddle
+	if (entity->getState()->type == ENTITY_PUDDLE)
+	{
+		// Allow human to step on edges without slipping
+		if (glm::length(entity->getState()->pos - _state->pos) <
+			(0.75 * entity->getState()->width / 2))
+		{
+			_isSlipping = true;
+		}
+	}
 
 	// Cast for player-specific stuff
 	auto humanState = std::static_pointer_cast<HumanState>(_state);
@@ -117,7 +154,8 @@ bool SHumanEntity::updateAction()
 	HumanAction oldAction = _curAction;
 
 	// lower the priority of action if possible
-	if (_curAction == ACTION_HUMAN_LAUNCHING && !_isLaunching)
+	if (_curAction == ACTION_HUMAN_LAUNCHING && !_isLaunching ||
+		_curAction == ACTION_HUMAN_SLIPPING && !_isSlipping)
 	{
 		_curAction = ACTION_HUMAN_IDLE;
 	}
@@ -129,6 +167,7 @@ bool SHumanEntity::updateAction()
 
 		// update action again if higher priority action is happening
 		if (_isLaunching) _curAction = ACTION_HUMAN_LAUNCHING;
+		else if (_isSlipping && !_isSlipImmune) _curAction = ACTION_HUMAN_SLIPPING;
 	}
 
 	return oldAction != _curAction;

@@ -7,7 +7,7 @@
 class SHumanEntity : public SPlayerEntity
 {
 public:
-	SHumanEntity(uint32_t playerId, 
+	SHumanEntity(uint32_t playerId,
 		std::string playerName,
 		std::vector<std::shared_ptr<SBaseEntity>>* newEntities);
 
@@ -25,5 +25,8 @@ private:
 	std::shared_ptr<SPlungerEntity> plungerEntity;
 
 	bool updateAction();
-};
 
+	// Slipping state
+	bool _isSlipping = false;
+	bool _isSlipImmune = false;
+};
