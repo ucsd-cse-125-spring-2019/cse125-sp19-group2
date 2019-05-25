@@ -35,7 +35,7 @@ public:
 
 		// Non-solid object
 		_state->isSolid = false;
-		_state->transparency = 0.60f;
+		_state->transparency = 0.10f;
 
 		hasChanged = true;
 
