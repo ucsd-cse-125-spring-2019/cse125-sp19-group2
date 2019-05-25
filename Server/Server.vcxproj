@@ -240,6 +240,7 @@
     <ClInclude Include="EventManager.hpp" />
     <ClInclude Include="GameServer.hpp" />
     <ClInclude Include="GateCollider.hpp" />
+    <ClInclude Include="PlungerCollider.hpp" />
     <ClInclude Include="SBarEntity.hpp" />
     <ClInclude Include="SBoneEntity.hpp" />
     <ClInclude Include="IdGenerator.hpp" />
@@ -264,6 +265,7 @@
     <ClInclude Include="GridLevelParser.hpp" />
     <ClInclude Include="SPlungerEntity.hpp" />
     <ClInclude Include="SPuddleEntity.hpp" />
+    <ClInclude Include="SRopeEntity.hpp" />
     <ClInclude Include="STriggerEntity.hpp" />
     <ClInclude Include="StructureInfo.hpp" />
   </ItemGroup>

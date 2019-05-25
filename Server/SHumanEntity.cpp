@@ -26,6 +26,20 @@ SHumanEntity::SHumanEntity(uint32_t playerId, std::string playerName, std::vecto
 
 	// Player-specific stuff
 	humanState->playerName = playerName;
+
+	_launchingReset = [&] {
+		_isLaunching = false;
+		if (plungerEntity != nullptr)
+		{
+			plungerEntity->getState()->isDestroyed = true;
+			plungerEntity = nullptr;
+		}
+		if (ropeEntity != nullptr)
+		{
+			ropeEntity->getState()->isDestroyed = true;
+			ropeEntity = nullptr;
+		}
+	};
 }
 
 void SHumanEntity::update(std::vector<std::shared_ptr<GameEvent>> events)
@@ -50,8 +64,7 @@ void SHumanEntity::update(std::vector<std::shared_ptr<GameEvent>> events)
 			_isLaunching = false;
 			if (plungerEntity != nullptr)
 			{
-				plungerEntity->getState()->isDestroyed = true;
-				plungerEntity = nullptr;
+				_launchingReset();
 
 				// stop human from flying
 				if (actionStage == 3) {
@@ -116,6 +129,10 @@ void SHumanEntity::update(std::vector<std::shared_ptr<GameEvent>> events)
 				plungerEntity = std::make_shared<SPlungerEntity>(_state->pos, _state->forward);
 				_newEntities->push_back(plungerEntity);
 			}
+			if (ropeEntity == nullptr) {
+				ropeEntity = std::make_shared<SRopeEntity>();
+				_newEntities->push_back(ropeEntity);
+			}
 			if (!plungerEntity->launching) {
 				actionStage++;
 			}
@@ -125,24 +142,18 @@ void SHumanEntity::update(std::vector<std::shared_ptr<GameEvent>> events)
 		if (actionStage == 2) {
 			humanState->currentAnimation = ANIMATION_HUMAN_FLYING;
 			hasChanged = true;
-			interpolateMovement(plungerEntity->getState()->pos, plungerEntity->getState()->forward, 20.0f, 
-				[&] {
-				_isLaunching = false;
-				if (plungerEntity != nullptr)
-				{
-					plungerEntity->getState()->isDestroyed = true;
-					plungerEntity = nullptr;
-				}
-			},
-				[&] {
-				_isLaunching = false;
-				if (plungerEntity != nullptr)
-				{
-					plungerEntity->getState()->isDestroyed = true;
-					plungerEntity = nullptr;
-				}
-			});
+			glm::vec3 plungerTailPos = plungerEntity->getState()->pos + glm::normalize(plungerEntity->getState()->forward) * -0.675f;
+			interpolateMovement(plungerTailPos, plungerEntity->getState()->forward, 20.0f,
+				_launchingReset, _launchingReset);
 			actionStage++;
+		}
+
+		// update rope start point and end point
+		if (ropeEntity != nullptr)
+		{
+			glm::vec3 gunPos = _state->pos + glm::normalize(_state->forward) * 0.7f;
+			glm::vec3 plungerTailPos = plungerEntity->getState()->pos + glm::normalize(plungerEntity->getState()->forward) * -0.675f;
+			ropeEntity->updatePoints(gunPos, plungerTailPos);
 		}
 
 		break;

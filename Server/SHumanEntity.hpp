@@ -3,6 +3,7 @@
 #include "SPlayerEntity.hpp"
 #include "Shared/HumanState.hpp"
 #include "SPlungerEntity.hpp"
+#include "SRopeEntity.hpp"
 
 class SHumanEntity : public SPlayerEntity
 {
@@ -23,10 +24,14 @@ private:
 	std::vector<std::shared_ptr<SBaseEntity>>* _newEntities;
 
 	std::shared_ptr<SPlungerEntity> plungerEntity;
+	std::shared_ptr<SRopeEntity> ropeEntity;
+	std::function<void()> _launchingReset;
 
 	bool updateAction();
 
 	// Slipping state
 	bool _isSlipping = false;
 	bool _isSlipImmune = false;
+
+
 };
