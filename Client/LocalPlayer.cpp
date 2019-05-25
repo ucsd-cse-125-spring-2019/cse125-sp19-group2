@@ -286,6 +286,7 @@ LocalPlayer::LocalPlayer(uint32_t playerId, std::unique_ptr<NetworkClient> const
 	InputManager::getInstance().getKey(GLFW_KEY_Q)->onPress([&]
 	{
 		_usePlunger = !_usePlunger;
+		GuiManager::getInstance().setActiveSkill(_usePlunger);
 	});
 
     _camera = std::make_unique<Camera>();

@@ -315,6 +315,26 @@ void Application::Update()
 
 				// Show game HUD
 				GuiManager::getInstance().setVisibility(WIDGET_HUD, true);
+
+				// Hide human skills if we are a dog
+				for (auto& player : gameState->dogs)
+				{
+					if (player.first == _localPlayer->getPlayerId())
+					{
+						GuiManager::getInstance().setVisibility(WIDGET_HUD_HUMAN_SKILLS, false);
+						break;
+					}
+				}
+
+				// Hide dog skills if we are a human
+				for (auto& player : gameState->humans)
+				{
+					if (player.first == _localPlayer->getPlayerId())
+					{
+						GuiManager::getInstance().setVisibility(WIDGET_HUD_DOG_SKILLS, false);
+						break;
+					}
+				}
 			}
 			// Conversely, did a game just end and send us back to the lobby?
 			else if (gameState->inLobby && !_inLobby)
