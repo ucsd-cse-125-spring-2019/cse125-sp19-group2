@@ -23,6 +23,13 @@ private:
 
     bool _moveKeysPressed, _stopped, _moveCamera;
 
+	// Skill type to use (only for humans)
+	bool _usePlunger = true; // False for trap, true for plunger
+
+	// Whether or not the bumpers are pressed for XBOX gamepad
+	bool _leftBumperDown = false;
+	bool _rightBumperDown = false;
+
 public:
     /**
      * \brief Constructor of local player.

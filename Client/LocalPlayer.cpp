@@ -86,21 +86,65 @@ LocalPlayer::LocalPlayer(uint32_t playerId, std::unique_ptr<NetworkClient> const
             _camera->set_distance(-y);
         });
 
-	/*
+	// Right mouse button for skill
     InputManager::getInstance().getKey(GLFW_MOUSE_BUTTON_RIGHT)->onPress(
         [&] {
-            glfwSetInputMode(
-                InputManager::getInstance().getWindow(), GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-            _moveCamera = true;
+			auto event = std::make_shared<GameEvent>();
+			event->playerId = _playerId;
+			event->type = EVENT_PLAYER_URINATE_START;
+			try
+			{
+				networkClient->sendEvent(event);
+			}
+			catch (std::runtime_error e)
+			{
+			};
+
+			// For human only
+			if (_usePlunger)
+			{
+				event = std::make_shared<GameEvent>();
+				event->playerId = _playerId;
+				event->type = EVENT_PLAYER_LAUNCH_START;
+				try
+				{
+					networkClient->sendEvent(event);
+				}
+				catch (std::runtime_error e)
+				{
+				};
+			}
+			else
+			{
+				// TODO: trap placement
+			}
         });
 
     InputManager::getInstance().getKey(GLFW_MOUSE_BUTTON_RIGHT)->onRelease(
         [&] {
-            glfwSetInputMode(
-                InputManager::getInstance().getWindow(), GLFW_CURSOR, GLFW_CURSOR_NORMAL);
-            _moveCamera = false;
+			auto event = std::make_shared<GameEvent>();
+			event->playerId = _playerId;
+			event->type = EVENT_PLAYER_URINATE_END;
+			try
+			{
+				networkClient->sendEvent(event);
+			}
+			catch (std::runtime_error e)
+			{
+			};
+
+			// Plunger release
+			event = std::make_shared<GameEvent>();
+			event->playerId = _playerId;
+			event->type = EVENT_PLAYER_LAUNCH_END;
+			try
+			{
+				networkClient->sendEvent(event);
+			}
+			catch (std::runtime_error e)
+			{
+			};
         });
-	*/
 
     InputManager::getInstance().getKey2D(Key::KEYTYPE::MOUSE)->onMove(
         [&](glm::vec2 v) {
@@ -172,95 +216,12 @@ LocalPlayer::LocalPlayer(uint32_t playerId, std::unique_ptr<NetworkClient> const
 		};
 	});
 
-	// Dog peeing start
-	InputManager::getInstance().getKey(GLFW_KEY_SPACE)->onPress([&]
-	{
-		auto event = std::make_shared<GameEvent>();
-		event->playerId = _playerId;
-		event->type = EVENT_PLAYER_URINATE_START;
-		try
-		{
-			networkClient->sendEvent(event);
-		}
-		catch (std::runtime_error e)
-		{
-		};
-		
-		event = std::make_shared<GameEvent>();
-		event->playerId = _playerId;
-		event->type = EVENT_PLAYER_LAUNCH_START;
-		try
-		{
-			networkClient->sendEvent(event);
-		}
-		catch (std::runtime_error e)
-		{
-		};
-	});
-
-	// Dog peeing end
-	InputManager::getInstance().getKey(GLFW_KEY_SPACE)->onRelease([&]
-	{
-		auto event = std::make_shared<GameEvent>();
-		event->playerId = _playerId;
-		event->type = EVENT_PLAYER_URINATE_END;
-		try
-		{
-			networkClient->sendEvent(event);
-		}
-		catch (std::runtime_error e)
-		{
-		};
-
-		event = std::make_shared<GameEvent>();
-		event->playerId = _playerId;
-		event->type = EVENT_PLAYER_LAUNCH_END;
-		try
-		{
-			networkClient->sendEvent(event);
-		}
-		catch (std::runtime_error e)
-		{
-		};
-	});
-
-	// Player start interacting (jail, fountains, etc.)
-	InputManager::getInstance().getKey(GLFW_KEY_F)->onPress([&]
-	{
-		auto event = std::make_shared<GameEvent>();
-		event->playerId = _playerId;
-		event->type = EVENT_PLAYER_INTERACT_START;
-
-		try
-		{
-			networkClient->sendEvent(event);
-		}
-		catch (std::runtime_error e)
-		{
-		};
-	});
-
-	// Player end interacting (jail, fountains, etc.)
-	InputManager::getInstance().getKey(GLFW_KEY_F)->onRelease([&]
-	{
-		auto event = std::make_shared<GameEvent>();
-		event->playerId = _playerId;
-		event->type = EVENT_PLAYER_INTERACT_END;
-		try
-		{
-			networkClient->sendEvent(event);
-		}
-		catch (std::runtime_error e)
-		{
-		};
-	});
-
-	// Human swinging net
 	InputManager::getInstance().getKey(GLFW_MOUSE_BUTTON_LEFT)->onPress([&]
 	{
 		// We don't want to register clicks if the mouse isn't captured
 		if (_moveCamera)
 		{
+			// Humans swinging nets
 			auto event = std::make_shared<GameEvent>();
 			event->playerId = _playerId;
 			event->type = EVENT_PLAYER_SWING_NET;
@@ -271,7 +232,47 @@ LocalPlayer::LocalPlayer(uint32_t playerId, std::unique_ptr<NetworkClient> const
 			catch (std::runtime_error e)
 			{
 			};
+
+			// Dogs interacting
+			event = std::make_shared<GameEvent>();
+			event->playerId = _playerId;
+			event->type = EVENT_PLAYER_INTERACT_START;
+
+			try
+			{
+				networkClient->sendEvent(event);
+			}
+			catch (std::runtime_error e)
+			{
+			};
 		}
+	});
+
+	InputManager::getInstance().getKey(GLFW_MOUSE_BUTTON_LEFT)->onRelease([&]
+	{
+		// We don't want to register clicks if the mouse isn't captured
+		if (_moveCamera)
+		{
+			// TODO: humans swinging nets
+
+			// Dogs interacting
+			auto event = std::make_shared<GameEvent>();
+			event->playerId = _playerId;
+			event->type = EVENT_PLAYER_INTERACT_END;
+			try
+			{
+				networkClient->sendEvent(event);
+			}
+			catch (std::runtime_error e)
+			{
+			};
+		}
+	});
+
+	// Q to switch skills
+	InputManager::getInstance().getKey(GLFW_KEY_Q)->onPress([&]
+	{
+		_usePlunger = !_usePlunger;
 	});
 
     _camera = std::make_unique<Camera>();
@@ -361,31 +362,50 @@ void LocalPlayer::updateController() {
             InputManager::getInstance().fire(GLFW_KEY_S, KeyState::Release);
         }
 
-		// Map "A" on xbox to "F" and left click on keyboard. Change if "F" and left
-		// click ever have different functionalities.
+		// Map "B" on xbox to right click (use skill)
+		if (_gamePad->isKeyDown(GamePad_Button_B)) {
+			InputManager::getInstance().fire(GLFW_MOUSE_BUTTON_RIGHT, KeyState::Press);
+		}
+		if (_gamePad->isKeyUp(GamePad_Button_B)) {
+			InputManager::getInstance().fire(GLFW_MOUSE_BUTTON_RIGHT, KeyState::Release);
+		}
+
+		// Map "X" on xbox to left shift (sprint for dogs)
+		if (_gamePad->isKeyDown(GamePad_Button_X)) {
+			InputManager::getInstance().fire(GLFW_KEY_LEFT_SHIFT, KeyState::Press);
+		}
+		if (_gamePad->isKeyUp(GamePad_Button_X)) {
+			InputManager::getInstance().fire(GLFW_KEY_LEFT_SHIFT, KeyState::Release);
+		}
+
+		// Map "A" on xbox to left click (interact / charge & swing net)
 		if (_gamePad->isKeyDown(GamePad_Button_A)) {
-			InputManager::getInstance().fire(GLFW_KEY_F, KeyState::Press);
 			InputManager::getInstance().fire(GLFW_MOUSE_BUTTON_LEFT, KeyState::Press);
 		}
 		if (_gamePad->isKeyUp(GamePad_Button_A)) {
-			InputManager::getInstance().fire(GLFW_KEY_F, KeyState::Release);
 			InputManager::getInstance().fire(GLFW_MOUSE_BUTTON_LEFT, KeyState::Release);
 		}
 
-		// Map "Y" on xbox to "Space" on keyboard
-		if (_gamePad->isKeyDown(GamePad_Button_Y)) {
-			InputManager::getInstance().fire(GLFW_KEY_SPACE, KeyState::Press);
-		}
-		if (_gamePad->isKeyUp(GamePad_Button_Y)) {
-			InputManager::getInstance().fire(GLFW_KEY_SPACE, KeyState::Release);
-		}
-
-		// Map left bumper on xbox to "LShift" on keyboard
+		// Map both bumpers to "Q" to switch skills on the human
 		if (_gamePad->isKeyDown(GamePad_Button_LEFT_THUMB)) {
-			InputManager::getInstance().fire(GLFW_KEY_LEFT_SHIFT, KeyState::Press);
+			if (!_leftBumperDown) {
+				_leftBumperDown = true;
+				InputManager::getInstance().fire(GLFW_KEY_Q, KeyState::Press);
+			}
 		}
-		if (_gamePad->isKeyUp(GamePad_Button_LEFT_THUMB)) {
-			InputManager::getInstance().fire(GLFW_KEY_LEFT_SHIFT, KeyState::Release);
+		else {
+			_leftBumperDown = false;
+			InputManager::getInstance().fire(GLFW_KEY_Q, KeyState::Release);
+		}
+		if (_gamePad->isKeyDown(GamePad_Button_RIGHT_THUMB)) {
+			if (!_rightBumperDown) {
+				_rightBumperDown = true;
+				InputManager::getInstance().fire(GLFW_KEY_Q, KeyState::Press);
+			}
+		}
+		else {
+			_rightBumperDown = false;
+			InputManager::getInstance().fire(GLFW_KEY_Q, KeyState::Release);
 		}
     }
 }
