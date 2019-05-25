@@ -258,10 +258,13 @@ bool SDogEntity::updateAction()
 		// change action based on attempting to move or not
 		_curAction = (_isMoving) ? ACTION_DOG_MOVING : ACTION_DOG_IDLE;
 
+		_lookDirLocked = true;
+
 		// update action again if higher priority action is happening
 		if (_isUrinating && dogState->urineMeter == 1.0f) _curAction = ACTION_DOG_PEEING;
 		else if (_isInteracting && _nearTrigger) _curAction = ACTION_DOG_SCRATCHING;
 		else if (_isInteracting && _nearFountain) _curAction = ACTION_DOG_DRINKING;
+		else _lookDirLocked = false;
 	}
 
 	return oldAction != _curAction;

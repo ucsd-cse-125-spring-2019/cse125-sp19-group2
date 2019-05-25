@@ -88,6 +88,21 @@ public:
 				} // !_isInterpolating
 			} // player movement
 
+			// Player look events
+			std::vector<std::shared_ptr<GameEvent>> lookEvents;
+			std::copy_if(events.begin(), events.end(), std::back_inserter(lookEvents), [&](std::shared_ptr<GameEvent> i)
+			{
+				return i->type == EVENT_PLAYER_LOOK;
+			});
+
+			// Set player forward to last value
+			if (lookEvents.size() && !_lookDirLocked)
+			{
+				auto direction = glm::normalize(lookEvents.back()->direction);
+				_state->forward = glm::vec3(direction.x, 0, direction.y);
+				hasChanged = true;
+			}
+
 			// Check for player stop event
 			for (auto& event : events)
 			{
@@ -139,6 +154,9 @@ protected:
 
 	// For the case in which client FPS is lower than tick rate
 	bool _isMoving = false;
+
+	// Whether the player can freely look around
+	bool _lookDirLocked = false;
 
 	// Interpolation stuff
 	bool _isInterpolating = false;
@@ -217,7 +235,8 @@ protected:
 		auto filteredEvents = std::vector<std::shared_ptr<GameEvent>>();
 		for (auto& event : events)
 		{
-			if (event->type != EVENT_PLAYER_MOVE)
+			if (event->type != EVENT_PLAYER_MOVE &&
+				event->type != EVENT_PLAYER_LOOK)
 			{
 				filteredEvents.push_back(event);
 			}

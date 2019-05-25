@@ -80,8 +80,6 @@ void GameServer::update()
 {
 	// General game state and network updates
 
-
-
 	// add new entities from last tick to the entity map
 	for (auto& newEntity : *_structureInfo->newEntities)
 	{
@@ -282,5 +280,4 @@ void GameServer::resetGameState()
 		fgetc(stdin);
 		exit(1);
 	}
-
 }

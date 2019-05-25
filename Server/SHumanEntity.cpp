@@ -230,9 +230,12 @@ bool SHumanEntity::updateAction()
 		// change action based on attempting to move or not
 		_curAction = (_isMoving) ? ACTION_HUMAN_MOVING : ACTION_HUMAN_IDLE;
 
+		_lookDirLocked = true;
+
 		// update action again if higher priority action is happening
 		if (_isLaunching) _curAction = ACTION_HUMAN_LAUNCHING;
 		else if (_isSlipping && !_isSlipImmune) _curAction = ACTION_HUMAN_SLIPPING;
+		else _lookDirLocked = false;
 	}
 
 	return oldAction != _curAction;
