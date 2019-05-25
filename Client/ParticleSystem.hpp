@@ -5,6 +5,7 @@
 #pragma once
 
 #include "Physics.hpp"
+#include "Camera.hpp"
 #include <vector>
 #include <memory>
 
@@ -24,7 +25,7 @@ public:
 	ParticleSystem(unsigned int max_particles, const glm::vec3 &origin);
 
 	virtual void Update(float delta_time) = 0;
-	virtual void Draw() = 0;
+	virtual void Draw(std::unique_ptr<Camera> const &camera) = 0;
 
 	virtual void Reset();
 	virtual unsigned int Emit(unsigned int num_particles);
@@ -39,7 +40,8 @@ protected:
 	unsigned int _live_particles; ///< Total number of active particles.
 	unsigned int _last_particle;
 
-	float _accum_time; ///< Time accumulator for keeping track of last emission.
+	float _accum_time;
+	float _rate;       ///< Particles per second.
 
 	std::vector<ParticlePtr> _particles;
 

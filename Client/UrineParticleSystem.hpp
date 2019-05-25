@@ -6,9 +6,9 @@
 
 #include "ParticleSystem.hpp"
 #include "Texture.hpp"
-#include "Camera.hpp"
 #include "Shader.hpp"
 
+/*
 struct UrineParticleSort
 {
 	bool operator()(const std::shared_ptr<Particle>& a, const std::shared_ptr<Particle>& b)
@@ -22,14 +22,15 @@ namespace particle
 	const char *urine_shader_vert = "./Resources/Shaders/urine.vert";
 	const char *urine_shader_frag = "./Resources/Shaders/urine.frag";
 }
-
+*/
 class UrineParticleSystem : public ParticleSystem
 {
 public:
-	UrineParticleSystem(unsigned int max_particles, const glm::vec3 &origin, const std::shared_ptr<Camera> camera);
+	UrineParticleSystem();
+	UrineParticleSystem(unsigned int max_particles, const glm::vec3 &origin);
 
-	void Update(float delta_timen) override;
-	void Draw() override;
+	void Update(float delta_time) override;
+	void Draw(std::unique_ptr<Camera> const &camera) override;
 
 	glm::vec3 origin() const;
 	glm::vec3 velocity() const;
@@ -43,6 +44,7 @@ public:
 	void set_size(float x, float y);
 	void set_texture(const char *path);
 	void set_lifespan(float lifespan);
+	void set_rate(float rate);
 
 private:
 	// Urine particle properties
@@ -56,11 +58,11 @@ private:
 	GLuint _vao;
 	GLuint _vbo;
 	GLuint _position_buffer;
-	std::shared_ptr<Camera> _camera;
+	//std::shared_ptr<Camera> _camera;
 	Shader _urine_program;
 
 	std::vector<glm::vec3> _position_data;
 
 	void CreateParticle(unsigned int index) override;
-	void SortParticles();
+	//void SortParticles();
 };

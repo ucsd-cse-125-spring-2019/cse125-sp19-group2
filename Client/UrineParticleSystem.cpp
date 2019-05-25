@@ -3,6 +3,7 @@
  */
 
 #include "UrineParticleSystem.hpp"
+#include "Shared/Logger.hpp"
 #include <algorithm>
 
 static const GLfloat vertex_data[] = {
@@ -12,16 +13,17 @@ static const GLfloat vertex_data[] = {
 	0.5f, 0.5f, 0.0f,
 };
 
-UrineParticleSystem::UrineParticleSystem(unsigned int max_particles, const glm::vec3 &origin, const std::shared_ptr<Camera> camera)
+UrineParticleSystem::UrineParticleSystem() : UrineParticleSystem(100, glm::vec3(0.0f)) {}
+
+UrineParticleSystem::UrineParticleSystem(unsigned int max_particles, const glm::vec3 &origin)
 	: ParticleSystem(max_particles, origin)
 {
-	_camera = camera;
 	_position_data.resize(_max_particles);
 
 	// Setup shader program
 	_urine_program = Shader();
-	_urine_program.LoadFromFile(GL_VERTEX_SHADER, particle::urine_shader_vert);
-	_urine_program.LoadFromFile(GL_FRAGMENT_SHADER, particle::urine_shader_frag);
+	_urine_program.LoadFromFile(GL_VERTEX_SHADER, "./Resources/Shaders/urine.vert");
+	_urine_program.LoadFromFile(GL_FRAGMENT_SHADER, "./Resources/Shaders/urine.frag");
 	_urine_program.CreateProgram();
 
 	glGenVertexArrays(1, &_vao);
@@ -71,7 +73,7 @@ void UrineParticleSystem::Update(float delta_time)
 			p->position += p->velocity * delta_time;
 
 			// Calculate camera distance for sorting
-			p->camera_distance = glm::length(p->position - _camera->position());
+			//p->camera_distance = glm::length(p->position - _camera->position());
 
 			// Update particle position buffer data
 			_position_data[particle_index] = p->position;
@@ -89,7 +91,7 @@ void UrineParticleSystem::Update(float delta_time)
 	_live_particles = remaining_particles;
 
 	// Sort particles
-	SortParticles();
+	//SortParticles();
 
 	// Update buffer data
 	glBindBuffer(GL_ARRAY_BUFFER, _position_buffer);
@@ -97,7 +99,7 @@ void UrineParticleSystem::Update(float delta_time)
 	glBufferSubData(GL_ARRAY_BUFFER, 0, _live_particles * sizeof(GLfloat) * 3, _position_data.data());
 }
 
-void UrineParticleSystem::Draw()
+void UrineParticleSystem::Draw(std::unique_ptr<Camera> const &camera)
 {
 	_urine_program.Use();
 
@@ -110,8 +112,8 @@ void UrineParticleSystem::Draw()
 	_urine_program.set_uniform("u_size", _size);
 
 	// Camera
-	_urine_program.set_uniform("u_view", _camera->view_matrix());
-	_urine_program.set_uniform("u_projection", _camera->projection_matrix());
+	_urine_program.set_uniform("u_view", camera->view_matrix());
+	_urine_program.set_uniform("u_projection", camera->projection_matrix());
 
 	glBindVertexArray(_vao);
 	glDrawArraysInstanced(GL_TRIANGLE_STRIP, 0, 1, _live_particles);
@@ -167,13 +169,20 @@ void UrineParticleSystem::set_size(float x, float y)
 void UrineParticleSystem::set_texture(const char * path)
 {
 	_texture.id = LoadTextureFromFile(path, "./Resources/Textures");
+	Logger::getInstance()->info("Loaded urine texture: " + std::string(path));
 	_texture.type = TextureType::DIFFUSE;
 	_texture.path = std::string(path);
+
 }
 
 void UrineParticleSystem::set_lifespan(float lifespan)
 {
 	_lifespan = lifespan;
+}
+
+void UrineParticleSystem::set_rate(float rate)
+{
+	_rate = rate;
 }
 
 void UrineParticleSystem::CreateParticle(unsigned int index)
@@ -188,8 +197,9 @@ void UrineParticleSystem::CreateParticle(unsigned int index)
 
 	_live_particles++;
 }
-
+/*
 void UrineParticleSystem::SortParticles()
 {
 	std::sort(_particles.begin(), _particles.end(), UrineSort);
 }
+*/
