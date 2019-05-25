@@ -75,9 +75,6 @@ protected:
 		// Cast model as animation
 		Animation* animation = static_cast<Animation*>(_objectModel.get());
 
-		// Ensuring index is non-garbage value
-		animation->animatedMesh->_takeIndex = 0;
-
 		// Call init to let Animation precache uniform location
 		animation->init(_objectShader);
 

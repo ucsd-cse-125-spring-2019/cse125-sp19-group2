@@ -29,7 +29,7 @@ public:
 
 		// Requires a cast
 		Animation* dogAnimation = static_cast<Animation*>(_objectModel.get());
-		dogAnimation->animatedMesh->_takeIndex = newState->currentAnimation;
+		dogAnimation->play(newState->currentAnimation);
 
 		// Dog attributes and items
 		currentState->runStamina = newState->runStamina;
