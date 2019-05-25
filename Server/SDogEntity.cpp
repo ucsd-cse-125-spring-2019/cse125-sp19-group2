@@ -16,7 +16,7 @@ SDogEntity::SDogEntity(uint32_t playerId, std::string playerName, std::vector<gl
 	_state->height = 0.8f;
 	_state->depth = 0.8f;
 
-	_velocity = BASE_VELOCITY;
+	_velocity = DOG_BASE_VELOCITY;
 
 	_jails = jails;
 
@@ -122,16 +122,16 @@ void SDogEntity::update(std::vector<std::shared_ptr<GameEvent>> events)
 		if (_isRunning) {
 			if (dogState->runStamina >= 1.0f / TICKS_PER_SEC)
 			{
-				_velocity = RUN_VELOCITY;
+				_velocity = DOG_RUN_VELOCITY;
 				dogState->runStamina -= 1.0f / TICKS_PER_SEC;
 			}
 			else {
 				dogState->runStamina = 0;
-				_velocity = BASE_VELOCITY;
+				_velocity = DOG_BASE_VELOCITY;
 			}
 		}
 		else {
-			_velocity = BASE_VELOCITY;
+			_velocity = DOG_BASE_VELOCITY;
 		}
 		handleActionMoving();
 		break;
@@ -159,7 +159,7 @@ void SDogEntity::update(std::vector<std::shared_ptr<GameEvent>> events)
 			targetPos.y = 0;
 			glm::vec3 dest = targetPos + glm::normalize(_state->pos - targetPos) * 0.55f;
 			dogState->currentAnimation = ANIMATION_DOG_RUNNING;
-			interpolateMovement(dest, glm::normalize(targetPos - _state->pos), BASE_VELOCITY / 2,
+			interpolateMovement(dest, glm::normalize(targetPos - _state->pos), DOG_BASE_VELOCITY / 2,
 				[&] {
 				// Stage 1: start scratching animation and lifting the gate
 				actionStage++;
@@ -172,7 +172,7 @@ void SDogEntity::update(std::vector<std::shared_ptr<GameEvent>> events)
 		// Stage 0: interpolating to the fountain and look at it
 		if (actionStage == 0) {
 			dogState->currentAnimation = ANIMATION_DOG_RUNNING;
-			interpolateMovement(targetPos, targetDir, BASE_VELOCITY / 2, [&]()
+			interpolateMovement(targetPos, targetDir, DOG_BASE_VELOCITY / 2, [&]()
 				{
 					// Stage 1: start drinking animation and filling meter
 					actionStage++;

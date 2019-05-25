@@ -35,4 +35,5 @@ private:
 
 	bool _isCharging = false;
 	bool _isSwinging = false;
+	long stuntDuration = 0;
 };

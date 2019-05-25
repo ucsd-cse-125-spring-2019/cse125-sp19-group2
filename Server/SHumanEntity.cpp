@@ -16,7 +16,7 @@ SHumanEntity::SHumanEntity(uint32_t playerId, std::string playerName, std::vecto
 	_state->height = 2.0f;
 	_state->depth = 0.9f;
 
-	_velocity = 4.8f;
+	_velocity = HUMAN_BASE_VELOCITY;
 
 	_newEntities = newEntities;
 
@@ -54,12 +54,18 @@ void SHumanEntity::update(std::vector<std::shared_ptr<GameEvent>> events)
 		switch (event->type)
 		{
 		case EVENT_PLAYER_CHARGE_NET:
-			_isCharging = true;
+			if (!_isSwinging)
+			{
+				_isCharging = true;
+			}
+			else
+			{
+				_isCharging = false;
+			}
 			break;
 		case EVENT_PLAYER_SWING_NET:
 			_isCharging = false;
-			// Example of lunging. Will probably need to change
-			interpolateMovement(_state->pos + (_state->forward * 1.5f), _state->forward, 15.0f);
+			_isSwinging = true;
 			break;
 		case EVENT_PLAYER_LAUNCH_START:
 			_isLaunching = true;
@@ -87,7 +93,7 @@ void SHumanEntity::update(std::vector<std::shared_ptr<GameEvent>> events)
 	}
 
 	if (_isCharging && humanState->chargeMeter < MAX_HUMAN_CHARGE) {
-		humanState->chargeMeter += 1.0f / TICKS_PER_SEC;
+		humanState->chargeMeter += 2.0f / TICKS_PER_SEC;
 	}
 
 	// Save old position
@@ -187,6 +193,60 @@ void SHumanEntity::update(std::vector<std::shared_ptr<GameEvent>> events)
 				});
 		}
 		break;
+	case ACTION_HUMAN_SWINGING:
+		if (actionChanged) {
+			// animation based on how high is the charge meter
+			if (humanState->chargeMeter < HUMAN_CHARGE_THRESHOLD1)
+			{
+				humanState->currentAnimation = ANIMATION_HUMAN_SWINGING1;
+				registerTimer(220, [&]()
+				{
+					humanState->currentAnimation = ANIMATION_HUMAN_SWINGING1_IDLE;
+					hasChanged = true;
+				});
+			}
+			else if (humanState->chargeMeter < HUMAN_CHARGE_THRESHOLD2)
+			{
+				humanState->currentAnimation = ANIMATION_HUMAN_SWINGING2;
+				registerTimer(290, [&]()
+				{
+					humanState->currentAnimation = ANIMATION_HUMAN_SWINGING2_IDLE;
+					hasChanged = true;
+				});
+			}
+			else
+			{
+				humanState->currentAnimation = ANIMATION_HUMAN_SWINGING3;
+				registerTimer(570, [&]()
+				{
+					humanState->currentAnimation = ANIMATION_HUMAN_SWINGING3_IDLE;
+					hasChanged = true;
+				});
+			}
+				
+
+			hasChanged = true;
+
+			float chargeDistance = humanState->chargeMeter * 3.0f;
+			stuntDuration = (chargeDistance / HUMAN_BASE_VELOCITY - chargeDistance / HUMAN_SWING_VELOCITY + 0.2f) * 1250;
+			interpolateMovement(_state->pos + (_state->forward * chargeDistance), _state->forward, HUMAN_SWING_VELOCITY,
+				[&] {
+				registerTimer(stuntDuration, [&]()
+				{
+					_isSwinging = false;
+					humanState->chargeMeter = 0;
+					hasChanged = true;
+				});
+			}, [&] {
+				registerTimer(stuntDuration, [&]()
+				{
+					_isSwinging = false;
+					humanState->chargeMeter = 0;
+					hasChanged = true;
+				});
+			});
+		}
+		break;
 	}
 
 
@@ -240,6 +300,12 @@ bool SHumanEntity::updateAction()
 		if (_isLaunching) _curAction = ACTION_HUMAN_LAUNCHING;
 		else if (_isSlipping && !_isSlipImmune) _curAction = ACTION_HUMAN_SLIPPING;
 		else if (_isSwinging) _curAction = ACTION_HUMAN_SWINGING;
+	}
+
+	// if failed to swing then cancel swing
+	if (!_curAction == ACTION_HUMAN_SWINGING)
+	{
+		_isSwinging = false;
 	}
 
 	return oldAction != _curAction;
