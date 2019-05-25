@@ -28,6 +28,8 @@ public:
 
 	virtual void update(std::vector<std::shared_ptr<GameEvent>> events) override
 	{
+		auto playerState = std::static_pointer_cast<PlayerState>(_state);
+
 		// Do nothing if we are set to be destroyed
 		if (_state->isDestroyed)
 		{
@@ -115,6 +117,9 @@ public:
 
 		// Update all timers for the player
 		updateTimers();
+
+		// Reset custom player message
+		playerState->message = "";
 
 	} // update()
 
