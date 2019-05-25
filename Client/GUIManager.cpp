@@ -361,8 +361,12 @@ void GuiManager::initLobbyScreen() {
 	// Title for dogs list
 	auto dogsLabel = new nanogui::Label(lobbyScreen, "Dogs", "sans", 60);
 
-	// Empty widget
-	auto emptyLabel = new nanogui::Label(lobbyScreen, "", "sans", 60);
+	// Controls button
+	auto controlsButton = new nanogui::Button(lobbyScreen, "Controls");
+	controlsButton->setCallback([&]()
+		{
+			setVisibility(WIDGET_OPTIONS, !getWidget(WIDGET_OPTIONS)->visible());
+		});
 
 	// Title for humans list
 	auto humansLabel = new nanogui::Label(lobbyScreen, "Humans", "sans", 60);

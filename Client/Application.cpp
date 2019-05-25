@@ -614,10 +614,14 @@ void Application::registerGlobalKeys() {
 
 	InputManager::getInstance().getKey(GLFW_KEY_ESCAPE)->onPress([&]
 	{
-		if (_localPlayer && !_inLobby) {
+		if (_localPlayer) {
 			bool curState = _localPlayer->getMouseCaptured();
-			GuiManager::getInstance().setVisibility(WIDGET_OPTIONS, curState);
-			_localPlayer->setMouseCaptured(!curState);
+			GuiManager::getInstance().setVisibility(WIDGET_OPTIONS,
+				!GuiManager::getInstance().getWidget(WIDGET_OPTIONS)->visible());
+			if (!_inLobby)
+			{
+				_localPlayer->setMouseCaptured(!curState);
+			}
 		}
 	});
 }
