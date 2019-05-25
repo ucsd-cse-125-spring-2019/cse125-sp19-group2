@@ -4,12 +4,11 @@
 
 EventManager::EventManager(
 	NetworkServer* networkInterface,
-	StructureInfo* structureInfo,
-	std::shared_ptr<GameState> gameState)
+	StructureInfo* structureInfo)
 {
 	_networkInterface = networkInterface;
 	_structureInfo = structureInfo;
-	_gameState = gameState;
+	_gameState = structureInfo->gameState.get();
 }
 
 EventManager::~EventManager()
@@ -17,7 +16,7 @@ EventManager::~EventManager()
 }
 
 
-void EventManager::update()
+bool EventManager::update()
 {
 	auto playerEvents = _networkInterface->receiveEvents();
 
@@ -43,7 +42,10 @@ void EventManager::update()
 		}
 		case EVENT_PLAYER_LEAVE:
 		{
-			handlePlayerLeave(event);
+			if (!handlePlayerLeave(event))
+			{
+				return false;
+			}
 			break;
 		}
 		case EVENT_PLAYER_READY:
@@ -86,6 +88,8 @@ void EventManager::update()
 			entityPair.second->update(eventVec);
 		}
 	}
+
+	return true;
 }
 
 void EventManager::handlePlayerJoin(std::shared_ptr<GameEvent> event)
@@ -148,7 +152,7 @@ void EventManager::handlePlayerReady(std::shared_ptr<GameEvent> event)
 	}
 }
 
-void EventManager::handlePlayerLeave(std::shared_ptr<GameEvent> event)
+bool EventManager::handlePlayerLeave(std::shared_ptr<GameEvent> event)
 {
 	if (_gameState->dogs.find(event->playerId) != _gameState->dogs.end())
 	{
@@ -185,6 +189,7 @@ void EventManager::handlePlayerLeave(std::shared_ptr<GameEvent> event)
 		_gameState->gameOver = false;
 		_gameState->readyPlayers.clear();
 		_gameState->millisecondsLeft = std::chrono::duration_cast<std::chrono::milliseconds>(MAX_GAME_LENGTH).count();
+		return false;
 	}
 
 	// Mark entity for deletion if it exists
@@ -194,13 +199,15 @@ void EventManager::handlePlayerLeave(std::shared_ptr<GameEvent> event)
 		entity->getState()->isDestroyed = true;
 		entity->hasChanged = true;
 	}
+
+	return true;
 }
 
 void EventManager::startGame()
 {
 	// Immediately send a new GameState to try and update ready button before
 	// the game loads on the client
-	_networkInterface->sendUpdate(_gameState);
+	_networkInterface->sendUpdate(_structureInfo->gameState);
 
 	// Build player entities for each human
 	for (auto& humanPair : _gameState->humans)
@@ -211,9 +218,9 @@ void EventManager::startGame()
 		_structureInfo->humanSpawns->push(humanSpawn);
 
 		auto humanEntity = std::make_shared<SHumanEntity>(
-			humanPair.first,
-			humanPair.second,
-			_structureInfo->newEntities);
+			humanPair.first, // ID
+			humanPair.second, // Name
+			_structureInfo);
 
 		// Set location
 		humanEntity->getState()->pos = glm::vec3(humanSpawn.x, 0, humanSpawn.y);
@@ -233,8 +240,7 @@ void EventManager::startGame()
 		auto dogEntity = std::make_shared<SDogEntity>(
 			dogPair.first, // ID
 			dogPair.second, // Name
-			_structureInfo->jailsPos,
-			_structureInfo->newEntities);
+			_structureInfo);
 
 		// Set location
 		dogEntity->getState()->pos = glm::vec3(dogSpawn.x, 0, dogSpawn.y);

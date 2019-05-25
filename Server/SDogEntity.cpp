@@ -1,7 +1,12 @@
 #include "SDogEntity.hpp"
 
-SDogEntity::SDogEntity(uint32_t playerId, std::string playerName, std::vector<glm::vec2>* jails, std::vector<std::shared_ptr<SBaseEntity>>* newEntities)
+SDogEntity::SDogEntity(
+	uint32_t playerId,
+	std::string playerName,
+	StructureInfo* structureInfo)
 {
+	_structureInfo = structureInfo;
+
 	_state = std::make_shared<DogState>();
 
 	// Parent initialization
@@ -17,10 +22,6 @@ SDogEntity::SDogEntity(uint32_t playerId, std::string playerName, std::vector<gl
 	_state->depth = 0.8f;
 
 	_velocity = BASE_VELOCITY;
-
-	_jails = jails;
-
-	_newEntities = newEntities;
 
 	// Dog-specific stuff
 	auto dogState = std::static_pointer_cast<DogState>(_state);
@@ -206,12 +207,17 @@ void SDogEntity::generalHandleCollision(SBaseEntity * entity)
 	auto dogState = std::static_pointer_cast<DogState>(_state);
 
 	// Dog getting caught is handled by the dog, not the human
-	if (entity->getState()->type == ENTITY_HUMAN && !isCaught)
+	if (entity->getState()->type == ENTITY_HUMAN &&
+		!isCaught &&
+		!_structureInfo->gameState->gameOver)
 	{
 		// Teleport to a random jail
 		unsigned int seed = (unsigned int)std::chrono::system_clock::now().time_since_epoch().count();
-		std::shuffle(_jails->begin(), _jails->end(), std::default_random_engine(seed));
-		glm::vec2 jailPos = (*_jails)[0];
+		std::shuffle(
+			_structureInfo->jailsPos->begin(),
+			_structureInfo->jailsPos->end(),
+			std::default_random_engine(seed));
+		glm::vec2 jailPos = (*(_structureInfo->jailsPos))[0];
 		getState()->pos = glm::vec3(jailPos.x, 0, jailPos.y);
 	}
 	else if (entity->getState()->type == ENTITY_BONE)
@@ -229,7 +235,7 @@ void SDogEntity::generalHandleCollision(SBaseEntity * entity)
 void SDogEntity::createPuddle()
 {
 	std::shared_ptr<SPuddleEntity> puddleEntity = std::make_shared<SPuddleEntity>(_state->pos);
-	_newEntities->push_back(puddleEntity);
+	_structureInfo->newEntities->push_back(puddleEntity);
 }
 
 bool SDogEntity::updateAction()

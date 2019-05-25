@@ -36,6 +36,10 @@ private:
 	// Update basic game state info (started, inLobby, etc)
 	void updateGameState();
 
+	// Reset state on the server. This includes deleting all existing entities,
+	// and parsing new ones from the level file.
+	void resetGameState();
+
 	/** Variables **/
 
     // Interface for client communication
@@ -51,7 +55,7 @@ private:
 	std::unique_ptr<CollisionManager> _collisionManager;
 
 	// Struct to keep track of game state
-	std::shared_ptr<GameState> _gameState;
+	GameState* _gameState;
 
 	// Struct containing general game info
 	StructureInfo* _structureInfo;

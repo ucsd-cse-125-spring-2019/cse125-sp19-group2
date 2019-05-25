@@ -14,8 +14,7 @@ public:
 	SDogEntity(
 		uint32_t playerId,
 		std::string playerName,
-		std::vector<glm::vec2>* jails,
-		std::vector<std::shared_ptr<SBaseEntity>>* newEntities);
+		StructureInfo* structureInfo);
 
 	~SDogEntity() {};
 
@@ -38,8 +37,6 @@ public:
 	}
 
 private:
-	// List of jails the dog could potentially be sent to
-	std::vector<glm::vec2>* _jails;
 	int type = 0;
 
 	// _isSomething is just player's attempt of doing it, may not be the final action
@@ -48,8 +45,6 @@ private:
 	bool _isInteracting = false;
 
 	DogAction _curAction = ACTION_DOG_IDLE;
-
-	std::vector<std::shared_ptr<SBaseEntity>>* _newEntities;
 
 	// State for jail triggers
 	bool _nearTrigger = false;

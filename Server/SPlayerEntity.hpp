@@ -3,7 +3,8 @@
 #include "IdGenerator.hpp"
 #include "SBaseEntity.hpp"
 #include "CapsuleCollider.hpp"
-#include "Shared\PlayerState.hpp"
+#include "StructureInfo.hpp"
+#include "Shared/PlayerState.hpp"
 #include <algorithm>
 
 // Amount of leway when comparing floats
@@ -129,6 +130,9 @@ public:
 	glm::vec3 targetDir;
 
 protected:
+	// General server state info
+	StructureInfo* _structureInfo;
+
 	// Player movement velocity in units/second
 	float _velocity;
 	glm::vec3 _newDir;

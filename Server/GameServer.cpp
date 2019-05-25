@@ -24,54 +24,18 @@ void GameServer::start()
     // Start network server
     _networkInterface = std::make_unique<NetworkServer>(PORTNUM);
 
-	// Initialize game state struct
-	_gameState = std::make_shared<GameState>();
-	_gameState->type = ENTITY_STATE;
-	_gameState->gameStarted = false;
-	_gameState->gameOver = false;
-	_gameState->inLobby = true;
-	_gameState->pregameCountdown = false;
-	_gameState->millisecondsToStart = 0;
-	_gameState->millisecondsLeft = std::chrono::duration_cast<std::chrono::milliseconds>(MAX_GAME_LENGTH).count();
-	_gameState->millisecondsToLobby = 0;
-	_gameState->dogs = std::unordered_map<uint32_t, std::string>();
-	_gameState->humans = std::unordered_map<uint32_t, std::string>();
-	_gameState->readyPlayers = std::vector<uint32_t>();
+	// Init level parser
+	_levelParser = std::make_unique<GridLevelParser>();
+	
+	// Struct containing pointers to all gamestate related objects
+	_structureInfo = new StructureInfo();
+
+	// Load and initialize all server gamestate. This includes loading entities
+	// from the level file, and initializing the gameState struct
+	resetGameState();
 
 	// Server utilization monitor
 	Logger::getInstance()->initUtilizationMonitor();
-
-	// Struct of all useful objects for event manager and otherwise
-	_structureInfo = new StructureInfo();
-
-	// Init level parser
-	_levelParser = std::make_unique<GridLevelParser>();
-
-	// Map initialization
-	_levelParser->parseLevelFromFile("Levels/map.dat", _structureInfo);
-
-	Logger::getInstance()->debug("Parsed " + std::to_string(_structureInfo->entityMap->size()) + " entities from file.");
-
-	// Ensure at least one human spawn, dog spawn, and jail
-	// TODO: convert these to exceptions, or find a cleaner way to handle this
-	if (!_structureInfo->jails->size())
-	{
-		Logger::getInstance()->fatal("No jails found in level file");
-		fgetc(stdin);
-		exit(1);
-	}
-	if (!_structureInfo->humanSpawns->size())
-	{
-		Logger::getInstance()->fatal("No human spawn locations found in level file");
-		fgetc(stdin);
-		exit(1);
-	}
-	if (!_structureInfo->dogSpawns->size())
-	{
-		Logger::getInstance()->fatal("No dog spawn locations found in level file");
-		fgetc(stdin);
-		exit(1);
-	}
 
 	// Init collision manager
 	_collisionManager = std::make_unique<CollisionManager>(_structureInfo->entityMap);
@@ -79,8 +43,7 @@ void GameServer::start()
 	// Init event handler
 	_eventManager = std::make_unique<EventManager>(
 		_networkInterface.get(),
-		_structureInfo,
-		_gameState);
+		_structureInfo);
 
     // Run update loop, keeping each iteration at a minimum of 1 tick
 	while (true)
@@ -126,8 +89,12 @@ void GameServer::update()
 	}
 	_structureInfo->newEntities->clear();
 
-	// Handle events from clients and update() each entity
-	_eventManager->update();
+	// Handle events from clients and update() each entity. If it returns false,
+	// we need to reset the state of the server.
+	if (!_eventManager->update())
+	{
+		resetGameState();
+	}
 
 	// Collision resolution
 	_collisionManager->handleCollisions();
@@ -159,7 +126,7 @@ void GameServer::update()
 	// own clocks for the countdown.
 	if (_gameState->dogs.size() || _gameState->humans.size())
 	{
-		_networkInterface->sendUpdate(_gameState);
+		_networkInterface->sendUpdate(_structureInfo->gameState);
 	}
 
 	// Remove all entities marked for deletion
@@ -180,7 +147,6 @@ void GameServer::update()
 		_structureInfo->entityMap->erase(_structureInfo->entityMap->find(id));
 	}
 }
-
 
 void GameServer::updateGameState()
 {
@@ -240,24 +206,10 @@ void GameServer::updateGameState()
 				std::chrono::duration_cast<std::chrono::nanoseconds>(POSTGAME_LENGTH)
 				- duration).count();
 
+		// Reset game if we are past the lobby timer
 		if (_gameState->millisecondsToLobby <= 0)
 		{
-			_gameState->inLobby = true;
-			_gameState->gameOver = false;
-			_gameState->readyPlayers.clear();
-			_gameState->millisecondsLeft = std::chrono::duration_cast<std::chrono::milliseconds>(MAX_GAME_LENGTH).count();
-
-			// Reset game state
-			for (auto& entityPair : *_structureInfo->entityMap)
-			{
-				// Remove players and pee puddles. TODO: other state reset stuff
-				if (entityPair.second->getState()->type == ENTITY_HUMAN ||
-					entityPair.second->getState()->type == ENTITY_DOG ||
-					entityPair.second->getState()->type == ENTITY_PUDDLE)
-				{
-					entityPair.second->getState()->isDestroyed = true;
-				}
-			}
+			resetGameState();
 		}
 	}
 
@@ -278,4 +230,57 @@ void GameServer::updateGameState()
 		_gameState->_endgameStart = std::chrono::steady_clock::now();
 		Logger::getInstance()->debug("Dogs won!");
 	}
+}
+
+
+void GameServer::resetGameState()
+{
+	// Initialize game state struct if it does not exist
+	if (!_structureInfo->gameState)
+	{
+		_structureInfo->gameState = std::make_shared<GameState>();
+		_gameState = _structureInfo->gameState.get();
+		_gameState->readyPlayers = std::vector<uint32_t>();
+		_gameState->dogs = std::unordered_map<uint32_t, std::string>();
+		_gameState->humans = std::unordered_map<uint32_t, std::string>();
+	}
+	// Otherwise we are working with an old state struct
+	else
+	{
+		_gameState->readyPlayers.clear();
+	}
+	_gameState->type = ENTITY_STATE;
+	_gameState->gameStarted = false;
+	_gameState->gameOver = false;
+	_gameState->inLobby = true;
+	_gameState->pregameCountdown = false;
+	_gameState->millisecondsToStart = 0;
+	_gameState->millisecondsLeft = std::chrono::duration_cast<std::chrono::milliseconds>(MAX_GAME_LENGTH).count();
+	_gameState->millisecondsToLobby = 0;
+
+	// Map initialization
+	_levelParser->parseLevelFromFile("Levels/map.dat", _structureInfo);
+
+	Logger::getInstance()->debug("Parsed " + std::to_string(_structureInfo->entityMap->size()) + " entities from file.");
+
+	// Ensure at least one human spawn, dog spawn, and jail
+	if (!_structureInfo->jails->size())
+	{
+		Logger::getInstance()->fatal("No jails found in level file");
+		fgetc(stdin);
+		exit(1);
+	}
+	if (!_structureInfo->humanSpawns->size())
+	{
+		Logger::getInstance()->fatal("No human spawn locations found in level file");
+		fgetc(stdin);
+		exit(1);
+	}
+	if (!_structureInfo->dogSpawns->size())
+	{
+		Logger::getInstance()->fatal("No dog spawn locations found in level file");
+		fgetc(stdin);
+		exit(1);
+	}
+
 }

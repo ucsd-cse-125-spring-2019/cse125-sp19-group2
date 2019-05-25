@@ -1,7 +1,12 @@
 #include "SHumanEntity.hpp"
 
-SHumanEntity::SHumanEntity(uint32_t playerId, std::string playerName, std::vector<std::shared_ptr<SBaseEntity>>* newEntities)
+SHumanEntity::SHumanEntity(
+	uint32_t playerId,
+	std::string playerName,
+	StructureInfo* structureInfo)
 {
+	_structureInfo = structureInfo;
+
 	_state = std::make_shared<HumanState>();
 
 	// Parent initialization
@@ -17,8 +22,6 @@ SHumanEntity::SHumanEntity(uint32_t playerId, std::string playerName, std::vecto
 	_state->depth = 0.9f;
 
 	_velocity = 4.8f;
-
-	_newEntities = newEntities;
 
 	// Human-specific stuff
 	auto humanState = std::static_pointer_cast<HumanState>(_state);
@@ -127,11 +130,11 @@ void SHumanEntity::update(std::vector<std::shared_ptr<GameEvent>> events)
 		if (actionStage == 1) {
 			if (plungerEntity == nullptr) {
 				plungerEntity = std::make_shared<SPlungerEntity>(_state->pos, _state->forward);
-				_newEntities->push_back(plungerEntity);
+				_structureInfo->newEntities->push_back(plungerEntity);
 			}
 			if (ropeEntity == nullptr) {
 				ropeEntity = std::make_shared<SRopeEntity>();
-				_newEntities->push_back(ropeEntity);
+				_structureInfo->newEntities->push_back(ropeEntity);
 			}
 			if (!plungerEntity->launching) {
 				actionStage++;

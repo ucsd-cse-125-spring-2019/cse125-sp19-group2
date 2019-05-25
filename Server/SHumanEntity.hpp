@@ -10,7 +10,7 @@ class SHumanEntity : public SPlayerEntity
 public:
 	SHumanEntity(uint32_t playerId,
 		std::string playerName,
-		std::vector<std::shared_ptr<SBaseEntity>>* newEntities);
+		StructureInfo* structureInfo);
 
 	~SHumanEntity() {};
 
@@ -21,7 +21,6 @@ public:
 private:
 	bool _isLaunching = false;
 	HumanAction _curAction = ACTION_HUMAN_IDLE;
-	std::vector<std::shared_ptr<SBaseEntity>>* _newEntities;
 
 	std::shared_ptr<SPlungerEntity> plungerEntity;
 	std::shared_ptr<SRopeEntity> ropeEntity;
