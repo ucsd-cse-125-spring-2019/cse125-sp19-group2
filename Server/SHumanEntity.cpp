@@ -53,7 +53,11 @@ void SHumanEntity::update(std::vector<std::shared_ptr<GameEvent>> events)
 	{
 		switch (event->type)
 		{
+		case EVENT_PLAYER_CHARGE_NET:
+			_isCharging = true;
+			break;
 		case EVENT_PLAYER_SWING_NET:
+			_isCharging = false;
 			// Example of lunging. Will probably need to change
 			interpolateMovement(_state->pos + (_state->forward * 1.5f), _state->forward, 15.0f);
 			break;
@@ -80,6 +84,10 @@ void SHumanEntity::update(std::vector<std::shared_ptr<GameEvent>> events)
 			
 			break;
 		}
+	}
+
+	if (_isCharging && humanState->chargeMeter < MAX_HUMAN_CHARGE) {
+		humanState->chargeMeter += 1.0f / TICKS_PER_SEC;
 	}
 
 	// Save old position
@@ -217,7 +225,8 @@ bool SHumanEntity::updateAction()
 
 	// lower the priority of action if possible
 	if (_curAction == ACTION_HUMAN_LAUNCHING && !_isLaunching ||
-		_curAction == ACTION_HUMAN_SLIPPING && !_isSlipping)
+		_curAction == ACTION_HUMAN_SLIPPING && !_isSlipping ||
+		_curAction == ACTION_HUMAN_SWINGING && !_isSwinging)
 	{
 		_curAction = ACTION_HUMAN_IDLE;
 	}
@@ -230,6 +239,7 @@ bool SHumanEntity::updateAction()
 		// update action again if higher priority action is happening
 		if (_isLaunching) _curAction = ACTION_HUMAN_LAUNCHING;
 		else if (_isSlipping && !_isSlipImmune) _curAction = ACTION_HUMAN_SLIPPING;
+		else if (_isSwinging) _curAction = ACTION_HUMAN_SWINGING;
 	}
 
 	return oldAction != _curAction;

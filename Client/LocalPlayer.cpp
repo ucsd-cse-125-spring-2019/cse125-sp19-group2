@@ -224,7 +224,7 @@ LocalPlayer::LocalPlayer(uint32_t playerId, std::unique_ptr<NetworkClient> const
 			// Humans swinging nets
 			auto event = std::make_shared<GameEvent>();
 			event->playerId = _playerId;
-			event->type = EVENT_PLAYER_SWING_NET;
+			event->type = EVENT_PLAYER_CHARGE_NET;
 			try
 			{
 				networkClient->sendEvent(event);
@@ -253,10 +253,20 @@ LocalPlayer::LocalPlayer(uint32_t playerId, std::unique_ptr<NetworkClient> const
 		// We don't want to register clicks if the mouse isn't captured
 		if (_moveCamera)
 		{
-			// TODO: humans swinging nets
+			// Humans swinging nets
+			auto event = std::make_shared<GameEvent>();
+			event->playerId = _playerId;
+			event->type = EVENT_PLAYER_SWING_NET;
+			try
+			{
+				networkClient->sendEvent(event);
+			}
+			catch (std::runtime_error e)
+			{
+			};
 
 			// Dogs interacting
-			auto event = std::make_shared<GameEvent>();
+			event = std::make_shared<GameEvent>();
 			event->playerId = _playerId;
 			event->type = EVENT_PLAYER_INTERACT_END;
 			try

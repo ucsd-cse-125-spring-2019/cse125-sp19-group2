@@ -33,5 +33,6 @@ private:
 	bool _isSlipping = false;
 	bool _isSlipImmune = false;
 
-
+	bool _isCharging = false;
+	bool _isSwinging = false;
 };

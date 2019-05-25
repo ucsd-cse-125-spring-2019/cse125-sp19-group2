@@ -32,6 +32,11 @@ const std::chrono::seconds POSTGAME_LENGTH(15);
 #define MAX_DOG_STAMINA 3.0f	// Dog can sprint for three seconds max
 #define MAX_DOG_URINE 1.0f		// Dog can make one puddle per urine bar
 
+// Human-spedific stats
+#define MAX_HUMAN_CHARGE 2.0f
+#define HUMAN_CHARGE_THRESHOLD1 0.2f	// lower than that will be swing1
+#define HUMAN_CHARGE_THRESHOLD2 1.2f    // lower than that will be swing2
+
 // This is absolutely filthy code but it is necessary when multiple machines
 // enter the picture.
 enum EntityType
