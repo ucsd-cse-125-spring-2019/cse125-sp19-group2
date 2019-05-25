@@ -173,14 +173,6 @@ bool EventManager::handlePlayerLeave(std::shared_ptr<GameEvent> event)
 			event->playerId),
 		_gameState->readyPlayers.end());
 
-	// If everyone is now ready, start the game
-	if (_gameState->inLobby &&
-		_gameState->readyPlayers.size() ==
-		_gameState->dogs.size() + _gameState->humans.size())
-	{
-		startGame();
-	}
-
 	// Reset the game if no other players
 	if (!_gameState->dogs.size() && !_gameState->humans.size())
 	{
@@ -190,6 +182,14 @@ bool EventManager::handlePlayerLeave(std::shared_ptr<GameEvent> event)
 		_gameState->readyPlayers.clear();
 		_gameState->millisecondsLeft = std::chrono::duration_cast<std::chrono::milliseconds>(MAX_GAME_LENGTH).count();
 		return false;
+	}
+	
+	// If everyone is now ready, start the game
+	if (_gameState->inLobby &&
+		_gameState->readyPlayers.size() ==
+		_gameState->dogs.size() + _gameState->humans.size())
+	{
+		startGame();
 	}
 
 	// Mark entity for deletion if it exists
