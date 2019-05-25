@@ -24,6 +24,8 @@
 #include "fmod/fmod_errors.h"
 #include "Shared/GameEvent.hpp"
 
+#define SESSION_FILE_PATH "last_session.txt"
+
 class Application {
 public:
   Application(const char *windowTitle, int argc, char **argv);

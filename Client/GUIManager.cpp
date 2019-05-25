@@ -175,8 +175,16 @@ std::string GuiManager::getPlayerName() {
 	return _playerNameBox->value();
 }
 
+void GuiManager::setPlayerName(std::string val) {
+	_playerNameBox->setValue(val);
+}
+
 std::string GuiManager::getAddress() {
 	return _addressBox->value();
+}
+
+void GuiManager::setAddress(std::string val) {
+	_addressBox->setValue(val);
 }
 
 void GuiManager::updateDogsList(

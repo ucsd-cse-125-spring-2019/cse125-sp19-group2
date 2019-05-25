@@ -4,6 +4,7 @@
 
 #include "Application.hpp"
 #include <iostream>
+#include <fstream>
 #include "Camera.hpp"
 #include "InputManager.h"
 #include "Shared/Logger.hpp"
@@ -120,6 +121,13 @@ void Application::Setup() {
 		std::string address = GuiManager::getInstance().getAddress();
 		std::string playerName = GuiManager::getInstance().getPlayerName();
 
+		// Save address and playername to session file
+		std::ofstream ofs;
+		ofs.open(SESSION_FILE_PATH, std::ofstream::out | std::ofstream::trunc);
+		ofs << address << std::endl;
+		ofs << playerName << std::endl;
+		ofs.close();
+
 		uint32_t playerId;
 		try {
 			playerId = _networkClient->connect(address, PORTNUM);
@@ -142,13 +150,24 @@ void Application::Setup() {
 		// Register global keys
 		registerGlobalKeys();
 
-
 		// Hide connect screen
 		GuiManager::getInstance().hideAll();
 
 		// Show lobby
 		GuiManager::getInstance().setVisibility(WIDGET_LOBBY, true);
 	});
+
+	// Connect screen default address and player name from session file
+	std::ifstream ifs;
+	ifs.open(SESSION_FILE_PATH);
+	if (!ifs.fail()) {
+		std::string address, playerName;
+		ifs >> address;
+		ifs >> playerName;
+		ifs.close();
+		GuiManager::getInstance().setAddress(address);
+		GuiManager::getInstance().setPlayerName(playerName);
+	}
 
 	// Switch sides button callback
 	GuiManager::getInstance().registerSwitchSidesCallback([&]() {

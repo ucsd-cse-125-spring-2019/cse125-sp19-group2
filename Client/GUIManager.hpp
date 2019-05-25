@@ -31,8 +31,6 @@ public:
 
     void draw();
 
-	void redraw(nanogui::Widget* widget);
-
 	void resize(int x, int y);
 
     nanogui::Screen* getScreen();
@@ -57,9 +55,11 @@ public:
 	void registerReadyCallback(const std::function<void()> f);
 	void registerControllerCallback(const std::function<void(GamePadIndex)> f);
 
-	// Returns text in player name and address boxes
+	// Text in player name and address boxes
 	std::string getPlayerName();
+	void setPlayerName(std::string val);
 	std::string getAddress();
+	void setAddress(std::string val);
 
 	// Updates list of dogs/humans in the lobby
 	void updateDogsList(std::unordered_map<uint32_t, std::string> dogs, uint32_t playerId);
