@@ -40,6 +40,9 @@ void ColliderManager::updateState(std::shared_ptr<BaseState> const& state) {
 	// Collision box already created
 	if (result != colliderList.end()) {
 		result->second->pos = state->pos;
+		result->second->scale.x = state->width;
+		result->second->scale.y = state->height;
+		result->second->scale.z = state->depth;
 	}
 	// Collision box not found and need to create it
 	else {

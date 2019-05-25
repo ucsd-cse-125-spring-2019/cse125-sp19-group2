@@ -6,6 +6,7 @@
 #include "STriggerEntity.hpp"
 #include "SDogEntity.hpp"
 #include "EmptyCollider.hpp"
+#include "SBoxPlungerEntity.hpp"
 #include <algorithm>
 
 #define JAIL_WALL_WIDTH 0.15f
@@ -143,7 +144,12 @@ public:
 			if (collidingEntity->getState()->type == ENTITY_DOG)
 			{
 				SDogEntity* collidingDog = static_cast<SDogEntity*>(collidingEntity);
-				if (collidingDog->isLifting()) {
+				collidingDog->setNearTrigger(true);
+				// sending position of trigger to dogEntity for interpolate
+				collidingDog->targetPos = entity->getState()->pos;
+				
+				// start lifting the gate in Stage 1
+				if (collidingDog->isInteracting() && collidingDog->actionStage == 1) {
 					_lifted = true;
 				}
 			}
@@ -207,6 +213,8 @@ public:
 			}
 		});
 		_children.push_back(jailSensorBox);
+
+		_children.push_back(std::make_shared<SBoxPlungerEntity>(pos, scale));
 	};
 	~SJailEntity() {};
 
@@ -225,9 +233,9 @@ public:
 					_gates[i]->getState()->pos.y = gateHeight;
 					_gates[i]->hasChanged = true;
 				}
-				for (int i = 0; i < _triggers.size(); i++) {
-					_triggers[i]->updateForward(4);
-				}
+			}
+			for (int i = 0; i < _triggers.size(); i++) {
+				_triggers[i]->updateForward(4);
 			}
 		}
 		else {

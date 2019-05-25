@@ -1,13 +1,14 @@
 #pragma once
 
 #include <memory>
+#include <glm/gtx/string_cast.hpp>
 
 #include "Shared/BaseState.hpp"
 #include "Shared/GameEvent.hpp"
 #include "Shared/QuadTree.hpp"
+#include "Shared/Timer.hpp"
 #include "IdGenerator.hpp"
 #include "BaseCollider.hpp"
-#include <glm/gtx/string_cast.hpp>
 
 /*
 ** As with CBaseEntity, this is an abstract class, and cannot be instantiated.
@@ -23,7 +24,8 @@ class SBaseEntity
 public:
 	bool hasChanged;	// If object state has changed during the last iteration
 
-	// Update function, called every tick
+	// Update function, called every tick. Override if additional functionality
+	// is desired
 	virtual void update(std::vector<std::shared_ptr<GameEvent>> events) {};
 
     // All server objects must have a state to send to the client.
@@ -58,6 +60,13 @@ public:
 	// any children
 	virtual void initState(bool generateId = true);
 
+	// Registers a timer with the entity
+	Timer * registerTimer(long durationMilliseconds, std::function<void()> f);
+
+	// Updates existing timers. This must be manually called every tick in
+	// order for timers to work!
+	void updateTimers();
+
 	// Rotates the object and all its children around a point.
 	// Angle is the number of times to be rotated clockwise in
 	// 90 degree steps.
@@ -82,4 +91,7 @@ protected:
 private:
 	// Helper function to rotate forward vector 90 degrees clockwise
 	glm::vec3 rotateOnce(glm::vec3 vec);
+
+	// Timers to fire events
+	std::vector<Timer*> _timers;
 };

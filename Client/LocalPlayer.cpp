@@ -185,6 +185,17 @@ LocalPlayer::LocalPlayer(uint32_t playerId, std::unique_ptr<NetworkClient> const
 		catch (std::runtime_error e)
 		{
 		};
+		
+		event = std::make_shared<GameEvent>();
+		event->playerId = _playerId;
+		event->type = EVENT_PLAYER_LAUNCH_START;
+		try
+		{
+			networkClient->sendEvent(event);
+		}
+		catch (std::runtime_error e)
+		{
+		};
 	});
 
 	// Dog peeing end
@@ -200,14 +211,25 @@ LocalPlayer::LocalPlayer(uint32_t playerId, std::unique_ptr<NetworkClient> const
 		catch (std::runtime_error e)
 		{
 		};
+
+		event = std::make_shared<GameEvent>();
+		event->playerId = _playerId;
+		event->type = EVENT_PLAYER_LAUNCH_END;
+		try
+		{
+			networkClient->sendEvent(event);
+		}
+		catch (std::runtime_error e)
+		{
+		};
 	});
 
-	// Player start lifting
+	// Player start interacting (jail, fountains, etc.)
 	InputManager::getInstance().getKey(GLFW_KEY_F)->onPress([&]
 	{
 		auto event = std::make_shared<GameEvent>();
 		event->playerId = _playerId;
-		event->type = EVENT_PLAYER_LIFTING_START;
+		event->type = EVENT_PLAYER_INTERACT_START;
 
 		try
 		{
@@ -218,12 +240,12 @@ LocalPlayer::LocalPlayer(uint32_t playerId, std::unique_ptr<NetworkClient> const
 		};
 	});
 
-	// Player end lifting
+	// Player end interacting (jail, fountains, etc.)
 	InputManager::getInstance().getKey(GLFW_KEY_F)->onRelease([&]
 	{
 		auto event = std::make_shared<GameEvent>();
 		event->playerId = _playerId;
-		event->type = EVENT_PLAYER_LIFTING_END;
+		event->type = EVENT_PLAYER_INTERACT_END;
 		try
 		{
 			networkClient->sendEvent(event);

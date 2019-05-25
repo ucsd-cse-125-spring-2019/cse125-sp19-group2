@@ -13,9 +13,12 @@
 #include "CBarEntity.hpp"
 #include "CGateEntity.hpp"
 #include "CTriggerEntity.hpp"
+#include "CPlungerEntity.hpp"
 #include "ColliderManager.hpp"
 #include "Shared/Logger.hpp"
 #include <algorithm>
+
+std::unique_ptr<Shader> CPlungerEntity::plungerShader;
 
 EntityManager::EntityManager()
 {
@@ -65,9 +68,6 @@ std::shared_ptr<CBaseEntity> EntityManager::getEntity(std::shared_ptr<BaseState>
     case ENTITY_HUMAN:
       entity = std::make_shared<CHumanEntity>();
       break;
-    case ENTITY_BOX:
-      entity = std::make_shared<CBoxEntity>();
-      break;  
     case ENTITY_HOUSE_6X6_A:
       entity = std::make_shared<CHouseEntity>(type);
       break;
@@ -97,6 +97,9 @@ std::shared_ptr<CBaseEntity> EntityManager::getEntity(std::shared_ptr<BaseState>
       break;
 	case ENTITY_TRIGGER:
 	  entity = std::make_shared<CTriggerEntity>();
+	  break;
+	case ENTITY_PLUNGER:
+	  entity = std::make_shared<CPlungerEntity>();
 	  break;
     case ENTITY_FLOOR:
       CFloorEntity::getInstance().updateTile(state);

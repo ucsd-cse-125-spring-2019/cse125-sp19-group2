@@ -2,6 +2,7 @@
 
 #include "SBaseEntity.hpp"
 #include "AABBCollider.hpp"
+#include "SBoxPlungerEntity.hpp"
 #include <glm/gtx/rotate_vector.hpp>
 #include <glm/gtx/vector_angle.hpp>
 
@@ -122,6 +123,8 @@ public:
 		_children.push_back(leftWall);
 		_children.push_back(rightWall);
 		_children.push_back(sensorBox);
+
+		_children.push_back(std::make_shared<SBoxPlungerEntity>(pos, glm::vec3(1.0f, 1.2f, 1.0f)));
 	};
 	~SDogHouseEntity() {};
 

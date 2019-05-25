@@ -138,6 +138,7 @@ void EventManager::handlePlayerReady(std::shared_ptr<GameEvent> event)
 			return;
 		}
 	}
+
 	_gameState->readyPlayers.push_back(event->playerId);
 
 	// Check if everyone is ready
@@ -211,7 +212,8 @@ void EventManager::startGame()
 
 		auto humanEntity = std::make_shared<SHumanEntity>(
 			humanPair.first,
-			humanPair.second);
+			humanPair.second,
+			_structureInfo->newEntities);
 
 		// Set location
 		humanEntity->getState()->pos = glm::vec3(humanSpawn.x, 0, humanSpawn.y);
