@@ -42,7 +42,15 @@ public:
 		auto currentState = std::static_pointer_cast<PlayerState>(_state);
 		auto newState = std::static_pointer_cast<PlayerState>(state);
 
-		// TODO: player variables
+		// Set custom player message
+		if (_isLocal &&
+			currentState->message != newState->message)
+		{
+			currentState->message = newState->message;
+			GuiManager::getInstance().setSecondaryMessage(currentState->message);
+			auto screen = GuiManager::getInstance().getScreen();
+			GuiManager::getInstance().resize(screen->size().x(), screen->size().y());
+		}
 	}
 
 	std::shared_ptr<BaseState> const& getState() { return _state; }
