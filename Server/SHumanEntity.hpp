@@ -20,6 +20,7 @@ public:
 
 private:
 	bool _isLaunching = false;
+	bool _isPlacingTrap = false;
 	HumanAction _curAction = ACTION_HUMAN_IDLE;
 
 	std::shared_ptr<SPlungerEntity> plungerEntity;
@@ -29,6 +30,12 @@ private:
 	glm::vec3 _plungerDirection;
 
 	bool updateAction();
+
+	void updateCooldowns();
+
+	// Cooldowns
+	std::chrono::time_point<std::chrono::steady_clock> _plungerCooldownStart;
+	std::chrono::time_point<std::chrono::steady_clock> _trapCooldownStart;
 
 	// Slipping state
 	bool _isSlipping = false;

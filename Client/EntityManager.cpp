@@ -15,6 +15,7 @@
 #include "CTriggerEntity.hpp"
 #include "CPlungerEntity.hpp"
 #include "CRopeEntity.hpp"
+#include "CTrapEntity.hpp"
 #include "ColliderManager.hpp"
 #include "Shared/Logger.hpp"
 #include <algorithm>
@@ -104,6 +105,9 @@ std::shared_ptr<CBaseEntity> EntityManager::getEntity(std::shared_ptr<BaseState>
 	  break;
 	case ENTITY_ROPE:
 	  entity = std::make_shared<CRopeEntity>();
+	  break;
+	case ENTITY_TRAP:
+	  entity = std::make_shared<CTrapEntity>();
 	  break;
     case ENTITY_FLOOR:
       CFloorEntity::getInstance().updateTile(state);

@@ -266,6 +266,7 @@
     <ClInclude Include="SPlungerEntity.hpp" />
     <ClInclude Include="SPuddleEntity.hpp" />
     <ClInclude Include="SRopeEntity.hpp" />
+    <ClInclude Include="STrapEntity.hpp" />
     <ClInclude Include="STriggerEntity.hpp" />
     <ClInclude Include="StructureInfo.hpp" />
   </ItemGroup>

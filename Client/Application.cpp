@@ -335,6 +335,10 @@ void Application::Update()
 						break;
 					}
 				}
+
+				// Redraw
+				auto screen = GuiManager::getInstance().getScreen();
+				GuiManager::getInstance().resize(screen->size().x(), screen->size().y());
 			}
 			// Conversely, did a game just end and send us back to the lobby?
 			else if (gameState->inLobby && !_inLobby)

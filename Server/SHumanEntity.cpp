@@ -1,4 +1,5 @@
 #include "SHumanEntity.hpp"
+#include "STrapEntity.hpp"
 
 SHumanEntity::SHumanEntity(
 	uint32_t playerId,
@@ -29,8 +30,17 @@ SHumanEntity::SHumanEntity(
 
 	// Player-specific stuff
 	humanState->playerName = playerName;
+	humanState->plungerCooldown = 0;
+	humanState->trapCooldown = 0;
 
+	// Plunger finish handler
 	_launchingReset = [&] {
+		// Start cooldown
+		auto playerState = std::static_pointer_cast<HumanState>(_state);
+		playerState->plungerCooldown = std::chrono::duration_cast<std::chrono::milliseconds>(PLUNGER_COOLDOWN).count();
+		_plungerCooldownStart = std::chrono::steady_clock::now();
+		hasChanged = true;
+
 		_isLaunching = false;
 		if (plungerEntity != nullptr)
 		{
@@ -91,7 +101,13 @@ void SHumanEntity::update(std::vector<std::shared_ptr<GameEvent>> events)
 					}
 				}
 			}
-			
+
+			break;
+		case EVENT_PLAYER_PLACE_TRAP:
+			if (humanState->trapCooldown == 0)
+			{
+				_isPlacingTrap = true;
+			}
 			break;
 		}
 	}
@@ -254,9 +270,35 @@ void SHumanEntity::update(std::vector<std::shared_ptr<GameEvent>> events)
 			});
 		}
 		break;
+	case ACTION_HUMAN_PLACING_TRAP:
+		if (actionChanged)
+		{
+			humanState->currentAnimation = ANIMATION_HUMAN_PLACING;
+			humanState->isPlayOnce = true;
+			humanState->animationDuration = 70;
+			hasChanged = true;
+			registerTimer(400, [&]()
+				{
+					_isPlacingTrap = false;
+
+					// Create trap
+					std::shared_ptr<STrapEntity> trap = std::make_shared<STrapEntity>(_state->pos);
+					_structureInfo->newEntities->push_back(trap);
+
+					// Set cooldown
+					humanState->trapCooldown = std::chrono::duration_cast<std::chrono::milliseconds>(TRAP_COOLDOWN).count();
+					_trapCooldownStart = std::chrono::steady_clock::now();
+
+					hasChanged = true;
+				});
+		}
+		break;
 	}
 
 	handleInterpolation();
+
+	updateCooldowns();
+
 	//Logger::getInstance()->debug("Human   x: " + std::to_string(_state->forward.x) + " y: " + std::to_string(_state->forward.y) + " z: " + std::to_string(_state->forward.z));
 }
 
@@ -284,12 +326,15 @@ void SHumanEntity::generalHandleCollision(SBaseEntity * entity)
 
 bool SHumanEntity::updateAction()
 {
+	auto humanState = std::static_pointer_cast<HumanState>(_state);
+
 	HumanAction oldAction = _curAction;
 
 	// lower the priority of action if possible
 	if (_curAction == ACTION_HUMAN_LAUNCHING && !_isLaunching ||
 		_curAction == ACTION_HUMAN_SLIPPING && !_isSlipping ||
-		_curAction == ACTION_HUMAN_SWINGING && !_isSwinging)
+		_curAction == ACTION_HUMAN_SWINGING && !_isSwinging ||
+		_curAction == ACTION_HUMAN_PLACING_TRAP && !_isPlacingTrap)
 	{
 		_curAction = ACTION_HUMAN_IDLE;
 	}
@@ -300,9 +345,10 @@ bool SHumanEntity::updateAction()
 		_curAction = (_isMoving) ? ACTION_HUMAN_MOVING : ACTION_HUMAN_IDLE;
 
 		// update action again if higher priority action is happening
-		if (_isLaunching) _curAction = ACTION_HUMAN_LAUNCHING;
+		if (_isLaunching && humanState->plungerCooldown == 0) _curAction = ACTION_HUMAN_LAUNCHING;
 		else if (_isSlipping && !_isSlipImmune) _curAction = ACTION_HUMAN_SLIPPING;
 		else if (_isSwinging) _curAction = ACTION_HUMAN_SWINGING;
+		else if (_isPlacingTrap && humanState->trapCooldown == 0) _curAction = ACTION_HUMAN_PLACING_TRAP;
 	}
 
 	// if failed to swing then cancel swing
@@ -312,4 +358,39 @@ bool SHumanEntity::updateAction()
 	}
 
 	return oldAction != _curAction;
+}
+
+void SHumanEntity::updateCooldowns()
+{
+	std::shared_ptr<HumanState> humanState = std::static_pointer_cast<HumanState>(_state);
+
+	// Trap bones
+	if (humanState->trapCooldown != 0)
+	{
+		auto elapsed = std::chrono::steady_clock::now() - _trapCooldownStart;
+		auto diff = TRAP_COOLDOWN - elapsed;
+		humanState->trapCooldown = std::chrono::duration_cast<std::chrono::milliseconds>(diff).count();
+		hasChanged = true;
+	}
+
+	if (humanState->trapCooldown < 0)
+	{
+		humanState->trapCooldown = 0;
+		hasChanged = true;
+	}
+
+	// Plunger
+	if (humanState->plungerCooldown != 0)
+	{
+		auto elapsed = std::chrono::steady_clock::now() - _plungerCooldownStart;
+		auto diff = PLUNGER_COOLDOWN - elapsed;
+		humanState->plungerCooldown = std::chrono::duration_cast<std::chrono::milliseconds>(diff).count();
+		hasChanged = true;
+	}
+
+	if (humanState->plungerCooldown < 0)
+	{
+		humanState->plungerCooldown = 0;
+		hasChanged = true;
+	}
 }

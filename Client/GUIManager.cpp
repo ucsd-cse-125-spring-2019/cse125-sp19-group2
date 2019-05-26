@@ -331,6 +331,30 @@ void GuiManager::updatePee(float val) {
 	_peeInfo->setCaption("Pee: " + std::to_string(percentage) + "%");
 }
 
+void GuiManager::updatePlunger(long millisecondsLeft) {
+	if (millisecondsLeft == 0)
+	{
+		_plungerInfo->setCaption("Plunger: Ready");
+	}
+	else
+	{
+		auto seconds = (int)(std::ceil(millisecondsLeft / 1000.0f));
+		_plungerInfo->setCaption("Plunger: " + std::to_string(seconds));
+	}
+}
+
+void GuiManager::updateTrap(long millisecondsLeft) {
+	if (millisecondsLeft == 0)
+	{
+		_trapInfo->setCaption("Trap: Ready");
+	}
+	else
+	{
+		auto seconds = (int)(std::ceil(millisecondsLeft / 1000.0f));
+		_trapInfo->setCaption("Trap: " + std::to_string(seconds));
+	}
+}
+
 void GuiManager::setVisibility(WidgetType name, bool visibility) {
 	setVisibility(_widgets.find(name)->second, visibility);
 }

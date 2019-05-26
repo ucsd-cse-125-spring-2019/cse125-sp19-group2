@@ -23,19 +23,26 @@
 const std::chrono::seconds PREGAME_LENGTH(6);
 
 // Max game length
-const std::chrono::seconds MAX_GAME_LENGTH(30);
+const std::chrono::seconds MAX_GAME_LENGTH(90);
 
 // Back to lobby countdown
 const std::chrono::seconds POSTGAME_LENGTH(15);
 
+// Plunger cooldown
+const std::chrono::seconds PLUNGER_COOLDOWN(5);
+
+// Dogbone trap cooldown
+const std::chrono::seconds TRAP_COOLDOWN(10);
+
 // Dog-specific stats
-#define DOG_BASE_VELOCITY 5.0f
+#define DOG_BASE_VELOCITY 4.8f
 #define DOG_RUN_VELOCITY DOG_BASE_VELOCITY * 1.5f
 #define MAX_DOG_STAMINA 3.0f	// Dog can sprint for three seconds max
 #define MAX_DOG_URINE 1.0f		// Dog can make one puddle per urine bar
+#define MAX_DOG_ESCAPE_PRESSES 15	// Dog must press button 15 times to escape trap
 
 // Human-spedific stats
-#define HUMAN_BASE_VELOCITY 4.8f
+#define HUMAN_BASE_VELOCITY 5.0f
 #define HUMAN_SWING_VELOCITY 10.0f
 #define MAX_HUMAN_CHARGE 2.0f
 #define HUMAN_CHARGE_THRESHOLD1 0.5f	// lower than that will be swing1
@@ -66,7 +73,8 @@ enum EntityType
 	ENTITY_CYLINDER,
 	ENTITY_HIT_PLUNGER,
 	ENTITY_PLUNGER,
-	ENTITY_ROPE
+	ENTITY_ROPE,
+	ENTITY_TRAP
 	// TODO: add new types here, e.g. ENTITY_DOGBONE
 };
 
@@ -91,10 +99,10 @@ enum HumanAction
 {
 	ACTION_HUMAN_IDLE,
 	ACTION_HUMAN_MOVING,
-
 	ACTION_HUMAN_SLIPPING,
 	ACTION_HUMAN_LAUNCHING,
-	ACTION_HUMAN_SWINGING
+	ACTION_HUMAN_SWINGING,
+	ACTION_HUMAN_PLACING_TRAP
 };
 
 /*
@@ -110,7 +118,8 @@ enum DogAction
 	ACTION_DOG_MOVING,
 	ACTION_DOG_PEEING,
 	ACTION_DOG_DRINKING,
-	ACTION_DOG_SCRATCHING
+	ACTION_DOG_SCRATCHING,
+	ACTION_DOG_TRAPPED
 };
 
 /*
@@ -139,7 +148,9 @@ enum HumanAnimation
 	ANIMATION_HUMAN_SWINGING1,
 	ANIMATION_HUMAN_SWINGING1_IDLE, // transition
 	ANIMATION_HUMAN_SWINGING3,
-	ANIMATION_HUMAN_SWINGING3_IDLE // transition
+	ANIMATION_HUMAN_SWINGING3_IDLE, // transition
+	ANIMATION_HUMAN_PLACING,
+	ANIMATION_HUMAN_PLACING_IDLE // transition
 };
 
 // Animations for dogs

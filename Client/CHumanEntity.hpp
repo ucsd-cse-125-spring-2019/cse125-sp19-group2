@@ -39,7 +39,8 @@ public:
 		}
 
 		// Human attributes and items
-		// TODO
+		GuiManager::getInstance().updatePlunger(newState->plungerCooldown);
+		GuiManager::getInstance().updateTrap(newState->trapCooldown);
 	}
 };
 

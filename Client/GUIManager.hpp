@@ -91,6 +91,10 @@ public:
 	void updateStamina(float val);
 	void updatePee(float val);
 
+	// Update skills with cooldowns
+	void updatePlunger(long millisecondsLeft);
+	void updateTrap(long millisecondsLeft);
+
 	// Sets visibility recursively for a given widget
 	void setVisibility(WidgetType name, bool visiblity);
 

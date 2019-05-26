@@ -4,6 +4,7 @@
 #include "SPlayerEntity.hpp"
 #include "Shared/DogState.hpp"
 #include "SPuddleEntity.hpp"
+#include "STrapEntity.hpp"
 
 class SDogEntity : public SPlayerEntity
 {
@@ -40,6 +41,13 @@ private:
 	bool _isUrinating = false;
 	bool _isRunning = false;
 	bool _isInteracting = false;
+	bool _isTrapped = false;
+
+	// Number of times the dog has pressed a button to escape trap
+	int _numEscapePressed = 0;
+
+	// If the dog is currently trapped, this points to the trap
+	SBaseEntity* _curTrap;
 
 	DogAction _curAction = ACTION_DOG_IDLE;
 
