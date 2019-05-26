@@ -331,6 +331,11 @@ void GuiManager::updatePee(float val) {
 	_peeInfo->setCaption("Pee: " + std::to_string(percentage) + "%");
 }
 
+void GuiManager::updateCharge(float val) {
+	int percentage = (int)(val * 100);
+	_chargeInfo->setCaption("Charge: " + std::to_string(percentage) + "%");
+}
+
 void GuiManager::setVisibility(WidgetType name, bool visibility) {
 	setVisibility(_widgets.find(name)->second, visibility);
 }
@@ -507,6 +512,10 @@ void GuiManager::initHUD() {
 	// Trap
 	_trapInfo = new nanogui::Label(humanSkills, "Trap: Ready", "sans", 32);
 	_trapInfo->setColor(SOLID_WHITE);
+
+	// Charge rate of swinging
+	_chargeInfo = new nanogui::Label(humanSkills, "Charge: 0%", "sans", 32);
+	_chargeInfo->setColor(SOLID_WHITE);
 
 	//auto skillsPlaceholder = new nanogui::Label(bottomHUD, "Skills go here", "sans", 52);
 	//skillsPlaceholder->setColor(Color(Vector4f(1,1,1,0.2f)));

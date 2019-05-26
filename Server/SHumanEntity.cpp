@@ -202,40 +202,40 @@ void SHumanEntity::update(std::vector<std::shared_ptr<GameEvent>> events)
 		break;
 	case ACTION_HUMAN_SWINGING:
 		if (actionChanged) {
+
+			float chargeDistance = humanState->chargeMeter * 3.0f;
+			float chargeDuration = chargeDistance / HUMAN_SWING_VELOCITY;
+			stuntDuration = (chargeDistance / HUMAN_BASE_VELOCITY - chargeDistance / HUMAN_SWING_VELOCITY + 0.2f) * 1250;
+
 			// animation based on how high is the charge meter
 			if (humanState->chargeMeter < HUMAN_CHARGE_THRESHOLD1)
 			{
+				// swing1->idle min time: 19/60
+				stuntDuration = std::max(stuntDuration, (19.0f / 60 - chargeDuration) * 1000);
 				humanState->currentAnimation = ANIMATION_HUMAN_SWINGING1;
-				registerTimer(220, [&]()
-				{
-					humanState->currentAnimation = ANIMATION_HUMAN_SWINGING1_IDLE;
-					hasChanged = true;
-				});
+				humanState->isPlayOnce = true;
+				humanState->animationDuration = stuntDuration + chargeDuration;
 			}
 			else if (humanState->chargeMeter < HUMAN_CHARGE_THRESHOLD2)
 			{
+				// swing2->idle min time: 36/60
+				stuntDuration = std::max(stuntDuration, (36.0f / 60 - chargeDuration) * 1000);
 				humanState->currentAnimation = ANIMATION_HUMAN_SWINGING2;
-				registerTimer(290, [&]()
-				{
-					humanState->currentAnimation = ANIMATION_HUMAN_SWINGING2_IDLE;
-					hasChanged = true;
-				});
+				humanState->isPlayOnce = true;
+				humanState->animationDuration = stuntDuration + chargeDuration;
 			}
 			else
 			{
+				// swing3->idle min time: 55/60
+				stuntDuration = std::max(stuntDuration, (55.0f / 60 - chargeDuration) * 1000);
 				humanState->currentAnimation = ANIMATION_HUMAN_SWINGING3;
-				registerTimer(570, [&]()
-				{
-					humanState->currentAnimation = ANIMATION_HUMAN_SWINGING3_IDLE;
-					hasChanged = true;
-				});
+				humanState->isPlayOnce = true;
+				humanState->animationDuration = stuntDuration + chargeDuration;
 			}
 				
 
 			hasChanged = true;
 
-			float chargeDistance = humanState->chargeMeter * 3.0f;
-			stuntDuration = (chargeDistance / HUMAN_BASE_VELOCITY - chargeDistance / HUMAN_SWING_VELOCITY + 0.2f) * 1250;
 			interpolateMovement(_state->pos + (_state->forward * chargeDistance), _state->forward, HUMAN_SWING_VELOCITY,
 				[&] {
 				registerTimer(stuntDuration, [&]()

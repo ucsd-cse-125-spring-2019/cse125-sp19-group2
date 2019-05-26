@@ -39,7 +39,10 @@ public:
 		}
 
 		// Human attributes and items
-		// TODO
+		currentState->chargeMeter = newState->chargeMeter;
+
+		// Update HUD
+		GuiManager::getInstance().updateCharge(currentState->chargeMeter / MAX_HUMAN_CHARGE);
 	}
 };
 
