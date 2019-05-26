@@ -359,6 +359,13 @@ void GuiManager::initConnectScreen() {
 	_playerNameBox->setFontSize(38);
 	_playerNameBox->setAlignment(nanogui::TextBox::Alignment::Center);
 
+    auto background = LoadTextureFromFile("1.jpg", "./Resources/Textures/Menu/");
+    	auto foreground1 = LoadTextureFromFile("2.jpg", "./Resources/Textures/Menu/");
+    	auto foreground2 = LoadTextureFromFile("3.jpg", "./Resources/Textures/Menu/");
+    	//_playerNameBox->setBackgroundTexture(background, foreground1, foreground2);
+    	//_playerNameBox->alpha = 0.5;
+        //_playerNameBox->setTextColor(nanogui::Color(0, 0, 255, 255));
+
 	// IP address box
 	_addressBox = new nanogui::TextBox(connectScreen, "localhost");
 	_addressBox->setEditable(true);
@@ -368,7 +375,7 @@ void GuiManager::initConnectScreen() {
 	// Connect button
 	_connectButton = new nanogui::Button(connectScreen, "Connect");
 	_connectButton->setFontSize(28);
-	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+	
     	auto unfocused = LoadTextureFromFile("1.jpg", "./Resources/Textures/Menu/");
     	auto focused = LoadTextureFromFile("2.jpg", "./Resources/Textures/Menu/");
     	auto pushed = LoadTextureFromFile("3.jpg", "./Resources/Textures/Menu/");
