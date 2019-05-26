@@ -96,15 +96,17 @@ void SHumanEntity::update(std::vector<std::shared_ptr<GameEvent>> events)
 		}
 	}
 
-	if (_isCharging && humanState->chargeMeter < MAX_HUMAN_CHARGE) {
-		humanState->chargeMeter += 2.0f / TICKS_PER_SEC;
-	}
-
 	// Save old position
 	glm::vec3 oldPos = _state->pos;
 
 	// Update and check for changes
 	SPlayerEntity::update(events);
+
+	// Update net charge amount
+	if (_isCharging && humanState->chargeMeter < MAX_HUMAN_CHARGE) {
+		humanState->chargeMeter += 2.0f / TICKS_PER_SEC;
+		hasChanged = true;
+	}
 
 	bool actionChanged = updateAction();
 
