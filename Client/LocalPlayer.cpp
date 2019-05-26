@@ -151,7 +151,20 @@ LocalPlayer::LocalPlayer(uint32_t playerId, std::unique_ptr<NetworkClient> const
             //std::cout << glm::to_string(v) << std::endl;
             if (_moveCamera && InputManager::getInstance().isForegroundWindow()) {
                 _camera->move_camera(v);
-            }
+
+				// Send new look direction to server
+				auto event = std::make_shared<GameEvent>();
+				event->playerId = _playerId;
+				event->type = EVENT_PLAYER_LOOK;
+				event->direction = _camera->convert_direction(glm::vec2(0, -1));
+
+				// Try sending the update
+				try {
+					networkClient->sendEvent(event);
+				}
+				catch (std::runtime_error e) {
+				};
+			}
         });
 
     InputManager::getInstance().getKey2D(Key::KEYTYPE::RSTICK)->onMove(
@@ -283,6 +296,7 @@ LocalPlayer::LocalPlayer(uint32_t playerId, std::unique_ptr<NetworkClient> const
 	InputManager::getInstance().getKey(GLFW_KEY_Q)->onPress([&]
 	{
 		_usePlunger = !_usePlunger;
+		GuiManager::getInstance().setActiveSkill(_usePlunger);
 	});
 
     _camera = std::make_unique<Camera>();

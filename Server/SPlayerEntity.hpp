@@ -3,7 +3,8 @@
 #include "IdGenerator.hpp"
 #include "SBaseEntity.hpp"
 #include "CapsuleCollider.hpp"
-#include "Shared\PlayerState.hpp"
+#include "StructureInfo.hpp"
+#include "Shared/PlayerState.hpp"
 #include <algorithm>
 
 // Amount of leway when comparing floats
@@ -27,6 +28,8 @@ public:
 
 	virtual void update(std::vector<std::shared_ptr<GameEvent>> events) override
 	{
+		auto playerState = std::static_pointer_cast<PlayerState>(_state);
+
 		// Do nothing if we are set to be destroyed
 		if (_state->isDestroyed)
 		{
@@ -87,6 +90,21 @@ public:
 				} // !_isInterpolating
 			} // player movement
 
+			// Player look events
+			std::vector<std::shared_ptr<GameEvent>> lookEvents;
+			std::copy_if(events.begin(), events.end(), std::back_inserter(lookEvents), [&](std::shared_ptr<GameEvent> i)
+			{
+				return i->type == EVENT_PLAYER_LOOK;
+			});
+
+			// Set player forward to last value
+			if (lookEvents.size() && !_lookDirLocked)
+			{
+				auto direction = glm::normalize(lookEvents.back()->direction);
+				_state->forward = glm::vec3(direction.x, 0, direction.y);
+				hasChanged = true;
+			}
+
 			// Check for player stop event
 			for (auto& event : events)
 			{
@@ -99,6 +117,12 @@ public:
 
 		// Update all timers for the player
 		updateTimers();
+
+		// Reset custom player message
+		playerState->message = "";
+
+		// Reset playOnce animation stuff
+		playerState->isPlayOnce = false;
 
 	} // update()
 
@@ -129,12 +153,18 @@ public:
 	glm::vec3 targetDir;
 
 protected:
+	// General server state info
+	StructureInfo* _structureInfo;
+
 	// Player movement velocity in units/second
 	float _velocity;
 	glm::vec3 _newDir;
 
 	// For the case in which client FPS is lower than tick rate
 	bool _isMoving = false;
+
+	// Whether the player can freely look around
+	bool _lookDirLocked = false;
 
 	// Interpolation stuff
 	bool _isInterpolating = false;
@@ -213,7 +243,8 @@ protected:
 		auto filteredEvents = std::vector<std::shared_ptr<GameEvent>>();
 		for (auto& event : events)
 		{
-			if (event->type != EVENT_PLAYER_MOVE)
+			if (event->type != EVENT_PLAYER_MOVE &&
+				event->type != EVENT_PLAYER_LOOK)
 			{
 				filteredEvents.push_back(event);
 			}

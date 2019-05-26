@@ -126,9 +126,7 @@ void AnimatedMesh::render(const std::unique_ptr<Shader>& shader) {
 
 void AnimatedMesh::getTransform(float second, vector<mat4>& transforms) {
 
-    const float tickrate = _takes[_takeIndex]->tickrate != 0 ? _takes[_takeIndex]->tickrate : 30.0f;
-    const float ticks = second * tickrate;
-    const float time = fmod(ticks, _takes[_takeIndex]->duration);
+    const float time = fmod(getTimeInTick(_takeIndex, second), _takes[_takeIndex]->duration);
 
     computeWorldMatrix(time, _root.get(), glm::mat4(1.0f));
 
@@ -141,6 +139,21 @@ void AnimatedMesh::getTransform(float second, vector<mat4>& transforms) {
 
 uint32_t AnimatedMesh::takeCount() const {
     return _takes.size();
+}
+
+float AnimatedMesh::getDuration(int takeIndex) {
+    if (takeIndex < _takes.size()) {
+        return _takes[takeIndex]->duration;
+    }
+    return -1;
+}
+
+float AnimatedMesh::getTimeInTick(int takeIndex, float second) {
+    if (takeIndex < _takes.size()) {
+        const float tickrate = _takes[_takeIndex]->tickrate != 0 ? _takes[_takeIndex]->tickrate : 30.0f;
+        return second * tickrate;
+    }
+    return -1;
 }
 
 std::string AnimatedMesh::getCurrentAnimName() const {

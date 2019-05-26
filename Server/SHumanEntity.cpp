@@ -1,7 +1,12 @@
 #include "SHumanEntity.hpp"
 
-SHumanEntity::SHumanEntity(uint32_t playerId, std::string playerName, std::vector<std::shared_ptr<SBaseEntity>>* newEntities)
+SHumanEntity::SHumanEntity(
+	uint32_t playerId,
+	std::string playerName,
+	StructureInfo* structureInfo)
 {
+	_structureInfo = structureInfo;
+
 	_state = std::make_shared<HumanState>();
 
 	// Parent initialization
@@ -17,8 +22,6 @@ SHumanEntity::SHumanEntity(uint32_t playerId, std::string playerName, std::vecto
 	_state->depth = 0.9f;
 
 	_velocity = HUMAN_BASE_VELOCITY;
-
-	_newEntities = newEntities;
 
 	// Human-specific stuff
 	auto humanState = std::static_pointer_cast<HumanState>(_state);
@@ -141,11 +144,11 @@ void SHumanEntity::update(std::vector<std::shared_ptr<GameEvent>> events)
 		if (actionStage == 1) {
 			if (plungerEntity == nullptr) {
 				plungerEntity = std::make_shared<SPlungerEntity>(_state->pos, _state->forward);
-				_newEntities->push_back(plungerEntity);
+				_structureInfo->newEntities->push_back(plungerEntity);
 			}
 			if (ropeEntity == nullptr) {
 				ropeEntity = std::make_shared<SRopeEntity>();
-				_newEntities->push_back(ropeEntity);
+				_structureInfo->newEntities->push_back(ropeEntity);
 			}
 			if (!plungerEntity->launching) {
 				actionStage++;
@@ -174,6 +177,8 @@ void SHumanEntity::update(std::vector<std::shared_ptr<GameEvent>> events)
 	case ACTION_HUMAN_SLIPPING:
 		if (actionChanged) {
 			humanState->currentAnimation = ANIMATION_HUMAN_SLIPPING;
+			humanState->isPlayOnce = true;
+			humanState->animationDuration = 1500;
 			hasChanged = true;
 
 			// Timer until immobility stops
@@ -249,13 +254,8 @@ void SHumanEntity::update(std::vector<std::shared_ptr<GameEvent>> events)
 		break;
 	}
 
-
-
 	handleInterpolation();
 	//Logger::getInstance()->debug("Human   x: " + std::to_string(_state->forward.x) + " y: " + std::to_string(_state->forward.y) + " z: " + std::to_string(_state->forward.z));
-
-	// Reset slipping state
-	_isSlipping = false;
 }
 
 void SHumanEntity::generalHandleCollision(SBaseEntity * entity)
@@ -264,7 +264,8 @@ void SHumanEntity::generalHandleCollision(SBaseEntity * entity)
 	SPlayerEntity::generalHandleCollision(entity);
 
 	// Player slipping in puddle
-	if (entity->getState()->type == ENTITY_PUDDLE)
+	if (entity->getState()->type == ENTITY_PUDDLE &&
+		!_isSlipImmune)
 	{
 		// Allow human to step on edges without slipping
 		if (glm::length(entity->getState()->pos - _state->pos) <
@@ -296,10 +297,13 @@ bool SHumanEntity::updateAction()
 		// change action based on attempting to move or not
 		_curAction = (_isMoving) ? ACTION_HUMAN_MOVING : ACTION_HUMAN_IDLE;
 
+		_lookDirLocked = true;
+
 		// update action again if higher priority action is happening
 		if (_isLaunching) _curAction = ACTION_HUMAN_LAUNCHING;
 		else if (_isSlipping && !_isSlipImmune) _curAction = ACTION_HUMAN_SLIPPING;
 		else if (_isSwinging) _curAction = ACTION_HUMAN_SWINGING;
+		else _lookDirLocked = false;
 	}
 
 	// if failed to swing then cancel swing
