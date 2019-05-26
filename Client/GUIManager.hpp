@@ -90,6 +90,7 @@ public:
 	// Update skills with percentages
 	void updateStamina(float val);
 	void updatePee(float val);
+	void updateCharge(float val);
 
 	// Update skills with cooldowns
 	void updatePlunger(long millisecondsLeft);
@@ -170,4 +171,5 @@ private:
 	// Human skills
 	nanogui::Label* _plungerInfo;
 	nanogui::Label* _trapInfo;
+	nanogui::Label* _chargeInfo;
 };
