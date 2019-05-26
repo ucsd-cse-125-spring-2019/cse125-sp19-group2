@@ -238,15 +238,12 @@ void SHumanEntity::update(std::vector<std::shared_ptr<GameEvent>> events)
 
 			hasChanged = true;
 
-			interpolateMovement(_state->pos + (_state->forward * chargeDistance), _state->forward, HUMAN_SWING_VELOCITY,
-				[&] {
-				registerTimer(stuntDuration, [&]()
-				{
-					_isSwinging = false;
-					humanState->chargeMeter = 0;
-					hasChanged = true;
-				});
-			}, [&] {
+			// alarm for end of charging
+			registerTimer(chargeDuration * 1000, [&]()
+			{
+				actionStage++;
+
+				// alarm for end of stunt
 				registerTimer(stuntDuration, [&]()
 				{
 					_isSwinging = false;
@@ -255,6 +252,14 @@ void SHumanEntity::update(std::vector<std::shared_ptr<GameEvent>> events)
 				});
 			});
 		}
+
+		// keep moving forward
+		if (actionStage == 0) {
+			Logger::getInstance()->debug("moving");
+			_state->pos += _state->forward * (HUMAN_SWING_VELOCITY / TICKS_PER_SEC);
+			hasChanged = true;
+		}
+
 		break;
 	}
 
