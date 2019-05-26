@@ -5,9 +5,6 @@
 #include "Shared/DogState.hpp"
 #include "SPuddleEntity.hpp"
 
-#define BASE_VELOCITY 5.0f
-#define RUN_VELOCITY BASE_VELOCITY * 1.5f
-
 class SDogEntity : public SPlayerEntity
 {
 public:
