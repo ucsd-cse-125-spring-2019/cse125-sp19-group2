@@ -26,6 +26,8 @@ private:
 	std::shared_ptr<SRopeEntity> ropeEntity;
 	std::function<void()> _launchingReset;
 
+	glm::vec3 _plungerDirection;
+
 	bool updateAction();
 
 	// Slipping state

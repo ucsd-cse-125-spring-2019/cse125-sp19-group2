@@ -27,7 +27,6 @@ enum EventType
     EVENT_PLAYER_SWITCH,
 	EVENT_PLAYER_READY,
     EVENT_PLAYER_LEAVE, // Created only by the server
-	EVENT_PLAYER_LOOK,	// Player looking in a new direction
     EVENT_PLAYER_MOVE,	// Movement vector for player
     EVENT_PLAYER_RUN_START,	// Used only for dogs at the moment
     EVENT_PLAYER_RUN_END,	// Used only for dogs at the moment

@@ -72,6 +72,7 @@ void SHumanEntity::update(std::vector<std::shared_ptr<GameEvent>> events)
 			break;
 		case EVENT_PLAYER_LAUNCH_START:
 			_isLaunching = true;
+			_plungerDirection = glm::vec3(event->direction.x, 0, event->direction.y);
 			break;
 		case EVENT_PLAYER_LAUNCH_END:
 			_isLaunching = false;
@@ -129,6 +130,7 @@ void SHumanEntity::update(std::vector<std::shared_ptr<GameEvent>> events)
 		break;
 	case ACTION_HUMAN_LAUNCHING:
 		if (actionChanged) {
+			_state->forward = _plungerDirection;
 			humanState->currentAnimation = ANIMATION_HUMAN_SHOOT;
 			hasChanged = true;
 			// Timer until shooting animation end
@@ -297,13 +299,10 @@ bool SHumanEntity::updateAction()
 		// change action based on attempting to move or not
 		_curAction = (_isMoving) ? ACTION_HUMAN_MOVING : ACTION_HUMAN_IDLE;
 
-		_lookDirLocked = true;
-
 		// update action again if higher priority action is happening
 		if (_isLaunching) _curAction = ACTION_HUMAN_LAUNCHING;
 		else if (_isSlipping && !_isSlipImmune) _curAction = ACTION_HUMAN_SLIPPING;
 		else if (_isSwinging) _curAction = ACTION_HUMAN_SWINGING;
-		else _lookDirLocked = false;
 	}
 
 	// if failed to swing then cancel swing
