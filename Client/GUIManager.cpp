@@ -89,9 +89,9 @@ void GuiManager::resize(int x, int y) {
 			break;
 		case WIDGET_HUD:
 			// Set spacing for parent HUD widget to "clamp" bottom and top HUD 
-			int topHeight = getWidget(WIDGET_HUD_TOP)->preferredSize(_screen->nvgContext()).y();
-			int middleHeight = getWidget(WIDGET_HUD_MIDDLE)->preferredSize(_screen->nvgContext()).y();
-			int bottomHeight = getWidget(WIDGET_HUD_BOTTOM)->preferredSize(_screen->nvgContext()).y();
+			int topHeight = getWidget(WIDGET_HUD_TOP)->preferredSize(_screen->nvgContext()).y() / _screen->pixelRatio();
+			int middleHeight = getWidget(WIDGET_HUD_MIDDLE)->preferredSize(_screen->nvgContext()).y() / _screen->pixelRatio();
+			int bottomHeight = getWidget(WIDGET_HUD_BOTTOM)->preferredSize(_screen->nvgContext()).y() / _screen->pixelRatio();
 
 			int spacing = (y / _screen->pixelRatio() - middleHeight - topHeight - bottomHeight);
 			static_cast<nanogui::BoxLayout*>(widgetPair.second->layout())->setSpacing(spacing / 2);

@@ -20,8 +20,8 @@ public:
 		_collider = std::make_unique<CapsuleCollider>(_state.get());
 		_state->colliderType = COLLIDER_CAPSULE;
 
-		_state->width = 2.0f;
-		_state->depth = 2.0f;
+		_state->width = 2.5f;
+		_state->depth = 2.5f;
 		_state->height = 0.6f;
 
 		// Non-solid object
