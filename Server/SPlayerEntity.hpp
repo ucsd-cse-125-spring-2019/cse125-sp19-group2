@@ -121,6 +121,9 @@ public:
 		// Reset custom player message
 		playerState->message = "";
 
+		// Reset playOnce animation stuff
+		playerState->isPlayOnce = false;
+
 	} // update()
 
 	// Call this function to move a player to a destination

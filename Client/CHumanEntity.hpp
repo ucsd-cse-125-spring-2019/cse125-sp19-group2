@@ -29,7 +29,14 @@ public:
 
 		// Requires a cast
 		Animation* humanAnimation = static_cast<Animation*>(_objectModel.get());
-		humanAnimation->play(newState->currentAnimation);
+		if (newState->isPlayOnce)
+		{
+			humanAnimation->playOnce(newState->currentAnimation, newState->animationDuration);
+		}
+		else
+		{
+			humanAnimation->play(newState->currentAnimation);
+		}
 
 		// Human attributes and items
 		// TODO

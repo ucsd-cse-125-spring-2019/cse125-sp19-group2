@@ -31,6 +31,4 @@ private:
 	// Slipping state
 	bool _isSlipping = false;
 	bool _isSlipImmune = false;
-
-
 };

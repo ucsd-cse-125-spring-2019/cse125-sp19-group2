@@ -163,6 +163,8 @@ void SHumanEntity::update(std::vector<std::shared_ptr<GameEvent>> events)
 	case ACTION_HUMAN_SLIPPING:
 		if (actionChanged) {
 			humanState->currentAnimation = ANIMATION_HUMAN_SLIPPING;
+			humanState->isPlayOnce = true;
+			humanState->animationDuration = 1500;
 			hasChanged = true;
 
 			// Timer until immobility stops
@@ -184,13 +186,8 @@ void SHumanEntity::update(std::vector<std::shared_ptr<GameEvent>> events)
 		break;
 	}
 
-
-
 	handleInterpolation();
 	//Logger::getInstance()->debug("Human   x: " + std::to_string(_state->forward.x) + " y: " + std::to_string(_state->forward.y) + " z: " + std::to_string(_state->forward.z));
-
-	// Reset slipping state
-	_isSlipping = false;
 }
 
 void SHumanEntity::generalHandleCollision(SBaseEntity * entity)
@@ -199,7 +196,8 @@ void SHumanEntity::generalHandleCollision(SBaseEntity * entity)
 	SPlayerEntity::generalHandleCollision(entity);
 
 	// Player slipping in puddle
-	if (entity->getState()->type == ENTITY_PUDDLE)
+	if (entity->getState()->type == ENTITY_PUDDLE &&
+		!_isSlipImmune)
 	{
 		// Allow human to step on edges without slipping
 		if (glm::length(entity->getState()->pos - _state->pos) <
