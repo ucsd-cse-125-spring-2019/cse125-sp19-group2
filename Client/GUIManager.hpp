@@ -90,6 +90,7 @@ public:
 	// Update skills with percentages
 	void updateStamina(float val);
 	void updatePee(float val);
+	void updateCharge(float val);
 
 	// Sets visibility recursively for a given widget
 	void setVisibility(WidgetType name, bool visiblity);
@@ -166,4 +167,5 @@ private:
 	// Human skills
 	nanogui::Label* _plungerInfo;
 	nanogui::Label* _trapInfo;
+	nanogui::Label* _chargeInfo;
 };

@@ -35,5 +35,5 @@ private:
 	bool _isSlipImmune = false;
 	bool _isCharging = false;
 	bool _isSwinging = false;
-	long stuntDuration = 0;
+	float stuntDuration = 0;
 };
