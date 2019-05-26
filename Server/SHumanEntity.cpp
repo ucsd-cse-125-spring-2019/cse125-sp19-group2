@@ -164,7 +164,7 @@ void SHumanEntity::update(std::vector<std::shared_ptr<GameEvent>> events)
 		if (actionChanged) {
 			humanState->currentAnimation = ANIMATION_HUMAN_SLIPPING;
 			humanState->isPlayOnce = true;
-			humanState->animationDuration = 1500;
+			humanState->animationDuration = 1400;
 			hasChanged = true;
 
 			// Timer until immobility stops
