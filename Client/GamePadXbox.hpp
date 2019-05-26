@@ -1,4 +1,6 @@
-﻿#include <windows.h>
+﻿#pragma once
+
+#include <windows.h>
 #include <XInput.h>     // XInput API
 #include "glm/glm.hpp"
 #include "Shared/Logger.hpp"
@@ -28,10 +30,11 @@ typedef enum
 // GamePad Indexes
 typedef enum
 {
-	GamePadIndex_One = 0,
-	GamePadIndex_Two = 1,
-	GamePadIndex_Three = 2,
-	GamePadIndex_Four = 3,
+	GamePadIndex_NULL = 0,
+	GamePadIndex_One = 1,
+	GamePadIndex_Two = 2,
+	GamePadIndex_Three = 3,
+	GamePadIndex_Four = 4,
 }GamePadIndex;
 
 class GamePadXbox
@@ -40,7 +43,7 @@ public:
 	GamePadXbox(GamePadIndex player)
 	{
 		_playerIndex = player;
-		_controllerNum = player;
+		_controllerNum = player-1;
 		reset();
 	}
 

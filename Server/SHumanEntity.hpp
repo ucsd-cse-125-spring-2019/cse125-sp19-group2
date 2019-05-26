@@ -2,75 +2,38 @@
 
 #include "SPlayerEntity.hpp"
 #include "Shared/HumanState.hpp"
+#include "SPlungerEntity.hpp"
+#include "SRopeEntity.hpp"
 
 class SHumanEntity : public SPlayerEntity
 {
 public:
-	SHumanEntity(uint32_t playerId)
-	{
-		_state = std::make_shared<HumanState>();
-
-		// Parent initialization
-		SPlayerEntity::initState();
-		_state->id = playerId;
-		_state->type = ENTITY_HUMAN;
-
-		// Collider stuff
-		_collider = std::make_unique<CapsuleCollider>(_state.get());
-		_state->colliderType = COLLIDER_CAPSULE;
-		_state->width = 0.9f;
-		_state->height = 2.0f;
-		_state->depth = 0.9f;
-
-		_velocity = 4.8f;
-
-		// Human-specific stuff
-		auto humanState = std::static_pointer_cast<HumanState>(_state);
-		humanState->currentAnimation = ANIMATION_HUMAN_IDLE;
-	};
+	SHumanEntity(uint32_t playerId,
+		std::string playerName,
+		std::vector<std::shared_ptr<SBaseEntity>>* newEntities);
 
 	~SHumanEntity() {};
 
-	void update(std::vector<std::shared_ptr<GameEvent>> events) override
-	{
-		auto humanState = std::static_pointer_cast<HumanState>(_state);
+	void update(std::vector<std::shared_ptr<GameEvent>> events) override;
 
-		// Save old position
-		glm::vec3 oldPos = _state->pos;
+	void generalHandleCollision(SBaseEntity* entity) override;
 
-		// Update and check for changes
-		SPlayerEntity::update(events);
+private:
+	bool _isLaunching = false;
+	HumanAction _curAction = ACTION_HUMAN_IDLE;
+	std::vector<std::shared_ptr<SBaseEntity>>* _newEntities;
 
-		// Set running/not running based on position
-		if (_state->pos != oldPos)
-		{
-			humanState->currentAnimation = ANIMATION_HUMAN_RUNNING;
-		}
+	std::shared_ptr<SPlungerEntity> plungerEntity;
+	std::shared_ptr<SRopeEntity> ropeEntity;
+	std::function<void()> _launchingReset;
 
-		// Check for stop event
-		for (auto& event : events)
-		{
-			if (event->type == EVENT_PLAYER_STOP)
-			{
-				humanState->currentAnimation = ANIMATION_HUMAN_IDLE;
-				hasChanged = true;
-				break;
-			}
-		}
+	bool updateAction();
 
-		// TODO: net throwing animation
-	}
+	// Slipping state
+	bool _isSlipping = false;
+	bool _isSlipImmune = false;
 
-	void handleCollision(std::shared_ptr<SBaseEntity> entity)
-	{
-		// Cast for player-specific stuff
-		auto humanState = std::static_pointer_cast<HumanState>(_state);
-
-		// Dog getting caught is not handled by the human
-		if (entity->getState()->type != ENTITY_DOG)
-		{
-			SBaseEntity::handleCollision(entity);
-		}
-	}
+	bool _isCharging = false;
+	bool _isSwinging = false;
+	long stuntDuration = 0;
 };
-

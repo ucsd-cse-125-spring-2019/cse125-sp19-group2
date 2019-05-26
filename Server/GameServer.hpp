@@ -12,11 +12,9 @@
 #include "LevelParser.hpp"
 #include "CollisionManager.hpp"
 #include "EventManager.hpp"
+#include "StructureInfo.hpp"
 
 using tick = std::chrono::duration<double, std::ratio<1, TICKS_PER_SEC>>;
-
-// Max game length
-const std::chrono::seconds MAX_GAME_LENGTH(30);
 
 struct PairHash;	// Forward declaration
 
@@ -52,14 +50,10 @@ private:
 	// Collision handler
 	std::unique_ptr<CollisionManager> _collisionManager;
 
-    // Map of all game entities
-    std::unordered_map<uint32_t, std::shared_ptr<SBaseEntity>> _entityMap;
-
-	// Locations of jails, human spawns, and dog spawns, respectively
-	std::vector<glm::vec2> _jails;
-	std::queue<glm::vec2> _humanSpawns, _dogSpawns;
-
 	// Struct to keep track of game state
 	std::shared_ptr<GameState> _gameState;
+
+	// Struct containing general game info
+	StructureInfo* _structureInfo;
 };
 

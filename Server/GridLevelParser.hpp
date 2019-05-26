@@ -2,6 +2,7 @@
 
 #include <queue>
 #include "LevelParser.hpp"
+#include <map>
 
 /**
   * Parser for tile-based level editor, which exports tiles in a newline-
@@ -13,11 +14,9 @@ public:
 	GridLevelParser();
 	~GridLevelParser();
 
-	std::vector<std::shared_ptr<SBaseEntity>> parseLevelFromFile(
+	void parseLevelFromFile(
 		std::string path,
-		std::vector<glm::vec2> & jailLocations,
-		std::queue<glm::vec2> & humanSpawns,
-		std::queue<glm::vec2> & dogSpawns) override;
+		StructureInfo* structureInfo) override;
 
 private:
 	// Different types of tiles; order must be exactly same as online editor!
@@ -25,7 +24,7 @@ private:
 	{
 		TILE_EMPTY,
 		TILE_JAIL,
-		TILE_WALL,
+		TILE_WALL, // should not have this anymore
 		TILE_FENCE,
 		TILE_HUMAN_SPAWN,
 		TILE_DOG_SPAWN,
@@ -34,6 +33,21 @@ private:
 		TILE_DOGHOUSE,
 		TILE_HYDRANT,
 		TILE_FOUNTAIN
+	};
+
+	// Different width for different structure (0 means size is not fixed)
+	std::map<TileType, int> EntityTileWidth = {
+		{TILE_EMPTY, 1},
+		{TILE_JAIL, 0},
+		{TILE_WALL, 0},
+		{TILE_FENCE, 0},
+		{TILE_HUMAN_SPAWN, 1},
+		{TILE_DOG_SPAWN, 1},
+		{TILE_HOUSE_6X6_A, 4},
+		{TILE_DOGBONE, 1},
+		{TILE_DOGHOUSE, 1},
+		{TILE_HYDRANT, 1},
+		{TILE_FOUNTAIN, 3}
 	};
 
 	// Order must be exactly the same as the online editor!
@@ -59,7 +73,7 @@ private:
 	public:
 		TileType type;
 		GroundType groundType;
-		glm::vec3 forward;
+		int angle; // Number of times to rotate clockwise
 		glm::vec2 pos;
 		int xIndex;
 		int zIndex;
@@ -71,7 +85,8 @@ private:
 			TileType type,
 			Direction dir,
 			std::vector<Tile*>& aggregatedTiles,
-			int maxWidth);
+			int maxWidth,
+			int maxDepth);
 	};
 
 	// Get average position, width, and depth from tiles. All are passed by

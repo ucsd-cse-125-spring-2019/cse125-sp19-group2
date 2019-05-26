@@ -3,6 +3,7 @@
 #include <glm/glm.hpp>
 #include <string>
 #include <iostream>
+#include <functional>
 
 #include "Shared/Common.hpp"	// GameEntity type enum
 
@@ -45,6 +46,9 @@ struct BaseState
 	float height;		// Height of object in Y-axis
 	ColliderType colliderType;
 
+	// Transparency information
+	float transparency;
+
 	// Object lifetime info
 	bool isDestroyed;	// Object has been deleted on the server
 
@@ -53,6 +57,25 @@ struct BaseState
 
 	// Whether or not the object can be passed through
 	bool isSolid;
+
+	bool getSolidity(BaseState* entity)
+	{
+		if (solidFunc == 0)
+		{
+			return isSolid;
+		}
+		else
+		{
+			return solidFunc(this, entity);
+		}
+	}
+
+	void setSolidity(std::function<bool(BaseState* entity, BaseState* collidingEntity)> f)
+	{
+		solidFunc = f;
+	}
+
+	std::function<bool(BaseState* entity, BaseState* collidingEntity)> solidFunc = 0;
 
 	// Serialization for Cereal
 	template<class Archive>
@@ -68,6 +91,7 @@ struct BaseState
 				depth,
 				height,
 				colliderType,
+				transparency,
 				isDestroyed,
 				isStatic,
 				isSolid);

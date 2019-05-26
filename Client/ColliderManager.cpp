@@ -40,6 +40,9 @@ void ColliderManager::updateState(std::shared_ptr<BaseState> const& state) {
 	// Collision box already created
 	if (result != colliderList.end()) {
 		result->second->pos = state->pos;
+		result->second->scale.x = state->width;
+		result->second->scale.y = state->height;
+		result->second->scale.z = state->depth;
 	}
 	// Collision box not found and need to create it
 	else {
@@ -83,6 +86,7 @@ void ColliderManager::render(std::unique_ptr<Camera> const& camera) {
 		ColliderManager::_shader->set_uniform("u_model", model);
 
 		switch (curBox->colliderType) {
+		case COLLIDER_GATE:
 		case COLLIDER_AABB:
 			ColliderManager::_cubeModel->getMeshAt(0).DrawLine(ColliderManager::_shader);
 			break;
@@ -91,4 +95,8 @@ void ColliderManager::render(std::unique_ptr<Camera> const& camera) {
 			break;
 		}
 	});
+}
+
+void ColliderManager::clear() {
+	colliderList.clear();
 }

@@ -27,28 +27,8 @@ Application::Application(const char* windowTitle, int argc, char** argv) {
     return;
   }
 
-  // Create network client and connect to server. The connect logic should
-  // eventually be moved into the main game loop, but we're not there yet
+  // Create network client. Connection happens in UI button callback
   _networkClient = std::make_unique<NetworkClient>();
-  try
-  {
-    uint32_t playerId = _networkClient->connect("localhost", PORTNUM);
-
-    // First thing we do is create a player join event with player name
-    auto joinEvent = std::make_shared<GameEvent>();
-    joinEvent->playerId = playerId;
-    joinEvent->type = EVENT_PLAYER_JOIN;
-
-    // TODO: change this to player-specified name
-    joinEvent->playerName = "Player" + std::to_string(playerId);
-    _networkClient->sendEvent(joinEvent);
-
-    _localPlayer = std::make_unique<LocalPlayer>(playerId, _networkClient);
-  }
-  catch (std::runtime_error e)
-  {
-    Logger::getInstance()->error(e.what());
-  }
 
   // Initialize GLFW
   if (!glfwInit()) {
@@ -66,7 +46,7 @@ Application::~Application() {
 
 void Application::Setup() {
   // OpenGL Graphics Setup
-  glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+  glClearColor(0.3f, 0.3f, 0.3f, 1.0f);
   glEnable(GL_DEPTH_TEST);
   glDepthFunc(GL_LEQUAL);
   glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
@@ -106,7 +86,7 @@ void Application::Setup() {
   _debuglightShader->LoadFromFile(GL_FRAGMENT_SHADER, "./Resources/Shaders/debuglight.frag");
   _debuglightShader->CreateProgram();
 
-  _skybox = std::make_unique<Skybox>("thefog");
+  _skybox = std::make_unique<Skybox>("skybox");
 
   // Create light
   _point_light = std::make_unique<PointLight>(
@@ -128,82 +108,94 @@ void Application::Setup() {
     // Give InputManager a reference to GLFWwindow
     InputManager::getInstance().setWindow(_window);
 
-  // Test input; to be removed
-  InputManager::getInstance().getKey(GLFW_KEY_G)->onPress([&]
-  {
-    std::cout << "Hello World!" << this->count << std::endl;
-  });
-
-  InputManager::getInstance().getKey(GLFW_KEY_K)->onRepeat([&]
-  {
-    this->count += 1;
-    std::cout << this->count << std::endl;
-  });
-
-  InputManager::getInstance().getKey(GLFW_KEY_T)->onPress([&]
-  {
-	  ColliderManager::getInstance().renderMode = !ColliderManager::getInstance().renderMode;
-  });
-
     // Initialize GuiManager
     GuiManager::getInstance().init(_window);
 
-    // Create a testing widget
-    bool enabled = true;
-    auto *gui = GuiManager::getInstance().createFormHelper("Form helper");
-    gui->addWindow(Eigen::Vector2i(2, 35), "Form helper");
-    
-    gui->addGroup("Validating fields");
-    auto * v = gui->addVariable("int", _integer);
-    v->setSpinnable(true);
+	// Create widget screens
+	GuiManager::getInstance().initWidgets();
 
-    gui->addVariable("float", _float)->setTooltip("Test.");
-    gui->addButton("Add One", [&]() {
-        _integer += 1;
-    });
+	// Connect screen button callback
+	GuiManager::getInstance().registerConnectCallback([&]() {
+		// Attempt server connection
+		std::string address = GuiManager::getInstance().getAddress();
+		std::string playerName = GuiManager::getInstance().getPlayerName();
 
-    
-    // Test Sound
-    auto ambient = AudioManager::getInstance().getAudioSource("Ambient Sound");
-    ambient->init("Resources/Sounds/Mario - Overworld.mp3");
-    ambient->setVolume(0.4f);
-    ambient->play(_playAmbient);
+		uint32_t playerId;
+		try {
+			playerId = _networkClient->connect(address, PORTNUM);
+		}
+		catch (std::runtime_error e) {
+			Logger::getInstance()->error(e.what());
+			return;
+		}
 
-    auto positional = AudioManager::getInstance().getAudioSource("Positional Sound");
-    positional->init("Resources/Sounds/footsteps.mp3", true, true);
-    positional->play(_playPositional);
+		// Send join event
+		auto joinEvent = std::make_shared<GameEvent>();
+		joinEvent->playerId = playerId;
+		joinEvent->type = EVENT_PLAYER_JOIN;
+		joinEvent->playerName = playerName;
+		_networkClient->sendEvent(joinEvent);
 
-    // Add Widget to control sound
-    gui->addGroup("Sound");
-    gui->addVariable("Play Ambient Sound", _playAmbient)->setCallback([=](const bool flag) {
-        _playAmbient = flag;
-        ambient->play(flag);
-    });
-    gui->addVariable("Play Positional Sound", _playPositional)->setCallback([=](const bool flag) {
-        _playPositional = flag;
-        positional->play(flag);
-    });
+		// Create local player
+		_localPlayer = std::make_unique<LocalPlayer>(playerId, _networkClient);
 
-    // Control sound position
-    auto * pos = gui->addVariable("Sound Location", _enum, enabled);
-    pos->setItems({ "Left", "Front", "Right" });
-    pos->setCallback([=](const Enum & e) {
-        switch (e) {
-        case Left:
-            positional->setPosition(glm::vec3(-2, 0 , 0));
-            break;
-        case Front:
-            positional->setPosition(glm::vec3(0, 0 , -2));
-            break;
-        case Right:
-            positional->setPosition(glm::vec3(2, 0 , 0));
-            break;
-        }
-        _enum = e;
-    });
+		// Register global keys
+		registerGlobalKeys();
 
-    GuiManager::getInstance().setDirty();
 
+		// Hide connect screen
+		GuiManager::getInstance().hideAll();
+
+		// Show lobby
+		GuiManager::getInstance().setVisibility(WIDGET_LOBBY, true);
+	});
+
+	// Switch sides button callback
+	GuiManager::getInstance().registerSwitchSidesCallback([&]() {
+		// Send switch event
+		auto switchEvent = std::make_shared<GameEvent>();
+		switchEvent->type = EVENT_PLAYER_SWITCH;
+		switchEvent->playerId = _localPlayer->getPlayerId();
+		_networkClient->sendEvent(switchEvent);
+	});
+
+	GuiManager::getInstance().registerReadyCallback([&]() {
+		// Send ready event
+		auto readyEvent = std::make_shared<GameEvent>();
+		readyEvent->type = EVENT_PLAYER_READY;
+		readyEvent->playerId = _localPlayer->getPlayerId();
+		_networkClient->sendEvent(readyEvent);
+
+		// Gray out ready and switch buttons
+		GuiManager::getInstance().setReadyEnabled(false);
+		GuiManager::getInstance().setSwitchEnabled(false);
+	});
+
+	// Controls menu stuff
+	GuiManager::getInstance().registerControllerCallback([=](GamePadIndex e) {
+		switch (e) {
+		case GamePadIndex_NULL:
+			_localPlayer->setControllerNum(GamePadIndex_NULL);
+			_gamepad_num = e;
+			break;
+		case GamePadIndex_One:
+			if (_localPlayer->setControllerNum(GamePadIndex_One))
+				_gamepad_num = e;
+			break;
+		case GamePadIndex_Two:
+			if (_localPlayer->setControllerNum(GamePadIndex_Two))
+				_gamepad_num = e;
+			break;
+		case GamePadIndex_Three:
+			if (_localPlayer->setControllerNum(GamePadIndex_Three))
+				_gamepad_num = e;
+			break;
+		case GamePadIndex_Four:
+			if (_localPlayer->setControllerNum(GamePadIndex_Four))
+				_gamepad_num = e;
+			break;
+		}
+	});
 }
 
 void Application::Cleanup() {
@@ -274,14 +266,152 @@ void Application::Update()
         {
             auto gameState = std::static_pointer_cast<GameState>(state);
 
-            // TODO: do something with general state
+			// Update client-side state and UI
             // Timer, winner of game, in lobby, etc
+			if (gameState->inLobby)
+			{
+				GuiManager::getInstance().updateDogsList(
+					gameState->dogs,
+					_localPlayer->getPlayerId());
+
+				GuiManager::getInstance().updateHumansList(
+					gameState->humans,
+					_localPlayer->getPlayerId());
+
+				// Ready button text
+				int numPlayers = gameState->dogs.size() + gameState->humans.size();
+				GuiManager::getInstance().setReadyText("Ready (" + std::to_string(gameState->readyPlayers.size()) + std::string("/") + std::to_string(numPlayers) + std::string(")"));
+			}
+
+			// Did a game just start? If so, hide lobby UI
+			if (_inLobby && !gameState->inLobby)
+			{
+				_inLobby = false;
+				GuiManager::getInstance().getWidget(WIDGET_LOBBY)->setVisible(false);
+				GuiManager::getInstance().setReadyEnabled(true);
+				GuiManager::getInstance().setSwitchEnabled(true);
+
+				// Capture mouse
+				_localPlayer->setMouseCaptured(true);
+
+				// Show game HUD
+				GuiManager::getInstance().setVisibility(WIDGET_HUD, true);
+			}
+			// Conversely, did a game just end and send us back to the lobby?
+			else if (gameState->inLobby && !_inLobby)
+			{
+				// Deallocate world objects
+				EntityManager::getInstance().clearAll();
+				ColliderManager::getInstance().clear();
+
+				// Set localPlayer's _playerEntity to null
+				_localPlayer->unpairEntity();
+
+				// Reset UI
+				_inLobby = true;
+				GuiManager::getInstance().hideAll();
+				GuiManager::getInstance().getWidget(WIDGET_LOBBY)->setVisible(true);
+				GuiManager::getInstance().getWidget(WIDGET_LIST_DOGS)->setVisible(true);
+				GuiManager::getInstance().getWidget(WIDGET_LIST_HUMANS)->setVisible(true);
+
+				GuiManager::getInstance().setPrimaryMessage("");
+				GuiManager::getInstance().setSecondaryMessage("");
+
+				// Uncapture mouse
+				_localPlayer->setMouseCaptured(false);
+
+				// Redraw
+				auto screen = GuiManager::getInstance().getScreen();
+				GuiManager::getInstance().resize(screen->size().x(), screen->size().y());
+			}
+
+			// Update pregame timer
+			if (gameState->pregameCountdown)
+			{
+				_inCountdown = true;
+				auto secondsLeft = (int)(std::ceil(gameState->millisecondsToStart / 1000.0f));
+
+				if (secondsLeft <= 3)
+				{
+					GuiManager::getInstance().setPrimaryMessage("Get set!");
+				}
+				else
+				{
+					GuiManager::getInstance().setPrimaryMessage("On your marks!");
+
+				}
+				GuiManager::getInstance().setSecondaryMessage(std::to_string(secondsLeft));
+
+				auto screen = GuiManager::getInstance().getScreen();
+				GuiManager::getInstance().resize(screen->size().x(), screen->size().y());
+			}
+			else if (_inCountdown)
+			{
+				_countdownEnd = std::chrono::steady_clock::now();
+				_inCountdown = false;
+				_startHidden = false;
+				GuiManager::getInstance().setPrimaryMessage("Go!");
+				GuiManager::getInstance().setSecondaryMessage("");
+
+				auto screen = GuiManager::getInstance().getScreen();
+				GuiManager::getInstance().resize(screen->size().x(), screen->size().y());
+			}
+			else if (!_startHidden)
+			{
+				// Hide Go! message after 1 second
+				auto elapsed = std::chrono::steady_clock::now() - _countdownEnd;
+
+				if (std::chrono::duration_cast<std::chrono::seconds>(elapsed) >
+					std::chrono::seconds(1))
+				{
+					GuiManager::getInstance().setPrimaryMessage("");
+					_startHidden = true;
+
+					auto screen = GuiManager::getInstance().getScreen();
+					GuiManager::getInstance().resize(screen->size().x(), screen->size().y());
+				}
+			}
+
+			// Show winners if the game is over
+			if (gameState->gameOver)
+			{
+				if (gameState->winner == ENTITY_DOG)
+				{
+					GuiManager::getInstance().setPrimaryMessage("Dogs Win!");
+				}
+				else if (gameState->winner == ENTITY_HUMAN)
+				{
+					GuiManager::getInstance().setPrimaryMessage("Humans Win!");
+				}
+				auto secondsLeft = (int)(std::ceil(gameState->millisecondsToLobby / 1000.0f));
+				GuiManager::getInstance().setSecondaryMessage("Returning to lobby in " + std::to_string(secondsLeft) + "...");
+
+				auto screen = GuiManager::getInstance().getScreen();
+				GuiManager::getInstance().resize(screen->size().x(), screen->size().y());
+			}
+
+			// Update countdown timer
+			GuiManager::getInstance().updateTimer(gameState->millisecondsLeft);
+
+			_inLobby = gameState->inLobby;
         }
     }
   }
   catch (std::runtime_error e)
   {
-    // Disconnected from the server
+	  // Disconnected from the server; de-allocate client-side objects and
+	  // show connection screen
+	  _localPlayer = nullptr;
+	  _networkClient->closeConnection();
+	  EntityManager::getInstance().clearAll();
+	  InputManager::getInstance().reset();
+	  ColliderManager::getInstance().clear();
+	  GuiManager::getInstance().hideAll();
+	  GuiManager::getInstance().setVisibility(WIDGET_CONNECT, true);
+
+	  // Un-capture mouse
+ 	  glfwSetInputMode(
+		InputManager::getInstance().getWindow(), GLFW_CURSOR, GLFW_CURSOR_NORMAL);
   }
 
   InputManager::getInstance().update();
@@ -292,7 +422,6 @@ void Application::Update()
     
   // Update sound engine
   AudioManager::getInstance().update();
-
     
   _camera->Update();
   _point_light->update();
@@ -309,22 +438,26 @@ void Application::Draw() {
     // render scene
     //_frameBuffer->drawQuad(_testShader);
       glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT| GL_STENCIL_BUFFER_BIT);
-    // Render Skybox
-    _skyboxShader->Use();
-    _skyboxShader->set_uniform("u_projection", _localPlayer->getCamera()->projection_matrix());
-    _skyboxShader->set_uniform("u_view", _localPlayer->getCamera()->view_matrix() * glm::scale(glm::mat4(1.0f), glm::vec3(200,200,200)));
-      //glm::mat4(glm::mat3(_localPlayer->getCamera()->view_matrix()))
-    _skybox->draw(_skyboxShader);
 
-	// Render floor before any entity
-	CFloorEntity::getInstance().render(_localPlayer->getCamera());
+	  // Non-UI elements depend on localPlayer and that we're not in the lobby
+	  if (_localPlayer && !_inLobby) {
+		  // Render Skybox
+		  _skyboxShader->Use();
+		  _skyboxShader->set_uniform("u_projection", _localPlayer->getCamera()->projection_matrix());
+		  _skyboxShader->set_uniform("u_view", _localPlayer->getCamera()->view_matrix() * glm::scale(glm::mat4(1.0f), glm::vec3(200, 200, 200)));
+		  //glm::mat4(glm::mat3(_localPlayer->getCamera()->view_matrix()))
+		  _skybox->draw(_skyboxShader);
 
-    EntityManager::getInstance().render(_localPlayer->getCamera());
+		  // Render floor before any entity
+		  CFloorEntity::getInstance().render(_localPlayer->getCamera());
 
-      // Debug Shader
-    _debuglightShader->Use();
-    _debuglightShader->set_uniform("u_projection", _localPlayer->getCamera()->projection_matrix());
-    _debuglightShader->set_uniform("u_view", _localPlayer->getCamera()->view_matrix());
+		  EntityManager::getInstance().render(_localPlayer->getCamera());
+
+		  // Debug Shader
+		  _debuglightShader->Use();
+		  _debuglightShader->set_uniform("u_projection", _localPlayer->getCamera()->projection_matrix());
+		  _debuglightShader->set_uniform("u_view", _localPlayer->getCamera()->view_matrix());
+	  }
 
     // Draw UI
     GuiManager::getInstance().draw();
@@ -377,8 +510,10 @@ void Application::Resize(int x, int y) {
   _win_height = y;
   glViewport(0, 0, x, y);
   _quadFrameBuffer->resize(x, y);
-  _localPlayer->resize(x, y);
-  GuiManager::getInstance().getScreen()->resizeCallbackEvent(x, y);
+  if (_localPlayer) {
+	  _localPlayer->resize(x, y);
+  }
+  GuiManager::getInstance().resize(x, y);
 }
 
 void Application::Keyboard(int key, int scancode, int action, int mods) {
@@ -392,17 +527,13 @@ void Application::Keyboard(int key, int scancode, int action, int mods) {
     }
   }
   else if (action == GLFW_RELEASE) {
-    if (mods == GLFW_MOD_SHIFT) {
-
-    }
-    else {
-      InputManager::getInstance().fire(key, KeyState::Release);
-    }
+	  InputManager::getInstance().fire(key, KeyState::Release);
   }
 }
 
 void Application::MouseButton(int btn, int action, int mods) {
-    GuiManager::getInstance().getScreen()->mouseButtonCallbackEvent(btn, action, mods);
+	GuiManager::getInstance().getScreen()->mouseButtonCallbackEvent(btn, action, mods);
+
 	if(action == GLFW_PRESS)
 	{
 		if(mods == GLFW_MOD_SHIFT)
@@ -461,4 +592,36 @@ void Application::DestroyWindow() {
   glfwSetCursorPosCallback(_window, nullptr);
   glfwSetFramebufferSizeCallback(_window, nullptr);
   glfwDestroyWindow(_window);
+}
+
+void Application::registerGlobalKeys() {
+	// Test input; to be removed
+	InputManager::getInstance().getKey(GLFW_KEY_G)->onPress([&]
+	{
+		std::cout << "Hello World!" << this->count << std::endl;
+	});
+
+	InputManager::getInstance().getKey(GLFW_KEY_K)->onRepeat([&]
+	{
+		this->count += 1;
+		std::cout << this->count << std::endl;
+	});
+
+	InputManager::getInstance().getKey(GLFW_KEY_T)->onPress([&]
+	{
+		ColliderManager::getInstance().renderMode = !ColliderManager::getInstance().renderMode;
+	});
+
+	InputManager::getInstance().getKey(GLFW_KEY_ESCAPE)->onPress([&]
+	{
+		if (_localPlayer) {
+			bool curState = _localPlayer->getMouseCaptured();
+			GuiManager::getInstance().setVisibility(WIDGET_OPTIONS,
+				!GuiManager::getInstance().getWidget(WIDGET_OPTIONS)->visible());
+			if (!_inLobby)
+			{
+				_localPlayer->setMouseCaptured(!curState);
+			}
+		}
+	});
 }

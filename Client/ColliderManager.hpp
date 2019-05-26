@@ -54,6 +54,11 @@ public:
 	*/
 	void render(std::unique_ptr<Camera> const& camera);
 
+	/**
+	* \brief Remove all collision boxes in the game world
+	*/
+	void clear();
+
 	bool renderMode = false;
 };
 

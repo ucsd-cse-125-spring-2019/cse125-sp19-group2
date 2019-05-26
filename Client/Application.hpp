@@ -22,7 +22,7 @@
 #include "fmod/fmod.h"
 #include "fmod/fmod.hpp"
 #include "fmod/fmod_errors.h"
-
+#include "Shared/GameEvent.hpp"
 
 class Application {
 public:
@@ -59,6 +59,9 @@ private:
   // Environment management
   void Setup();
   void Cleanup();
+
+  // Register global keys
+  void registerGlobalKeys();
 
   // Window management data
   GLFWwindow* _window = nullptr;
@@ -100,6 +103,14 @@ private:
   
   // Local player
   std::unique_ptr<LocalPlayer> _localPlayer;
+  
+  // Game state
+  bool _inLobby = true;
+  bool _inCountdown = false;
+  bool _startHidden = false;
+
+  // Time when pregame countdown ended
+  std::chrono::time_point<std::chrono::steady_clock> _countdownEnd;
 
   // Test Lights
   std::unique_ptr<PointLight> _point_light;
@@ -117,7 +128,8 @@ private:
         Right
     };
     Enum _enum;
-
+	GamePadIndex _gamepad_num;
+	PlayerType _player_type;
 };
 
 #endif

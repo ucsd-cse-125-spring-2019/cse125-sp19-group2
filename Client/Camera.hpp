@@ -67,7 +67,9 @@ class Camera
   glm::mat4 projection_matrix() const;
   glm::mat4 view_matrix() const;
   glm::vec3 position() const;
+    glm::vec3 lookat() const;
   bool isInFrustum(glm::vec3 p, float radius) const;
+  float getTransparency(glm::vec3 p, float radius) const;
   float fov() const;
 
   void set_position(const glm::vec3 & position);
@@ -80,6 +82,8 @@ class Camera
   void set_mouse_sensitivity(float sensitivity);
 
   void set_distance(float distance, bool delta = true);
+  
+  void set_heightfactor(float heightFactor);
 
   void update_distance();
 
@@ -134,6 +138,7 @@ class Camera
 	float _smoothness = 20.0f;
 
   float _mouseSensitivity = 1.0f;
+    float _heightFactor = 1.0f;
 };
 
 #endif /* CAMERA_HPP */

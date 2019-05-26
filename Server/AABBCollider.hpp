@@ -17,6 +17,7 @@ public:
 			{
 
 			// Case 1: candidate is also a box collider
+			case COLLIDER_GATE:
 			case COLLIDER_AABB:
 			{
 				// TODO
@@ -29,7 +30,6 @@ public:
 				// TODO
 				break;
 			}
-
 			} // switch
 		}
 		return false;

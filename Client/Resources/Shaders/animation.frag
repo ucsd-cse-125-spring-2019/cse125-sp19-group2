@@ -37,6 +37,9 @@ uniform DirLight   u_dirlight;
 uniform PointLight u_pointlight;
 uniform Material   u_material;
 uniform vec3       u_viewPos;
+uniform float      u_transparency = 1.0;
+
+// uniform int numBin = 30;
 
 // Output
 out vec4 out_color;
@@ -48,7 +51,7 @@ vec3 CalcDirLight(DirLight light, vec3 normal, vec3 viewDir)
 
   // Diffuse
   vec3 lightDir = normalize(-light.direction);
-  float diffAmt = max(dot(normal, lightDir), 0.25);
+  float diffAmt = max(dot(normal, lightDir), 0);
   vec3 diffuse = light.diffuse * diffAmt * texture(u_material.diffuse, pass_uv).rgb;
 
   return ambient + diffuse;
@@ -57,12 +60,12 @@ vec3 CalcDirLight(DirLight light, vec3 normal, vec3 viewDir)
 vec3 CalcPointLight(PointLight light, vec3 normal, vec3 fragPos, vec3 viewDir)
 {
   // Ambient
-  vec3 ambient = light.ambient * (texture(u_material.diffuse, pass_uv).rgb+ vec3(1.0));
+  vec3 ambient = light.ambient * texture(u_material.diffuse, pass_uv).rgb;
   
   // Diffuse
   vec3 lightDir = normalize(light.position - fragPos);
   float diffAmt = max(dot(normal, lightDir), 0);
-  vec3 diffuse = light.diffuse * diffAmt * (texture(u_material.diffuse, pass_uv).rgb+ vec3(1.0));
+  vec3 diffuse = light.diffuse * diffAmt * texture(u_material.diffuse, pass_uv).rgb;
   
   // Attenuation
   float dist = length(light.position - fragPos);
@@ -74,6 +77,14 @@ vec3 CalcPointLight(PointLight light, vec3 normal, vec3 fragPos, vec3 viewDir)
   diffuse  *= attenuation;
   
   return ambient + diffuse;
+}
+
+vec3 ToonShading(vec3 color) {
+  vec3 origColor = texture(u_material.diffuse, pass_uv).rgb;
+  float ratio = color.x / origColor.x;
+  if (ratio > 0.8)
+	return origColor * 0.9;
+  return origColor * 0.8;
 }
 
 void main(void)
@@ -95,5 +106,14 @@ void main(void)
     resultCol += CalcPointLight(u_pointlight, normal, pass_fragPos, viewDir);
   }
   
-  out_color = vec4(resultCol, 1.0f);
+  float alpha = 1.0f * u_transparency;
+
+  if(alpha < 0.01){
+	discard;
+  }
+
+  resultCol = ToonShading(resultCol);
+  
+  out_color = vec4(resultCol, alpha);
+
 }

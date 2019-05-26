@@ -13,13 +13,22 @@ private:
     uint32_t _playerId;
 
     std::unique_ptr<Camera> _camera;
-    std::unique_ptr<GamePadXbox> _pad;
+    std::unique_ptr<GamePadXbox> _gamePad;
+    PlayerType _playerType;
+
     std::shared_ptr<CPlayerEntity> _playerEntity;
     NetworkClient *_networkClient;
 
     float _height;
 
     bool _moveKeysPressed, _stopped, _moveCamera;
+
+	// Skill type to use (only for humans)
+	bool _usePlunger = true; // False for trap, true for plunger
+
+	// Whether or not the bumpers are pressed for XBOX gamepad
+	bool _leftBumperDown = false;
+	bool _rightBumperDown = false;
 
 public:
     /**
@@ -45,11 +54,38 @@ public:
      */
     std::unique_ptr<Camera> const &getCamera();
 
+	/**
+	 * \brief Set the number of the controller
+	 * Usage: setControllerNum(GamePadIndex_One)
+	 * \param GamePadIndex(int) GamePadIndex Keycode
+	 * \return true if success
+	 */
+	bool setControllerNum(GamePadIndex player);
+
+	// Sets the _playerEntity pointer to null, and allows the LocalPlayer to
+	// register a new player entity
+	void unpairEntity();
+
+	/**
+	 * \brief Set the type of player
+	 * Usage: setPlayerType(Player_Dog)
+	 * \param PlayerType(int) Player_Dog = 0, Player_Human = 1
+	 * \return void
+	 */
+	void setPlayerType(PlayerType typeNum);
+
+	void setMouseCaptured(bool mouseCaptured);
+
+	bool getMouseCaptured();
+
+	PlayerType getPlayerType();
+
+	uint32_t getPlayerId();
+
     /**
      * \brief Function needs to be called when the window resizes
      * \param x(int) Width of the window
      * \param y(int) Height of the window
      */
     void resize(int x, int y);
-
 };

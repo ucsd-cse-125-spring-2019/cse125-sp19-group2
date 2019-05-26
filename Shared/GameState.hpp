@@ -3,6 +3,8 @@
 #include <cereal/types/base_class.hpp>
 #include <cereal/types/polymorphic.hpp>
 #include <cereal/types/vector.hpp>
+#include <cereal/types/string.hpp>
+#include <cereal/types/unordered_map.hpp>
 #include <chrono>
 
 #include "Shared/BaseState.hpp"
@@ -15,12 +17,14 @@ struct GameState : public BaseState
 	bool gameStarted;
 	bool gameOver;
 	bool inLobby;
-	int numReady;	// Number of players ready to start the game
+	bool pregameCountdown;
 	long millisecondsToStart;	// Countdown to game start
 	long millisecondsLeft;	// Time remaining in game before dogs win
+	long millisecondsToLobby;	// Time remaining before everyone is returned to the lobby
 	EntityType winner;	// Either ENTITY_DOG or ENTITY_HUMAN
-	std::vector<uint32_t> dogs;
-	std::vector<uint32_t> humans;
+	std::unordered_map<uint32_t, std::string> dogs;
+	std::unordered_map<uint32_t, std::string> humans;
+	std::vector<uint32_t> readyPlayers;	// Players ready to start the game
 
 	template<class Archive>
 	void serialize(Archive& archive)
@@ -28,17 +32,22 @@ struct GameState : public BaseState
 		archive(
 			cereal::base_class<BaseState>(this),
 			gameStarted,
+			gameOver,
 			inLobby,
-			numReady,
+			pregameCountdown,
 			millisecondsToStart,
 			millisecondsLeft,
+			millisecondsToLobby,
 			winner,
 			dogs,
-			humans);
+			humans,
+			readyPlayers);
 	}
 
 	// Some items used by server, not serialized for the client
+	std::chrono::time_point<std::chrono::steady_clock> _pregameStart;
 	std::chrono::time_point<std::chrono::steady_clock> _gameStart;
+	std::chrono::time_point<std::chrono::steady_clock> _endgameStart;
 	std::chrono::nanoseconds _gameDuration;
 };
 
