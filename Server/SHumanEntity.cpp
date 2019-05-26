@@ -255,7 +255,6 @@ void SHumanEntity::update(std::vector<std::shared_ptr<GameEvent>> events)
 
 		// keep moving forward
 		if (actionStage == 0) {
-			Logger::getInstance()->debug("moving");
 			_state->pos += _state->forward * (HUMAN_SWING_VELOCITY / TICKS_PER_SEC);
 			hasChanged = true;
 		}
