@@ -31,8 +31,6 @@ public:
 	virtual unsigned int Emit(unsigned int num_particles);
 
 protected:
-	typedef std::shared_ptr<Particle> ParticlePtr;
-
 	// Overall system properties
 	glm::vec3 _origin;            ///< Position of particle system.
 	glm::vec3 _force;             ///< Force acting on system.
@@ -40,10 +38,10 @@ protected:
 	unsigned int _live_particles; ///< Total number of active particles.
 	unsigned int _last_particle;
 
-	float _accum_time;
+	float _accum_time; ///< Time since last particel was emitted;
 	float _rate;       ///< Particles per second.
 
-	std::vector<ParticlePtr> _particles;
+	std::vector<Particle> _particles;
 
 	virtual void CreateParticle(unsigned int index) = 0;
 	virtual unsigned int FindUnusedParticle();

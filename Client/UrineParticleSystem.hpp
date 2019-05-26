@@ -37,6 +37,7 @@ public:
 	glm::vec3 force() const;
 	glm::vec2 particle_size() const;
 	float lifespan() const;
+	bool is_urinating() const;
 
 	void set_origin(const glm::vec3 &position);
 	void set_velocity(const glm::vec3 &velocity);
@@ -45,6 +46,7 @@ public:
 	void set_texture(const char *path);
 	void set_lifespan(float lifespan);
 	void set_rate(float rate);
+	void set_is_urinating(bool is_urinating);
 
 private:
 	// Urine particle properties
@@ -53,6 +55,9 @@ private:
 	Texture   _texture;  ///< Urine article texture.
 	float     _mass;     ///< Urine particle mass in kg.
 	float     _lifespan; ///< Lifespan of a urine particle in seconds.
+
+	// System properties
+	bool _is_urinating; ///< Whether urine particle system should emit particles.
 
 	// Rendering
 	GLuint _vao;

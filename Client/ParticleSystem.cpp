@@ -9,6 +9,8 @@ ParticleSystem::ParticleSystem(unsigned int max_particles, const glm::vec3 &orig
 	_max_particles = max_particles;
 	_origin = origin;
 	_particles.resize(_max_particles);
+
+	_live_particles = 0;
 }
 
 void ParticleSystem::Reset()
@@ -33,7 +35,7 @@ unsigned int ParticleSystem::FindUnusedParticle()
 {
 	for (unsigned int i = _last_particle; i < _max_particles; i++)
 	{
-		if (_particles[i]->life <= 0.0f)
+		if (_particles[i].life <= 0.0f)
 		{
 			_last_particle = i;
 			return i;
@@ -42,7 +44,7 @@ unsigned int ParticleSystem::FindUnusedParticle()
 
 	for (unsigned int i = 0; i < _last_particle; i++)
 	{
-		if (_particles[i]->life <= 0.0f)
+		if (_particles[i].life <= 0.0f)
 		{
 			_last_particle = i;
 			return i;

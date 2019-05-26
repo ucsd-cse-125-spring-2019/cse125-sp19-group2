@@ -58,10 +58,10 @@ void UrineParticleSystem::Update(float delta_time)
 	// Update physics
 	for (unsigned int i = 0; i < _live_particles; i++)
 	{
-		ParticlePtr p = _particles[i];
+		Particle p = _particles[i];
 
-		p->life -= delta_time;
-		if (p->life > 0.0f)
+		p.life -= delta_time;
+		if (p.life > 0.0f)
 		{
 			// Determine acceleration
 			glm::vec3 accel{ 0.0f };
@@ -69,14 +69,14 @@ void UrineParticleSystem::Update(float delta_time)
 			accel += _force / _mass;
 
 			// Integrate velocity and position
-			p->velocity += accel * delta_time;
-			p->position += p->velocity * delta_time;
+			p.velocity += accel * delta_time;
+			p.position += p.velocity * delta_time;
 
 			// Calculate camera distance for sorting
 			//p->camera_distance = glm::length(p->position - _camera->position());
 
 			// Update particle position buffer data
-			_position_data[particle_index] = p->position;
+			_position_data[particle_index] = p.position;
 
 			particle_index++;
 		}
@@ -85,6 +85,9 @@ void UrineParticleSystem::Update(float delta_time)
 			// Particle has died
 			remaining_particles--;
 		}
+
+		// Update particle
+		_particles[i] = p;
 	}
 
 	// Update number of live particles
@@ -92,6 +95,18 @@ void UrineParticleSystem::Update(float delta_time)
 
 	// Sort particles
 	//SortParticles();
+
+	// Update number of particles and time
+	if (_is_urinating)
+	{
+		_accum_time += delta_time;
+		unsigned int new_particles = _rate * _accum_time;
+		_accum_time -= static_cast<float>(new_particles) / _rate;
+
+		Logger::getInstance()->info("Time: " + std::to_string(_accum_time));
+		Logger::getInstance()->info("Emitting " + std::to_string(new_particles) + " urine particles.");
+		Emit(new_particles);
+	}
 
 	// Update buffer data
 	glBindBuffer(GL_ARRAY_BUFFER, _position_buffer);
@@ -118,6 +133,8 @@ void UrineParticleSystem::Draw(std::unique_ptr<Camera> const &camera)
 	glBindVertexArray(_vao);
 	glDrawArraysInstanced(GL_TRIANGLE_STRIP, 0, 1, _live_particles);
 	glBindVertexArray(0);
+
+	//Logger::getInstance()->info("Drawing " + std::to_string(_live_particles) + " particles");
 }
 
 glm::vec3 UrineParticleSystem::origin() const
@@ -143,6 +160,11 @@ glm::vec2 UrineParticleSystem::particle_size() const
 float UrineParticleSystem::lifespan() const
 {
 	return _lifespan;
+}
+
+bool UrineParticleSystem::is_urinating() const
+{
+	return _is_urinating;
 }
 
 void UrineParticleSystem::set_origin(const glm::vec3 & position)
@@ -185,15 +207,22 @@ void UrineParticleSystem::set_rate(float rate)
 	_rate = rate;
 }
 
+void UrineParticleSystem::set_is_urinating(bool is_urinating)
+{
+	_is_urinating = is_urinating;
+	if (!is_urinating) _accum_time = 0; // Reset accumulated time if not emitting
+}
+
 void UrineParticleSystem::CreateParticle(unsigned int index)
 {
 	// Random floating point number between 0.8f to 1.0f
 	float random = (static_cast<float>(rand() % 20) / 100.0f) + 0.8f;
 
-	ParticlePtr p = _particles[index];
-	p->life = _lifespan;
-	p->position = _origin;
-	p->velocity = random * _velocity; // Vary the urine particle velocity randomly by 20%
+	Particle p = _particles[index];
+	p.life     = _lifespan;
+	p.position = _origin;
+	p.velocity = random * _velocity; // Vary the urine particle velocity randomly by 20%
+	_particles[index] = p;
 
 	_live_particles++;
 }
