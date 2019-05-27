@@ -52,8 +52,8 @@ void ParticleSystemManager::updateState(std::shared_ptr<BaseState> const & state
 		if (dogState->currentAnimation == DogAnimation::ANIMATION_DOG_PEEING)
 		{
 			urineSystem->set_is_urinating(true);
-			urineSystem->set_origin(dogState->pos + glm::vec3(0.0f, 3.0f, 0.0f));
-			urineSystem->set_velocity(dogState->forward * 0.3f);
+			urineSystem->set_origin(dogState->pos + glm::vec3(0.0f, 0.1f, 0.0f));
+			urineSystem->set_velocity(dogState->forward * 0.2f);
 			Logger::getInstance()->info("Urinating...");
 		}
 		else
@@ -80,8 +80,8 @@ std::shared_ptr<ParticleSystem> ParticleSystemManager::createSystem(ParticleSyst
 		urineSystem->set_texture("urine.png");
 		urineSystem->set_rate(100.0f);
 		urineSystem->set_lifespan(2.0f);
-		urineSystem->set_size(1.0f, 1.0f);
-		urineSystem->set_mass(0.1f);
+		urineSystem->set_size(0.03f, 0.03f);
+		urineSystem->set_mass(0.3f);
 
 		system = urineSystem;
 		break;

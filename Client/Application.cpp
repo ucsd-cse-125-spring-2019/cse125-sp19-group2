@@ -459,10 +459,10 @@ void Application::Draw() {
 			// Render floor before any entity
 			CFloorEntity::getInstance().render(_localPlayer->getCamera());
 
-			EntityManager::getInstance().render(_localPlayer->getCamera());
-
 			// Render particles
 			ParticleSystemManager::getInstance().render(_localPlayer->getCamera());
+
+			EntityManager::getInstance().render(_localPlayer->getCamera());
 
 			// Debug Shader
 			_debuglightShader->Use();

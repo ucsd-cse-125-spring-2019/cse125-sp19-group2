@@ -17,9 +17,9 @@ void main(void)
 
   vec3 position = in_particle_position
     + camera_right * in_position.x * u_size.x
-	+ camera_up * in_position.y * u_size.y;
+    + camera_up * in_position.y * u_size.y;
 
-  pass_uv = vec2(in_position.x + 0.5f, in_position.y + 0.5f);
+  pass_uv = in_position.xy + vec2(0.5f, 0.5f);
 
   gl_Position = u_projection * u_view * vec4(position, 1.0f);
 }

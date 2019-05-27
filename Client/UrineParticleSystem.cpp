@@ -30,23 +30,21 @@ UrineParticleSystem::UrineParticleSystem(unsigned int max_particles, const glm::
 	glGenVertexArrays(1, &_vao);
 	glBindVertexArray(_vao);
 
-	// Generate vertex buffer
+	// Generate vertex buffer for quad
 	glGenBuffers(1, &_vbo);
 	glBindBuffer(GL_ARRAY_BUFFER, _vbo);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(vertex_data), vertex_data, GL_STATIC_DRAW);
 
-	// Generate buffer of particle positions
-	glGenBuffers(1, &_position_buffer);
-	glBindBuffer(GL_ARRAY_BUFFER, _position_buffer);
-	glBufferData(GL_ARRAY_BUFFER, _max_particles * 3 * sizeof(GLfloat), nullptr, GL_STREAM_DRAW);
-
 	glEnableVertexAttribArray(0);
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (GLvoid*)0);
 
+	// Generate buffer of instanced particle positions
+	glGenBuffers(1, &_position_buffer);
+	glBindBuffer(GL_ARRAY_BUFFER, _position_buffer);
+	glBufferData(GL_ARRAY_BUFFER, _max_particles * 3 * sizeof(GLfloat), nullptr, GL_STREAM_DRAW);
+	
 	glEnableVertexAttribArray(1);
 	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, (GLvoid*)0);
-
-	glVertexAttribDivisor(0, 0);
 	glVertexAttribDivisor(1, 1);
 
 	glBindVertexArray(0);
@@ -106,7 +104,6 @@ void UrineParticleSystem::Update(float delta_time)
 
 	// Update buffer data
 	glBindBuffer(GL_ARRAY_BUFFER, _position_buffer);
-	glBufferData(GL_ARRAY_BUFFER, _max_particles * 3 * sizeof(GLfloat), nullptr, GL_STREAM_DRAW);
 	glBufferSubData(GL_ARRAY_BUFFER, 0, _particles_count * 3 * sizeof(GLfloat), _position_data.data());
 }
 
