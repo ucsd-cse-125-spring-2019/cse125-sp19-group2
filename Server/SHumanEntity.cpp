@@ -49,8 +49,6 @@ SHumanEntity::SHumanEntity(
 		{
 			netEntity->getState()->isDestroyed = true;
 			netEntity = nullptr;
-			_netDistance = 0;
-			_netVelocity = 0;
 		}
 	};
 }
@@ -219,14 +217,6 @@ void SHumanEntity::update(std::vector<std::shared_ptr<GameEvent>> events)
 			float chargeDuration = chargeDistance / HUMAN_SWING_VELOCITY;
 			stuntDuration = (chargeDistance / HUMAN_BASE_VELOCITY - chargeDistance / HUMAN_SWING_VELOCITY + 0.2f) * 1250;
 
-			if (netEntity == nullptr)
-			{
-				netEntity = std::make_shared<SCylinderEntity>(_state->pos, glm::vec3(0.5f, 1.0f, 0.5f));
-				netEntity->getState()->isSolid = false;
-				netEntity->hasChanged = true;
-				_structureInfo->newEntities->push_back(netEntity);
-			}
-
 			// animation based on how high is the charge meter
 			if (humanState->chargeMeter < HUMAN_CHARGE_THRESHOLD1)
 			{
@@ -235,8 +225,11 @@ void SHumanEntity::update(std::vector<std::shared_ptr<GameEvent>> events)
 				humanState->currentAnimation = ANIMATION_HUMAN_SWINGING1;
 				humanState->isPlayOnce = true;
 				humanState->animationDuration = stuntDuration + chargeDuration;
-				_netVelocity = 0.1f;
-				_netMaxDistance = 1.0f;
+				if (netEntity == nullptr)
+				{
+					netEntity = std::make_shared<SNetEntity>(_state->pos, 0.08f, 1.0f);
+					_structureInfo->newEntities->push_back(netEntity);
+				}
 			}
 			else if (humanState->chargeMeter < HUMAN_CHARGE_THRESHOLD2)
 			{
@@ -245,8 +238,11 @@ void SHumanEntity::update(std::vector<std::shared_ptr<GameEvent>> events)
 				humanState->currentAnimation = ANIMATION_HUMAN_SWINGING2;
 				humanState->isPlayOnce = true;
 				humanState->animationDuration = stuntDuration + chargeDuration;
-				_netVelocity = 0.08f;
-				_netMaxDistance = 2.0f;
+				if (netEntity == nullptr)
+				{
+					netEntity = std::make_shared<SNetEntity>(_state->pos, 0.08f, 1.8f);
+					_structureInfo->newEntities->push_back(netEntity);
+				}
 			}
 			else
 			{
@@ -255,8 +251,11 @@ void SHumanEntity::update(std::vector<std::shared_ptr<GameEvent>> events)
 				humanState->currentAnimation = ANIMATION_HUMAN_SWINGING3;
 				humanState->isPlayOnce = true;
 				humanState->animationDuration = stuntDuration + chargeDuration;
-				_netVelocity = 0.08f;
-				_netMaxDistance = 2.0f;
+				if (netEntity == nullptr)
+				{
+					netEntity = std::make_shared<SNetEntity>(_state->pos, 0.07f, 2.0f);
+					_structureInfo->newEntities->push_back(netEntity);
+				}
 			}
 				
 
@@ -286,9 +285,7 @@ void SHumanEntity::update(std::vector<std::shared_ptr<GameEvent>> events)
 
 		if (netEntity != nullptr)
 		{
-			_netDistance = std::min(_netDistance + _netVelocity, _netMaxDistance);
-			netEntity->getState()->pos = _state->pos + _state->forward * _netDistance;
-			netEntity->hasChanged = true;
+			netEntity->updateDistance(_state->pos, _state->forward);
 		}
 
 		break;

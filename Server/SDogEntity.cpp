@@ -207,7 +207,7 @@ void SDogEntity::generalHandleCollision(SBaseEntity * entity)
 	auto dogState = std::static_pointer_cast<DogState>(_state);
 
 	// Dog getting caught is handled by the dog, not the human
-	if (entity->getState()->type == ENTITY_HUMAN &&
+	if (entity->getState()->type == ENTITY_NET &&
 		!isCaught &&
 		!_structureInfo->gameState->gameOver)
 	{
