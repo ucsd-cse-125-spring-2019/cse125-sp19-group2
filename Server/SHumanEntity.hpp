@@ -4,6 +4,7 @@
 #include "Shared/HumanState.hpp"
 #include "SPlungerEntity.hpp"
 #include "SRopeEntity.hpp"
+#include "SNetEntity.hpp"
 
 class SHumanEntity : public SPlayerEntity
 {
@@ -25,7 +26,9 @@ private:
 
 	std::shared_ptr<SPlungerEntity> plungerEntity;
 	std::shared_ptr<SRopeEntity> ropeEntity;
+	std::shared_ptr<SNetEntity> netEntity;
 	std::function<void()> _launchingReset;
+	std::function<void()> _swingingReset;
 
 	glm::vec3 _plungerDirection;
 

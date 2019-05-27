@@ -53,6 +53,14 @@ SHumanEntity::SHumanEntity(
 			ropeEntity = nullptr;
 		}
 	};
+
+	_swingingReset = [&] {
+		if (netEntity != nullptr)
+		{
+			netEntity->getState()->isDestroyed = true;
+			netEntity = nullptr;
+		}
+	};
 }
 
 void SHumanEntity::update(std::vector<std::shared_ptr<GameEvent>> events)
@@ -181,7 +189,7 @@ void SHumanEntity::update(std::vector<std::shared_ptr<GameEvent>> events)
 			hasChanged = true;
 			glm::vec3 plungerTailPos = plungerEntity->getState()->pos + glm::normalize(plungerEntity->getState()->forward) * -0.675f;
 			interpolateMovement(plungerTailPos, plungerEntity->getState()->forward, 20.0f,
-				_launchingReset, _launchingReset);
+				_launchingReset, _launchingReset, false);
 			actionStage++;
 		}
 
@@ -233,6 +241,11 @@ void SHumanEntity::update(std::vector<std::shared_ptr<GameEvent>> events)
 				humanState->currentAnimation = ANIMATION_HUMAN_SWINGING1;
 				humanState->isPlayOnce = true;
 				humanState->animationDuration = stuntDuration + chargeDuration;
+				if (netEntity == nullptr)
+				{
+					netEntity = std::make_shared<SNetEntity>(_state->pos, 0.08f, 1.0f);
+					_structureInfo->newEntities->push_back(netEntity);
+				}
 			}
 			else if (humanState->chargeMeter < HUMAN_CHARGE_THRESHOLD2)
 			{
@@ -241,6 +254,11 @@ void SHumanEntity::update(std::vector<std::shared_ptr<GameEvent>> events)
 				humanState->currentAnimation = ANIMATION_HUMAN_SWINGING2;
 				humanState->isPlayOnce = true;
 				humanState->animationDuration = stuntDuration + chargeDuration;
+				if (netEntity == nullptr)
+				{
+					netEntity = std::make_shared<SNetEntity>(_state->pos, 0.08f, 1.8f);
+					_structureInfo->newEntities->push_back(netEntity);
+				}
 			}
 			else
 			{
@@ -249,6 +267,11 @@ void SHumanEntity::update(std::vector<std::shared_ptr<GameEvent>> events)
 				humanState->currentAnimation = ANIMATION_HUMAN_SWINGING3;
 				humanState->isPlayOnce = true;
 				humanState->animationDuration = stuntDuration + chargeDuration;
+				if (netEntity == nullptr)
+				{
+					netEntity = std::make_shared<SNetEntity>(_state->pos, 0.07f, 2.0f);
+					_structureInfo->newEntities->push_back(netEntity);
+				}
 			}
 				
 
@@ -265,14 +288,20 @@ void SHumanEntity::update(std::vector<std::shared_ptr<GameEvent>> events)
 					_isSwinging = false;
 					humanState->chargeMeter = 0;
 					hasChanged = true;
+					_swingingReset();
 				});
 			});
 		}
 
-		// keep moving forward
+		// stage 0: human moving forward and net moving forward
 		if (actionStage == 0) {
 			_state->pos += _state->forward * (HUMAN_SWING_VELOCITY / TICKS_PER_SEC);
 			hasChanged = true;
+		}
+
+		if (netEntity != nullptr)
+		{
+			netEntity->updateDistance(_state->pos, _state->forward);
 		}
 
 		break;
