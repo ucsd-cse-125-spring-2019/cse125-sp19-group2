@@ -1,7 +1,7 @@
 #pragma once
 
 #include "SBaseEntity.hpp"
-#include "CapsuleCollider.hpp"
+#include "PlungerCollider.hpp"
 #include "EmptyCollider.hpp"
 
 #define LAUNCHING_VELOCITY 22.0f
@@ -23,7 +23,7 @@ public:
 		_state->forward = forward;
 
 		// Basic capsule collider
-		_collider = std::make_unique<CapsuleCollider>(_state.get());
+		_collider = std::make_unique<PlungerCollider>(_state.get());
 		_state->colliderType = COLLIDER_CAPSULE;
 
 		// Slightly tighter bounding box

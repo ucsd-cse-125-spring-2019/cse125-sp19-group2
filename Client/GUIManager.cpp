@@ -35,7 +35,7 @@ void GuiManager::init(GLFWwindow* window) {
         });
 
     _fpsCounter = new Label(_screen, "fps: 0", "sans", 32);
-    _fpsCounter->setColor(Color(Vector4f(1,1,1,1)));
+    _fpsCounter->setColor(SOLID_WHITE);
     
 }
 
@@ -89,9 +89,9 @@ void GuiManager::resize(int x, int y) {
 			break;
 		case WIDGET_HUD:
 			// Set spacing for parent HUD widget to "clamp" bottom and top HUD 
-			int topHeight = getWidget(WIDGET_HUD_TOP)->preferredSize(_screen->nvgContext()).y();
-			int middleHeight = getWidget(WIDGET_HUD_MIDDLE)->preferredSize(_screen->nvgContext()).y();
-			int bottomHeight = getWidget(WIDGET_HUD_BOTTOM)->preferredSize(_screen->nvgContext()).y();
+			int topHeight = getWidget(WIDGET_HUD_TOP)->preferredSize(_screen->nvgContext()).y() / _screen->pixelRatio();
+			int middleHeight = getWidget(WIDGET_HUD_MIDDLE)->preferredSize(_screen->nvgContext()).y() / _screen->pixelRatio();
+			int bottomHeight = getWidget(WIDGET_HUD_BOTTOM)->preferredSize(_screen->nvgContext()).y() / _screen->pixelRatio();
 
 			int spacing = (y / _screen->pixelRatio() - middleHeight - topHeight - bottomHeight);
 			static_cast<nanogui::BoxLayout*>(widgetPair.second->layout())->setSpacing(spacing / 2);
@@ -175,8 +175,16 @@ std::string GuiManager::getPlayerName() {
 	return _playerNameBox->value();
 }
 
+void GuiManager::setPlayerName(std::string val) {
+	_playerNameBox->setValue(val);
+}
+
 std::string GuiManager::getAddress() {
 	return _addressBox->value();
+}
+
+void GuiManager::setAddress(std::string val) {
+	_addressBox->setValue(val);
 }
 
 void GuiManager::updateDogsList(
@@ -218,7 +226,7 @@ void GuiManager::updateDogsList(
 			_dogs[dogId] = dogName;
 			if (dogPair.first == playerId)
 			{
-				playerLabel->setColor(nanogui::Color(0.376f, 0.863f, 1.0f, 1.0f));
+				playerLabel->setColor(SOLID_HIGHLIGHTED);
 			}
 		}
 	}
@@ -263,7 +271,7 @@ void GuiManager::updateHumansList(
 			_humans[humanId] = humanName;
 			if (humanPair.first == playerId)
 			{
-				playerLabel->setColor(nanogui::Color(0.376f, 0.863f, 1.0f, 1.0f));
+				playerLabel->setColor(SOLID_HIGHLIGHTED);
 			}
 		}
 	}
@@ -301,6 +309,57 @@ void GuiManager::setSecondaryMessage(std::string message) {
 	_secondaryMessage->setCaption(message);
 }
 
+void GuiManager::setActiveSkill(bool usePlunger) {
+	if (usePlunger) {
+		_plungerInfo->setColor(SOLID_HIGHLIGHTED);
+		_trapInfo->setColor(SOLID_WHITE);
+	}
+	else
+	{
+		_plungerInfo->setColor(SOLID_WHITE);
+		_trapInfo->setColor(SOLID_HIGHLIGHTED);
+	}
+}
+
+void GuiManager::updateStamina(float val) {
+	int percentage = (int)(val * 100);
+	_staminaInfo->setCaption("Stamina: " + std::to_string(percentage) + "%");
+}
+
+void GuiManager::updatePee(float val) {
+	int percentage = (int)(val * 100);
+	_peeInfo->setCaption("Pee: " + std::to_string(percentage) + "%");
+}
+
+void GuiManager::updatePlunger(long millisecondsLeft) {
+	if (millisecondsLeft == 0)
+	{
+		_plungerInfo->setCaption("Plunger: Ready");
+	}
+	else
+	{
+		auto seconds = (int)(std::ceil(millisecondsLeft / 1000.0f));
+		_plungerInfo->setCaption("Plunger: " + std::to_string(seconds));
+	}
+}
+
+void GuiManager::updateTrap(long millisecondsLeft) {
+	if (millisecondsLeft == 0)
+	{
+		_trapInfo->setCaption("Trap: Ready");
+	}
+	else
+	{
+		auto seconds = (int)(std::ceil(millisecondsLeft / 1000.0f));
+		_trapInfo->setCaption("Trap: " + std::to_string(seconds));
+	}
+}
+
+void GuiManager::updateCharge(float val) {
+	int percentage = (int)(val * 100);
+	_chargeInfo->setCaption("Charge: " + std::to_string(percentage) + "%");
+}
+
 void GuiManager::setVisibility(WidgetType name, bool visibility) {
 	setVisibility(_widgets.find(name)->second, visibility);
 }
@@ -329,6 +388,13 @@ void GuiManager::initConnectScreen() {
 	_playerNameBox->setFontSize(38);
 	_playerNameBox->setAlignment(nanogui::TextBox::Alignment::Center);
 
+    auto background = LoadTextureFromFile("1.jpg", "./Resources/Textures/Menu/");
+    	auto foreground1 = LoadTextureFromFile("2.jpg", "./Resources/Textures/Menu/");
+    	auto foreground2 = LoadTextureFromFile("3.jpg", "./Resources/Textures/Menu/");
+    	//_playerNameBox->setBackgroundTexture(background, foreground1, foreground2);
+    	//_playerNameBox->alpha = 0.5;
+        //_playerNameBox->setTextColor(nanogui::Color(0, 0, 255, 255));
+
 	// IP address box
 	_addressBox = new nanogui::TextBox(connectScreen, "localhost");
 	_addressBox->setEditable(true);
@@ -338,7 +404,7 @@ void GuiManager::initConnectScreen() {
 	// Connect button
 	_connectButton = new nanogui::Button(connectScreen, "Connect");
 	_connectButton->setFontSize(28);
-	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+	
     	auto unfocused = LoadTextureFromFile("1.jpg", "./Resources/Textures/Menu/");
     	auto focused = LoadTextureFromFile("2.jpg", "./Resources/Textures/Menu/");
     	auto pushed = LoadTextureFromFile("3.jpg", "./Resources/Textures/Menu/");
@@ -429,7 +495,7 @@ void GuiManager::initHUD() {
 
 	// Clock
 	_timer = new nanogui::Label(topHUD, "00:00.000", "sans", 52);
-	_timer->setColor(Color(Vector4f(1,1,1,1)));
+	_timer->setColor(SOLID_WHITE);
 
 	// Empty right widget
 	//new nanogui::Label(topHUD, "", "sans", 5);
@@ -440,9 +506,9 @@ void GuiManager::initHUD() {
 	middleHUD->setLayout(middleHUDLayout);
 
 	_primaryMessage = new nanogui::Label(middleHUD, "", "sans", 72);
-	_primaryMessage->setColor(Color(Vector4f(1,1,1,1)));
+	_primaryMessage->setColor(SOLID_WHITE);
 	_secondaryMessage = new nanogui::Label(middleHUD, "", "sans", 48);
-	_secondaryMessage->setColor(Color(Vector4f(1,1,1,1)));
+	_secondaryMessage->setColor(SOLID_WHITE);
 
 	// Bottom HUD
 	auto bottomHUD = createWidget(hudContainer, WIDGET_HUD_BOTTOM);
@@ -452,9 +518,38 @@ void GuiManager::initHUD() {
 	// Empty left widget
 	new nanogui::Label(bottomHUD, "", "sans", 5);
 
-	// Skills/Abilities go here
-	auto skillsPlaceholder = new nanogui::Label(bottomHUD, "Skills go here", "sans", 52);
-	skillsPlaceholder->setColor(Color(Vector4f(1,1,1,0.2f)));
+	// Dog skills
+	auto dogSkills= createWidget(bottomHUD, WIDGET_HUD_DOG_SKILLS);
+	auto dogSkillsLayout = new nanogui::BoxLayout(nanogui::Orientation::Horizontal, nanogui::Alignment::Middle, 0, 50);
+	dogSkills->setLayout(dogSkillsLayout);
+
+	// Stamina
+	_staminaInfo = new nanogui::Label(dogSkills, "Stamina: 100%", "sans", 32);
+	_staminaInfo->setColor(SOLID_WHITE);
+
+	// Pee
+	_peeInfo = new nanogui::Label(dogSkills, "Pee: 100%", "sans", 32);
+	_peeInfo->setColor(SOLID_WHITE);
+
+	// Human skills
+	auto humanSkills = createWidget(bottomHUD, WIDGET_HUD_HUMAN_SKILLS);
+	auto humanSkillsLayout = new nanogui::BoxLayout(nanogui::Orientation::Horizontal, nanogui::Alignment::Middle, 0, 50);
+	humanSkills->setLayout(humanSkillsLayout);
+
+	// Plunger
+	_plungerInfo = new nanogui::Label(humanSkills, "Plunger: Ready", "sans", 32);
+	_plungerInfo->setColor(SOLID_HIGHLIGHTED);
+
+	// Trap
+	_trapInfo = new nanogui::Label(humanSkills, "Trap: Ready", "sans", 32);
+	_trapInfo->setColor(SOLID_WHITE);
+
+	// Charge rate of swinging
+	_chargeInfo = new nanogui::Label(humanSkills, "Charge: 0%", "sans", 32);
+	_chargeInfo->setColor(SOLID_WHITE);
+
+	//auto skillsPlaceholder = new nanogui::Label(bottomHUD, "Skills go here", "sans", 52);
+	//skillsPlaceholder->setColor(Color(Vector4f(1,1,1,0.2f)));
 
 	// Empty right widget
 	new nanogui::Label(bottomHUD, "", "sans", 5);

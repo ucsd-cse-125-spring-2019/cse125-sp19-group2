@@ -29,10 +29,22 @@ public:
 
 		// Requires a cast
 		Animation* dogAnimation = static_cast<Animation*>(_objectModel.get());
-		dogAnimation->animatedMesh->_takeIndex = newState->currentAnimation;
+		if (newState->isPlayOnce)
+		{
+			dogAnimation->playOnce(newState->currentAnimation, newState->animationDuration);
+		}
+		else
+		{
+			dogAnimation->play(newState->currentAnimation);
+		}
 
 		// Dog attributes and items
 		currentState->runStamina = newState->runStamina;
+		currentState->urineMeter = newState->urineMeter;
+
+		// Update HUD
+		GuiManager::getInstance().updateStamina(currentState->runStamina / MAX_DOG_STAMINA);
+		GuiManager::getInstance().updatePee(currentState->urineMeter / MAX_DOG_URINE);
 	}
 };
 

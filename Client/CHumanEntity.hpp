@@ -29,10 +29,22 @@ public:
 
 		// Requires a cast
 		Animation* humanAnimation = static_cast<Animation*>(_objectModel.get());
-		humanAnimation->animatedMesh->_takeIndex = newState->currentAnimation;
+		if (newState->isPlayOnce)
+		{
+			humanAnimation->playOnce(newState->currentAnimation, newState->animationDuration);
+		}
+		else
+		{
+			humanAnimation->play(newState->currentAnimation);
+		}
 
 		// Human attributes and items
-		// TODO
+		currentState->chargeMeter = newState->chargeMeter;
+
+		// Update HUD
+		GuiManager::getInstance().updatePlunger(newState->plungerCooldown);
+		GuiManager::getInstance().updateTrap(newState->trapCooldown);
+		GuiManager::getInstance().updateCharge(currentState->chargeMeter / MAX_HUMAN_CHARGE);
 	}
 };
 

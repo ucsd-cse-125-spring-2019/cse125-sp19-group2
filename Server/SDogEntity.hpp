@@ -4,9 +4,7 @@
 #include "SPlayerEntity.hpp"
 #include "Shared/DogState.hpp"
 #include "SPuddleEntity.hpp"
-
-#define BASE_VELOCITY 5.0f
-#define RUN_VELOCITY BASE_VELOCITY * 1.5f
+#include "STrapEntity.hpp"
 
 class SDogEntity : public SPlayerEntity
 {
@@ -14,8 +12,7 @@ public:
 	SDogEntity(
 		uint32_t playerId,
 		std::string playerName,
-		std::vector<glm::vec2>* jails,
-		std::vector<std::shared_ptr<SBaseEntity>>* newEntities);
+		StructureInfo* structureInfo);
 
 	~SDogEntity() {};
 
@@ -38,18 +35,21 @@ public:
 	}
 
 private:
-	// List of jails the dog could potentially be sent to
-	std::vector<glm::vec2>* _jails;
 	int type = 0;
 
 	// _isSomething is just player's attempt of doing it, may not be the final action
 	bool _isUrinating = false;
 	bool _isRunning = false;
 	bool _isInteracting = false;
+	bool _isTrapped = false;
+
+	// Number of times the dog has pressed a button to escape trap
+	int _numEscapePressed = 0;
+
+	// If the dog is currently trapped, this points to the trap
+	SBaseEntity* _curTrap;
 
 	DogAction _curAction = ACTION_DOG_IDLE;
-
-	std::vector<std::shared_ptr<SBaseEntity>>* _newEntities;
 
 	// State for jail triggers
 	bool _nearTrigger = false;

@@ -152,6 +152,10 @@ public:
      */
     uint32_t takeCount() const;
 
+    float getDuration(int takeIndex);
+
+    float getTimeInTick(int takeIndex, float second);
+
     std::string getCurrentAnimName() const;
 
 private:
@@ -194,6 +198,10 @@ private:
     void move(std::vector<T>& to, I& fromStart, I& fromEnd);
 
     void loadTakes(const std::string& filename);
+
+    std::tuple<int, uint32_t> getKeyFrame(int takeIndex, float time) const {
+        
+    }
 
     uint32_t _VAO;
     uint32_t _buffers[TYPECOUNT]{};
