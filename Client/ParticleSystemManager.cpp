@@ -52,8 +52,18 @@ void ParticleSystemManager::updateState(std::shared_ptr<BaseState> const & state
 		if (dogState->currentAnimation == DogAnimation::ANIMATION_DOG_PEEING)
 		{
 			urineSystem->set_is_urinating(true);
-			urineSystem->set_origin(dogState->pos + glm::vec3(0.0f, 0.1f, 0.0f));
-			urineSystem->set_velocity(dogState->forward * 0.2f);
+
+			glm::vec3 forward_norm = glm::normalize(dogState->forward);
+
+			// Origin urination
+			glm::vec3 origin = dogState->pos - forward_norm * 0.2f;
+			origin.y += 0.2f;
+
+			// Urination velocity
+			glm::vec3 velocity = glm::vec3(glm::rotate(-45.0f, glm::vec3(0.0f, 1.0f, 0.0f)) * glm::vec4(forward_norm, 1.0f));
+
+			urineSystem->set_origin(origin);
+			urineSystem->set_velocity(velocity);
 			Logger::getInstance()->info("Urinating...");
 		}
 		else
