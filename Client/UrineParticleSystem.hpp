@@ -65,7 +65,6 @@ private:
 	GLuint _vao;
 	GLuint _vbo;
 	GLuint _position_buffer;
-	//std::shared_ptr<Camera> _camera;
 	Shader _urine_program;
 
 	std::vector<glm::vec3> _position_data;

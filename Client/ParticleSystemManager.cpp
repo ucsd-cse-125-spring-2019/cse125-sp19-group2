@@ -1,5 +1,6 @@
 #include "ParticleSystemManager.hpp"
 #include "UrineParticleSystem.hpp"
+#include "FountainParticleSystem.hpp"
 #include "Shared/DogState.hpp"
 
 ParticleSystemManager & ParticleSystemManager::getInstance()
@@ -72,6 +73,19 @@ void ParticleSystemManager::updateState(std::shared_ptr<BaseState> const & state
 			Logger::getInstance()->info("Stopping urination...");
 		}
 	}
+	else if (state->type == ENTITY_FOUNTAIN)
+	{
+		std::shared_ptr<FountainParticleSystem> fountainSystem = nullptr;
+
+		// Check if particle system exists
+		auto result = _systemsMap.find(state->id);
+		if (result == _systemsMap.end())
+		{
+			fountainSystem = std::static_pointer_cast<FountainParticleSystem>(createSystem(ParticleSystemType::FOUNTAIN));
+			fountainSystem->set_origin(state->pos + glm::vec3(0.0f, 2.0f, 0.0f));
+			_systemsMap.insert({ state->id, fountainSystem });
+		}
+	}
 }
 
 void ParticleSystemManager::render(std::unique_ptr<Camera> const & camera)
@@ -86,15 +100,31 @@ std::shared_ptr<ParticleSystem> ParticleSystemManager::createSystem(ParticleSyst
 	switch (system_type)
 	{
 	case ParticleSystemType::URINE:
+	{
 		auto urineSystem = std::make_shared<UrineParticleSystem>();
 		urineSystem->set_texture("urine.png");
 		urineSystem->set_rate(100.0f);
-		urineSystem->set_lifespan(2.0f);
+		urineSystem->set_lifespan(1.0f);
 		urineSystem->set_size(0.03f, 0.03f);
 		urineSystem->set_mass(0.3f);
 
 		system = urineSystem;
 		break;
+	}
+	case ParticleSystemType::FOUNTAIN:
+	{
+		auto fountainSystem = std::make_shared<FountainParticleSystem>();
+		fountainSystem->set_texture("light_blue.jpg");
+		fountainSystem->set_rate(100.0f);
+		fountainSystem->set_lifespan(1.0f);
+		fountainSystem->set_size(0.05f, 0.05f);
+		fountainSystem->set_mass(0.3f);
+		fountainSystem->set_speed(3.0f);
+		fountainSystem->set_angle(45.0f);
+
+		system = fountainSystem;
+		break;
+	}
 	}
 
 	// Return the particle system that was added

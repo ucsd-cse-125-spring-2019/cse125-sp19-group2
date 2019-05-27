@@ -252,6 +252,7 @@ xcopy /y /d  "$(SolutionDir)Library\lib\x64\Release\*.dll" "$(OutDir)"</Command>
     <ClCompile Include="ColliderManager.cpp" />
     <ClCompile Include="EntityManager.cpp" />
     <ClCompile Include="DirectionalLight.cpp" />
+    <ClCompile Include="FountainParticleSystem.cpp" />
     <ClCompile Include="FrameBuffer.cpp" />
     <ClCompile Include="glad.c" />
     <ClCompile Include="GUIManager.cpp" />
@@ -325,6 +326,7 @@ xcopy /y /d  "$(SolutionDir)Library\lib\x64\Release\*.dll" "$(OutDir)"</Command>
     <ClInclude Include="CTriggerEntity.hpp" />
     <ClInclude Include="Drawable.hpp" />
     <ClInclude Include="EntityManager.hpp" />
+    <ClInclude Include="FountainParticleSystem.hpp" />
     <ClInclude Include="FrameBuffer.h" />
     <ClInclude Include="GamePadXbox.hpp" />
     <ClInclude Include="GUIManager.hpp" />

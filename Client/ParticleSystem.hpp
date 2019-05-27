@@ -32,14 +32,14 @@ public:
 
 protected:
 	// Overall system properties
-	glm::vec3 _origin{ 0.0f };    ///< Position of particle system.
-	glm::vec3 _force{ 0.0f };     ///< Force acting on system.
-	unsigned int _max_particles;  ///< Maximum number of particles.
-	unsigned int _live_particles; ///< Total number of active particles.
-	unsigned int _last_particle;
+	glm::vec3 _origin{ 0.0f };        ///< Position of particle system.
+	glm::vec3 _force{ 0.0f };         ///< Force acting on system.
+	unsigned int _max_particles  = 0; ///< Maximum number of particles.
+	unsigned int _live_particles = 0; ///< Total number of active particles.
+	unsigned int _last_particle  = 0;
 
-	float _accum_time; ///< Time since last particel was emitted;
-	float _rate;       ///< Particles per second.
+	float _accum_time = 0.0f; ///< Time since last particel was emitted;
+	float _rate = 0.0f;       ///< Particles per second.
 
 	std::vector<Particle> _particles;
 

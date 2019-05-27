@@ -7,7 +7,8 @@
 
 enum class ParticleSystemType : unsigned char
 {
-	URINE
+	URINE,
+	FOUNTAIN
 };
 
 class ParticleSystemManager
