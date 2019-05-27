@@ -178,7 +178,7 @@ protected:
     uint32_t backgroundTextureUnfocused = 0;
     uint32_t backgroundTextureFocused = 0;
     uint32_t backgroundTexturePushed = 0;
-  ImageView* _image;
+  ImageView* _image = nullptr;
   //Window* _iwindow;
   bool initialized = false;
 
