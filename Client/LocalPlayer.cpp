@@ -119,7 +119,16 @@ LocalPlayer::LocalPlayer(uint32_t playerId, std::unique_ptr<NetworkClient> const
 			}
 			else
 			{
-				// TODO: trap placement
+				event = std::make_shared<GameEvent>();
+				event->playerId = _playerId;
+				event->type = EVENT_PLAYER_PLACE_TRAP;
+				try
+				{
+					networkClient->sendEvent(event);
+				}
+				catch (std::runtime_error e)
+				{
+				};
 			}
         });
 

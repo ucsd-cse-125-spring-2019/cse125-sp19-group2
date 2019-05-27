@@ -261,11 +261,13 @@
     <ClInclude Include="SHumanEntity.hpp" />
     <ClInclude Include="SHydrantEntity.hpp" />
     <ClInclude Include="SJailEntity.hpp" />
+    <ClInclude Include="SNetEntity.hpp" />
     <ClInclude Include="SPlayerEntity.hpp" />
     <ClInclude Include="GridLevelParser.hpp" />
     <ClInclude Include="SPlungerEntity.hpp" />
     <ClInclude Include="SPuddleEntity.hpp" />
     <ClInclude Include="SRopeEntity.hpp" />
+    <ClInclude Include="STrapEntity.hpp" />
     <ClInclude Include="STriggerEntity.hpp" />
     <ClInclude Include="StructureInfo.hpp" />
   </ItemGroup>

@@ -48,7 +48,7 @@ void SDogEntity::update(std::vector<std::shared_ptr<GameEvent>> events)
 	if (dogState->runStamina < MAX_DOG_STAMINA)
 	{
 		// Four seconds to charge 1 second of sprinting
-		dogState->runStamina += 1.0f / 4 / TICKS_PER_SEC;
+		dogState->runStamina += 1.0f / 3 / TICKS_PER_SEC;
 		hasChanged = true;
 	}
 	else
@@ -87,6 +87,22 @@ void SDogEntity::update(std::vector<std::shared_ptr<GameEvent>> events)
 				break;
 			case EVENT_PLAYER_INTERACT_START:
 				_isInteracting = true;
+
+				// If currently trapped, increment button count
+				if (_isTrapped)
+				{
+					_numEscapePressed++;
+				}
+
+				// Mark player as no longer trapped if we reach the max
+				if (_numEscapePressed >= MAX_DOG_ESCAPE_PRESSES)
+				{
+					_numEscapePressed = 0;
+					_isTrapped = false;
+					_isInterpolating = false;
+					_curTrap->getState()->isDestroyed = true;
+					_curTrap = nullptr;
+				}
 				break;
 			case EVENT_PLAYER_INTERACT_END:
 				_isInteracting = false;
@@ -141,8 +157,8 @@ void SDogEntity::update(std::vector<std::shared_ptr<GameEvent>> events)
 			dogState->currentAnimation = ANIMATION_DOG_PEEING;
 			hasChanged = true;
 
-			// Register a timer and place the pee object after 1 second
-			_peeTimer = registerTimer(1000 /* Milliseconds */, [&]()
+			// Register a timer and place the pee object after half a second
+			_peeTimer = registerTimer(500 /* Milliseconds */, [&]()
 				{
 					if (_curAction == ACTION_DOG_PEEING)
 					{
@@ -185,7 +201,7 @@ void SDogEntity::update(std::vector<std::shared_ptr<GameEvent>> events)
 			// Increase pee meter
 			if (dogState->urineMeter < MAX_DOG_URINE)
 			{
-				dogState->urineMeter += MAX_DOG_URINE / 3 / TICKS_PER_SEC; // Refilled in 3 seconds
+				dogState->urineMeter += MAX_DOG_URINE / 2 / TICKS_PER_SEC; // Refilled in 2 seconds
 			}
 			else
 			{
@@ -193,6 +209,19 @@ void SDogEntity::update(std::vector<std::shared_ptr<GameEvent>> events)
 			}
 		}
 		break;
+	case ACTION_DOG_TRAPPED:
+		if (actionChanged) {
+			// Replace with walking animation
+			dogState->currentAnimation = ANIMATION_DOG_RUNNING;
+
+			// Interpolate to trap
+			interpolateMovement(_curTrap->getState()->pos, _state->forward, DOG_BASE_VELOCITY / 10,
+				[&]() {
+					// Switch to idle
+					dogState->currentAnimation = ANIMATION_DOG_IDLE;
+					hasChanged = true;
+				});
+		}
 	}
 
 	handleInterpolation();
@@ -207,7 +236,7 @@ void SDogEntity::generalHandleCollision(SBaseEntity * entity)
 	auto dogState = std::static_pointer_cast<DogState>(_state);
 
 	// Dog getting caught is handled by the dog, not the human
-	if (entity->getState()->type == ENTITY_HUMAN &&
+	if (entity->getState()->type == ENTITY_NET &&
 		!isCaught &&
 		!_structureInfo->gameState->gameOver)
 	{
@@ -230,6 +259,18 @@ void SDogEntity::generalHandleCollision(SBaseEntity * entity)
 		entity->getState()->isDestroyed = true;
 		entity->hasChanged = true;
 	}
+	else if (entity->getState()->type == ENTITY_TRAP)
+	{
+		// Mark dog as trapped if not yet slated for destruction
+		if (!entity->getState()->isDestroyed)
+		{
+			dogState->message = "Escape (Left click / A) [" +
+				std::to_string(_numEscapePressed) + "/" +
+				std::to_string(MAX_DOG_ESCAPE_PRESSES) + "]";
+			_curTrap = entity;
+			_isTrapped = true;
+		}
+	}
 }
 
 void SDogEntity::createPuddle()
@@ -248,7 +289,8 @@ bool SDogEntity::updateAction()
 	// lower the priority of action if possible
 	if (_curAction == ACTION_DOG_PEEING && !_isUrinating ||
 		_curAction == ACTION_DOG_DRINKING && !_isInteracting ||
-		_curAction == ACTION_DOG_SCRATCHING && !_isInteracting)
+		_curAction == ACTION_DOG_SCRATCHING && !_isInteracting ||
+		_curAction == ACTION_DOG_TRAPPED && !_isTrapped)
 	{
 		_curAction = ACTION_DOG_IDLE;
 	}
@@ -262,6 +304,7 @@ bool SDogEntity::updateAction()
 		if (_isUrinating && dogState->urineMeter == 1.0f) _curAction = ACTION_DOG_PEEING;
 		else if (_isInteracting && _nearTrigger) _curAction = ACTION_DOG_SCRATCHING;
 		else if (_isInteracting && _nearFountain) _curAction = ACTION_DOG_DRINKING;
+		else if (_isTrapped) _curAction = ACTION_DOG_TRAPPED;
 	}
 
 	return oldAction != _curAction;

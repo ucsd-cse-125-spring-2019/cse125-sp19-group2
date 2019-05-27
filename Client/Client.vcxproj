@@ -320,6 +320,7 @@ xcopy /y /d  "$(SolutionDir)Library\lib\x64\Release\*.dll" "$(OutDir)"</Command>
     <ClInclude Include="CPlungerEntity.hpp" />
     <ClInclude Include="CPuddleEntity.hpp" />
     <ClInclude Include="CRopeEntity.hpp" />
+    <ClInclude Include="CTrapEntity.hpp" />
     <ClInclude Include="CTriggerEntity.hpp" />
     <ClInclude Include="Drawable.hpp" />
     <ClInclude Include="EntityManager.hpp" />

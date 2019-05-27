@@ -1,4 +1,5 @@
 #include "SHumanEntity.hpp"
+#include "STrapEntity.hpp"
 
 SHumanEntity::SHumanEntity(
 	uint32_t playerId,
@@ -29,8 +30,17 @@ SHumanEntity::SHumanEntity(
 
 	// Player-specific stuff
 	humanState->playerName = playerName;
+	humanState->plungerCooldown = 0;
+	humanState->trapCooldown = 0;
 
+	// Plunger finish handler
 	_launchingReset = [&] {
+		// Start cooldown
+		auto playerState = std::static_pointer_cast<HumanState>(_state);
+		playerState->plungerCooldown = std::chrono::duration_cast<std::chrono::milliseconds>(PLUNGER_COOLDOWN).count();
+		_plungerCooldownStart = std::chrono::steady_clock::now();
+		hasChanged = true;
+
 		_isLaunching = false;
 		if (plungerEntity != nullptr)
 		{
@@ -41,6 +51,14 @@ SHumanEntity::SHumanEntity(
 		{
 			ropeEntity->getState()->isDestroyed = true;
 			ropeEntity = nullptr;
+		}
+	};
+
+	_swingingReset = [&] {
+		if (netEntity != nullptr)
+		{
+			netEntity->getState()->isDestroyed = true;
+			netEntity = nullptr;
 		}
 	};
 }
@@ -91,7 +109,13 @@ void SHumanEntity::update(std::vector<std::shared_ptr<GameEvent>> events)
 					}
 				}
 			}
-			
+
+			break;
+		case EVENT_PLAYER_PLACE_TRAP:
+			if (humanState->trapCooldown == 0)
+			{
+				_isPlacingTrap = true;
+			}
 			break;
 		}
 	}
@@ -165,7 +189,7 @@ void SHumanEntity::update(std::vector<std::shared_ptr<GameEvent>> events)
 			hasChanged = true;
 			glm::vec3 plungerTailPos = plungerEntity->getState()->pos + glm::normalize(plungerEntity->getState()->forward) * -0.675f;
 			interpolateMovement(plungerTailPos, plungerEntity->getState()->forward, 20.0f,
-				_launchingReset, _launchingReset);
+				_launchingReset, _launchingReset, false);
 			actionStage++;
 		}
 
@@ -182,7 +206,7 @@ void SHumanEntity::update(std::vector<std::shared_ptr<GameEvent>> events)
 		if (actionChanged) {
 			humanState->currentAnimation = ANIMATION_HUMAN_SLIPPING;
 			humanState->isPlayOnce = true;
-			humanState->animationDuration = 1500;
+			humanState->animationDuration = 1400;
 			hasChanged = true;
 
 			// Timer until immobility stops
@@ -217,6 +241,11 @@ void SHumanEntity::update(std::vector<std::shared_ptr<GameEvent>> events)
 				humanState->currentAnimation = ANIMATION_HUMAN_SWINGING1;
 				humanState->isPlayOnce = true;
 				humanState->animationDuration = stuntDuration + chargeDuration;
+				if (netEntity == nullptr)
+				{
+					netEntity = std::make_shared<SNetEntity>(_state->pos, 0.08f, 1.0f);
+					_structureInfo->newEntities->push_back(netEntity);
+				}
 			}
 			else if (humanState->chargeMeter < HUMAN_CHARGE_THRESHOLD2)
 			{
@@ -225,6 +254,11 @@ void SHumanEntity::update(std::vector<std::shared_ptr<GameEvent>> events)
 				humanState->currentAnimation = ANIMATION_HUMAN_SWINGING2;
 				humanState->isPlayOnce = true;
 				humanState->animationDuration = stuntDuration + chargeDuration;
+				if (netEntity == nullptr)
+				{
+					netEntity = std::make_shared<SNetEntity>(_state->pos, 0.08f, 1.8f);
+					_structureInfo->newEntities->push_back(netEntity);
+				}
 			}
 			else
 			{
@@ -233,6 +267,11 @@ void SHumanEntity::update(std::vector<std::shared_ptr<GameEvent>> events)
 				humanState->currentAnimation = ANIMATION_HUMAN_SWINGING3;
 				humanState->isPlayOnce = true;
 				humanState->animationDuration = stuntDuration + chargeDuration;
+				if (netEntity == nullptr)
+				{
+					netEntity = std::make_shared<SNetEntity>(_state->pos, 0.07f, 2.0f);
+					_structureInfo->newEntities->push_back(netEntity);
+				}
 			}
 				
 
@@ -249,20 +288,52 @@ void SHumanEntity::update(std::vector<std::shared_ptr<GameEvent>> events)
 					_isSwinging = false;
 					humanState->chargeMeter = 0;
 					hasChanged = true;
+					_swingingReset();
 				});
 			});
 		}
 
-		// keep moving forward
+		// stage 0: human moving forward and net moving forward
 		if (actionStage == 0) {
 			_state->pos += _state->forward * (HUMAN_SWING_VELOCITY / TICKS_PER_SEC);
 			hasChanged = true;
 		}
 
+		if (netEntity != nullptr)
+		{
+			netEntity->updateDistance(_state->pos, _state->forward);
+		}
+
+		break;
+	case ACTION_HUMAN_PLACING_TRAP:
+		if (actionChanged)
+		{
+			humanState->currentAnimation = ANIMATION_HUMAN_PLACING;
+			humanState->isPlayOnce = true;
+			humanState->animationDuration = 70;
+			hasChanged = true;
+			registerTimer(400, [&]()
+				{
+					_isPlacingTrap = false;
+
+					// Create trap
+					std::shared_ptr<STrapEntity> trap = std::make_shared<STrapEntity>(_state->pos);
+					_structureInfo->newEntities->push_back(trap);
+
+					// Set cooldown
+					humanState->trapCooldown = std::chrono::duration_cast<std::chrono::milliseconds>(TRAP_COOLDOWN).count();
+					_trapCooldownStart = std::chrono::steady_clock::now();
+
+					hasChanged = true;
+				});
+		}
 		break;
 	}
 
 	handleInterpolation();
+
+	updateCooldowns();
+
 	//Logger::getInstance()->debug("Human   x: " + std::to_string(_state->forward.x) + " y: " + std::to_string(_state->forward.y) + " z: " + std::to_string(_state->forward.z));
 }
 
@@ -290,12 +361,15 @@ void SHumanEntity::generalHandleCollision(SBaseEntity * entity)
 
 bool SHumanEntity::updateAction()
 {
+	auto humanState = std::static_pointer_cast<HumanState>(_state);
+
 	HumanAction oldAction = _curAction;
 
 	// lower the priority of action if possible
 	if (_curAction == ACTION_HUMAN_LAUNCHING && !_isLaunching ||
 		_curAction == ACTION_HUMAN_SLIPPING && !_isSlipping ||
-		_curAction == ACTION_HUMAN_SWINGING && !_isSwinging)
+		_curAction == ACTION_HUMAN_SWINGING && !_isSwinging ||
+		_curAction == ACTION_HUMAN_PLACING_TRAP && !_isPlacingTrap)
 	{
 		_curAction = ACTION_HUMAN_IDLE;
 	}
@@ -306,9 +380,10 @@ bool SHumanEntity::updateAction()
 		_curAction = (_isMoving) ? ACTION_HUMAN_MOVING : ACTION_HUMAN_IDLE;
 
 		// update action again if higher priority action is happening
-		if (_isLaunching) _curAction = ACTION_HUMAN_LAUNCHING;
+		if (_isLaunching && humanState->plungerCooldown == 0) _curAction = ACTION_HUMAN_LAUNCHING;
 		else if (_isSlipping && !_isSlipImmune) _curAction = ACTION_HUMAN_SLIPPING;
 		else if (_isSwinging) _curAction = ACTION_HUMAN_SWINGING;
+		else if (_isPlacingTrap && humanState->trapCooldown == 0) _curAction = ACTION_HUMAN_PLACING_TRAP;
 	}
 
 	// if failed to swing then cancel swing
@@ -318,4 +393,39 @@ bool SHumanEntity::updateAction()
 	}
 
 	return oldAction != _curAction;
+}
+
+void SHumanEntity::updateCooldowns()
+{
+	std::shared_ptr<HumanState> humanState = std::static_pointer_cast<HumanState>(_state);
+
+	// Trap bones
+	if (humanState->trapCooldown != 0)
+	{
+		auto elapsed = std::chrono::steady_clock::now() - _trapCooldownStart;
+		auto diff = TRAP_COOLDOWN - elapsed;
+		humanState->trapCooldown = std::chrono::duration_cast<std::chrono::milliseconds>(diff).count();
+		hasChanged = true;
+	}
+
+	if (humanState->trapCooldown < 0)
+	{
+		humanState->trapCooldown = 0;
+		hasChanged = true;
+	}
+
+	// Plunger
+	if (humanState->plungerCooldown != 0)
+	{
+		auto elapsed = std::chrono::steady_clock::now() - _plungerCooldownStart;
+		auto diff = PLUNGER_COOLDOWN - elapsed;
+		humanState->plungerCooldown = std::chrono::duration_cast<std::chrono::milliseconds>(diff).count();
+		hasChanged = true;
+	}
+
+	if (humanState->plungerCooldown < 0)
+	{
+		humanState->plungerCooldown = 0;
+		hasChanged = true;
+	}
 }

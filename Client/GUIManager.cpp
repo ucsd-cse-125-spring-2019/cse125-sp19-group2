@@ -89,9 +89,9 @@ void GuiManager::resize(int x, int y) {
 			break;
 		case WIDGET_HUD:
 			// Set spacing for parent HUD widget to "clamp" bottom and top HUD 
-			int topHeight = getWidget(WIDGET_HUD_TOP)->preferredSize(_screen->nvgContext()).y();
-			int middleHeight = getWidget(WIDGET_HUD_MIDDLE)->preferredSize(_screen->nvgContext()).y();
-			int bottomHeight = getWidget(WIDGET_HUD_BOTTOM)->preferredSize(_screen->nvgContext()).y();
+			int topHeight = getWidget(WIDGET_HUD_TOP)->preferredSize(_screen->nvgContext()).y() / _screen->pixelRatio();
+			int middleHeight = getWidget(WIDGET_HUD_MIDDLE)->preferredSize(_screen->nvgContext()).y() / _screen->pixelRatio();
+			int bottomHeight = getWidget(WIDGET_HUD_BOTTOM)->preferredSize(_screen->nvgContext()).y() / _screen->pixelRatio();
 
 			int spacing = (y / _screen->pixelRatio() - middleHeight - topHeight - bottomHeight);
 			static_cast<nanogui::BoxLayout*>(widgetPair.second->layout())->setSpacing(spacing / 2);
@@ -329,6 +329,30 @@ void GuiManager::updateStamina(float val) {
 void GuiManager::updatePee(float val) {
 	int percentage = (int)(val * 100);
 	_peeInfo->setCaption("Pee: " + std::to_string(percentage) + "%");
+}
+
+void GuiManager::updatePlunger(long millisecondsLeft) {
+	if (millisecondsLeft == 0)
+	{
+		_plungerInfo->setCaption("Plunger: Ready");
+	}
+	else
+	{
+		auto seconds = (int)(std::ceil(millisecondsLeft / 1000.0f));
+		_plungerInfo->setCaption("Plunger: " + std::to_string(seconds));
+	}
+}
+
+void GuiManager::updateTrap(long millisecondsLeft) {
+	if (millisecondsLeft == 0)
+	{
+		_trapInfo->setCaption("Trap: Ready");
+	}
+	else
+	{
+		auto seconds = (int)(std::ceil(millisecondsLeft / 1000.0f));
+		_trapInfo->setCaption("Trap: " + std::to_string(seconds));
+	}
 }
 
 void GuiManager::updateCharge(float val) {
