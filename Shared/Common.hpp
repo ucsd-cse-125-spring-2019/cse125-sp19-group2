@@ -1,6 +1,8 @@
 #pragma once
 
 #include <chrono>
+#include <string>
+#include <vector>
 
 /*
 ** This header file is intended to house any miscellaneous resources needed in
@@ -129,17 +131,12 @@ enum HumanAnimation
 	ANIMATION_HUMAN_IDLE,
 	ANIMATION_HUMAN_RUNNING,
 	ANIMATION_HUMAN_SWINGING2,
-	ANIMATION_HUMAN_SWINGING2_IDLE, // transition
 	ANIMATION_HUMAN_SHOOT,
-	ANIMATION_HUMAN_SHOOT_IDLE_LAUNCHER,
 	ANIMATION_HUMAN_IDLE_LAUNCHER,
 	ANIMATION_HUMAN_FLYING,
 	ANIMATION_HUMAN_SLIPPING,
-	ANIMATION_HUMAN_SLIPPING_IDLE, // transition
 	ANIMATION_HUMAN_SWINGING1,
-	ANIMATION_HUMAN_SWINGING1_IDLE, // transition
 	ANIMATION_HUMAN_SWINGING3,
-	ANIMATION_HUMAN_SWINGING3_IDLE // transition
 };
 
 // Animations for dogs
@@ -151,9 +148,33 @@ enum DogAnimation
 	ANIMATION_DOG_SCRATCHING,
 	ANIMATION_DOG_DRINKING,
 	ANIMATION_DOG_DIGGING_IN,
-	ANIMATION_DOG_DIGGING_IN_DIGGING_OUT, // transition
 	ANIMATION_DOG_DIGGING_OUT,
-	ANIMATION_DOG_IDLE_RUNNING // transition
 };
+
+#ifndef ANIMATIONSTR
+#define ANIMATIONSTR
+inline std::string humanAnimations[] = {
+    "idle",
+    "running",
+    "swinging2",
+    "shoot",
+    "idleLauncher",
+    "flying",
+    "slipping",
+    "swinging1",
+    "swinging3",
+    "placing"
+};
+
+inline std::string dogAnimations[] = {
+    "idle",
+    "running",
+    "peeing",
+    "scratching",
+    "drinking",
+    "diggingIn",
+    "diggingOut"
+};
+#endif
 
 //Logger::getInstance()->debug("x: " + std::to_string(dir.x) + " y: " + std::to_string(dir.y) + " z: " + std::to_string(dir.z));

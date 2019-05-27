@@ -78,7 +78,8 @@ struct Take {
     std::unordered_map<std::string, uint32_t> channelMap;
 };
 
-typedef std::variant<std::tuple<Keyframe, Keyframe>, Take*> Transition;
+typedef std::tuple<KeyframeAll, KeyframeAll, float> KeyframePair;
+typedef std::variant<KeyframePair, Take*> Transition;
 
 struct BoneData {
     glm::mat4 bindingMatrix{};
@@ -134,7 +135,6 @@ enum VERTEXBUFFERTYPES {
  */
 class AnimatedMesh {
 public:
-    int _takeIndex;
 
     AnimatedMesh();
 
@@ -160,14 +160,17 @@ public:
      */
     void getTransform(float second, std::vector<glm::mat4>& transforms);
 
+    void setTakes(std::string name);
+
     /**
      * \brief Getter, return the animation count of this animated mesh
      * \return uint32_t: The animation count of this animated mesh
      */
     uint32_t takeCount() const;
 
-    float getDuration(int takeIndex);
+    float getDuration(std::string name);
 
+    float getTimeInTick(std::string name, float second);
     float getTimeInTick(int takeIndex, float second);
 
     std::string getCurrentAnimName() const;
@@ -178,37 +181,9 @@ public:
 
     KeyframeAll getKeyframeAlongChannel(std::string takeName, float time);
     KeyframeAll getKeyframeAlongChannel(int takeIndex, float time);
-    KeyframeAll getKeyframeAlongChannel(int takeIndex, int index, float time);
+    KeyframeAll getKeyframeAlongChannelByIndex(int takeIndex, int index);
 
-    Transition getTransition(std::string from, std::string to, float time = -1.0) {
-        // Find if exist
-        auto transitionName = from + "-" + to;
-        auto index = getTakeIndex(transitionName);
-        if (index.has_value()) {
-            return getTake(index.value());
-        }
-        else {
-            // Get transform tuple
-            auto res = getTakeIndex(from);
-            if (!res.has_value()) {
-                throw std::exception("Non-exist animation name");
-            }
-            auto fromTake = getTake(res.value());
-
-            res = getTakeIndex(to);
-            if (!res.has_value()) {
-                throw std::exception("Non-exist animation name");
-            }
-            auto toTake = getTake(res.value());
-            if (time < 0) {
-                // assume end to front
-
-            }
-            else {
-                // assume middle to front
-            }
-        }
-    }
+    Transition getTransition(std::string from, std::string to, float time = -1.0);
 
 private:
 
@@ -270,7 +245,8 @@ private:
     glm::mat4 _globalInverseTransform{};
 
     std::unique_ptr<Node> _root;
-
+    
+    int _takeIndex;
     std::vector<MeshData> _entries;
     std::vector<Texture*> _textures;
     std::vector<std::unique_ptr<Take>> _takes;

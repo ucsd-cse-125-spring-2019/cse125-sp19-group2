@@ -31,11 +31,11 @@ public:
 		Animation* dogAnimation = static_cast<Animation*>(_objectModel.get());
 		if (newState->isPlayOnce)
 		{
-			dogAnimation->playOnce(newState->currentAnimation, newState->animationDuration);
+			dogAnimation->playOnce(dogAnimations[newState->currentAnimation], newState->animationDuration);
 		}
 		else
 		{
-			dogAnimation->play(newState->currentAnimation);
+			dogAnimation->play(dogAnimations[newState->currentAnimation]);
 		}
 
 		// Dog attributes and items

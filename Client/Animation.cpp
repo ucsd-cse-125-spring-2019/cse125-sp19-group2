@@ -1,45 +1,107 @@
 ﻿#include "Animation.hpp"
+#include "InputManager.h"
 
 using namespace std;
 using namespace glm;
 using namespace chrono;
 
 void TakeSequence::addTake(std::string takename) {
-    sequence.push_back(takename);
+    if(!isPlaying){
+        sequence.push_back(takename);
+	}
 }
 
-void TakeSequence::playSequence(AnimatedMesh* mesh, float totalTime) {
+void TakeSequence::prepareSequence(AnimatedMesh* mesh, float totalTime) {
     takesInSeq.clear();
     transitions.clear();
+    endTime = 0;
+    this->totalTime = totalTime;
 
     // Populate takes
-    for(int i = 0; i < sequence.size(); i ++) {
+    float time = 0;
+    int generated = 0;
+    for (int i = 0; i < sequence.size(); i ++) {
         auto name = sequence[i];
         auto res = mesh->getTakeIndex(name);
 
         // Animation itself
-        if(res.has_value())
-		{
-            takesInSeq.push_back(mesh->getTake(res.value()));
-		}else {
-		    throw std::exception("Non-exist animation name");
-		}
-        
-        // Find transition
-        if(i != sequence.size() - 1) {
-            auto from = sequence[i];
-            auto to = sequence[i+1];
+        if (!res.has_value()) {
+            throw std::exception("Non-exist animation name");
+        }
 
+        Take* t = mesh->getTake(res.value());
+        time += t->duration;
+        takesInSeq.push_back(t);
+
+        // Find transition
+        if (i != sequence.size() - 1) {
+            auto from = sequence[i];
+            auto to = sequence[i + 1];
+            auto k = mesh->getTransition(from, to, -1);
+
+            if (auto* pval = std::get_if<Take*>(&k)) {
+                // is a Take pointer
+                time += (*pval)->duration;
+            }
+            else {
+                generated += 1;
+            }
+            transitions.push_back(k);
         }
     }
 
+    // Sanitize time
+    float diff = totalTime - time;
+    if (diff < 0) {
+        throw std::exception("Sequence time longer than total time");
+    }
+
+    // Distribute difference to generated transition
+    if (diff > 0) {
+        if (generated > 0) {
+            float time = diff / float(generated);
+            for (int i = 0; i < transitions.size(); i ++) {
+                auto k = transitions[i];
+                if (auto* pval = std::get_if<KeyframePair>(&k)) {
+                    // is a KeyframePair
+                    auto [from, to, t] = *pval;
+                    transitions[i] = make_tuple(from, to, time);
+                }
+            }
+        }
+        else {
+            // pad ending
+            endTime = diff;
+        }
+    }
 
     sequence.clear();
 }
 
-Animation::Animation(const string& filename): _isPlaying(false), _speed(1.0f), _timer(0.0f), _timeStep(-1.0f) {
+Animation::Animation(const string& filename): _isPlaying(false), _speed(1.0f), _timeStep(-1.0f), _timer(0.0f),
+                                              _currentTakeStr("idle"), _lastTakeStr("idle") {
     _animatedMesh = make_unique<AnimatedMesh>();
     _animatedMesh->loadMesh(filename);
+    sequence = make_unique<TakeSequence>();
+
+    // Test event
+    InputManager::getInstance().getKey(GLFW_KEY_E)->onPress(
+        [&] {
+            sequence->addTake("running");
+            sequence->addTake("swinging2");
+            sequence->addTake("shoot");
+            sequence->addTake("flying");
+            sequence->addTake("slipping");
+            sequence->addTake("swinging3");
+            sequence->addTake("placing");
+            this->playSequence(2000);
+        });
+
+    // Test event
+    InputManager::getInstance().getKey(GLFW_KEY_K)->onPress(
+        [&] {
+            this->playOnce("swinging1-idle", 0);
+        });
 }
 
 void Animation::update() {
@@ -50,11 +112,11 @@ void Animation::update() {
 
 void Animation::eval() {
     if (_isTransition) {
-        const float currentTime = _animatedMesh->getTimeInTick(_lastTake, _timer / 1000.0f);
+        const float currentTime = _animatedMesh->getTimeInTick(_lastTakeStr, _timer / 1000.0f);
         // TODO
 
         if (currentTime > -1) {
-            _animatedMesh->_takeIndex = _currentTake;
+            _animatedMesh->setTakes(_currentTakeStr);
             _isTransition = false;
             _timer = 0;
         }
@@ -79,20 +141,42 @@ void Animation::eval() {
         // PlayOnce logic
         if (_isPlayOnce) {
             // check if the animation is finished
-            const float currentTime = _animatedMesh->getTimeInTick(_currentTake, _timer / 1000.0f);
-            const float endingTime = _animatedMesh->getTimeInTick(_currentTake, _endingTime / 1000.0f);
-            const float duration = _animatedMesh->getDuration(_currentTake);
+            const float currentTime = _animatedMesh->getTimeInTick(_currentTakeStr, _timer / 1000.0f);
+            const float endingTime = _animatedMesh->getTimeInTick(_currentTakeStr, _endingTime / 1000.0f);
+            const float duration = _animatedMesh->getDuration(_currentTakeStr);
             if (currentTime > duration) {
-                if(currentTime > duration + endingTime){
+                if (currentTime > duration + endingTime) {
                     // the animation is finished, switch back to the original one
-                    _isPlayOnce = false;
-                    play(_lastTake);
+                    if (_isPlayingSequence && index < sequence->transitions.size() * 2 + 1) {
+                        if ((index % 2) == 0) {
+                            // seq
+                            auto t = sequence->takesInSeq[index / 2];
+                            playOnce(t->takeName, 0);
+                        }
+                        else {
+                            // transition
+                            auto t = sequence->transitions[index / 2];
+                            playTransition(t);
+                        }
+                        index ++;
+                    }
+                    else {
+                        if (_isPlayingSequence) {
+                            _isPlayingSequence = false;
+                            sequence->clear();
+                            sequence->isPlaying = false;
+                            //_lastTakeStr = _takeStrBeforeSeq;
+                        }
+                        _isPlayOnce = false;
+                        play(_lastTakeStr);
+                    }
                     _lastTime = high_resolution_clock::now();
                     return;
-				}else {
+                }
+                else {
                     _lastTime = high_resolution_clock::now();
-				    return;
-				}
+                    return;
+                }
             }
         }
 

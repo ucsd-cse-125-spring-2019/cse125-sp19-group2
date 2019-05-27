@@ -151,20 +151,47 @@ void AnimatedMesh::getTransform(float second, vector<mat4>& transforms) {
     }
 }
 
+void AnimatedMesh::setTakes(std::string name) {
+    std::cout << name << std::endl;
+    auto res = getTakeIndex(name);
+    if (!res.has_value()) {
+        throw std::exception("Non-exist animation name");
+    }
+    _takeIndex = res.value();
+}
+
 uint32_t AnimatedMesh::takeCount() const {
     return _takes.size();
 }
 
-float AnimatedMesh::getDuration(int takeIndex) {
-    if (takeIndex < _takes.size()) {
-        return _takes[takeIndex]->duration;
+float AnimatedMesh::getDuration(std::string name) {
+    auto res = getTakeIndex(name);
+    if (!res.has_value()) {
+        throw std::exception("Non-exist animation name");
+    }
+
+    if (res.value() < _takes.size()) {
+        return _takes[res.value()]->duration;
+    }
+    return -1;
+}
+
+float AnimatedMesh::getTimeInTick(std::string name, float second) {
+    auto res = getTakeIndex(name);
+    if (!res.has_value()) {
+        throw std::exception("Non-exist animation name");
+    }
+
+    if (res.value() < _takes.size()) {
+        const float tickrate = _takes[res.value()]->tickrate != 0 ? _takes[res.value()]->tickrate : 30.0f;
+        return second * tickrate;
     }
     return -1;
 }
 
 float AnimatedMesh::getTimeInTick(int takeIndex, float second) {
     if (takeIndex < _takes.size()) {
-        const float tickrate = _takes[_takeIndex]->tickrate != 0 ? _takes[_takeIndex]->tickrate : 30.0f;
+        const float tickrate = _takes[takeIndex]->tickrate != 0 ? _takes[takeIndex]->tickrate : 30.0f;
         return second * tickrate;
     }
     return -1;
@@ -201,26 +228,74 @@ KeyframeAll AnimatedMesh::getKeyframeAlongChannel(std::string takeName, float ti
 }
 
 KeyframeAll AnimatedMesh::getKeyframeAlongChannel(int takeIndex, float time) {
-    
+
     // Find the index
     auto take = getTake(takeIndex);
     auto& cha = *take->channels[0];
     uint32_t index = findFrame(time, cha);
-    return getKeyframeAlongChannel(takeIndex, index, time);
+    return getKeyframeAlongChannelByIndex(takeIndex, index);
 }
 
-KeyframeAll AnimatedMesh::getKeyframeAlongChannel(int takeIndex, int index, float time) {
+KeyframeAll AnimatedMesh::getKeyframeAlongChannelByIndex(int takeIndex, int index) {
     KeyframeAll k;
-    k.time = time;
-    k.index = index;
-
     auto take = getTake(takeIndex);
+
+    if (index < 0) {
+        k.index = take->channels[0]->keyframes.size() + index;
+    }
+    else {
+        k.index = index;
+    }
+
+    if (k.index >= take->channels[0]->keyframes.size() || 
+		k.index < 0) {
+        throw std::runtime_error("Bad index value");
+    }
+
+    k.time = take->channels[0]->keyframes[k.index]->time;
     // Collect frames in all channel
     for (int i = 0; i < take->channels.size(); i ++) {
-        k.channels.push_back(take->channels[i]->keyframes[index].get());
+        k.channels.push_back(take->channels[i]->keyframes[k.index].get());
     }
 
     return k;
+}
+
+Transition AnimatedMesh::getTransition(std::string from, std::string to, float time) {
+    // Find if exist
+    auto transitionName = from + "-" + to;
+    auto index = getTakeIndex(transitionName);
+    if (index.has_value()) {
+        return getTake(index.value());
+    }
+    else {
+        // Find takeIndex
+        auto res = getTakeIndex(from);
+        if (!res.has_value()) {
+            throw std::exception("Non-exist animation name");
+        }
+        auto fromIndex = res.value();
+
+        res = getTakeIndex(to);
+        if (!res.has_value()) {
+            throw std::exception("Non-exist animation name");
+        }
+        auto toIndex = res.value();
+
+        // Get transform tuple
+        if (time < 0) {
+            // assume end to front
+            auto fromKey = getKeyframeAlongChannelByIndex(fromIndex, -1);
+            auto toKey = getKeyframeAlongChannelByIndex(toIndex, 0);
+            return make_tuple(fromKey, toKey, -1);
+        }
+        else {
+            // assume middle to front
+            auto fromKey = getKeyframeAlongChannel(fromIndex, time);
+            auto toKey = getKeyframeAlongChannelByIndex(toIndex, 0);
+            return make_tuple(fromKey, toKey, -1);
+        }
+    }
 }
 
 void AnimatedMesh::loadBones(uint32_t meshIndex, const aiMesh* mesh, vector<WeightData>& bones) {
@@ -436,9 +511,9 @@ unique_ptr<Channel> AnimatedMesh::initChannel(const aiNodeAnim* node) {
         // quat and vec4 both internally use ordering x,y,z,w
         quat rvalue;
         rvalue.x = rkey.mValue.x;
-		rvalue.y = rkey.mValue.y;
-		rvalue.z = rkey.mValue.z;
-		rvalue.w = rkey.mValue.w;
+        rvalue.y = rkey.mValue.y;
+        rvalue.z = rkey.mValue.z;
+        rvalue.w = rkey.mValue.w;
 
         auto& skey = node->mScalingKeys[i];
         vec4 svalue = vec4(skey.mValue.x, skey.mValue.y, skey.mValue.z, 1);
@@ -577,16 +652,17 @@ bool AnimatedMesh::computeWorldMatrix(float time, const Node* node, const mat4& 
 
     auto from = getKeyframeAlongChannel(_takeIndex, time);
     int index = from.index + 1;
-    if(index >= getTake(_takeIndex)->channels[0]->keyframes.size()) {
+    if (index >= getTake(_takeIndex)->channels[0]->keyframes.size()) {
         index = 0;
         isWraparound = true;
     }
-    auto to = getKeyframeAlongChannel(_takeIndex, index, time);
+    auto to = getKeyframeAlongChannelByIndex(_takeIndex, index);
     computeWorldMatrix(time, from, to, node, parent);
     return isWraparound;
 }
 
-void AnimatedMesh::computeWorldMatrix(float time, KeyframeAll& from, KeyframeAll& to, const Node* node, const glm::mat4& parent) {
+void AnimatedMesh::computeWorldMatrix(
+    float time, KeyframeAll& from, KeyframeAll& to, const Node* node, const glm::mat4& parent) {
 
     mat4 nodeTransform = node->transform;
     const auto ind = findChannelIndex(node->name);
@@ -607,11 +683,7 @@ void AnimatedMesh::computeWorldMatrix(float time, KeyframeAll& from, KeyframeAll
         const mat4 tMat = translate(mat4(1.0f), vec3(k.translate));
         const mat4 rMat = toMat4(k.rotation);
         const mat4 sMat = scale(mat4(1.0f), vec3(k.scale));
-#ifdef USE_FBX
-		nodeTransform = tMat * mat4(mat3(node->transform)) * rMat * sMat; // 
-#else
         nodeTransform = tMat * rMat * sMat;
-#endif
     }
 
     mat4 world = parent * nodeTransform;

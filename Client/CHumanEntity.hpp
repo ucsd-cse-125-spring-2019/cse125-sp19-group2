@@ -31,13 +31,13 @@ public:
 		Animation* humanAnimation = static_cast<Animation*>(_objectModel.get());
 		if (newState->isPlayOnce)
 		{
-			humanAnimation->playOnce(newState->currentAnimation, newState->animationDuration);
+			humanAnimation->playOnce(humanAnimations[newState->currentAnimation], newState->animationDuration);
 		}
 		else
 		{
-			humanAnimation->play(newState->currentAnimation);
+			humanAnimation->play(humanAnimations[newState->currentAnimation]);
 		}
-
+        
 		// Human attributes and items
 		currentState->chargeMeter = newState->chargeMeter;
 

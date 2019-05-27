@@ -81,6 +81,8 @@ LocalPlayer::LocalPlayer(uint32_t playerId, std::unique_ptr<NetworkClient> const
             };
         });
 
+    
+
     InputManager::getInstance().onScroll(
         [&](float y) {
             _camera->set_distance(-y);
