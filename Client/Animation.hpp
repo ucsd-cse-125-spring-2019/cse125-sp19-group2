@@ -3,6 +3,18 @@
 #include "AnimatedMesh.hpp"
 #include "Shader.hpp"
 
+class AnimatedMesh;
+
+struct TakeSequence {
+    std::vector<std::string> sequence;
+    std::vector<Take*> takesInSeq;
+    std::vector<Transition> transitions;
+
+    void addTake(std::string takename);
+
+    void playSequence(AnimatedMesh* mesh, float totalTime);
+};
+
 /**
  * \brief The class that handles playing animation
  */

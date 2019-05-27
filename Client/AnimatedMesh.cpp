@@ -25,6 +25,18 @@ using namespace glm;
 
 static inline mat4 mat4_cast(const aiMatrix4x4& m) { return transpose(make_mat4(&m.a1)); }
 
+Keyframe::Keyframe() {
+}
+
+Keyframe Keyframe::interpolatingFuntion(float factor, const Keyframe& from, const Keyframe& to) {
+    Keyframe ret;
+    ret.time = from.time + factor * (to.time - from.time);
+    ret.translate = from.translate + factor * (to.translate - from.translate);
+    ret.rotation = slerp(from.rotation, to.rotation, factor);
+    ret.scale = from.scale + factor * (to.scale - from.scale);
+    return ret;
+}
+
 void WeightData::addWeight(uint32_t boneID, float weight) {
     for (uint32_t i = 0; i < MAX_BONES_PER_VERTEX; i++) {
         if (weights[i] == 0.0) {
@@ -70,15 +82,16 @@ bool AnimatedMesh::loadMesh(const string& filename) {
 
     bool ret = false;
     Assimp::Importer importer;
-	importer.SetPropertyBool(AI_CONFIG_IMPORT_FBX_PRESERVE_PIVOTS, false);
+    importer.SetPropertyBool(AI_CONFIG_IMPORT_FBX_PRESERVE_PIVOTS, false);
     //importer.SetPropertyBool(AI_CONFIG_IMPORT_FBX_STRICT_MODE, true);
-    
-    auto scene = importer.ReadFile(filename.c_str(),
-                                         aiProcess_Triangulate |
-                                         aiProcess_GenSmoothNormals |
-                                         aiProcess_FlipUVs |
-                                         aiProcess_JoinIdenticalVertices 
-	                                    );
+
+    auto scene = importer.ReadFile(
+        filename.c_str(),
+        aiProcess_Triangulate |
+        aiProcess_GenSmoothNormals |
+        aiProcess_FlipUVs |
+        aiProcess_JoinIdenticalVertices
+    );
 
     if (scene) {
         _globalInverseTransform = mat4_cast(scene->mRootNode->mTransformation);
@@ -90,8 +103,8 @@ bool AnimatedMesh::loadMesh(const string& filename) {
     }
 
 #ifdef USE_TAKE_INFO
-	loadTakes(filename);
-#endif 
+    loadTakes(filename);
+#endif
 
     glBindVertexArray(0);
 
@@ -114,13 +127,14 @@ void AnimatedMesh::render(const std::unique_ptr<Shader>& shader) {
             shader->set_uniform("u_material.diffuse", i);
         }
 
-        glDrawElementsBaseVertex(GL_TRIANGLES,
-                                 _entries[i]._numIndices,
-                                 GL_UNSIGNED_INT,
-                                 (void*)(sizeof(uint32_t) * _entries[i]._baseIndex),
-                                 _entries[i]._baseVertex);
+        glDrawElementsBaseVertex(
+            GL_TRIANGLES,
+            _entries[i]._numIndices,
+            GL_UNSIGNED_INT,
+            (void*)(sizeof(uint32_t) * _entries[i]._baseIndex),
+            _entries[i]._baseVertex);
     }
-  
+
     glBindVertexArray(0);
 }
 
@@ -166,8 +180,8 @@ void AnimatedMesh::loadBones(uint32_t meshIndex, const aiMesh* mesh, vector<Weig
         string name(mesh->mBones[i]->mName.data);
 
         if (_boneMap.find(name) == _boneMap.end()) {
-			BoneData bi;
-			boneIndex = _boneMap[name] = _boneInfo.size();
+            BoneData bi;
+            boneIndex = _boneMap[name] = _boneInfo.size();
             _boneInfo.emplace_back(bi).bindingMatrix = mat4_cast(mesh->mBones[i]->mOffsetMatrix);
         }
         else {
@@ -182,13 +196,14 @@ void AnimatedMesh::loadBones(uint32_t meshIndex, const aiMesh* mesh, vector<Weig
     }
 }
 
-void AnimatedMesh::initMesh(uint32_t meshIndex,
-                            const aiMesh* paiMesh,
-                            vector<vec3>& positions,
-                            vector<vec3>& normals,
-                            vector<vec2>& texCoords,
-                            vector<WeightData>& bones,
-                            vector<uint32_t>& indices) {
+void AnimatedMesh::initMesh(
+    uint32_t meshIndex,
+    const aiMesh* paiMesh,
+    vector<vec3>& positions,
+    vector<vec3>& normals,
+    vector<vec2>& texCoords,
+    vector<WeightData>& bones,
+    vector<uint32_t>& indices) {
     const aiVector3D zero3D(0.0f, 0.0f, 0.0f);
 
     // Populate the vertex attribute vectors
@@ -279,9 +294,9 @@ bool AnimatedMesh::initScene(const aiScene* scene, const string& filename) {
 
     // Fill up takes
     for (uint32_t i = 0; i < scene->mNumAnimations; i ++) {
-		if (scene->mAnimations[i]->mDuration > 0) {
-			_takes.push_back(initTake(scene->mAnimations[i]));
-		}
+        if (scene->mAnimations[i]->mDuration > 0) {
+            _takes.push_back(initTake(scene->mAnimations[i]));
+        }
     }
 
     // Fill up node list (recursively)
@@ -364,25 +379,21 @@ unique_ptr<Channel> AnimatedMesh::initChannel(const aiNodeAnim* node) {
 
     // Fill in the keyframes value
     for (uint32_t i = 0; i < node->mNumPositionKeys; i++) {
-        auto& key = node->mPositionKeys[i];
-        auto time = float(key.mTime);
-        vec4 value = vec4(key.mValue.x, key.mValue.y, key.mValue.z, 1);
-        cha->translations.push_back(make_unique<Keyframe>(time, value));
-    }
+        auto& pkey = node->mPositionKeys[i];
+        auto time = float(pkey.mTime);
+        vec4 pvalue = vec4(pkey.mValue.x, pkey.mValue.y, pkey.mValue.z, 1);
 
-    for (uint32_t i = 0; i < node->mNumRotationKeys; i++) {
-        auto& key = node->mRotationKeys[i];
-        auto time = float(key.mTime);
+        auto& rkey = node->mRotationKeys[i];
         // quat and vec4 both internally use ordering x,y,z,w
-        vec4 value = vec4(key.mValue.x, key.mValue.y, key.mValue.z, key.mValue.w);;
-        cha->rotations.push_back(make_unique<Keyframe>(time, value));
-    }
+        quat rvalue;
+        rvalue.x = rkey.mValue.x;
+		rvalue.y = rkey.mValue.y;
+		rvalue.z = rkey.mValue.z;
+		rvalue.w = rkey.mValue.w;
 
-    for (uint32_t i = 0; i < node->mNumScalingKeys; i++) {
-        auto& key = node->mScalingKeys[i];
-        auto time = float(key.mTime);
-        vec4 value = vec4(key.mValue.x, key.mValue.y, key.mValue.z, 1);
-        cha->scales.push_back(make_unique<Keyframe>(time, value));
+        auto& skey = node->mScalingKeys[i];
+        vec4 svalue = vec4(skey.mValue.x, skey.mValue.y, skey.mValue.z, 1);
+        cha->keyframes.push_back(make_unique<Keyframe>(time, pvalue, rvalue, svalue));
     }
 
     // Transfer channel ptr back the parent 
@@ -413,7 +424,7 @@ unique_ptr<Node> AnimatedMesh::initNode(const Node* parent, const aiNode* node) 
     }
 
     // Bookkeeping
-	_nodeList.push_back(n.get());
+    _nodeList.push_back(n.get());
 
     // Transfer node ptr back to parent
     return n;
@@ -428,16 +439,16 @@ unique_ptr<Take> AnimatedMesh::initTake(const aiAnimation* animation) {
 
     // Init Channel
     for (uint32_t i = 0; i < animation->mNumChannels; i ++) {
-		take->channels.push_back(initChannel(animation->mChannels[i]));
+        take->channels.push_back(initChannel(animation->mChannels[i]));
     }
 
     // Build channel map
 #ifdef USE_FBX
 	processFBXAnimation(*take);
 #else
-    for(uint32_t i = 0; i < take->channels.size(); i ++) {
-		auto cha = take->channels[i].get();
-		take->channelMap.insert({ cha->jointName, cha });
+    for (uint32_t i = 0; i < take->channels.size(); i ++) {
+        auto cha = take->channels[i].get();
+        take->channelMap.insert({cha->jointName, cha});
     }
 #endif
     // Transfer take ptr back to parent
@@ -454,33 +465,32 @@ const Channel* AnimatedMesh::findChannel(const string& nodeName) {
     return nullptr;
 }
 
-uint32_t AnimatedMesh::findKeyframe(float time, const vector<unique_ptr<Keyframe>>& keyframes) {
-    if (keyframes.size() <= 0) {
-        Logger::getInstance()->warn("findKeyframe: size <= 0");
+uint32_t AnimatedMesh::findFrame(float time, const Channel& channel) {
+    if (channel.keyframes.size() <= 0) {
+        throw std::exception("Animation has no keyframe: size <= 0");
     }
-    for (uint32_t i = 0; i < keyframes.size() - 1; i++) {
-        if (time < keyframes[i + 1]->time) {
+    for (uint32_t i = 0; i < channel.keyframes.size() - 1; i++) {
+        if (time < channel.keyframes[i + 1]->time) {
             return i;
         }
     }
-    return keyframes.size() - 1;
+    return channel.keyframes.size() - 1;
 }
 
-std::tuple<uint32_t, uint32_t, uint32_t> AnimatedMesh::findFrame(float time, const Channel& channel) {
-    uint32_t t = 0, r = 0, s = 0;
-    t = findKeyframe(time, channel.translations);
-    r = findKeyframe(time, channel.rotations);
-    s = findKeyframe(time, channel.scales);
-    return {t, r, s};
-}
+Keyframe AnimatedMesh::getInterpolatedValue(
+    float time, uint32_t start,
+    const vector<unique_ptr<Keyframe>>& keyframes,
+    std::function<Keyframe(float, const Keyframe&, const Keyframe&)> interpolateFunction) {
 
-vec4 AnimatedMesh::getInterpolatedValue(float time, uint32_t start,
-                                        const vector<unique_ptr<Keyframe>>& keyframes,
-                                        std::function<glm::vec4(float, glm::vec4, glm::vec4)> interpolateFunction) {
+    Keyframe ret;
+    ret.time = time;
 
-    if(keyframes.size()==1) {
+    if (keyframes.size() == 1) {
         // Only one frame exists, no need for interpolation
-		return keyframes[0]->value;
+        ret.translate = keyframes[0]->translate;
+        ret.rotation = keyframes[0]->rotation;
+        ret.scale = keyframes[0]->scale;
+        return ret;
     }
 
     auto& k1 = keyframes[start];
@@ -496,21 +506,19 @@ vec4 AnimatedMesh::getInterpolatedValue(float time, uint32_t start,
 
     const float dt = endTime - startTime;
     float factor = (time - startTime) / dt;
-    const auto& startValue = k1->value;
-    const auto& endValue = k2->value;
+    const auto& startValue = *k1;
+    const auto& endValue = *k2;
 
     // Use interpolating function to get value
     return interpolateFunction(factor, startValue, endValue);
 }
 
 void AnimatedMesh::computeWorldMatrix(float time, const Node* node, const mat4& parent) {
-    static auto vec3Interp = [](float f, vec4 v1, vec4 v2)
-    {
+    static auto vec3Interp = [](float f, vec4 v1, vec4 v2) {
         return v1 + f * (v2 - v1);
     };
 
-    static auto quatInterp = [](float f, vec4 v1, vec4 v2)
-    {
+    static auto quatInterp = [](float f, vec4 v1, vec4 v2) {
         return make_vec4(value_ptr(slerp(make_quat(value_ptr(v1)), make_quat(value_ptr(v2)), f)));
     };
 
@@ -522,19 +530,16 @@ void AnimatedMesh::computeWorldMatrix(float time, const Node* node, const mat4& 
     if (res) {
         // Interpolate and generate transformation matrix
         const auto& cha = (*res);
-        const auto [t, r, s] = findFrame(time, cha);
-        const vec3 tVec = vec3(getInterpolatedValue(time, t, cha.translations, vec3Interp));
-        const vec4 rVec = getInterpolatedValue(time, t, cha.rotations, quatInterp);
-        const quat rQuat = make_quat(value_ptr(rVec));
-        const vec3 sVec = vec3(getInterpolatedValue(time, t, cha.scales, vec3Interp));
+        const auto index = findFrame(time, cha);
+        const Keyframe k = getInterpolatedValue(time, index, cha.keyframes, Keyframe::interpolatingFuntion);
 
-        const mat4 tMat = translate(mat4(1.0f), tVec);
-        const mat4 rMat = toMat4(rQuat);
-        const mat4 sMat = scale(mat4(1.0f), sVec);
+        const mat4 tMat = translate(mat4(1.0f), vec3(k.translate));
+        const mat4 rMat = toMat4(k.rotation);
+        const mat4 sMat = scale(mat4(1.0f), vec3(k.scale));
 #ifdef USE_FBX
 		nodeTransform = tMat * mat4(mat3(node->transform)) * rMat * sMat; // 
 #else
-		nodeTransform = tMat * rMat * sMat;
+        nodeTransform = tMat * rMat * sMat;
 #endif
     }
 
@@ -542,102 +547,15 @@ void AnimatedMesh::computeWorldMatrix(float time, const Node* node, const mat4& 
 
     if (_boneMap.find(name) != _boneMap.end()) {
         const uint32_t boneIndex = _boneMap[name];
-		_boneInfo[boneIndex].worldMatrix = _globalInverseTransform * world *_boneInfo[boneIndex].bindingMatrix;
-    }else {
-		//Logger::getInstance()->info("Not a animation bone:" + name);
+        _boneInfo[boneIndex].worldMatrix = _globalInverseTransform * world * _boneInfo[boneIndex].bindingMatrix;
+    }
+    else {
+        //Logger::getInstance()->info("Not a animation bone:" + name);
     }
 
     for (auto& child : node->children) {
         computeWorldMatrix(time, child.get(), world);
     }
-}
-
-void AnimatedMesh::processFBXAnimation(Take& seq) {
-    std::vector<std::unique_ptr<Channel>> temp;
-    std::unordered_set<std::string> processed;
-
-    for (uint32_t i = 0; i < seq.channels.size(); i++) {
-        auto& cha = seq.channels[i];
-        auto strtok = split(cha->jointName, '$');
-        if (strtok.size() > 1) {
-            // complex animation, need to manually compose
-            // Remove _ in jointName_
-            auto jointName = strtok[0];
-            jointName.pop_back();
-
-            // if not yet compose,
-            if (processed.find(jointName) == processed.end()) {
-                temp.push_back(composeChannel(seq, jointName));
-                processed.insert(jointName);
-            }
-        }
-    }
-
-    // Clear the original channels
-    seq.channels.clear();
-
-    // Copy back all composed new channels
-    move(seq.channels, temp);
-
-    // Create map based on name
-    for (uint32_t i = 0; i < seq.channels.size(); i++) {
-        auto cha = seq.channels[i].get();
-        seq.channelMap.insert({cha->jointName, cha});
-    }
-}
-
-std::unique_ptr<Channel> AnimatedMesh::composeChannel(Take& seq, std::string& jointName) {
-    // Gather all corresponding channels
-    Channel* translation = nullptr;
-    Channel* rotation = nullptr;
-    Channel* scaling = nullptr;
-
-    for (uint32_t i = 0; i < seq.channels.size(); i++) {
-        auto& cha = seq.channels[i];
-        auto strtok = split(cha->jointName, '$');
-        if (strtok.size() > 1) {
-            // complex animation, need to manually compose
-            // Remove _ in jointName_
-            auto name = strtok[0];
-            name.pop_back();
-
-            // if this is the correct channel
-            if (name == jointName) {
-                // Check what kind of this animation it is.
-                auto type = strtok[2];
-                type.erase(0, 1);
-
-                if (type == "Translation") {
-                    translation = cha.get();
-                }
-                else if (type == "Rotation") {
-                    rotation = cha.get();
-                }
-                else if (type == "Scaling") {
-                    scaling = cha.get();
-                }
-                else {
-                    Logger::getInstance()->warn("Unknown channel type:" + type);
-                }
-            }
-        }
-    }
-
-    auto ret = std::make_unique<Channel>();
-    ret->jointName = jointName;
-    if (translation) {
-        move(ret->translations, translation->translations);
-    }
-
-    if (rotation) {
-        move(ret->rotations, rotation->rotations);
-    }
-
-    if (scaling) {
-        move(ret->scales, scaling->scales);
-    }
-
-    return ret;
 }
 
 void AnimatedMesh::loadTakes(const std::string& filename) {
@@ -686,18 +604,14 @@ void AnimatedMesh::loadTakes(const std::string& filename) {
             cha->jointName = from->jointName;
 
             // Copy frame
-            move(cha->translations, from->translations, startIndex, size);
-            move(cha->rotations, from->rotations, startIndex, size);
-            move(cha->scales, from->scales, startIndex, size);
+            move(cha->keyframes, from->keyframes, startIndex, size);
 
             // Calculate offset
-            const auto startTime = cha->translations[0]->time;
+            const auto startTime = cha->keyframes[0]->time;
 
             // Offset keyframe
-            for (uint32_t k = 0; k < cha->translations.size(); k++) {
-                cha->translations[k]->time -= startTime;
-                cha->rotations[k]->time -= startTime;
-                cha->scales[k]->time -= startTime;
+            for (uint32_t k = 0; k < cha->keyframes.size(); k++) {
+                cha->keyframes[k]->time -= startTime;
             }
 
             newTake->channels.push_back(std::move(cha));
@@ -710,7 +624,7 @@ void AnimatedMesh::loadTakes(const std::string& filename) {
         }
 
         // Calculate duration
-        auto& list = newTake->channels[0]->translations;
+        auto& list = newTake->channels[0]->keyframes;
         const auto startTime = list[0]->time;
         const auto endTime = list[list.size() - 1]->time;
         newTake->duration = endTime - startTime;

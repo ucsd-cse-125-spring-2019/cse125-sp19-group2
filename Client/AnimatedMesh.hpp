@@ -14,6 +14,8 @@
 #include <functional>
 #include <sstream>
 #include "Shared/Logger.hpp"
+#include <optional>
+#include <variant>
 
 #define MAX_BONES_PER_VERTEX 8
 #define TAKE_EXT ".txt"
@@ -45,17 +47,26 @@ struct Node {
 
 struct Keyframe {
     float time;
-    glm::vec4 value;
-
-    Keyframe(float t, glm::vec4 v): time(t), value(v) {
+    glm::vec4 translate;
+    glm::quat rotation;
+    glm::vec4 scale;
+    Keyframe();
+    Keyframe(float time, glm::vec4 t, glm::quat r, glm::vec4 s) :
+        time(time), translate(t), rotation(r), scale(s)
+    {
     }
+
+    static Keyframe interpolatingFuntion(float factor, const Keyframe& from, const Keyframe& to);
+};
+
+struct KeyframeAll {
+    float time;
+    std::vector<Keyframe*> channels;
 };
 
 struct Channel {
     std::string jointName;
-    std::vector<std::unique_ptr<Keyframe>> translations;
-    std::vector<std::unique_ptr<Keyframe>> rotations;
-    std::vector<std::unique_ptr<Keyframe>> scales;
+    std::vector<std::unique_ptr<Keyframe>> keyframes;
 };
 
 struct Take {
@@ -65,6 +76,8 @@ struct Take {
     std::vector<std::unique_ptr<Channel>> channels;
     std::unordered_map<std::string, Channel*> channelMap;
 };
+
+typedef std::variant<std::tuple<Keyframe, Keyframe>, Take*> Transition;
 
 struct BoneData {
     glm::mat4 bindingMatrix{};
@@ -158,40 +171,95 @@ public:
 
     std::string getCurrentAnimName() const;
 
+    std::optional<uint32_t> getTakeIndex(std::string name) {
+        auto res = _takeMap.find(name);
+        if (res != _takeMap.end()) {
+            return (res->second);
+        }
+        else {
+            return std::nullopt;
+        }
+    }
+
+    Take* getTake(uint32_t index) {
+        return _takes[index].get();
+    }
+
+    KeyframeAll getKeyframeAlongChannel(int takeName, float time) {
+        KeyframeAll k;
+    }
+
+    Transition getTransition(std::string from, std::string to, float time = -1.0) {
+        // Find if exist
+        auto transitionName = from + "-" + to;
+        auto index = getTakeIndex(transitionName);
+        if (index.has_value()) {
+            return getTake(index.value());
+        }
+        else {
+            // Get transform tuple
+            auto res = getTakeIndex(from);
+            if (!res.has_value()) {
+                throw std::exception("Non-exist animation name");
+            }
+            auto fromTake = getTake(res.value());
+
+            res = getTakeIndex(to);
+            if (!res.has_value()) {
+                throw std::exception("Non-exist animation name");
+            }
+            auto toTake = getTake(res.value());
+            if (time < 0) {
+                // assume end to front
+
+            }
+            else {
+                // assume middle to front
+            }
+        }
+    }
+
 private:
 
     // Helper functions related to model loading
     void loadBones(uint32_t meshIndex, const aiMesh* pMesh, std::vector<WeightData>& bones);
-    void initMesh(uint32_t meshIndex,
-                  const aiMesh* paiMesh,
-                  std::vector<glm::vec3>& positions,
-                  std::vector<glm::vec3>& normals,
-                  std::vector<glm::vec2>& texCoords,
-                  std::vector<WeightData>& bones,
-                  std::vector<unsigned int>& indices);
+
+    void initMesh(
+        uint32_t meshIndex,
+        const aiMesh* paiMesh,
+        std::vector<glm::vec3>& positions,
+        std::vector<glm::vec3>& normals,
+        std::vector<glm::vec2>& texCoords,
+        std::vector<WeightData>& bones,
+        std::vector<unsigned int>& indices);
+
     bool initMaterials(const aiScene* scene, const std::string& filename);
+
     bool initScene(const aiScene* scene, const std::string& filename);
+
     std::unique_ptr<Channel> initChannel(const aiNodeAnim* node);
+
     std::unique_ptr<Node> initNode(const Node* parent, const aiNode* node);
+
     std::unique_ptr<Take> initTake(const aiAnimation* animation);
 
     // Helper functions related to frame look up
     const Channel* findChannel(const std::string& nodeName);
-    uint32_t findKeyframe(float time, const std::vector<std::unique_ptr<Keyframe>>& keyframes);
-    std::tuple<uint32_t, uint32_t, uint32_t> findFrame(float time, const Channel& channel);
 
-    glm::vec4 getInterpolatedValue(float time, uint32_t start, const std::vector<std::unique_ptr<Keyframe>>& keyframes,
-                                   std::function<glm::vec4(float, glm::vec4, glm::vec4)> interpolateFunction);
+    uint32_t findFrame(float time, const Channel& channel);
+
+    Keyframe getInterpolatedValue(float time, uint32_t start,
+                                        const std::vector<std::unique_ptr<Keyframe>>& keyframes,
+                                        std::function<Keyframe(float, const Keyframe&, const Keyframe&)> interpolateFunction);
+
     void computeWorldMatrix(float time, const Node* node, const glm::mat4& parent);
 
-    void processFBXAnimation(Take& seq);
-
-    std::unique_ptr<Channel> composeChannel(Take& seq, std::string& jointName);
+    void computeWorldMatrix(const Node* node, const glm::mat4& parent);
 
     template <typename T>
     void move(std::vector<T>& to, std::vector<T>& from);
 
-	template <typename T>
+    template <typename T>
     void move(std::vector<T>& to, std::vector<T>& from, size_t start, size_t size);
 
     template <typename T, class Iterator, class I = typename std::iterator_traits<Iterator>::value_type>
@@ -200,7 +268,7 @@ private:
     void loadTakes(const std::string& filename);
 
     std::tuple<int, uint32_t> getKeyFrame(int takeIndex, float time) const {
-        
+
     }
 
     uint32_t _VAO;

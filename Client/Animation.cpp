@@ -4,6 +4,39 @@ using namespace std;
 using namespace glm;
 using namespace chrono;
 
+void TakeSequence::addTake(std::string takename) {
+    sequence.push_back(takename);
+}
+
+void TakeSequence::playSequence(AnimatedMesh* mesh, float totalTime) {
+    takesInSeq.clear();
+    transitions.clear();
+
+    // Populate takes
+    for(int i = 0; i < sequence.size(); i ++) {
+        auto name = sequence[i];
+        auto res = mesh->getTakeIndex(name);
+
+        // Animation itself
+        if(res.has_value())
+		{
+            takesInSeq.push_back(mesh->getTake(res.value()));
+		}else {
+		    throw std::exception("Non-exist animation name");
+		}
+        
+        // Find transition
+        if(i != sequence.size() - 1) {
+            auto from = sequence[i];
+            auto to = sequence[i+1];
+
+        }
+    }
+
+
+    sequence.clear();
+}
+
 Animation::Animation(const string& filename): _isPlaying(false), _speed(1.0f), _timer(0.0f), _timeStep(-1.0f) {
     _animatedMesh = make_unique<AnimatedMesh>();
     _animatedMesh->loadMesh(filename);
