@@ -2,6 +2,7 @@
 #include "InputManager.h"
 #include "Shared/GameEvent.hpp"
 #include "EntityManager.hpp"
+#include "AudioManager.hpp"
 #include <glm/gtx/string_cast.hpp>
 
 LocalPlayer::LocalPlayer(uint32_t playerId, std::unique_ptr<NetworkClient> const& networkClient) {
@@ -328,7 +329,14 @@ void LocalPlayer::update() {
     glm::vec3 pos = _playerEntity->getState()->pos;
     pos.y += _height;
     _camera->set_position(pos);
+
     _camera->Update();
+
+	// Update audio engine
+	AudioManager::getInstance().setListenerPos(_camera->position());
+	auto forward2D = _camera->convert_direction(glm::vec2(0, -1));
+	auto forward3D = glm::vec3(forward2D.x, 0, forward2D.y);
+	AudioManager::getInstance().setListenerDir(forward3D);
 
     // Stop events for the server
     if (!_stopped && !_moveKeysPressed) {

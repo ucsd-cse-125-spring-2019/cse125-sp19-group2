@@ -13,6 +13,12 @@ public:
 
         // Load Animation
         initAnimation("./Resources/Models/human.dae");
+
+		_runningSound = AudioManager::getInstance().getAudioSource("human running");
+		_runningSound->init("Resources/Sounds/human_running.wav", true, true);
+		_runningSound->setVolume(0.1f);
+
+		_swingSound = AudioManager::getInstance().getAudioSource("human swinging");
     };
     ~CHumanEntity() {};
 
@@ -24,7 +30,25 @@ public:
 		auto currentState = std::static_pointer_cast<HumanState>(_state);
 		auto newState = std::static_pointer_cast<HumanState>(state);
 
-		// Animation
+		/** Sounds **/
+		_runningSound->setPosition(_state->pos);
+		_swingSound->setPosition(_state->pos);
+
+		// Running
+		_runningSound->play(newState->currentAnimation == ANIMATION_HUMAN_RUNNING);
+
+		// Net swing
+		if (newState->currentAnimation != currentState->currentAnimation &&
+			(newState->currentAnimation == ANIMATION_HUMAN_SWINGING1 ||
+			 newState->currentAnimation == ANIMATION_HUMAN_SWINGING2 ||
+			 newState->currentAnimation == ANIMATION_HUMAN_SWINGING3))
+		{
+			_swingSound->init("Resources/Sounds/swing1.wav", false, true);
+			_swingSound->setVolume(0.3f);
+			_swingSound->play(true);
+		}
+
+		/** Animation **/
 		currentState->currentAnimation = newState->currentAnimation;
 
 		// Requires a cast
@@ -46,5 +70,9 @@ public:
 		GuiManager::getInstance().updateTrap(newState->trapCooldown);
 		GuiManager::getInstance().updateCharge(currentState->chargeMeter / MAX_HUMAN_CHARGE);
 	}
+
+protected:
+	AudioSource* _runningSound;
+	AudioSource* _swingSound;
 };
 

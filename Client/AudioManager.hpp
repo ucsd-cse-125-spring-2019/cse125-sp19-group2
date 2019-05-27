@@ -22,7 +22,9 @@ public:
 
     AudioManager();
 
-    void setListenerPose(glm::vec3 pos, glm::vec3 forward);
+    void setListenerPos(glm::vec3 pos);
+
+	void setListenerDir(glm::vec3 forward);
 
     static FMOD_VECTOR* vec3ToFmod(const glm::vec3& v, FMOD_VECTOR* fv);
 
