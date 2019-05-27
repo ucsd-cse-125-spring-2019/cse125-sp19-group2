@@ -13,7 +13,7 @@
 #define PORTNUM "4000"
 
 // Map is a square so this is the same as height
-#define MAP_WIDTH 48
+#define MAP_WIDTH 72
 
 // Width and height of walls and fences
 #define FENCE_WIDTH 0.2f
@@ -74,7 +74,8 @@ enum EntityType
 	ENTITY_HIT_PLUNGER,
 	ENTITY_PLUNGER,
 	ENTITY_ROPE,
-	ENTITY_TRAP
+	ENTITY_TRAP,
+	ENTITY_NET
 	// TODO: add new types here, e.g. ENTITY_DOGBONE
 };
 

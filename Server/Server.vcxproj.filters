@@ -194,6 +194,9 @@
     <ClInclude Include="STrapEntity.hpp">
       <Filter>Header Files\Entity</Filter>
     </ClInclude>
+    <ClInclude Include="SNetEntity.hpp">
+      <Filter>Header Files\Entity</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
