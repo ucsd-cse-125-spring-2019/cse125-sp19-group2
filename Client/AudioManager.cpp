@@ -99,3 +99,9 @@ void AudioManager::update() {
 FMOD::System* AudioManager::getSystem() const {
     return _system;
 }
+
+void AudioManager::reset() {
+	for (auto& source : _audioSources) {
+		source->play(false);
+	}
+}

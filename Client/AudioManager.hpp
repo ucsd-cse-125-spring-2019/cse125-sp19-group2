@@ -36,6 +36,9 @@ public:
 
     FMOD::System* getSystem() const;
 
+	// Stops all sound clips and sources
+	void reset();
+
 private:
     // System
     FMOD::System* _system;

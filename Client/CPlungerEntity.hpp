@@ -1,6 +1,7 @@
 #pragma once
 
 #include "CBaseEntity.hpp"
+#include "Shared/PlungerState.hpp"
 #include "Model.hpp"
 
 class CPlungerEntity : public CBaseEntity
@@ -9,7 +10,7 @@ public:
 	CPlungerEntity() {
 		_objectModel = std::make_unique<Model>("./Resources/Models/plunger.fbx");
 		plungerShader = std::make_unique<Shader>();
-		_state = std::make_shared<BaseState>();
+		_state = std::make_shared<PlungerState>();
 
 		plungerShader->LoadFromFile(GL_VERTEX_SHADER, "./Resources/Shaders/basiclight.vert");
 		plungerShader->LoadFromFile(GL_FRAGMENT_SHADER, "./Resources/Shaders/basiclight.frag");
@@ -24,6 +25,32 @@ public:
 
 		// Invert z
 		_state->forward.z = -_state->forward.z;
+
+		// Plunger-specific stuff
+		auto curState = std::static_pointer_cast<PlungerState>(_state);
+		auto newState = std::static_pointer_cast<PlungerState>(state);
+
+		// If just created, play shooting sound
+		if (!_shootSound)
+		{
+			_shootSound = AudioManager::getInstance().getAudioSource("plunger shoot" + std::to_string(_state->id));
+			_shootSound->init("Resources/Sounds/plunger_shoot.wav", false, true);
+			_shootSound->setPosition(_state->pos);
+			_shootSound->setVolume(0.15f);
+			_shootSound->play(true);
+		}
+
+		// If the plunger just became stuck, play sound
+		if (!curState->isStuck && newState->isStuck)
+		{
+			auto stickingSound = AudioManager::getInstance().getAudioSource("plunger stick" + std::to_string(_state->id));
+			stickingSound->init("Resources/Sounds/plunger_hit.wav", false, true);
+			stickingSound->setPosition(_state->pos);
+			stickingSound->setVolume(0.3f);
+			stickingSound->play(true);
+		}
+
+		curState->isStuck = newState->isStuck;
 	}
 
 	virtual void setUniforms(std::unique_ptr<Camera> const &camera) override
@@ -57,5 +84,9 @@ public:
 	}
 
 	static std::unique_ptr<Shader> plungerShader;
+
+protected:
+	AudioSource* _shootSound = nullptr;
+	AudioSource* _hitSound = nullptr;
 };
 

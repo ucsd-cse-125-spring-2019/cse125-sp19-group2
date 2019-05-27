@@ -347,6 +347,9 @@ void Application::Update()
 				EntityManager::getInstance().clearAll();
 				ColliderManager::getInstance().clear();
 
+				// Stop playing sounds
+				AudioManager::getInstance().reset();
+
 				// Set localPlayer's _playerEntity to null
 				_localPlayer->unpairEntity();
 
@@ -448,6 +451,7 @@ void Application::Update()
 	  _networkClient->closeConnection();
 	  EntityManager::getInstance().clearAll();
 	  InputManager::getInstance().reset();
+	  AudioManager::getInstance().reset();
 	  ColliderManager::getInstance().clear();
 	  GuiManager::getInstance().hideAll();
 	  GuiManager::getInstance().setVisibility(WIDGET_CONNECT, true);

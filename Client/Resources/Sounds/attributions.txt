@@ -1,3 +1,5 @@
 plunger_hit: https://freesound.org/people/LloydEvans09/sounds/321807/ (Creative Commons: Attribution Noncommercial License)
-human running: https://freesound.org/people/Juandamb/sounds/430708/ (Creative Commons 0)
+human_running: https://freesound.org/people/Juandamb/sounds/430708/ (Creative Commons 0)
 swing1: https://freesound.org/people/Josethehedgehog/sounds/390360/ (Creative Commons 0)
+plunger_shoot: https://freesound.org/people/muel2002/sounds/266966/ (Creative Commons 0)
+human_flying: https://freesound.org/people/LuannWepener/sounds/326105/ (Creative Commons: Attribition Noncommercial License)

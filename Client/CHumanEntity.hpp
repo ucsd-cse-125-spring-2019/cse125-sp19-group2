@@ -14,11 +14,16 @@ public:
         // Load Animation
         initAnimation("./Resources/Models/human.dae");
 
+		// Load positional sounds
 		_runningSound = AudioManager::getInstance().getAudioSource("human running" + std::to_string(id));
 		_runningSound->init("Resources/Sounds/human_running.wav", true, true);
 		_runningSound->setVolume(0.1f);
 
 		_swingSound = AudioManager::getInstance().getAudioSource("human swinging" + std::to_string(id));
+
+		_flyingSound = AudioManager::getInstance().getAudioSource("human flying" + std::to_string(id));
+		_flyingSound->init("Resources/Sounds/human_flying.wav", true, true);
+		_flyingSound->setVolume(0.1f);
     };
     ~CHumanEntity() {};
 
@@ -33,6 +38,7 @@ public:
 		/** Sounds **/
 		_runningSound->setPosition(_state->pos);
 		_swingSound->setPosition(_state->pos);
+		_flyingSound->setPosition(_state->pos);
 
 		// Running
 		_runningSound->play(newState->currentAnimation == ANIMATION_HUMAN_RUNNING);
@@ -45,8 +51,12 @@ public:
 		{
 			_swingSound->init("Resources/Sounds/swing1.wav", false, true);
 			_swingSound->setVolume(0.3f);
+			_swingSound->setPosition(_state->pos);
 			_swingSound->play(true);
 		}
+
+		// Flying
+		_flyingSound->play(newState->currentAnimation == ANIMATION_HUMAN_FLYING);
 
 		/** Animation **/
 		currentState->currentAnimation = newState->currentAnimation;
@@ -77,5 +87,6 @@ public:
 protected:
 	AudioSource* _runningSound;
 	AudioSource* _swingSound;
+	AudioSource* _flyingSound;
 };
 
