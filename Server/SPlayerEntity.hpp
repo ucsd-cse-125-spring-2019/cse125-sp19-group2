@@ -117,7 +117,8 @@ public:
 		glm::vec3 finalDirection,
 		float velocity,
 		std::function<void()> onComplete = 0,
-		std::function<void()> onInterrupt = 0) 
+		std::function<void()> onInterrupt = 0,
+		bool allowInterrupt = true) 
 	{
 		if (!_isInterpolating)
 		{
@@ -127,6 +128,7 @@ public:
 			_interpVelocity = velocity;
 			_interpOnComplete = onComplete;
 			_interpOnInterrupt = onInterrupt;
+			_allowInterrupt = allowInterrupt;
 		}
 	}
 
@@ -153,6 +155,7 @@ protected:
 	glm::vec3 _destination;
 	glm::vec3 _finalDirection;
 	float _interpVelocity; // Interpolation velocity, in units/sec
+	bool _allowInterrupt;
 
 	// Function to be called when interpolation is complete
 	std::function<void()> _interpOnComplete;
@@ -205,7 +208,9 @@ protected:
 	void generalHandleCollision(SBaseEntity* entity) override
 	{
 		// If interpolating and we hit a solid object, stop
-		if (_isInterpolating && entity->getState()->getSolidity(_state.get()))
+		if (_isInterpolating &&
+			entity->getState()->getSolidity(_state.get()) &&
+			_allowInterrupt)
 		{
 			_isInterpolating = false;
 
