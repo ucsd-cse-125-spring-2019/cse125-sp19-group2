@@ -6,7 +6,6 @@
 #include "Camera.hpp"
 #include "Drawable.hpp"
 #include "Shader.hpp"
-#include "ParticleSystem.hpp"
 
 /*
 ** This is an interface that any graphics objects on the client side must be
@@ -27,11 +26,6 @@ public:
 		_objectShader->Use();
 		setUniforms(camera);
 		_objectModel->render(_objectShader);
-
-		for (int i = 0; i < _particleSystems.size(); i++)
-		{
-			_particleSystems[i]->Draw(camera);
-		}
 	}
 
 	virtual void setUniforms(std::unique_ptr<Camera> const &camera)
@@ -127,7 +121,4 @@ protected:
 
 	// Shader program for object
 	std::unique_ptr<Shader> _objectShader;
-
-	// Particle Systems for object
-	std::vector<std::shared_ptr<ParticleSystem>> _particleSystems;
 };

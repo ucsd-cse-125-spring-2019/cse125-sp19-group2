@@ -44,6 +44,7 @@ public:
 	void set_force(const glm::vec3 &force);
 	void set_size(float x, float y);
 	void set_texture(const char *path);
+	void set_mass(float mass);
 	void set_lifespan(float lifespan);
 	void set_rate(float rate);
 	void set_is_urinating(bool is_urinating);
@@ -57,6 +58,7 @@ private:
 	float     _lifespan; ///< Lifespan of a urine particle in seconds.
 
 	// System properties
+	unsigned int _particles_count;
 	bool _is_urinating; ///< Whether urine particle system should emit particles.
 
 	// Rendering

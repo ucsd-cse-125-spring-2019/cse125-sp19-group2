@@ -15,6 +15,7 @@
 #include "CTriggerEntity.hpp"
 #include "CPlungerEntity.hpp"
 #include "ColliderManager.hpp"
+#include "ParticleSystemManager.hpp"
 #include "Shared/Logger.hpp"
 #include <algorithm>
 

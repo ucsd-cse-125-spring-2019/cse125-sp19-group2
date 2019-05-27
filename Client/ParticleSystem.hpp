@@ -32,8 +32,8 @@ public:
 
 protected:
 	// Overall system properties
-	glm::vec3 _origin;            ///< Position of particle system.
-	glm::vec3 _force;             ///< Force acting on system.
+	glm::vec3 _origin{ 0.0f };    ///< Position of particle system.
+	glm::vec3 _force{ 0.0f };     ///< Force acting on system.
 	unsigned int _max_particles;  ///< Maximum number of particles.
 	unsigned int _live_particles; ///< Total number of active particles.
 	unsigned int _last_particle;
