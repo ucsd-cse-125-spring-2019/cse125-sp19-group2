@@ -174,6 +174,55 @@ std::string AnimatedMesh::getCurrentAnimName() const {
     return _takes[_takeIndex]->takeName;
 }
 
+std::optional<uint32_t> AnimatedMesh::getTakeIndex(std::string name) {
+    auto res = _takeMap.find(name);
+    if (res != _takeMap.end()) {
+        return (res->second);
+    }
+    else {
+        return std::nullopt;
+    }
+}
+
+Take* AnimatedMesh::getTake(uint32_t index) {
+    return _takes[index].get();
+}
+
+KeyframeAll AnimatedMesh::getKeyframeAlongChannel(std::string takeName, float time) {
+    // Find the take
+    auto res = getTakeIndex(takeName);
+    if (!res.has_value()) {
+        throw std::exception("Non-exist animation name");
+    }
+
+    KeyframeAll k = getKeyframeAlongChannel(res.value(), time);
+
+    return k;
+}
+
+KeyframeAll AnimatedMesh::getKeyframeAlongChannel(int takeIndex, float time) {
+    
+    // Find the index
+    auto take = getTake(takeIndex);
+    auto& cha = *take->channels[0];
+    uint32_t index = findFrame(time, cha);
+    return getKeyframeAlongChannel(takeIndex, index, time);
+}
+
+KeyframeAll AnimatedMesh::getKeyframeAlongChannel(int takeIndex, int index, float time) {
+    KeyframeAll k;
+    k.time = time;
+    k.index = index;
+
+    auto take = getTake(takeIndex);
+    // Collect frames in all channel
+    for (int i = 0; i < take->channels.size(); i ++) {
+        k.channels.push_back(take->channels[i]->keyframes[index].get());
+    }
+
+    return k;
+}
+
 void AnimatedMesh::loadBones(uint32_t meshIndex, const aiMesh* mesh, vector<WeightData>& bones) {
     for (uint32_t i = 0; i < mesh->mNumBones; i++) {
         uint32_t boneIndex = 0;
@@ -448,7 +497,7 @@ unique_ptr<Take> AnimatedMesh::initTake(const aiAnimation* animation) {
 #else
     for (uint32_t i = 0; i < take->channels.size(); i ++) {
         auto cha = take->channels[i].get();
-        take->channelMap.insert({cha->jointName, cha});
+        take->channelMap.insert({cha->jointName, i});
     }
 #endif
     // Transfer take ptr back to parent
@@ -460,9 +509,19 @@ const Channel* AnimatedMesh::findChannel(const string& nodeName) {
     const auto cha = channels.find(nodeName);
 
     if (cha != channels.end()) {
-        return (cha->second);
+        return (_takes[_takeIndex]->channels[cha->second].get());
     }
     return nullptr;
+}
+
+int AnimatedMesh::findChannelIndex(const std::string& nodeName) {
+    auto& channels = _takes[_takeIndex]->channelMap;
+    const auto index = channels.find(nodeName);
+
+    if (index != channels.end()) {
+        return index->second;
+    }
+    return -1;
 }
 
 uint32_t AnimatedMesh::findFrame(float time, const Channel& channel) {
@@ -513,25 +572,37 @@ Keyframe AnimatedMesh::getInterpolatedValue(
     return interpolateFunction(factor, startValue, endValue);
 }
 
-void AnimatedMesh::computeWorldMatrix(float time, const Node* node, const mat4& parent) {
-    static auto vec3Interp = [](float f, vec4 v1, vec4 v2) {
-        return v1 + f * (v2 - v1);
-    };
+bool AnimatedMesh::computeWorldMatrix(float time, const Node* node, const mat4& parent) {
+    bool isWraparound = false;
 
-    static auto quatInterp = [](float f, vec4 v1, vec4 v2) {
-        return make_vec4(value_ptr(slerp(make_quat(value_ptr(v1)), make_quat(value_ptr(v2)), f)));
-    };
+    auto from = getKeyframeAlongChannel(_takeIndex, time);
+    int index = from.index + 1;
+    if(index >= getTake(_takeIndex)->channels[0]->keyframes.size()) {
+        index = 0;
+        isWraparound = true;
+    }
+    auto to = getKeyframeAlongChannel(_takeIndex, index, time);
+    computeWorldMatrix(time, from, to, node, parent);
+    return isWraparound;
+}
 
-    const string name(node->name);
+void AnimatedMesh::computeWorldMatrix(float time, KeyframeAll& from, KeyframeAll& to, const Node* node, const glm::mat4& parent) {
 
-    auto& take = _takes[_takeIndex];
     mat4 nodeTransform = node->transform;
-    const auto res = findChannel(node->name);
-    if (res) {
+    const auto ind = findChannelIndex(node->name);
+    if (ind >= 0) {
         // Interpolate and generate transformation matrix
-        const auto& cha = (*res);
-        const auto index = findFrame(time, cha);
-        const Keyframe k = getInterpolatedValue(time, index, cha.keyframes, Keyframe::interpolatingFuntion);
+        const auto& fromKeyframe = from.channels[ind];
+        const auto& toKeyframe = to.channels[ind];
+        const auto startTime = fromKeyframe->time;
+        const auto endTime = toKeyframe->time;
+
+        const float dt = endTime - startTime;
+        float factor = (time - startTime) / dt;
+        const auto& startValue = *fromKeyframe;
+        const auto& endValue = *toKeyframe;
+
+        const Keyframe k = Keyframe::interpolatingFuntion(factor, startValue, endValue);
 
         const mat4 tMat = translate(mat4(1.0f), vec3(k.translate));
         const mat4 rMat = toMat4(k.rotation);
@@ -545,8 +616,8 @@ void AnimatedMesh::computeWorldMatrix(float time, const Node* node, const mat4& 
 
     mat4 world = parent * nodeTransform;
 
-    if (_boneMap.find(name) != _boneMap.end()) {
-        const uint32_t boneIndex = _boneMap[name];
+    if (_boneMap.find(node->name) != _boneMap.end()) {
+        const uint32_t boneIndex = _boneMap[node->name];
         _boneInfo[boneIndex].worldMatrix = _globalInverseTransform * world * _boneInfo[boneIndex].bindingMatrix;
     }
     else {
@@ -554,7 +625,7 @@ void AnimatedMesh::computeWorldMatrix(float time, const Node* node, const mat4& 
     }
 
     for (auto& child : node->children) {
-        computeWorldMatrix(time, child.get(), world);
+        computeWorldMatrix(time, from, to, child.get(), world);
     }
 }
 
@@ -620,7 +691,7 @@ void AnimatedMesh::loadTakes(const std::string& filename) {
         // Build channel map
         for (uint32_t i = 0; i < newTake->channels.size(); i++) {
             auto cha = newTake->channels[i].get();
-            newTake->channelMap.insert({cha->jointName, cha});
+            newTake->channelMap.insert({cha->jointName, i});
         }
 
         // Calculate duration

@@ -61,6 +61,7 @@ struct Keyframe {
 
 struct KeyframeAll {
     float time;
+    int index = -1;
     std::vector<Keyframe*> channels;
 };
 
@@ -74,7 +75,7 @@ struct Take {
     float tickrate{};
     float duration{};
     std::vector<std::unique_ptr<Channel>> channels;
-    std::unordered_map<std::string, Channel*> channelMap;
+    std::unordered_map<std::string, uint32_t> channelMap;
 };
 
 typedef std::variant<std::tuple<Keyframe, Keyframe>, Take*> Transition;
@@ -171,23 +172,13 @@ public:
 
     std::string getCurrentAnimName() const;
 
-    std::optional<uint32_t> getTakeIndex(std::string name) {
-        auto res = _takeMap.find(name);
-        if (res != _takeMap.end()) {
-            return (res->second);
-        }
-        else {
-            return std::nullopt;
-        }
-    }
+    std::optional<uint32_t> getTakeIndex(std::string name);
 
-    Take* getTake(uint32_t index) {
-        return _takes[index].get();
-    }
+    Take* getTake(uint32_t index);
 
-    KeyframeAll getKeyframeAlongChannel(int takeName, float time) {
-        KeyframeAll k;
-    }
+    KeyframeAll getKeyframeAlongChannel(std::string takeName, float time);
+    KeyframeAll getKeyframeAlongChannel(int takeIndex, float time);
+    KeyframeAll getKeyframeAlongChannel(int takeIndex, int index, float time);
 
     Transition getTransition(std::string from, std::string to, float time = -1.0) {
         // Find if exist
@@ -246,15 +237,17 @@ private:
     // Helper functions related to frame look up
     const Channel* findChannel(const std::string& nodeName);
 
+    int findChannelIndex(const std::string& nodeName);
+
     uint32_t findFrame(float time, const Channel& channel);
 
     Keyframe getInterpolatedValue(float time, uint32_t start,
                                         const std::vector<std::unique_ptr<Keyframe>>& keyframes,
                                         std::function<Keyframe(float, const Keyframe&, const Keyframe&)> interpolateFunction);
 
-    void computeWorldMatrix(float time, const Node* node, const glm::mat4& parent);
+    bool computeWorldMatrix(float time, const Node* node, const glm::mat4& parent);
 
-    void computeWorldMatrix(const Node* node, const glm::mat4& parent);
+    void computeWorldMatrix(float time, KeyframeAll & from, KeyframeAll & to, const Node* node, const glm::mat4& parent);
 
     template <typename T>
     void move(std::vector<T>& to, std::vector<T>& from);
