@@ -90,14 +90,6 @@ void Application::Setup() {
 	_skybox = std::make_unique<Skybox>("skybox");
 
 	// Create light
-	_point_light = std::make_unique<PointLight>(
-		PointLight{
-			"u_pointlight",
-			{ { 0.05f, 0.05f, 0.05f }, { 0.8f, 0.8f, 0.8f }, { 1.0f, 1.0f, 1.0f } },
-			{ -1.0f, 0.0f, 0.0f },
-			{ 1.0f, 0.09f, 0.032f }
-		}
-	);
 	_dir_light = std::make_unique<DirectionalLight>(
 		DirectionalLight{
 			"u_dirlight",
@@ -432,7 +424,6 @@ void Application::Update()
 	AudioManager::getInstance().update();
 
 	_camera->Update();
-	_point_light->update();
 }
 
 void Application::Draw() {
