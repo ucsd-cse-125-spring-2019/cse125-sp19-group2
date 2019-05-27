@@ -6,7 +6,7 @@
 class CHumanEntity : public CPlayerEntity
 {
 public:
-    CHumanEntity() : CPlayerEntity()
+    CHumanEntity(uint32_t id) : CPlayerEntity()
     {
 		// Init player state
 		_state = std::make_shared<HumanState>();
@@ -14,11 +14,11 @@ public:
         // Load Animation
         initAnimation("./Resources/Models/human.dae");
 
-		_runningSound = AudioManager::getInstance().getAudioSource("human running");
+		_runningSound = AudioManager::getInstance().getAudioSource("human running" + std::to_string(id));
 		_runningSound->init("Resources/Sounds/human_running.wav", true, true);
 		_runningSound->setVolume(0.1f);
 
-		_swingSound = AudioManager::getInstance().getAudioSource("human swinging");
+		_swingSound = AudioManager::getInstance().getAudioSource("human swinging" + std::to_string(id));
     };
     ~CHumanEntity() {};
 

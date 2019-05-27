@@ -68,7 +68,7 @@ std::shared_ptr<CBaseEntity> EntityManager::getEntity(std::shared_ptr<BaseState>
         entity = std::make_shared<CDogEntity>();
         break;
     case ENTITY_HUMAN:
-      entity = std::make_shared<CHumanEntity>();
+      entity = std::make_shared<CHumanEntity>(id);
       break;
     case ENTITY_HOUSE_6X6_A:
       entity = std::make_shared<CHouseEntity>(type);
