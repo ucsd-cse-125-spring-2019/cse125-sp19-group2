@@ -16,8 +16,8 @@
 
 Application::Application(const char* windowTitle, int argc, char** argv) {
   _win_title = windowTitle;
-  _win_width = 800;
-  _win_height = 600;
+  _win_width = 1280;
+  _win_height = 720;
 
   if (argc == 1) {
   }

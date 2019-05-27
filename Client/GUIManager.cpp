@@ -336,16 +336,21 @@ void GuiManager::initConnectScreen() {
 	_addressBox->setAlignment(nanogui::TextBox::Alignment::Center);
 
 	// Connect button
-	_connectButton = new nanogui::Button(connectScreen, "Connect");
+	_connectButton = new nanogui::Button(connectScreen, " ");
 	_connectButton->setFontSize(28);
 	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-    	auto unfocused = LoadTextureFromFile("1.jpg", "./Resources/Textures/Menu/");
-    	auto focused = LoadTextureFromFile("2.jpg", "./Resources/Textures/Menu/");
-    	auto pushed = LoadTextureFromFile("3.jpg", "./Resources/Textures/Menu/");
+    	auto unfocused = LoadTextureFromFile("connect.png", "./Resources/Textures/Menu/");
+    	auto focused = LoadTextureFromFile("connectfocused.png", "./Resources/Textures/Menu/");
+    	auto pushed = LoadTextureFromFile("connectpushed.png", "./Resources/Textures/Menu/");
     	_connectButton->setBackgroundTexture(unfocused, focused, pushed);
-    	_connectButton->alpha = 0.5;
+    	_connectButton->alpha = 1;
     	_connectButton->setTheme(new nanogui::Theme(_screen->nvgContext()));
     	_connectButton->theme()->mTextColor = nanogui::Color(0, 0, 255, 255);
+		_connectButton->theme()->mTextColorShadow = nanogui::Color(0, 0, 0, 0);
+		_connectButton->setFixedHeight(40);
+		_connectButton->setFixedWidth(100);
+		
+
 }
 
 void GuiManager::initLobbyScreen() {
