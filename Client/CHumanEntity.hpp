@@ -65,10 +65,13 @@ public:
 		// Human attributes and items
 		currentState->chargeMeter = newState->chargeMeter;
 
-		// Update HUD
-		GuiManager::getInstance().updatePlunger(newState->plungerCooldown);
-		GuiManager::getInstance().updateTrap(newState->trapCooldown);
-		GuiManager::getInstance().updateCharge(currentState->chargeMeter / MAX_HUMAN_CHARGE);
+		if (_isLocal)
+		{
+			// Update HUD
+			GuiManager::getInstance().updatePlunger(newState->plungerCooldown);
+			GuiManager::getInstance().updateTrap(newState->trapCooldown);
+			GuiManager::getInstance().updateCharge(currentState->chargeMeter / MAX_HUMAN_CHARGE);
+		}
 	}
 
 protected:
