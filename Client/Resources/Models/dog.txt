@@ -7,3 +7,5 @@ diggingIn 122 140
 diggingIn-diggingOut 140 141
 diggingOut 141 160
 idle-running 25 28
+walking 161 193
+eating 194 226
