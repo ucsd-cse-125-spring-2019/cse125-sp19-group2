@@ -57,12 +57,15 @@ public:
 		}
 
 		// Dog attributes and items
-		currentState->runStamina = newState->runStamina;
-		currentState->urineMeter = newState->urineMeter;
+		if (_isLocal)
+		{
+			currentState->runStamina = newState->runStamina;
+			currentState->urineMeter = newState->urineMeter;
 
-		// Update HUD
-		GuiManager::getInstance().updateStamina(currentState->runStamina / MAX_DOG_STAMINA);
-		GuiManager::getInstance().updatePee(currentState->urineMeter / MAX_DOG_URINE);
+			// Update HUD
+			GuiManager::getInstance().updateStamina(currentState->runStamina / MAX_DOG_STAMINA);
+			GuiManager::getInstance().updatePee(currentState->urineMeter / MAX_DOG_URINE);
+		}
 	}
 
 protected:

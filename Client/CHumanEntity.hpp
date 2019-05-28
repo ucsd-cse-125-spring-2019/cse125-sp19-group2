@@ -87,10 +87,13 @@ public:
 		}
 
 		// Human attributes and items
-		currentState->chargeMeter = newState->chargeMeter;
-
 		if (_isLocal)
 		{
+			// Update state
+			currentState->plungerCooldown = newState->plungerCooldown;
+			currentState->trapCooldown = newState->trapCooldown;
+			currentState->chargeMeter = newState->chargeMeter;
+
 			// Update HUD
 			GuiManager::getInstance().updatePlunger(newState->plungerCooldown);
 			GuiManager::getInstance().updateTrap(newState->trapCooldown);
