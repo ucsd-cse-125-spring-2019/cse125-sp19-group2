@@ -19,6 +19,10 @@ public:
 		_pantingSound = AudioManager::getInstance().getAudioSource("dog panting" + std::to_string(id));
 		_pantingSound->init("Resources/Sounds/dog_panting.wav", true, true);
 		_pantingSound->setVolume(0.1f);
+
+		_runningSound = AudioManager::getInstance().getAudioSource("dog running" + std::to_string(id));
+		_runningSound->init("Resources/Sounds/dog_running.wav", true, true);
+		_runningSound->setVolume(0.2f);
     };
     ~CDogEntity() {};
 
@@ -32,9 +36,11 @@ public:
 		
 		/** Sounds **/
 		_pantingSound->setPosition(_state->pos);
+		_runningSound->setPosition(_state->pos);
 
 		// Panting
 		_pantingSound->play(newState->currentAnimation == ANIMATION_DOG_IDLE);
+		_runningSound->play(newState->currentAnimation == ANIMATION_DOG_RUNNING);
 
 		// Animation
 		currentState->currentAnimation = newState->currentAnimation;
@@ -61,5 +67,6 @@ public:
 
 protected:
 	AudioSource * _pantingSound;
+	AudioSource * _runningSound;
 };
 
