@@ -373,7 +373,11 @@ void GuiManager::hideAll() {
 /*** Private functions ***/
 void GuiManager::initConnectScreen() {
 	auto connectScreen = createWidget(_screen, WIDGET_CONNECT);
+    auto bg = LoadTextureFromFile("bg.png", "./Resources/Textures/Menu/");
     connectScreen->setVisible(false);
+    connectScreen->alpha = 0.2;
+    connectScreen->setBackgroundTexture(bg, 0, 0);
+    connectScreen->drawBackground = true;
 
 	// Resize handles margins, 50 pixel spacing
 	auto connectLayout = new nanogui::BoxLayout(nanogui::Orientation::Vertical, nanogui::Alignment::Middle, 0, 25);
@@ -402,16 +406,18 @@ void GuiManager::initConnectScreen() {
 	_addressBox->setAlignment(nanogui::TextBox::Alignment::Center);
 
 	// Connect button
-	_connectButton = new nanogui::Button(connectScreen, "Connect");
+	_connectButton = new nanogui::Button(connectScreen, "");
 	_connectButton->setFontSize(28);
 	
-    	auto unfocused = LoadTextureFromFile("1.jpg", "./Resources/Textures/Menu/");
-    	auto focused = LoadTextureFromFile("2.jpg", "./Resources/Textures/Menu/");
-    	auto pushed = LoadTextureFromFile("3.jpg", "./Resources/Textures/Menu/");
-    	_connectButton->setBackgroundTexture(unfocused, focused, pushed);
-    	_connectButton->alpha = 0.5;
-    	_connectButton->setTheme(new nanogui::Theme(_screen->nvgContext()));
-    	_connectButton->theme()->mTextColor = nanogui::Color(0, 0, 255, 255);
+    auto unfocused = LoadTextureFromFile("1.png", "./Resources/Textures/Menu/");
+    auto focused = LoadTextureFromFile("2.jpg", "./Resources/Textures/Menu/");
+    auto pushed = LoadTextureFromFile("3.jpg", "./Resources/Textures/Menu/");
+    _connectButton->setFixedSize(nanogui::Vector2i(99, 38));
+    _connectButton->setBackgroundTexture(unfocused, focused, pushed);
+    _connectButton->alpha = 0.7;
+    _connectButton->setTheme(new nanogui::Theme(_screen->nvgContext()));
+    _connectButton->theme()->mTextColor = nanogui::Color(0, 0, 255, 255);
+   // _connectButton->theme()-> = nanogui::Color(0, 0, 255, 255);
 }
 
 void GuiManager::initLobbyScreen() {

@@ -96,10 +96,8 @@ public:
     virtual void draw(NVGcontext* ctx) override;
     virtual void save(Serializer &s) const override;
     virtual bool load(Serializer &s) override;
-
-    virtual void setBackgroundTexture(uint32_t background, uint32_t foreground1, uint32_t foreground2);
-
-    float alpha = 0.8;
+  virtual void setBackgroundTexture(uint32_t bg0, uint32_t bg1, uint32_t bg2) override;
+    
 protected:
     bool checkFormat(const std::string& input,const std::string& format);
     bool copySelection();
@@ -139,16 +137,9 @@ protected:
     int mMouseDownModifier;
     float mTextOffset;
     double mLastClick;
-
-
+  /// The color of the caption text of this Button.
     Color mTextColor;
-    // hack
-    uint32_t backgroundTexture = 0;
-    uint32_t foreground1Texture = 0;
-    uint32_t foreground2Texture = 0;
-    ImageView* _image = nullptr;
-    //Window* _iwindow;
-    bool initialized = false;
+
 public:
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 };
