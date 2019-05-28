@@ -113,6 +113,9 @@ private:
   // Time when pregame countdown ended
   std::chrono::time_point<std::chrono::steady_clock> _countdownEnd;
 
+  // Background music source
+  AudioSource* _bgm = nullptr;
+
   // Test Lights
   std::unique_ptr<DirectionalLight> _dir_light;
 

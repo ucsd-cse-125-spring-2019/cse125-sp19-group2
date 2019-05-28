@@ -150,6 +150,7 @@
     <ClInclude Include="HumanState.hpp" />
     <ClInclude Include="Logger.hpp" />
     <ClInclude Include="PlayerState.hpp" />
+    <ClInclude Include="PlungerState.hpp" />
     <ClInclude Include="QuadTree.hpp" />
     <ClInclude Include="Timer.hpp" />
   </ItemGroup>

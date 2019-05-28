@@ -208,6 +208,11 @@ void Application::Setup() {
 			break;
 		}
 	});
+
+	_bgm = AudioManager::getInstance().getAudioSource("bgm");
+	_bgm->init("Resources/Sounds/bgm1.mp3");
+	_bgm->setVolume(0.05f);
+	_bgm->play(true);
 }
 
 void Application::Cleanup() {
@@ -342,6 +347,9 @@ void Application::Update()
 				ColliderManager::getInstance().clear();
 				ParticleSystemManager::getInstance().clear();
 
+				// Stop playing sounds
+				AudioManager::getInstance().reset();
+
 				// Set localPlayer's _playerEntity to null
 				_localPlayer->unpairEntity();
 
@@ -443,6 +451,7 @@ void Application::Update()
 	  _networkClient->closeConnection();
 	  EntityManager::getInstance().clearAll();
 	  InputManager::getInstance().reset();
+	  AudioManager::getInstance().reset();
 	  ColliderManager::getInstance().clear();
 	  ParticleSystemManager::getInstance().clear();
 	  GuiManager::getInstance().hideAll();

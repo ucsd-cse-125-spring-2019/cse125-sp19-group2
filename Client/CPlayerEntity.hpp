@@ -6,6 +6,7 @@
 #include "glad/glad.h"
 #include "InputManager.h"
 #include "GuiManager.hpp"
+#include "AudioManager.hpp"
 #include "Shared/PlayerState.hpp"
 
 class CPlayerEntity : public CBaseEntity
@@ -42,14 +43,16 @@ public:
 		auto currentState = std::static_pointer_cast<PlayerState>(_state);
 		auto newState = std::static_pointer_cast<PlayerState>(state);
 
-		// Set custom player message
-		if (_isLocal &&
-			currentState->message != newState->message)
+		if (_isLocal)
 		{
-			currentState->message = newState->message;
-			GuiManager::getInstance().setSecondaryMessage(currentState->message);
-			auto screen = GuiManager::getInstance().getScreen();
-			GuiManager::getInstance().resize(screen->size().x(), screen->size().y());
+			// Set custom player message
+			if (currentState->message != newState->message)
+			{
+				currentState->message = newState->message;
+				GuiManager::getInstance().setSecondaryMessage(currentState->message);
+				auto screen = GuiManager::getInstance().getScreen();
+				GuiManager::getInstance().resize(screen->size().x(), screen->size().y());
+			}
 		}
 	}
 
