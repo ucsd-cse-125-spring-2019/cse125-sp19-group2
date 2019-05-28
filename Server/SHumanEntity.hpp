@@ -20,8 +20,6 @@ public:
 	void generalHandleCollision(SBaseEntity* entity) override;
 
 private:
-	bool _isLaunching = false;
-	bool _isPlacingTrap = false;
 	HumanAction _curAction = ACTION_HUMAN_IDLE;
 
 	std::shared_ptr<SPlungerEntity> plungerEntity;
@@ -45,5 +43,8 @@ private:
 	bool _isSlipImmune = false;
 	bool _isCharging = false;
 	bool _isSwinging = false;
+	bool _isLaunching = false;
+	bool _isPlacingTrap = false;
+	bool _launchCanStop = true;
 	float stuntDuration = 0;
 };

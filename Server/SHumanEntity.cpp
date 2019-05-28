@@ -156,22 +156,35 @@ void SHumanEntity::update(std::vector<std::shared_ptr<GameEvent>> events)
 		break;
 	case ACTION_HUMAN_LAUNCHING:
 		if (actionChanged) {
+			_launchCanStop = false;
 			_state->forward = _plungerDirection;
 			humanState->currentAnimation = ANIMATION_HUMAN_SHOOT;
+			humanState->isPlayOnce = true;
+			humanState->animationDuration = 450;
 			hasChanged = true;
 			// Timer until shooting animation end
-			registerTimer(360, [&]()
+			registerTimer(450, [&]()
 			{
-				humanState->currentAnimation = ANIMATION_HUMAN_IDLE_LAUNCHER;
-				hasChanged = true;
-				actionStage++;
+				if (_curAction == ACTION_HUMAN_LAUNCHING)
+				{
+					hasChanged = true;
+					actionStage++;
+				}
+			});
+			registerTimer(500, [&]()
+			{
+				_launchCanStop = true;
+				if (!_isLaunching)
+				{
+					_launchingReset();
+				}
 			});
 		}
 
 		// stage 1: create plunger entity and wait until it hit the wall
 		if (actionStage == 1) {
 			if (plungerEntity == nullptr) {
-				plungerEntity = std::make_shared<SPlungerEntity>(_state->pos, _state->forward);
+				plungerEntity = std::make_shared<SPlungerEntity>(_state->pos + _state->forward * 0.4f, _state->forward);
 				_structureInfo->newEntities->push_back(plungerEntity);
 			}
 			if (ropeEntity == nullptr) {
@@ -365,7 +378,7 @@ bool SHumanEntity::updateAction()
 	HumanAction oldAction = _curAction;
 
 	// lower the priority of action if possible
-	if (_curAction == ACTION_HUMAN_LAUNCHING && !_isLaunching ||
+	if (_curAction == ACTION_HUMAN_LAUNCHING && !_isLaunching && _launchCanStop ||
 		_curAction == ACTION_HUMAN_SLIPPING && !_isSlipping ||
 		_curAction == ACTION_HUMAN_SWINGING && !_isSwinging ||
 		_curAction == ACTION_HUMAN_PLACING_TRAP && !_isPlacingTrap)
@@ -392,7 +405,7 @@ bool SHumanEntity::updateAction()
 	}
 
 	// Reset slipping
-	if (!_curAction == ACTION_HUMAN_SLIPPING)
+	if (_curAction != ACTION_HUMAN_SLIPPING)
 	{
 		_isSlipping = false;
 	}
