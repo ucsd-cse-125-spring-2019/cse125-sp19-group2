@@ -167,7 +167,9 @@ enum DogAnimation
 	ANIMATION_DOG_DIGGING_IN,
 	ANIMATION_DOG_DIGGING_IN_DIGGING_OUT, // transition
 	ANIMATION_DOG_DIGGING_OUT,
-	ANIMATION_DOG_IDLE_RUNNING // transition
+	ANIMATION_DOG_IDLE_RUNNING, // transition
+	ANIMATION_DOG_WALKING,
+	ANIMATION_DOG_EATING
 };
 
 //Logger::getInstance()->debug("x: " + std::to_string(dir.x) + " y: " + std::to_string(dir.y) + " z: " + std::to_string(dir.z));

@@ -212,13 +212,13 @@ void SDogEntity::update(std::vector<std::shared_ptr<GameEvent>> events)
 	case ACTION_DOG_TRAPPED:
 		if (actionChanged) {
 			// Replace with walking animation
-			dogState->currentAnimation = ANIMATION_DOG_RUNNING;
+			dogState->currentAnimation = ANIMATION_DOG_WALKING;
 
 			// Interpolate to trap
 			interpolateMovement(_curTrap->getState()->pos, _state->forward, DOG_BASE_VELOCITY / 10,
 				[&]() {
 					// Switch to idle
-					dogState->currentAnimation = ANIMATION_DOG_IDLE;
+					dogState->currentAnimation = ANIMATION_DOG_EATING;
 					hasChanged = true;
 				});
 		}
