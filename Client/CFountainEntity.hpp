@@ -16,5 +16,20 @@ public:
 		_objectShader->CreateProgram();
 	};
 	~CFountainEntity() {};
+
+	void updateState(std::shared_ptr<BaseState> state) override {
+		CBaseEntity::updateState(state);
+
+		if (!_waterSound) {
+			_waterSound = AudioManager::getInstance().getAudioSource("fountain sound" + std::to_string(state->id));
+			_waterSound->init("Resources/Sounds/fountain.wav", true, true);
+			_waterSound->setVolume(0.4f);
+			_waterSound->setPosition(state->pos);
+			_waterSound->play(true);
+		}
+	}
+
+protected:
+	AudioSource * _waterSound = nullptr;
 };
 
