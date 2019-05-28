@@ -278,6 +278,9 @@ void Application::Update()
         // Update entity
         EntityManager::getInstance().update(state);
 
+		// Update entity particle system
+		ParticleSystemManager::getInstance().updateState(state);
+
         // Check for special case of GameState update
         if (state->type == ENTITY_STATE)
         {
@@ -500,6 +503,9 @@ void Application::Draw() {
 
 		  // Render floor before any entity
 		  CFloorEntity::getInstance().render(_localPlayer->getCamera());
+
+          // Render particles
+		  ParticleSystemManager::getInstance().render(_localPlayer->getCamera());
 
 		  EntityManager::getInstance().render(_localPlayer->getCamera());
 
