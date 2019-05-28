@@ -228,7 +228,6 @@ void SHumanEntity::update(std::vector<std::shared_ptr<GameEvent>> events)
 		break;
 	case ACTION_HUMAN_SWINGING:
 		if (actionChanged) {
-
 			float chargeDistance = humanState->chargeMeter * 3.0f;
 			float chargeDuration = chargeDistance / HUMAN_SWING_VELOCITY;
 			stuntDuration = (chargeDistance / HUMAN_BASE_VELOCITY - chargeDistance / HUMAN_SWING_VELOCITY + 0.2f) * 1250;
@@ -390,6 +389,12 @@ bool SHumanEntity::updateAction()
 	if (!_curAction == ACTION_HUMAN_SWINGING)
 	{
 		_isSwinging = false;
+	}
+
+	// Reset slipping
+	if (!_curAction == ACTION_HUMAN_SLIPPING)
+	{
+		_isSlipping = false;
 	}
 
 	return oldAction != _curAction;
