@@ -47,6 +47,8 @@ const std::chrono::seconds TRAP_COOLDOWN(10);
 #define MAX_HUMAN_CHARGE 2.0f
 #define HUMAN_CHARGE_THRESHOLD1 0.5f	// lower than that will be swing1
 #define HUMAN_CHARGE_THRESHOLD2 1.5f    // lower than that will be swing2
+#define LAUNCHING_VELOCITY 25.0f	// Plunger speed
+#define HUMAN_FLY_VELOCITY 30.0f
 
 // This is absolutely filthy code but it is necessary when multiple machines
 // enter the picture.

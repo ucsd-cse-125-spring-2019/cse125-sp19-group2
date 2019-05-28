@@ -46,7 +46,7 @@ public:
 			auto stickingSound = AudioManager::getInstance().getAudioSource("plunger stick" + std::to_string(_state->id));
 			stickingSound->init("Resources/Sounds/plunger_hit.wav", false, true);
 			stickingSound->setPosition(_state->pos);
-			stickingSound->setVolume(0.6f);
+			stickingSound->setVolume(1.0f);
 			stickingSound->play(true);
 		}
 

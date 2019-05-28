@@ -201,7 +201,7 @@ void SHumanEntity::update(std::vector<std::shared_ptr<GameEvent>> events)
 			humanState->currentAnimation = ANIMATION_HUMAN_FLYING;
 			hasChanged = true;
 			glm::vec3 plungerTailPos = plungerEntity->getState()->pos + glm::normalize(plungerEntity->getState()->forward) * -0.675f;
-			interpolateMovement(plungerTailPos, plungerEntity->getState()->forward, 20.0f,
+			interpolateMovement(plungerTailPos, plungerEntity->getState()->forward, HUMAN_FLY_VELOCITY,
 				_launchingReset, _launchingReset, false);
 			actionStage++;
 		}

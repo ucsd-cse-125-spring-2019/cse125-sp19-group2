@@ -5,8 +5,6 @@
 #include "EmptyCollider.hpp"
 #include "Shared/PlungerState.hpp"
 
-#define LAUNCHING_VELOCITY 22.0f
-
 class SPlungerEntity : public SBaseEntity
 {
 public:
