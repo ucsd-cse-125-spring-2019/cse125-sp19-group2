@@ -24,6 +24,9 @@ public:
 		_flyingSound = AudioManager::getInstance().getAudioSource("human flying" + std::to_string(id));
 		_flyingSound->init("Resources/Sounds/human_flying.wav", true, true);
 		_flyingSound->setVolume(0.1f);
+
+		_slippingSound = AudioManager::getInstance().getAudioSource("human slipping" + std::to_string(id));
+
     };
     ~CHumanEntity() {};
 
@@ -39,6 +42,7 @@ public:
 		_runningSound->setPosition(_state->pos);
 		_swingSound->setPosition(_state->pos);
 		_flyingSound->setPosition(_state->pos);
+		_slippingSound->setPosition(_state->pos);
 
 		// Running
 		_runningSound->play(newState->currentAnimation == ANIMATION_HUMAN_RUNNING);
@@ -57,6 +61,16 @@ public:
 
 		// Flying
 		_flyingSound->play(newState->currentAnimation == ANIMATION_HUMAN_FLYING);
+
+		// Slipping
+		if (newState->currentAnimation != currentState->currentAnimation &&
+			newState->currentAnimation == ANIMATION_HUMAN_SLIPPING)
+		{
+			_slippingSound->init("Resources/Sounds/human_slipping.wav", false, true);
+			_slippingSound->setVolume(0.10f);
+			_slippingSound->setPosition(_state->pos);
+			_slippingSound->play(true);
+		}
 
 		/** Animation **/
 		currentState->currentAnimation = newState->currentAnimation;
@@ -88,5 +102,6 @@ protected:
 	AudioSource* _runningSound;
 	AudioSource* _swingSound;
 	AudioSource* _flyingSound;
+	AudioSource* _slippingSound;
 };
 

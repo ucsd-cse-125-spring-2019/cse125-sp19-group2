@@ -101,7 +101,11 @@ FMOD::System* AudioManager::getSystem() const {
 }
 
 void AudioManager::reset() {
+	// Don't pause background music
+	auto bgmSource = getAudioSource("bgm");
 	for (auto& source : _audioSources) {
-		source->play(false);
+		if (source.get() != bgmSource) {
+			source->play(false);
+		}
 	}
 }

@@ -1,5 +1,12 @@
+Music:
+bgm1: Village Tarantella by Kevin MacLeod (freepd.com)
+
+Positional Sounds:
 plunger_hit: https://freesound.org/people/LloydEvans09/sounds/321807/ (Creative Commons: Attribution Noncommercial License)
 human_running: https://freesound.org/people/Juandamb/sounds/430708/ (Creative Commons 0)
 swing1: https://freesound.org/people/Josethehedgehog/sounds/390360/ (Creative Commons 0)
 plunger_shoot: https://freesound.org/people/muel2002/sounds/266966/ (Creative Commons 0)
 human_flying: https://freesound.org/people/LuannWepener/sounds/326105/ (Creative Commons: Attribition Noncommercial License)
+human_slipping: https://freesound.org/people/soundscalpel.com/sounds/110390/ (Creative Commons: Attribution License)
+dog_barking: https://freesound.org/people/beerbelly38/sounds/162148/ (Creative Commons: Attribution License)
+dog_panting: https://freesound.org/people/keweldog/sounds/181767/ (Creative Commons 0)

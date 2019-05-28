@@ -215,6 +215,11 @@ void Application::Setup() {
 			break;
 		}
 	});
+
+	_bgm = AudioManager::getInstance().getAudioSource("bgm");
+	_bgm->init("Resources/Sounds/bgm1.mp3");
+	_bgm->setVolume(0.05f);
+	_bgm->play(true);
 }
 
 void Application::Cleanup() {
