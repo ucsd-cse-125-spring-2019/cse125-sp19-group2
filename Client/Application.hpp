@@ -23,6 +23,8 @@
 #include "fmod/fmod_errors.h"
 #include "Shared/GameEvent.hpp"
 
+#define SESSION_FILE_PATH "last_session.txt"
+
 class Application {
 public:
   Application(const char *windowTitle, int argc, char **argv);
@@ -110,6 +112,9 @@ private:
 
   // Time when pregame countdown ended
   std::chrono::time_point<std::chrono::steady_clock> _countdownEnd;
+
+  // Background music source
+  AudioSource* _bgm = nullptr;
 
   // Test Lights
   std::unique_ptr<DirectionalLight> _dir_light;

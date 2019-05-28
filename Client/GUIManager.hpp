@@ -12,10 +12,15 @@ enum WidgetType {
 	WIDGET_HUD,
 	WIDGET_HUD_TOP,
 	WIDGET_HUD_MIDDLE,
-	WIDGET_HUD_BOTTOM
+	WIDGET_HUD_BOTTOM,
+	WIDGET_HUD_DOG_SKILLS,
+	WIDGET_HUD_HUMAN_SKILLS
 };
 
 #define CONNECT_MARGIN 0.15f
+
+static const nanogui::Color SOLID_HIGHLIGHTED = nanogui::Color(0.376f, 0.863f, 1.0f, 1.0f);
+static const nanogui::Color SOLID_WHITE = nanogui::Color(1.0f, 1.0f, 1.0f, 1.0f);
 
 class GuiManager {
 public: 
@@ -30,8 +35,6 @@ public:
     void init(GLFWwindow* window);
 
     void draw();
-
-	void redraw(nanogui::Widget* widget);
 
 	void resize(int x, int y);
 
@@ -57,9 +60,11 @@ public:
 	void registerReadyCallback(const std::function<void()> f);
 	void registerControllerCallback(const std::function<void(GamePadIndex)> f);
 
-	// Returns text in player name and address boxes
+	// Text in player name and address boxes
 	std::string getPlayerName();
+	void setPlayerName(std::string val);
 	std::string getAddress();
+	void setAddress(std::string val);
 
 	// Updates list of dogs/humans in the lobby
 	void updateDogsList(std::unordered_map<uint32_t, std::string> dogs, uint32_t playerId);
@@ -78,6 +83,18 @@ public:
 	// Primary and secondary messages for main HUD
 	void setPrimaryMessage(std::string message);
 	void setSecondaryMessage(std::string message);
+
+	// Set active skill for human
+	void setActiveSkill(bool usePlunger);
+
+	// Update skills with percentages
+	void updateStamina(float val);
+	void updatePee(float val);
+	void updateCharge(float val);
+
+	// Update skills with cooldowns
+	void updatePlunger(long millisecondsLeft);
+	void updateTrap(long millisecondsLeft);
 
 	// Sets visibility recursively for a given widget
 	void setVisibility(WidgetType name, bool visiblity);
@@ -146,4 +163,13 @@ private:
 	nanogui::Label* _secondaryMessage;	// Time to start, etc.
 
 	// Lower HUD
+
+	// Dog skills
+	nanogui::Label* _staminaInfo;
+	nanogui::Label* _peeInfo;
+
+	// Human skills
+	nanogui::Label* _plungerInfo;
+	nanogui::Label* _trapInfo;
+	nanogui::Label* _chargeInfo;
 };

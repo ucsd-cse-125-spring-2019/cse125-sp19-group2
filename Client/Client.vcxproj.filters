@@ -255,6 +255,12 @@
     <ClInclude Include="CPlungerEntity.hpp">
       <Filter>Header Files\Entity</Filter>
     </ClInclude>
+    <ClInclude Include="CRopeEntity.hpp">
+      <Filter>Header Files\Entity</Filter>
+    </ClInclude>
+    <ClInclude Include="CTrapEntity.hpp">
+      <Filter>Header Files\Entity</Filter>
+    </ClInclude>
     <ClInclude Include="ParticleSystemManager.hpp">
       <Filter>Header Files\Graphics</Filter>
     </ClInclude>

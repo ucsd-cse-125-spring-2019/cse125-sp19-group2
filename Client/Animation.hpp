@@ -8,7 +8,7 @@
  */
 class Animation : public Drawable {
 public:
-	std::unique_ptr<AnimatedMesh> animatedMesh;
+	std::unique_ptr<AnimatedMesh> _animatedMesh;
 
     /**
 	 * \brief The parameter to determine whether it should play animation or not
@@ -53,6 +53,23 @@ public:
      */
     void init(const std::unique_ptr<Shader> & shader);
 
+    void play(int newTake) {
+        if(newTake != _currentTake && !_isPlayOnce){
+            _lastTake = _currentTake;
+            _currentTake = newTake;
+            _isTransition = true;
+		}
+    }
+
+
+    void playOnce(int newTake, float endingTime) {
+        if(newTake != _currentTake){
+           play(newTake);
+           _isPlayOnce = true;
+           _endingTime = endingTime;
+        }
+    }
+
 private:
 	void setBoneUniform(uint32_t index, const glm::mat4& transform);
 
@@ -62,4 +79,15 @@ private:
 
 	float _timer; // in millisecond
 	std::chrono::steady_clock::time_point _lastTime;
+
+    int _lastTake = 0;
+    int _currentTake = 0;
+
+    // Value for transition
+    bool _isTransition = false;
+
+    // Value for playOnce
+    bool _isPlayOnce = false;
+    float _duration = -1;
+    float _endingTime = -1; // in millisecond
 };

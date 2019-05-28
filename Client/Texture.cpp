@@ -8,7 +8,7 @@ GLuint LoadTextureFromFile(const char *path, const std::string &directory)
 
   GLuint id;
   glGenTextures(1, &id);
-
+  glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
   int width, height, num_components;
   unsigned char *data = stbi_load(filename.c_str(), &width, &height, &num_components, 0);
   if (data)

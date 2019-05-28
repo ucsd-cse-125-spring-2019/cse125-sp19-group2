@@ -42,15 +42,24 @@ AudioManager::AudioManager() {
 
 }
 
-void AudioManager::setListenerPose(vec3 pos, vec3 forward) {
+void AudioManager::setListenerPos(vec3 pos) {
     _pos = pos;
-    _forward = forward;
     FMOD_VECTOR p, f, u;
     // Set Listener's position
     _system->set3DListenerAttributes(
         0, vec3ToFmod(_pos, &p), 0,
         vec3ToFmod(_forward, &f),
         vec3ToFmod(_up, &u));
+}
+
+void AudioManager::setListenerDir(vec3 forward) {
+	_forward = forward;
+	FMOD_VECTOR p, f, u;
+	// Set Listener's position
+	_system->set3DListenerAttributes(
+		0, vec3ToFmod(_pos, &p), 0,
+		vec3ToFmod(_forward, &f),
+		vec3ToFmod(_up, &u));
 }
 
 FMOD_VECTOR* AudioManager::vec3ToFmod(const vec3& v, FMOD_VECTOR* fv) {
@@ -89,4 +98,14 @@ void AudioManager::update() {
 
 FMOD::System* AudioManager::getSystem() const {
     return _system;
+}
+
+void AudioManager::reset() {
+	// Don't pause background music
+	auto bgmSource = getAudioSource("bgm");
+	for (auto& source : _audioSources) {
+		if (source.get() != bgmSource) {
+			source->play(false);
+		}
+	}
 }

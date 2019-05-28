@@ -2,6 +2,7 @@
 #include "InputManager.h"
 #include "Shared/GameEvent.hpp"
 #include "EntityManager.hpp"
+#include "AudioManager.hpp"
 #include <glm/gtx/string_cast.hpp>
 
 LocalPlayer::LocalPlayer(uint32_t playerId, std::unique_ptr<NetworkClient> const& networkClient) {
@@ -106,6 +107,7 @@ LocalPlayer::LocalPlayer(uint32_t playerId, std::unique_ptr<NetworkClient> const
 				event = std::make_shared<GameEvent>();
 				event->playerId = _playerId;
 				event->type = EVENT_PLAYER_LAUNCH_START;
+				event->direction = _camera->convert_direction(glm::vec2(0, -1));
 				try
 				{
 					networkClient->sendEvent(event);
@@ -116,7 +118,16 @@ LocalPlayer::LocalPlayer(uint32_t playerId, std::unique_ptr<NetworkClient> const
 			}
 			else
 			{
-				// TODO: trap placement
+				event = std::make_shared<GameEvent>();
+				event->playerId = _playerId;
+				event->type = EVENT_PLAYER_PLACE_TRAP;
+				try
+				{
+					networkClient->sendEvent(event);
+				}
+				catch (std::runtime_error e)
+				{
+				};
 			}
         });
 
@@ -151,7 +162,7 @@ LocalPlayer::LocalPlayer(uint32_t playerId, std::unique_ptr<NetworkClient> const
             //std::cout << glm::to_string(v) << std::endl;
             if (_moveCamera && InputManager::getInstance().isForegroundWindow()) {
                 _camera->move_camera(v);
-            }
+			}
         });
 
     InputManager::getInstance().getKey2D(Key::KEYTYPE::RSTICK)->onMove(
@@ -224,7 +235,7 @@ LocalPlayer::LocalPlayer(uint32_t playerId, std::unique_ptr<NetworkClient> const
 			// Humans swinging nets
 			auto event = std::make_shared<GameEvent>();
 			event->playerId = _playerId;
-			event->type = EVENT_PLAYER_SWING_NET;
+			event->type = EVENT_PLAYER_CHARGE_NET;
 			try
 			{
 				networkClient->sendEvent(event);
@@ -253,10 +264,20 @@ LocalPlayer::LocalPlayer(uint32_t playerId, std::unique_ptr<NetworkClient> const
 		// We don't want to register clicks if the mouse isn't captured
 		if (_moveCamera)
 		{
-			// TODO: humans swinging nets
+			// Humans swinging nets
+			auto event = std::make_shared<GameEvent>();
+			event->playerId = _playerId;
+			event->type = EVENT_PLAYER_SWING_NET;
+			try
+			{
+				networkClient->sendEvent(event);
+			}
+			catch (std::runtime_error e)
+			{
+			};
 
 			// Dogs interacting
-			auto event = std::make_shared<GameEvent>();
+			event = std::make_shared<GameEvent>();
 			event->playerId = _playerId;
 			event->type = EVENT_PLAYER_INTERACT_END;
 			try
@@ -273,6 +294,7 @@ LocalPlayer::LocalPlayer(uint32_t playerId, std::unique_ptr<NetworkClient> const
 	InputManager::getInstance().getKey(GLFW_KEY_Q)->onPress([&]
 	{
 		_usePlunger = !_usePlunger;
+		GuiManager::getInstance().setActiveSkill(_usePlunger);
 	});
 
     _camera = std::make_unique<Camera>();
@@ -317,6 +339,23 @@ void LocalPlayer::update() {
 		event->type = EVENT_PLAYER_STOP;
 		_networkClient->sendEvent(event);
 	}
+
+	if (_playerEntity)
+	{
+		AudioManager::getInstance().setListenerPos(_playerEntity->getState()->pos);
+		auto forward2D = _camera->convert_direction(glm::vec2(0, -1));
+		auto forward3D = glm::vec3(forward2D.x, 0, forward2D.y);
+		AudioManager::getInstance().setListenerDir(forward3D);
+	}
+
+    // Stop events for the server
+    if (!_stopped && !_moveKeysPressed) {
+        _stopped = true;
+        auto event = std::make_shared<GameEvent>();
+        event->playerId = _playerId;
+        event->type = EVENT_PLAYER_STOP;
+        _networkClient->sendEvent(event);
+    }
 
 	_moveKeysPressed = false;
 }
