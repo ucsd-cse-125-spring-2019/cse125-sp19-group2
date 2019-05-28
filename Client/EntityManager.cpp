@@ -17,6 +17,7 @@
 #include "CRopeEntity.hpp"
 #include "CTrapEntity.hpp"
 #include "ColliderManager.hpp"
+#include "ParticleSystemManager.hpp"
 #include "Shared/Logger.hpp"
 #include <algorithm>
 

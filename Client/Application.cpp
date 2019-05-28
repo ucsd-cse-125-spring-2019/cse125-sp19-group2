@@ -13,6 +13,7 @@
 #include "GuiManager.hpp"
 #include "AudioManager.hpp"
 #include "ColliderManager.hpp"
+#include "ParticleSystemManager.hpp"
 #include "CFloorEntity.hpp"
 
 Application::Application(const char* windowTitle, int argc, char** argv) {
@@ -90,14 +91,6 @@ void Application::Setup() {
   _skybox = std::make_unique<Skybox>("skybox");
 
   // Create light
-  _point_light = std::make_unique<PointLight>(
-    PointLight{
-      "u_pointlight",
-      { { 0.05f, 0.05f, 0.05f }, { 0.8f, 0.8f, 0.8f }, { 1.0f, 1.0f, 1.0f } },
-      { -1.0f, 0.0f, 0.0f },
-      { 1.0f, 0.09f, 0.032f }
-    }
-  );
   _dir_light = std::make_unique<DirectionalLight>(
     DirectionalLight{
       "u_dirlight",
@@ -307,6 +300,7 @@ void Application::Update()
 			{
 				_inLobby = false;
 				GuiManager::getInstance().getWidget(WIDGET_LOBBY)->setVisible(false);
+				GuiManager::getInstance().getWidget(WIDGET_OPTIONS)->setVisible(false);
 				GuiManager::getInstance().setReadyEnabled(true);
 				GuiManager::getInstance().setSwitchEnabled(true);
 
@@ -346,6 +340,7 @@ void Application::Update()
 				// Deallocate world objects
 				EntityManager::getInstance().clearAll();
 				ColliderManager::getInstance().clear();
+				ParticleSystemManager::getInstance().clear();
 
 				// Set localPlayer's _playerEntity to null
 				_localPlayer->unpairEntity();
@@ -449,6 +444,7 @@ void Application::Update()
 	  EntityManager::getInstance().clearAll();
 	  InputManager::getInstance().reset();
 	  ColliderManager::getInstance().clear();
+	  ParticleSystemManager::getInstance().clear();
 	  GuiManager::getInstance().hideAll();
 	  GuiManager::getInstance().setVisibility(WIDGET_CONNECT, true);
 
@@ -462,12 +458,14 @@ void Application::Update()
   if (_localPlayer) {
       _localPlayer->update();
   }
+
+  // Update particle system physics
+  ParticleSystemManager::getInstance().updatePhysics(0.016f);
     
   // Update sound engine
   AudioManager::getInstance().update();
     
   _camera->Update();
-  _point_light->update();
 }
 
 void Application::Draw() {

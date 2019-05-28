@@ -16,7 +16,7 @@ CFloorEntity::CFloorEntity()
 	_state = std::make_shared<BaseState>();
 
 	_state->scale = glm::vec3(MAP_WIDTH, 1, MAP_WIDTH);
-	_state->pos = glm::vec3(0);
+	_state->pos = glm::vec3(0.0f, -0.01f, 0.0f);
 	_state->forward = glm::vec3(0, 0, 1.0f);
 	_state->up = glm::vec3(0, 1.0f, 0);
 
@@ -88,7 +88,6 @@ void CFloorEntity::render(std::unique_ptr<Camera> const & camera)
 			_textureShader->set_uniform("u_projection", projM);
 			_textureShader->set_uniform("u_view", viewM);
 
-			glDisable(GL_DEPTH_TEST);
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 			
 
@@ -120,8 +119,6 @@ void CFloorEntity::render(std::unique_ptr<Camera> const & camera)
 					}
 				}
 			}
-
-			glEnable(GL_DEPTH_TEST);
 		});
 		updatedTexture = true;
 
@@ -133,8 +130,6 @@ void CFloorEntity::render(std::unique_ptr<Camera> const & camera)
 	// render the floor with changed texture
 	_objectShader->Use();
 	setUniforms(camera);
-	glDisable(GL_DEPTH_TEST);
 	Mesh floorMesh = (static_cast<Model*>(_objectModel.get()))->getMeshAt(0);
 	floorMesh.Draw(_objectShader, fbo->getRGBA());
-	glEnable(GL_DEPTH_TEST);
 }

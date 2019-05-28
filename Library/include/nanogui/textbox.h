@@ -146,7 +146,7 @@ protected:
     uint32_t backgroundTexture = 0;
     uint32_t foreground1Texture = 0;
     uint32_t foreground2Texture = 0;
-    ImageView* _image;
+    ImageView* _image = nullptr;
     //Window* _iwindow;
     bool initialized = false;
 public:
