@@ -234,6 +234,29 @@ void SDogEntity::update(std::vector<std::shared_ptr<GameEvent>> events)
 					hasChanged = true;
 				});
 		}
+		break;
+	case ACTION_DOG_JAILED:
+		if (actionChanged)
+		{
+			// Make dog invisible and non-solid
+			_state->isSolid = false;
+			_state->transparency = 0.0f;
+
+			// Interpolate to jail
+			interpolateMovement(
+				_targetJailPos,
+				_state->forward,
+				DOG_TELEPORT_VELOCITY,
+				[&]()
+				{
+					// On finish, revert dog properties
+					_state->isSolid = true;
+					_state->transparency = 1.0f;
+					_isJailed = false;
+				},
+				0,
+				false /* Disable interp interrupt */);
+		}
 	}
 
 	handleInterpolation();
@@ -263,7 +286,9 @@ void SDogEntity::generalHandleCollision(SBaseEntity * entity)
 			_structureInfo->jailsPos->end(),
 			std::default_random_engine(seed));
 		glm::vec2 jailPos = (*(_structureInfo->jailsPos))[0];
-		getState()->pos = glm::vec3(jailPos.x, 0, jailPos.y);
+		_targetJailPos = glm::vec3(jailPos.x, 0, jailPos.y);
+		_isJailed = true;
+		//getState()->pos = glm::vec3(jailPos.x, 0, jailPos.y);
 	}
 	else if (entity->getState()->type == ENTITY_BONE)
 	{
@@ -308,7 +333,8 @@ bool SDogEntity::updateAction()
 	DogAction oldAction = _curAction;
 
 	// lower the priority of action if possible
-	if (_curAction == ACTION_DOG_PEEING && !_isUrinating ||
+	if (_curAction == ACTION_DOG_JAILED && !_isJailed ||
+		_curAction == ACTION_DOG_PEEING && !_isUrinating ||
 		_curAction == ACTION_DOG_DRINKING && !_isInteracting ||
 		_curAction == ACTION_DOG_SCRATCHING && !_isInteracting ||
 		_curAction == ACTION_DOG_TRAPPED && !_isTrapped)
@@ -323,7 +349,8 @@ bool SDogEntity::updateAction()
 		_curAction = (_isMoving) ? ACTION_DOG_MOVING : ACTION_DOG_IDLE;
 
 		// update action again if higher priority action is happening
-		if (_isUrinating && dogState->urineMeter == 1.0f) _curAction = ACTION_DOG_PEEING;
+		if (_isJailed) _curAction = ACTION_DOG_JAILED;
+		else if (_isUrinating && dogState->urineMeter == 1.0f) _curAction = ACTION_DOG_PEEING;
 		else if (_isInteracting && _nearTrigger) _curAction = ACTION_DOG_SCRATCHING;
 		else if (_isInteracting && _nearFountain) _curAction = ACTION_DOG_DRINKING;
 		else if (_isTrapped) _curAction = ACTION_DOG_TRAPPED;

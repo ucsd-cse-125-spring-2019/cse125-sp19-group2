@@ -17,6 +17,7 @@ public:
 	~SDogEntity() {};
 
 	bool isCaught = false;
+	bool isTeleporting = false;
 
 	void update(std::vector<std::shared_ptr<GameEvent>> events) override;
 
@@ -42,6 +43,9 @@ private:
 	bool _isRunning = false;
 	bool _isInteracting = false;
 	bool _isTrapped = false;
+	bool _isJailed = false;	// Teleporting to jail
+
+	glm::vec3 _targetJailPos;
 
 	// Number of times the dog has pressed a button to escape trap
 	int _numEscapePressed = 0;
