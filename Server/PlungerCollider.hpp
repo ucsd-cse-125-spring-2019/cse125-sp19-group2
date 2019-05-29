@@ -60,7 +60,7 @@ public:
 
 			else if (stateB->type == ENTITY_FENCE)
 			{
-				stateA->pos -= stateA->forward * 0.07f;
+				stateA->pos -= stateA->forward * 0.12f;
 				float rA = (float)std::fmax(stateA->width, stateA->depth) / 2;
 
 				glm::vec3 correctionVec = glm::vec3(0);
@@ -95,7 +95,7 @@ public:
 
 			else if (stateB->colliderType == COLLIDER_AABB)
 			{
-				stateA->pos -= stateA->forward * 0.07f;
+				stateA->pos -= stateA->forward * 0.12f;
 
 				float rA = (float)std::fmax(stateA->width, stateA->depth) / 2;
 

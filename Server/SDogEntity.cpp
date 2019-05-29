@@ -48,7 +48,7 @@ void SDogEntity::update(std::vector<std::shared_ptr<GameEvent>> events)
 	if (dogState->runStamina < MAX_DOG_STAMINA)
 	{
 		// Four seconds to charge 1 second of sprinting
-		dogState->runStamina += 1.0f / 3 / TICKS_PER_SEC;
+		dogState->runStamina += 1.0f / 4 / TICKS_PER_SEC;
 		hasChanged = true;
 	}
 	else
@@ -137,10 +137,10 @@ void SDogEntity::update(std::vector<std::shared_ptr<GameEvent>> events)
 			hasChanged = true;
 		}
 		if (_isRunning) {
-			if (dogState->runStamina >= 1.0f / TICKS_PER_SEC)
+			if (dogState->runStamina >= 1.5f / TICKS_PER_SEC)
 			{
 				_velocity = DOG_RUN_VELOCITY;
-				dogState->runStamina -= 1.0f / TICKS_PER_SEC;
+				dogState->runStamina -= 1.5f / TICKS_PER_SEC;
 			}
 			else {
 				dogState->runStamina = 0;
@@ -251,8 +251,15 @@ void SDogEntity::generalHandleCollision(SBaseEntity * entity)
 	}
 	else if (entity->getState()->type == ENTITY_BONE)
 	{
-		// Refill dog stamina
-		dogState->runStamina = MAX_DOG_STAMINA;
+		// Refill dog stamina by 25%
+		if (dogState->runStamina < MAX_DOG_STAMINA)
+		{
+			dogState->runStamina += MAX_DOG_STAMINA / 4.0f;
+		}
+		else
+		{
+			dogState->runStamina = MAX_DOG_STAMINA;
+		}
 		hasChanged = true;
 
 		// Remove dog bone

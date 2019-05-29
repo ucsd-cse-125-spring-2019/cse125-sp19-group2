@@ -39,7 +39,7 @@ const std::chrono::seconds TRAP_COOLDOWN(10);
 #define DOG_RUN_VELOCITY DOG_BASE_VELOCITY * 1.5f
 #define MAX_DOG_STAMINA 3.0f	// Dog can sprint for three seconds max
 #define MAX_DOG_URINE 1.0f		// Dog can make one puddle per urine bar
-#define MAX_DOG_ESCAPE_PRESSES 15	// Dog must press button 15 times to escape trap
+#define MAX_DOG_ESCAPE_PRESSES 12	// Dog must press button 12 times to escape trap
 
 // Human-spedific stats
 #define HUMAN_BASE_VELOCITY 5.0f
