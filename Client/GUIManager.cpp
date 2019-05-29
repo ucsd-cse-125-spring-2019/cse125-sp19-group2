@@ -373,10 +373,11 @@ void GuiManager::hideAll() {
 /*** Private functions ***/
 void GuiManager::initConnectScreen() {
 	auto connectScreen = createWidget(_screen, WIDGET_CONNECT);
+    auto bg = LoadTextureFromFile("background.png", "./Resources/Textures/Menu/");
     connectScreen->setVisible(false);
-	auto screenBackground = LoadTextureFromFile("background.png", "./Resources/Textures/Menu/");
-
-	connectScreen->setBackgroundTexture(screenBackground, screenBackground, screenBackground);
+    connectScreen->alpha = 0.2;
+    connectScreen->setBackgroundTexture(bg, 0, 0);
+    connectScreen->drawBackground = true;
 
 	// Resize handles margins, 50 pixel spacing
 	auto connectLayout = new nanogui::BoxLayout(nanogui::Orientation::Vertical, nanogui::Alignment::Middle, 0, 25);
@@ -390,7 +391,6 @@ void GuiManager::initConnectScreen() {
 	_playerNameBox->setEditable(true);
 	_playerNameBox->setFontSize(38);
 	_playerNameBox->setAlignment(nanogui::TextBox::Alignment::Center);
-
     	//_playerNameBox->setBackgroundTexture(background, foreground1, foreground2);
     	//_playerNameBox->alpha = 0.5;
         //_playerNameBox->setTextColor(nanogui::Color(0, 0, 255, 255));
@@ -416,7 +416,6 @@ void GuiManager::initConnectScreen() {
 		_connectButton->setFixedHeight(40);
 		_connectButton->setFixedWidth(100);
 		
-
 }
 
 void GuiManager::initLobbyScreen() {
