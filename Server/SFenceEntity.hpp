@@ -14,7 +14,11 @@ public:
 
 		_children.push_back(std::make_shared<SBoxPlungerEntity>(pos, scale));
 	};
-	~SFenceEntity() {};
+
+	~SFenceEntity()
+	{
+		_children.clear();
+	};
 
 	std::vector<std::shared_ptr<SBaseEntity>> getChildren() override
 	{

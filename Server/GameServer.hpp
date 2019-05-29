@@ -3,6 +3,7 @@
 #include <memory>
 #include <unordered_map>
 #include <unordered_set>
+#include <atomic>
 
 #include "Shared/Logger.hpp"
 #include "Shared/QuadTree.hpp"
@@ -30,6 +31,9 @@ public:
     // Main update loop
     void update();
 
+	// Shutdown the server
+	void shutdown();
+
 private:
 	/** Functions **/
 
@@ -41,6 +45,8 @@ private:
 	void resetGameState();
 
 	/** Variables **/
+	std::atomic<bool> _isRunning;
+	std::atomic<bool> _isFinished;
 
     // Interface for client communication
     std::unique_ptr<NetworkServer> _networkInterface;

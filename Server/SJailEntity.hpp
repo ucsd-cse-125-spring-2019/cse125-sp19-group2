@@ -220,7 +220,11 @@ public:
 
 		_children.push_back(std::make_shared<SBoxPlungerEntity>(pos, scale));
 	};
-	~SJailEntity() {};
+
+	~SJailEntity()
+	{
+		_children.clear();
+	};
 
 	// If walls have children in the future, change this
 	std::vector<std::shared_ptr<SBaseEntity>> getChildren() override

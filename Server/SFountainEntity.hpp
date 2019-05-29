@@ -53,7 +53,11 @@ public:
 
 		_children.push_back(dogSensor);
 	};
-	~SFountainEntity() {};
+
+	~SFountainEntity()
+	{
+		_children.clear();
+	};
 
 	std::vector<std::shared_ptr<SBaseEntity>> getChildren() override
 	{

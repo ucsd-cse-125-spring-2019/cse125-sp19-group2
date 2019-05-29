@@ -32,7 +32,8 @@ private:
 		TILE_DOGBONE,
 		TILE_DOGHOUSE,
 		TILE_HYDRANT,
-		TILE_FOUNTAIN
+		TILE_FOUNTAIN,
+		TILE_TREE
 	};
 
 	// Different width for different structure (0 means size is not fixed)
@@ -47,7 +48,8 @@ private:
 		{TILE_DOGBONE, 1},
 		{TILE_DOGHOUSE, 1},
 		{TILE_HYDRANT, 1},
-		{TILE_FOUNTAIN, 3}
+		{TILE_FOUNTAIN, 3},
+		{TILE_TREE, 1}
 	};
 
 	// Order must be exactly the same as the online editor!

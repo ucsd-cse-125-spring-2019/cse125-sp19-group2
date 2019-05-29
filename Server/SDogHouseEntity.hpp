@@ -126,7 +126,11 @@ public:
 
 		_children.push_back(std::make_shared<SBoxPlungerEntity>(pos, glm::vec3(1.0f, 1.2f, 1.0f)));
 	};
-	~SDogHouseEntity() {};
+
+	~SDogHouseEntity()
+	{
+		_children.clear();
+	};
 
 	// Reset solidity of doghouse walls
 	void update(std::vector<std::shared_ptr<GameEvent>> events) override

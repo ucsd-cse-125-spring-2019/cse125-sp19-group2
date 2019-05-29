@@ -77,7 +77,8 @@ enum EntityType
 	ENTITY_PLUNGER,
 	ENTITY_ROPE,
 	ENTITY_TRAP,
-	ENTITY_NET
+	ENTITY_NET,
+	ENTITY_TREE
 	// TODO: add new types here, e.g. ENTITY_DOGBONE
 };
 

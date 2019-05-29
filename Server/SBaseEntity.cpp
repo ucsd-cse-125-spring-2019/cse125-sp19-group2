@@ -1,6 +1,13 @@
 #include <algorithm>
 #include "SBaseEntity.hpp"
 
+SBaseEntity::~SBaseEntity()
+{
+	_state = nullptr;
+	_collider = nullptr;
+	_collisionHandlers.clear();
+}
+
 std::shared_ptr<BaseState> SBaseEntity::getState()
 {
 	return _state;
