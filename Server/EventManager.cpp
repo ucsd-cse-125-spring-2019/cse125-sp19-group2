@@ -268,4 +268,13 @@ void EventManager::startGame()
 		_gameState->pregameCountdown = true;
 		_gameState->_pregameStart = std::chrono::steady_clock::now();
 	}
+
+	// Optimization: remove all tile entities from the server map
+	for (auto& entityPair : *_structureInfo->entityMap)
+	{
+		if (entityPair.second->getState()->type == ENTITY_FLOOR)
+		{
+			entityPair.second->getState()->isDestroyed = true;
+		}
+	}
 }

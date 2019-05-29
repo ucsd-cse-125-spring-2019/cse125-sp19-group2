@@ -115,8 +115,9 @@ std::shared_ptr<CBaseEntity> EntityManager::getEntity(std::shared_ptr<BaseState>
 	  entity = std::make_shared<CTreeEntity>();
 	  break;
     case ENTITY_FLOOR:
+	  // Floor tiles should not be placed in map
       CFloorEntity::getInstance().updateTile(state);
-      break;
+	  return nullptr;
     }
 
     if (entity)
@@ -130,10 +131,18 @@ std::shared_ptr<CBaseEntity> EntityManager::getEntity(std::shared_ptr<BaseState>
 
 void EntityManager::update(std::shared_ptr<BaseState> const &state)
 {
-    // First check if marked as destroyed
-    if (state->isDestroyed)
-    {
+	auto entity = getEntity(state);
 
+    if (entity)
+    {
+        entity->updateState(state);
+    }
+
+	ColliderManager::getInstance().updateState(state);
+
+	// Destroy entity if necessary
+	if (state->isDestroyed)
+    {
         // Find in map and destroy if it exists
         auto result = _entityMap.find(state->id);
         if (result != _entityMap.end())
@@ -149,15 +158,6 @@ void EntityManager::update(std::shared_ptr<BaseState> const &state)
 
         return;
     }
-
-    auto entity = getEntity(state);
-
-    if (entity)
-    {
-        entity->updateState(state);
-    }
-
-    ColliderManager::getInstance().updateState(state);
 }
 
 void EntityManager::render(std::unique_ptr<Camera> const &camera)
