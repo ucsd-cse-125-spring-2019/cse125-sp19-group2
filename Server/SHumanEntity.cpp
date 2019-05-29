@@ -45,11 +45,13 @@ SHumanEntity::SHumanEntity(
 		if (plungerEntity != nullptr)
 		{
 			plungerEntity->getState()->isDestroyed = true;
+			plungerEntity->hasChanged = true;
 			plungerEntity = nullptr;
 		}
 		if (ropeEntity != nullptr)
 		{
 			ropeEntity->getState()->isDestroyed = true;
+			ropeEntity->hasChanged = true;
 			ropeEntity = nullptr;
 		}
 	};
@@ -58,6 +60,7 @@ SHumanEntity::SHumanEntity(
 		if (netEntity != nullptr)
 		{
 			netEntity->getState()->isDestroyed = true;
+			netEntity->hasChanged = true;
 			netEntity = nullptr;
 		}
 	};

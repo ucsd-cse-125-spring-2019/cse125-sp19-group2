@@ -144,6 +144,12 @@ void GameServer::update()
 	{
 		_structureInfo->entityMap->erase(_structureInfo->entityMap->find(id));
 	}
+
+	// Reset hasChanged for all entities
+	for (auto& entityPair : *_structureInfo->entityMap)
+	{
+		entityPair.second->hasChanged = false;
+	}
 }
 
 void GameServer::updateGameState()

@@ -147,6 +147,8 @@ public:
 				DogState* dogState = static_cast<DogState*>(collidingEntity->getState().get());
 				dogState->message = "Raise (Left click / A)";
 				collidingDog->setNearTrigger(true);
+				collidingDog->hasChanged = true;
+
 				// sending position of trigger to dogEntity for interpolate
 				collidingDog->targetPos = entity->getState()->pos;
 				
@@ -249,14 +251,6 @@ public:
 				}
 				for (int i = 0; i < _triggers.size(); i++) {
 					_triggers[i]->updateForward(-2);
-				}
-			}
-			else {
-				for (int i = 0; i < _gates.size(); i++) {
-					_gates[i]->hasChanged = false;
-				}
-				for (int i = 0; i < _triggers.size(); i++) {
-					_triggers[i]->hasChanged = false;
 				}
 			}
 		}

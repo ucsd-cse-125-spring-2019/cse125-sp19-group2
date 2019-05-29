@@ -35,11 +35,16 @@ SDogEntity::SDogEntity(
 
 void SDogEntity::update(std::vector<std::shared_ptr<GameEvent>> events)
 {
-	isCaught = false;
 	if (!_isInteracting)
 	{
 		_nearTrigger = false;
 		_nearFountain = false;
+	}
+
+	// Dogs cannot clear trap bones from the jail
+	if (isCaught)
+	{
+		_isTrapped = false;
 	}
 
 	auto dogState = std::static_pointer_cast<DogState>(_state);
@@ -92,16 +97,17 @@ void SDogEntity::update(std::vector<std::shared_ptr<GameEvent>> events)
 				if (_isTrapped)
 				{
 					_numEscapePressed++;
-				}
 
-				// Mark player as no longer trapped if we reach the max
-				if (_numEscapePressed >= MAX_DOG_ESCAPE_PRESSES)
-				{
-					_numEscapePressed = 0;
-					_isTrapped = false;
-					_isInterpolating = false;
-					_curTrap->getState()->isDestroyed = true;
-					_curTrap = nullptr;
+					// Mark player as no longer trapped if we reach the max
+					if (_numEscapePressed >= MAX_DOG_ESCAPE_PRESSES)
+					{
+						_numEscapePressed = 0;
+						_isTrapped = false;
+						_isInterpolating = false;
+						_curTrap->getState()->isDestroyed = true;
+						_curTrap->hasChanged = true;
+						_curTrap = nullptr;
+					}
 				}
 				break;
 			case EVENT_PLAYER_INTERACT_END:
@@ -210,6 +216,12 @@ void SDogEntity::update(std::vector<std::shared_ptr<GameEvent>> events)
 		}
 		break;
 	case ACTION_DOG_TRAPPED:
+		// Update dog's message
+		dogState->message = "Escape (Left click / A) [" +
+			std::to_string(_numEscapePressed) + "/" +
+			std::to_string(MAX_DOG_ESCAPE_PRESSES) + "]";
+		hasChanged = true;
+
 		if (actionChanged) {
 			// Replace with walking animation
 			dogState->currentAnimation = ANIMATION_DOG_WALKING;
@@ -225,6 +237,10 @@ void SDogEntity::update(std::vector<std::shared_ptr<GameEvent>> events)
 	}
 
 	handleInterpolation();
+
+	// Reset state handled by collision logic
+	_isTrapped = false;
+	isCaught = false;
 }
 
 void SDogEntity::generalHandleCollision(SBaseEntity * entity)
@@ -269,11 +285,9 @@ void SDogEntity::generalHandleCollision(SBaseEntity * entity)
 	else if (entity->getState()->type == ENTITY_TRAP)
 	{
 		// Mark dog as trapped if not yet slated for destruction
+		// and dog is not in the jail
 		if (!entity->getState()->isDestroyed)
 		{
-			dogState->message = "Escape (Left click / A) [" +
-				std::to_string(_numEscapePressed) + "/" +
-				std::to_string(MAX_DOG_ESCAPE_PRESSES) + "]";
 			_curTrap = entity;
 			_isTrapped = true;
 		}
@@ -300,6 +314,7 @@ bool SDogEntity::updateAction()
 		_curAction == ACTION_DOG_TRAPPED && !_isTrapped)
 	{
 		_curAction = ACTION_DOG_IDLE;
+		_isInterpolating = false;
 	}
 
 	// all other actions has higher priority than idle and moving

@@ -36,8 +36,6 @@ public:
 			return;
 		}
 
-		hasChanged = false;
-
 		// Only change attributes of this object if not static
 		if (!_state->isStatic)
 		{
