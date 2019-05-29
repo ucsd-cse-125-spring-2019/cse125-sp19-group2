@@ -15,7 +15,6 @@
 #include "Model.hpp"
 #include "Skybox.hpp"
 #include "LocalPlayer.hpp"
-#include "PointLight.hpp"
 #include "DirectionalLight.hpp"
 #include "AnimatedMesh.hpp"
 #include "Animation.hpp"
@@ -23,6 +22,8 @@
 #include "fmod/fmod.hpp"
 #include "fmod/fmod_errors.h"
 #include "Shared/GameEvent.hpp"
+
+#define SESSION_FILE_PATH "last_session.txt"
 
 class Application {
 public:
@@ -112,8 +113,10 @@ private:
   // Time when pregame countdown ended
   std::chrono::time_point<std::chrono::steady_clock> _countdownEnd;
 
+  // Background music source
+  AudioSource* _bgm = nullptr;
+
   // Test Lights
-  std::unique_ptr<PointLight> _point_light;
   std::unique_ptr<DirectionalLight> _dir_light;
 
     // Test UI

@@ -144,6 +144,8 @@ public:
 			if (collidingEntity->getState()->type == ENTITY_DOG)
 			{
 				SDogEntity* collidingDog = static_cast<SDogEntity*>(collidingEntity);
+				DogState* dogState = static_cast<DogState*>(collidingEntity->getState().get());
+				dogState->message = "Raise (Left click / A)";
 				collidingDog->setNearTrigger(true);
 				// sending position of trigger to dogEntity for interpolate
 				collidingDog->targetPos = entity->getState()->pos;

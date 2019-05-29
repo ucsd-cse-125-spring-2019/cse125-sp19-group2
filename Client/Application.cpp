@@ -4,6 +4,7 @@
 
 #include "Application.hpp"
 #include <iostream>
+#include <fstream>
 #include "Camera.hpp"
 #include "InputManager.h"
 #include "Shared/Logger.hpp"
@@ -12,6 +13,7 @@
 #include "GuiManager.hpp"
 #include "AudioManager.hpp"
 #include "ColliderManager.hpp"
+#include "ParticleSystemManager.hpp"
 #include "CFloorEntity.hpp"
 
 Application::Application(const char* windowTitle, int argc, char** argv) {
@@ -89,14 +91,6 @@ void Application::Setup() {
   _skybox = std::make_unique<Skybox>("skybox");
 
   // Create light
-  _point_light = std::make_unique<PointLight>(
-    PointLight{
-      "u_pointlight",
-      { { 0.05f, 0.05f, 0.05f }, { 0.8f, 0.8f, 0.8f }, { 1.0f, 1.0f, 1.0f } },
-      { -1.0f, 0.0f, 0.0f },
-      { 1.0f, 0.09f, 0.032f }
-    }
-  );
   _dir_light = std::make_unique<DirectionalLight>(
     DirectionalLight{
       "u_dirlight",
@@ -120,6 +114,13 @@ void Application::Setup() {
 		std::string address = GuiManager::getInstance().getAddress();
 		std::string playerName = GuiManager::getInstance().getPlayerName();
 
+		// Save address and playername to session file
+		std::ofstream ofs;
+		ofs.open(SESSION_FILE_PATH, std::ofstream::out | std::ofstream::trunc);
+		ofs << address << std::endl;
+		ofs << playerName << std::endl;
+		ofs.close();
+
 		uint32_t playerId;
 		try {
 			playerId = _networkClient->connect(address, PORTNUM);
@@ -142,13 +143,24 @@ void Application::Setup() {
 		// Register global keys
 		registerGlobalKeys();
 
-
 		// Hide connect screen
 		GuiManager::getInstance().hideAll();
 
 		// Show lobby
 		GuiManager::getInstance().setVisibility(WIDGET_LOBBY, true);
 	});
+
+	// Connect screen default address and player name from session file
+	std::ifstream ifs;
+	ifs.open(SESSION_FILE_PATH);
+	if (!ifs.fail()) {
+		std::string address, playerName;
+		ifs >> address;
+		ifs >> playerName;
+		ifs.close();
+		GuiManager::getInstance().setAddress(address);
+		GuiManager::getInstance().setPlayerName(playerName);
+	}
 
 	// Switch sides button callback
 	GuiManager::getInstance().registerSwitchSidesCallback([&]() {
@@ -196,6 +208,11 @@ void Application::Setup() {
 			break;
 		}
 	});
+
+	_bgm = AudioManager::getInstance().getAudioSource("bgm");
+	_bgm->init("Resources/Sounds/bgm1.mp3");
+	_bgm->setVolume(0.05f);
+	_bgm->play(true);
 }
 
 void Application::Cleanup() {
@@ -261,6 +278,9 @@ void Application::Update()
         // Update entity
         EntityManager::getInstance().update(state);
 
+		// Update entity particle system
+		ParticleSystemManager::getInstance().updateState(state);
+
         // Check for special case of GameState update
         if (state->type == ENTITY_STATE)
         {
@@ -288,6 +308,7 @@ void Application::Update()
 			{
 				_inLobby = false;
 				GuiManager::getInstance().getWidget(WIDGET_LOBBY)->setVisible(false);
+				GuiManager::getInstance().getWidget(WIDGET_OPTIONS)->setVisible(false);
 				GuiManager::getInstance().setReadyEnabled(true);
 				GuiManager::getInstance().setSwitchEnabled(true);
 
@@ -296,6 +317,30 @@ void Application::Update()
 
 				// Show game HUD
 				GuiManager::getInstance().setVisibility(WIDGET_HUD, true);
+
+				// Hide human skills if we are a dog
+				for (auto& player : gameState->dogs)
+				{
+					if (player.first == _localPlayer->getPlayerId())
+					{
+						GuiManager::getInstance().setVisibility(WIDGET_HUD_HUMAN_SKILLS, false);
+						break;
+					}
+				}
+
+				// Hide dog skills if we are a human
+				for (auto& player : gameState->humans)
+				{
+					if (player.first == _localPlayer->getPlayerId())
+					{
+						GuiManager::getInstance().setVisibility(WIDGET_HUD_DOG_SKILLS, false);
+						break;
+					}
+				}
+
+				// Redraw
+				auto screen = GuiManager::getInstance().getScreen();
+				GuiManager::getInstance().resize(screen->size().x(), screen->size().y());
 			}
 			// Conversely, did a game just end and send us back to the lobby?
 			else if (gameState->inLobby && !_inLobby)
@@ -303,6 +348,10 @@ void Application::Update()
 				// Deallocate world objects
 				EntityManager::getInstance().clearAll();
 				ColliderManager::getInstance().clear();
+				ParticleSystemManager::getInstance().clear();
+
+				// Stop playing sounds
+				AudioManager::getInstance().reset();
 
 				// Set localPlayer's _playerEntity to null
 				_localPlayer->unpairEntity();
@@ -405,7 +454,9 @@ void Application::Update()
 	  _networkClient->closeConnection();
 	  EntityManager::getInstance().clearAll();
 	  InputManager::getInstance().reset();
+	  AudioManager::getInstance().reset();
 	  ColliderManager::getInstance().clear();
+	  ParticleSystemManager::getInstance().clear();
 	  GuiManager::getInstance().hideAll();
 	  GuiManager::getInstance().setVisibility(WIDGET_CONNECT, true);
 
@@ -419,12 +470,14 @@ void Application::Update()
   if (_localPlayer) {
       _localPlayer->update();
   }
+
+  // Update particle system physics
+  ParticleSystemManager::getInstance().updatePhysics(0.016f);
     
   // Update sound engine
   AudioManager::getInstance().update();
     
   _camera->Update();
-  _point_light->update();
 }
 
 void Application::Draw() {
@@ -450,6 +503,9 @@ void Application::Draw() {
 
 		  // Render floor before any entity
 		  CFloorEntity::getInstance().render(_localPlayer->getCamera());
+
+          // Render particles
+		  ParticleSystemManager::getInstance().render(_localPlayer->getCamera());
 
 		  EntityManager::getInstance().render(_localPlayer->getCamera());
 

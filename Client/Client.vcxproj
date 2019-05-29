@@ -144,6 +144,7 @@
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <PreprocessorDefinitions>_ENABLE_EXTENDED_ALIGNED_STORAGE;_MBCS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <EnableParallelCodeGeneration>true</EnableParallelCodeGeneration>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
       <AdditionalDependencies>XInput.lib;fmod_vc.lib;nanogui.lib;Ws2_32.lib;Shared.lib;assimp.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
@@ -215,6 +216,7 @@ xcopy /y /d  "$(SolutionDir)Library\lib\x64\Debug\*.dll" "$(OutDir)"</Command>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <PreprocessorDefinitions>_ENABLE_EXTENDED_ALIGNED_STORAGE;_MBCS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <EnableParallelCodeGeneration>true</EnableParallelCodeGeneration>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
@@ -252,6 +254,7 @@ xcopy /y /d  "$(SolutionDir)Library\lib\x64\Release\*.dll" "$(OutDir)"</Command>
     <ClCompile Include="ColliderManager.cpp" />
     <ClCompile Include="EntityManager.cpp" />
     <ClCompile Include="DirectionalLight.cpp" />
+    <ClCompile Include="FountainParticleSystem.cpp" />
     <ClCompile Include="FrameBuffer.cpp" />
     <ClCompile Include="glad.c" />
     <ClCompile Include="GUIManager.cpp" />
@@ -259,6 +262,8 @@ xcopy /y /d  "$(SolutionDir)Library\lib\x64\Release\*.dll" "$(OutDir)"</Command>
     <ClCompile Include="Key.cpp" />
     <ClCompile Include="LocalPlayer.cpp" />
     <ClCompile Include="Light.cpp" />
+    <ClCompile Include="ParticleSystem.cpp" />
+    <ClCompile Include="ParticleSystemManager.cpp" />
     <ClCompile Include="PointLight.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="NetworkClient.cpp" />
@@ -270,6 +275,7 @@ xcopy /y /d  "$(SolutionDir)Library\lib\x64\Release\*.dll" "$(OutDir)"</Command>
     <ClCompile Include="stb_image.cpp" />
     <ClCompile Include="Texture.cpp" />
     <ClCompile Include="GamePadXbox.cpp" />
+    <ClCompile Include="UrineParticleSystem.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
@@ -291,6 +297,8 @@ xcopy /y /d  "$(SolutionDir)Library\lib\x64\Release\*.dll" "$(OutDir)"</Command>
     <None Include="Resources\Shaders\quad.vert" />
     <None Include="Resources\Shaders\skybox.frag" />
     <None Include="Resources\Shaders\skybox.vert" />
+    <None Include="Resources\Shaders\urine.frag" />
+    <None Include="Resources\Shaders\urine.vert" />
     <None Include="Resources\Shaders\wall.vert" />
   </ItemGroup>
   <ItemGroup>
@@ -317,15 +325,21 @@ xcopy /y /d  "$(SolutionDir)Library\lib\x64\Release\*.dll" "$(OutDir)"</Command>
     <ClInclude Include="CPlayerEntity.hpp" />
     <ClInclude Include="CPlungerEntity.hpp" />
     <ClInclude Include="CPuddleEntity.hpp" />
+    <ClInclude Include="CRopeEntity.hpp" />
+    <ClInclude Include="CTrapEntity.hpp" />
     <ClInclude Include="CTriggerEntity.hpp" />
     <ClInclude Include="Drawable.hpp" />
     <ClInclude Include="EntityManager.hpp" />
+    <ClInclude Include="FountainParticleSystem.hpp" />
     <ClInclude Include="FrameBuffer.h" />
     <ClInclude Include="GamePadXbox.hpp" />
     <ClInclude Include="GUIManager.hpp" />
     <ClInclude Include="LocalPlayer.hpp" />
     <ClInclude Include="DirectionalLight.hpp" />
     <ClInclude Include="Light.hpp" />
+    <ClInclude Include="ParticleSystem.hpp" />
+    <ClInclude Include="ParticleSystemManager.hpp" />
+    <ClInclude Include="Physics.hpp" />
     <ClInclude Include="PointLight.hpp" />
     <ClInclude Include="NetworkClient.hpp" />
     <ClInclude Include="InputManager.h" />
@@ -338,6 +352,7 @@ xcopy /y /d  "$(SolutionDir)Library\lib\x64\Release\*.dll" "$(OutDir)"</Command>
     <ClInclude Include="Model.hpp" />
     <ClInclude Include="Shader.hpp" />
     <ClInclude Include="Camera.hpp" />
+    <ClInclude Include="UrineParticleSystem.hpp" />
     <ClInclude Include="Vertex.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

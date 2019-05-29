@@ -1,7 +1,12 @@
 #include "SDogEntity.hpp"
 
-SDogEntity::SDogEntity(uint32_t playerId, std::string playerName, std::vector<glm::vec2>* jails, std::vector<std::shared_ptr<SBaseEntity>>* newEntities)
+SDogEntity::SDogEntity(
+	uint32_t playerId,
+	std::string playerName,
+	StructureInfo* structureInfo)
 {
+	_structureInfo = structureInfo;
+
 	_state = std::make_shared<DogState>();
 
 	// Parent initialization
@@ -16,11 +21,7 @@ SDogEntity::SDogEntity(uint32_t playerId, std::string playerName, std::vector<gl
 	_state->height = 0.8f;
 	_state->depth = 0.8f;
 
-	_velocity = BASE_VELOCITY;
-
-	_jails = jails;
-
-	_newEntities = newEntities;
+	_velocity = DOG_BASE_VELOCITY;
 
 	// Dog-specific stuff
 	auto dogState = std::static_pointer_cast<DogState>(_state);
@@ -47,7 +48,7 @@ void SDogEntity::update(std::vector<std::shared_ptr<GameEvent>> events)
 	if (dogState->runStamina < MAX_DOG_STAMINA)
 	{
 		// Four seconds to charge 1 second of sprinting
-		dogState->runStamina += 1.0f / 4 / TICKS_PER_SEC;
+		dogState->runStamina += 1.0f / 3 / TICKS_PER_SEC;
 		hasChanged = true;
 	}
 	else
@@ -86,6 +87,22 @@ void SDogEntity::update(std::vector<std::shared_ptr<GameEvent>> events)
 				break;
 			case EVENT_PLAYER_INTERACT_START:
 				_isInteracting = true;
+
+				// If currently trapped, increment button count
+				if (_isTrapped)
+				{
+					_numEscapePressed++;
+				}
+
+				// Mark player as no longer trapped if we reach the max
+				if (_numEscapePressed >= MAX_DOG_ESCAPE_PRESSES)
+				{
+					_numEscapePressed = 0;
+					_isTrapped = false;
+					_isInterpolating = false;
+					_curTrap->getState()->isDestroyed = true;
+					_curTrap = nullptr;
+				}
 				break;
 			case EVENT_PLAYER_INTERACT_END:
 				_isInteracting = false;
@@ -122,16 +139,16 @@ void SDogEntity::update(std::vector<std::shared_ptr<GameEvent>> events)
 		if (_isRunning) {
 			if (dogState->runStamina >= 1.0f / TICKS_PER_SEC)
 			{
-				_velocity = RUN_VELOCITY;
+				_velocity = DOG_RUN_VELOCITY;
 				dogState->runStamina -= 1.0f / TICKS_PER_SEC;
 			}
 			else {
 				dogState->runStamina = 0;
-				_velocity = BASE_VELOCITY;
+				_velocity = DOG_BASE_VELOCITY;
 			}
 		}
 		else {
-			_velocity = BASE_VELOCITY;
+			_velocity = DOG_BASE_VELOCITY;
 		}
 		handleActionMoving();
 		break;
@@ -140,8 +157,8 @@ void SDogEntity::update(std::vector<std::shared_ptr<GameEvent>> events)
 			dogState->currentAnimation = ANIMATION_DOG_PEEING;
 			hasChanged = true;
 
-			// Register a timer and place the pee object after 1 second
-			_peeTimer = registerTimer(1000 /* Milliseconds */, [&]()
+			// Register a timer and place the pee object after half a second
+			_peeTimer = registerTimer(500 /* Milliseconds */, [&]()
 				{
 					if (_curAction == ACTION_DOG_PEEING)
 					{
@@ -159,7 +176,7 @@ void SDogEntity::update(std::vector<std::shared_ptr<GameEvent>> events)
 			targetPos.y = 0;
 			glm::vec3 dest = targetPos + glm::normalize(_state->pos - targetPos) * 0.55f;
 			dogState->currentAnimation = ANIMATION_DOG_RUNNING;
-			interpolateMovement(dest, glm::normalize(targetPos - _state->pos), BASE_VELOCITY / 2,
+			interpolateMovement(dest, glm::normalize(targetPos - _state->pos), DOG_BASE_VELOCITY / 2,
 				[&] {
 				// Stage 1: start scratching animation and lifting the gate
 				actionStage++;
@@ -172,7 +189,7 @@ void SDogEntity::update(std::vector<std::shared_ptr<GameEvent>> events)
 		// Stage 0: interpolating to the fountain and look at it
 		if (actionStage == 0) {
 			dogState->currentAnimation = ANIMATION_DOG_RUNNING;
-			interpolateMovement(targetPos, targetDir, BASE_VELOCITY / 2, [&]()
+			interpolateMovement(targetPos, targetDir, DOG_BASE_VELOCITY / 2, [&]()
 				{
 					// Stage 1: start drinking animation and filling meter
 					actionStage++;
@@ -184,7 +201,7 @@ void SDogEntity::update(std::vector<std::shared_ptr<GameEvent>> events)
 			// Increase pee meter
 			if (dogState->urineMeter < MAX_DOG_URINE)
 			{
-				dogState->urineMeter += MAX_DOG_URINE / 3 / TICKS_PER_SEC; // Refilled in 3 seconds
+				dogState->urineMeter += MAX_DOG_URINE / 2 / TICKS_PER_SEC; // Refilled in 2 seconds
 			}
 			else
 			{
@@ -192,6 +209,19 @@ void SDogEntity::update(std::vector<std::shared_ptr<GameEvent>> events)
 			}
 		}
 		break;
+	case ACTION_DOG_TRAPPED:
+		if (actionChanged) {
+			// Replace with walking animation
+			dogState->currentAnimation = ANIMATION_DOG_WALKING;
+
+			// Interpolate to trap
+			interpolateMovement(_curTrap->getState()->pos, _state->forward, DOG_BASE_VELOCITY / 10,
+				[&]() {
+					// Switch to idle
+					dogState->currentAnimation = ANIMATION_DOG_EATING;
+					hasChanged = true;
+				});
+		}
 	}
 
 	handleInterpolation();
@@ -206,12 +236,17 @@ void SDogEntity::generalHandleCollision(SBaseEntity * entity)
 	auto dogState = std::static_pointer_cast<DogState>(_state);
 
 	// Dog getting caught is handled by the dog, not the human
-	if (entity->getState()->type == ENTITY_HUMAN && !isCaught)
+	if (entity->getState()->type == ENTITY_NET &&
+		!isCaught &&
+		!_structureInfo->gameState->gameOver)
 	{
 		// Teleport to a random jail
 		unsigned int seed = (unsigned int)std::chrono::system_clock::now().time_since_epoch().count();
-		std::shuffle(_jails->begin(), _jails->end(), std::default_random_engine(seed));
-		glm::vec2 jailPos = (*_jails)[0];
+		std::shuffle(
+			_structureInfo->jailsPos->begin(),
+			_structureInfo->jailsPos->end(),
+			std::default_random_engine(seed));
+		glm::vec2 jailPos = (*(_structureInfo->jailsPos))[0];
 		getState()->pos = glm::vec3(jailPos.x, 0, jailPos.y);
 	}
 	else if (entity->getState()->type == ENTITY_BONE)
@@ -224,12 +259,24 @@ void SDogEntity::generalHandleCollision(SBaseEntity * entity)
 		entity->getState()->isDestroyed = true;
 		entity->hasChanged = true;
 	}
+	else if (entity->getState()->type == ENTITY_TRAP)
+	{
+		// Mark dog as trapped if not yet slated for destruction
+		if (!entity->getState()->isDestroyed)
+		{
+			dogState->message = "Escape (Left click / A) [" +
+				std::to_string(_numEscapePressed) + "/" +
+				std::to_string(MAX_DOG_ESCAPE_PRESSES) + "]";
+			_curTrap = entity;
+			_isTrapped = true;
+		}
+	}
 }
 
 void SDogEntity::createPuddle()
 {
 	std::shared_ptr<SPuddleEntity> puddleEntity = std::make_shared<SPuddleEntity>(_state->pos);
-	_newEntities->push_back(puddleEntity);
+	_structureInfo->newEntities->push_back(puddleEntity);
 }
 
 bool SDogEntity::updateAction()
@@ -242,7 +289,8 @@ bool SDogEntity::updateAction()
 	// lower the priority of action if possible
 	if (_curAction == ACTION_DOG_PEEING && !_isUrinating ||
 		_curAction == ACTION_DOG_DRINKING && !_isInteracting ||
-		_curAction == ACTION_DOG_SCRATCHING && !_isInteracting)
+		_curAction == ACTION_DOG_SCRATCHING && !_isInteracting ||
+		_curAction == ACTION_DOG_TRAPPED && !_isTrapped)
 	{
 		_curAction = ACTION_DOG_IDLE;
 	}
@@ -256,6 +304,7 @@ bool SDogEntity::updateAction()
 		if (_isUrinating && dogState->urineMeter == 1.0f) _curAction = ACTION_DOG_PEEING;
 		else if (_isInteracting && _nearTrigger) _curAction = ACTION_DOG_SCRATCHING;
 		else if (_isInteracting && _nearFountain) _curAction = ACTION_DOG_DRINKING;
+		else if (_isTrapped) _curAction = ACTION_DOG_TRAPPED;
 	}
 
 	return oldAction != _curAction;

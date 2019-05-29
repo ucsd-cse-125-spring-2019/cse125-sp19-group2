@@ -11,7 +11,7 @@ namespace cereal
 	template<class Archive>
 	void serialize(Archive & archive, glm::vec2 &v)
 	{
-        archive(v.x, v.y);
+		archive(v.x, v.y);
 	}
 }
 
@@ -25,7 +25,7 @@ enum EventType
 {
     EVENT_PLAYER_JOIN,
     EVENT_PLAYER_SWITCH,
-		EVENT_PLAYER_READY,
+	EVENT_PLAYER_READY,
     EVENT_PLAYER_LEAVE, // Created only by the server
     EVENT_PLAYER_MOVE,	// Movement vector for player
     EVENT_PLAYER_RUN_START,	// Used only for dogs at the moment
@@ -33,11 +33,13 @@ enum EventType
     EVENT_PLAYER_STOP,
     EVENT_PLAYER_URINATE_START,
     EVENT_PLAYER_URINATE_END,
-		EVENT_PLAYER_INTERACT_START, // Jail gates, fountains, etc.
-		EVENT_PLAYER_INTERACT_END,
-		EVENT_PLAYER_SWING_NET,
-		EVENT_PLAYER_LAUNCH_START,
-		EVENT_PLAYER_LAUNCH_END
+	EVENT_PLAYER_INTERACT_START, // Jail gates, fountains, etc.
+	EVENT_PLAYER_INTERACT_END,
+	EVENT_PLAYER_CHARGE_NET,
+	EVENT_PLAYER_SWING_NET,
+	EVENT_PLAYER_LAUNCH_START,
+	EVENT_PLAYER_LAUNCH_END,
+	EVENT_PLAYER_PLACE_TRAP
     // TODO: more event types here
 };
 // GamePad Indexes
@@ -52,22 +54,22 @@ typedef enum
 */
 struct GameEvent
 {
-    EventType type;
-    uint32_t playerId; // Not used for EVENT_PLAYER_JOIN
-    std::string playerName; // Used only for EVENT_PLAYER_JOIN
+	EventType type;
+	uint32_t playerId; // Not used for EVENT_PLAYER_JOIN
+	std::string playerName; // Used only for EVENT_PLAYER_JOIN
 	glm::vec2 direction;	// Used only for PLAYER_TURN and PLAYER_MOVE
-    //TODO: add more elements as necessary
+		//TODO: add more elements as necessary
 
 	// Serialization for Cereal
-    template<class Archive>
-    void serialize(Archive & archive)
-    {
-        archive(
+	template<class Archive>
+	void serialize(Archive & archive)
+	{
+		archive(
 			type,
 			playerId,
 			playerName,
 			direction);
-    }
+	}
 
 	void print()
 	{

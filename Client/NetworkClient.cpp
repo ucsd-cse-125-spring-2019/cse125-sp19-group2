@@ -6,6 +6,7 @@
 #include "Shared/PlayerState.hpp"
 #include "Shared/DogState.hpp"
 #include "Shared/HumanState.hpp"
+#include "Shared/PlungerState.hpp"
 
 NetworkClient::NetworkClient()
 {

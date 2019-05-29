@@ -14,7 +14,10 @@
 #include "CGateEntity.hpp"
 #include "CTriggerEntity.hpp"
 #include "CPlungerEntity.hpp"
+#include "CRopeEntity.hpp"
+#include "CTrapEntity.hpp"
 #include "ColliderManager.hpp"
+#include "ParticleSystemManager.hpp"
 #include "Shared/Logger.hpp"
 #include <algorithm>
 
@@ -63,10 +66,10 @@ std::shared_ptr<CBaseEntity> EntityManager::getEntity(std::shared_ptr<BaseState>
     case ENTITY_EXAMPLE:
         break;
     case ENTITY_DOG:
-        entity = std::make_shared<CDogEntity>();
+        entity = std::make_shared<CDogEntity>(id);
         break;
     case ENTITY_HUMAN:
-      entity = std::make_shared<CHumanEntity>();
+      entity = std::make_shared<CHumanEntity>(id);
       break;
     case ENTITY_HOUSE_6X6_A:
       entity = std::make_shared<CHouseEntity>(type);
@@ -100,6 +103,12 @@ std::shared_ptr<CBaseEntity> EntityManager::getEntity(std::shared_ptr<BaseState>
 	  break;
 	case ENTITY_PLUNGER:
 	  entity = std::make_shared<CPlungerEntity>();
+	  break;
+	case ENTITY_ROPE:
+	  entity = std::make_shared<CRopeEntity>();
+	  break;
+	case ENTITY_TRAP:
+	  entity = std::make_shared<CTrapEntity>();
 	  break;
     case ENTITY_FLOOR:
       CFloorEntity::getInstance().updateTile(state);

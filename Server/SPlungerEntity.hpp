@@ -1,10 +1,9 @@
 #pragma once
 
 #include "SBaseEntity.hpp"
-#include "CapsuleCollider.hpp"
+#include "PlungerCollider.hpp"
 #include "EmptyCollider.hpp"
-
-#define LAUNCHING_VELOCITY 22.0f
+#include "Shared/PlungerState.hpp"
 
 class SPlungerEntity : public SBaseEntity
 {
@@ -13,7 +12,7 @@ public:
 
 	SPlungerEntity(glm::vec3 pos, glm::vec3 forward)
 	{
-		_state = std::make_shared<BaseState>();
+		_state = std::make_shared<PlungerState>();
 
 		// Base defaults
 		SBaseEntity::initState();
@@ -23,7 +22,7 @@ public:
 		_state->forward = forward;
 
 		// Basic capsule collider
-		_collider = std::make_unique<CapsuleCollider>(_state.get());
+		_collider = std::make_unique<PlungerCollider>(_state.get());
 		_state->colliderType = COLLIDER_CAPSULE;
 
 		// Slightly tighter bounding box
@@ -37,6 +36,10 @@ public:
 		});
 
 		_state->isStatic = false;
+
+		// Plunger-specific stuff
+		auto plungerState = std::static_pointer_cast<PlungerState>(_state);
+		plungerState->isStuck = false;
 
 		launching = true;
 	};
@@ -63,6 +66,10 @@ public:
 			_state->colliderType = COLLIDER_NONE;
 			_state->isStatic = true;
 			launching = false;
+
+			// Set plunger as stuck
+			auto plungerState = std::static_pointer_cast<PlungerState>(_state);
+			plungerState->isStuck = true;
 
 			auto stateB = entity->getState();
 

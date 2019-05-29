@@ -1,12 +1,8 @@
 #pragma once
+
 #include "CBaseEntity.hpp"
 #include "Model.hpp"
-#include "Shared/Logger.hpp"
-#include <glm/mat4x4.hpp>
-#include <glm/gtc/matrix_transform.hpp>
 
-// As with server, TONS of copied code. Need to refactor static objects
-// to initialize all this junk in a parent class.
 class CBoneEntity : public CBaseEntity
 {
 public:
@@ -23,5 +19,3 @@ public:
 
 	~CBoneEntity() {};
 };
-
-#pragma once
