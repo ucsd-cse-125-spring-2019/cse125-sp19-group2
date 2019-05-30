@@ -79,7 +79,7 @@ bool EventManager::update()
 	}
 
 	// Call update() on all entities if we are not in the pregame countdown
-	if (!_gameState->pregameCountdown)
+	if (!_gameState->pregameCountdown && !_gameState->waitingForClients)
 	{
 		for (auto& entityPair : *_structureInfo->entityMap)
 		{
