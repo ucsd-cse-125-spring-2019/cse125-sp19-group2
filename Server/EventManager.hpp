@@ -41,6 +41,8 @@ private:
 	// on the server, false otherwise.
 	bool handlePlayerLeave(std::shared_ptr<GameEvent> event);
 
+	void handleResendRequest(std::shared_ptr<GameEvent> event);
+
 	void startGame();
 
 	// Raw pointer to network interface

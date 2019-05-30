@@ -67,6 +67,11 @@ bool EventManager::update()
 			}
 			break;
 		}
+		case EVENT_REQUEST_RESEND:
+		{
+			handleResendRequest(event);
+			break;
+		}
 		default:
 			// By default, the entity handles the event
 			auto it = eventMap.find(event->playerId);
@@ -215,6 +220,38 @@ bool EventManager::handlePlayerLeave(std::shared_ptr<GameEvent> event)
 	}
 
 	return true;
+}
+
+void EventManager::handleResendRequest(std::shared_ptr<GameEvent> event)
+{
+	// List of entities known to the client
+	std::vector<uint32_t> clientList = event->entityList;
+
+	// Get list of entities currently on the server
+	std::vector<uint32_t> serverList;
+
+	for (auto& entityPair : *_structureInfo->entityMap)
+	{
+		serverList.push_back(entityPair.first);
+	}
+
+	// Difference between the two vectors
+	std::vector<uint32_t> diff;
+	std::set_difference(
+		clientList.begin(), clientList.end(),
+		serverList.begin(), serverList.end(),
+		std::back_inserter(diff));
+
+	// Build a list of updates for this client based on diff
+	std::vector<std::shared_ptr<BaseState>> updates;
+	for (auto& entityId : diff)
+	{
+		std::shared_ptr<SBaseEntity> entity = _structureInfo->entityMap->find(entityId)->second;
+		updates.push_back(entity->getState());
+	}
+
+	// Send updates to client
+	_networkInterface->sendUpdates(updates, event->playerId);
 }
 
 void EventManager::startGame()

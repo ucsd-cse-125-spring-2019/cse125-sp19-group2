@@ -11,7 +11,7 @@ public:
 		glm::vec3 scale) : SBoxEntity(pos, scale)
 	{
 		_state->type = ENTITY_FENCE;
-
+		_state->isVisible = true;
 		_children.push_back(std::make_shared<SBoxPlungerEntity>(pos, scale));
 	};
 

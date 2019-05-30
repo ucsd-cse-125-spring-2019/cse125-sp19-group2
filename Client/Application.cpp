@@ -545,6 +545,23 @@ void Application::Draw() {
 	  auto screen = GuiManager::getInstance().getScreen();
 	  StaticResize(_window, screen->size().x(), screen->size().y());
   }
+  // Edge case in which not all state was received by the client
+  else if (!_gameLoaded && !_inLobby &&
+	  EntityManager::getInstance().getEntityCount() > 0 &&
+	  EntityManager::getInstance().getEntityCount() < _serverEntityCount) {
+	  // Build a list of the entities we have
+	  auto entityList = EntityManager::getInstance().getEntityIdList();
+
+	  // Request a re-send from the server
+	  auto resendEvent = std::make_shared<GameEvent>();
+	  resendEvent->type = EVENT_REQUEST_RESEND;
+	  resendEvent->playerId = _localPlayer->getPlayerId();
+	  resendEvent->entityList = entityList;
+	  try {
+		  _networkClient->sendEvent(resendEvent);
+	  }
+	  catch (std::runtime_error e) {};
+  }
 }
 
 void Application::Reset() {

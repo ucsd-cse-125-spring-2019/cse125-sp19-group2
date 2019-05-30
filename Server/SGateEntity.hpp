@@ -10,6 +10,7 @@ public:
 	{
 		_state->type = ENTITY_GATE;
 		_state->colliderType = COLLIDER_GATE;
+		_state->isVisible = true;
 	};
 	~SGateEntity() {};
 };
