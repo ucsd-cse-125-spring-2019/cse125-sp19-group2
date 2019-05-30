@@ -209,6 +209,11 @@ void Application::Setup() {
 		}
 	});
 
+	// Disconnect button
+	GuiManager::getInstance().registerDisconnectCallback([&]() {
+		_networkClient->closeConnection();
+	});
+
 	_bgm = AudioManager::getInstance().getAudioSource("bgm");
 	_bgm->init("Resources/Sounds/bgm1.mp3");
 	_bgm->setVolume(0.05f);

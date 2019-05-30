@@ -1,6 +1,7 @@
 ﻿#include "GuiManager.hpp"
 #include "Shared/Logger.hpp"
 #include "stb_image.h"
+#include "AudioManager.hpp"
 #include <chrono>
 #include "Texture.hpp"
 
@@ -169,6 +170,10 @@ void GuiManager::registerReadyCallback(const std::function<void()> f) {
 void GuiManager::registerControllerCallback(const std::function<void(GamePadIndex)> f)
 {
 	_gamepadSelect->setCallback(f);
+}
+
+void GuiManager::registerDisconnectCallback(const std::function<void()> f) {
+	_disconnectButton->setCallback(f);
 }
 
 std::string GuiManager::getPlayerName() {
@@ -568,6 +573,32 @@ void GuiManager::initControlMenu() {
 	auto controllerLabel = new Label(controlsWidget, "Select Controller", "sans", 16);
 	_gamepadSelect = new nanogui::detail::FormWidget<GamePadIndex, std::integral_constant<bool, true>>(controlsWidget);
 	_gamepadSelect->setItems({ "None", "1", "2", "3", "4" });
+
+	// Mute button
+	new Label(controlsWidget, "Audio options", "sans", 16);
+	_muteButton = new nanogui::Button(controlsWidget, "Mute All");
+	_muteButton->setCallback([&]()
+	{
+		FMOD::ChannelGroup* masterGroup;
+		AudioManager::getInstance().getSystem()->getMasterChannelGroup(&masterGroup);
+		bool isMuted;
+		masterGroup->getMute(&isMuted);
+		masterGroup->setMute(!isMuted);
+		if (isMuted)
+		{
+			_muteButton->setCaption("Mute All");
+		}
+		else
+		{
+			_muteButton->setCaption("Unmute All");
+		}
+	});
+
+	// Other miscellaneous buttons
+	new Label(controlsWidget, "Other", "sans", 16);
+
+	// Disconnect from server
+	_disconnectButton = new nanogui::Button(controlsWidget, "Disconnect");
 
 	auto windowCast = static_cast<nanogui::Window*>(controlsWidget);
 }

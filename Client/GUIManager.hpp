@@ -59,6 +59,7 @@ public:
 	void registerSwitchSidesCallback(const std::function<void()> f);
 	void registerReadyCallback(const std::function<void()> f);
 	void registerControllerCallback(const std::function<void(GamePadIndex)> f);
+	void registerDisconnectCallback(const std::function<void()> f);
 
 	// Text in player name and address boxes
 	std::string getPlayerName();
@@ -154,6 +155,8 @@ private:
 
 	// Controls menu
 	nanogui::detail::FormWidget<GamePadIndex, std::integral_constant<bool, true>>* _gamepadSelect;
+	nanogui::Button* _muteButton;
+	nanogui::Button* _disconnectButton;
 
 	// Upper HUD
 	nanogui::Label* _timer;	// Countdown timer
