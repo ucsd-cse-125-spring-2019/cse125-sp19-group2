@@ -184,11 +184,11 @@ void SDogEntity::update(std::vector<std::shared_ptr<GameEvent>> events)
 			dogState->currentAnimation = ANIMATION_DOG_RUNNING;
 			interpolateMovement(dest, glm::normalize(targetPos - _state->pos), DOG_BASE_VELOCITY / 2,
 				[&] {
-				// Stage 1: start scratching animation and lifting the gate
-				actionStage++;
-				dogState->currentAnimation = ANIMATION_DOG_SCRATCHING;
-				hasChanged = true;
-			});
+					// Stage 1: start scratching animation and lifting the gate
+					actionStage++;
+					dogState->currentAnimation = ANIMATION_DOG_SCRATCHING;
+					hasChanged = true;
+				});
 		}
 		break;
 	case ACTION_DOG_DRINKING:
@@ -255,8 +255,15 @@ void SDogEntity::update(std::vector<std::shared_ptr<GameEvent>> events)
 					_isJailed = false;
 				},
 				0,
-				false /* Disable interp interrupt */);
+					false /* Disable interp interrupt */);
 		}
+		break;
+	case ACTION_DOG_TELEPORTING:
+		if (actionChanged)
+		{
+			// Play digging animation first
+		}
+		break;
 	}
 
 	handleInterpolation();
@@ -337,7 +344,8 @@ bool SDogEntity::updateAction()
 		_curAction == ACTION_DOG_PEEING && !_isUrinating ||
 		_curAction == ACTION_DOG_DRINKING && !_isInteracting ||
 		_curAction == ACTION_DOG_SCRATCHING && !_isInteracting ||
-		_curAction == ACTION_DOG_TRAPPED && !_isTrapped)
+		_curAction == ACTION_DOG_TRAPPED && !_isTrapped ||
+		_curAction == ACTION_DOG_TELEPORTING && !_isTeleporting)
 	{
 		_curAction = ACTION_DOG_IDLE;
 		_isInterpolating = false;
@@ -349,11 +357,17 @@ bool SDogEntity::updateAction()
 		_curAction = (_isMoving) ? ACTION_DOG_MOVING : ACTION_DOG_IDLE;
 
 		// update action again if higher priority action is happening
-		if (_isJailed) _curAction = ACTION_DOG_JAILED;
-		else if (_isUrinating && dogState->urineMeter == 1.0f) _curAction = ACTION_DOG_PEEING;
+		if (_isUrinating && dogState->urineMeter == 1.0f) _curAction = ACTION_DOG_PEEING;
 		else if (_isInteracting && _nearTrigger) _curAction = ACTION_DOG_SCRATCHING;
 		else if (_isInteracting && _nearFountain) _curAction = ACTION_DOG_DRINKING;
 		else if (_isTrapped) _curAction = ACTION_DOG_TRAPPED;
+		else if (_isTeleporting) _curAction = ACTION_DOG_TELEPORTING;
+	}
+
+	// Dog being jailed takes absolute precedence
+	if (_isJailed && !isCaught)
+	{
+		_curAction = ACTION_DOG_JAILED;
 	}
 
 	return oldAction != _curAction;

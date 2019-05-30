@@ -44,6 +44,7 @@ private:
 	bool _isInteracting = false;
 	bool _isTrapped = false;
 	bool _isJailed = false;	// Teleporting to jail
+	bool _isTeleporting = false;	// Teleporting to a doghouse
 
 	glm::vec3 _targetJailPos;
 
