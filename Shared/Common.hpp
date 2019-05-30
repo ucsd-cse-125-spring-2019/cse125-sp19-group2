@@ -20,7 +20,7 @@
 #define FENCE_HEIGHT 3.0f
 
 // Pregame countdown
-const std::chrono::seconds PREGAME_LENGTH(6);
+const std::chrono::seconds PREGAME_LENGTH(5);
 
 // Max game length
 const std::chrono::seconds MAX_GAME_LENGTH(90);
@@ -38,6 +38,7 @@ const std::chrono::seconds TRAP_COOLDOWN(10);
 #define DOG_SKIN_AMOUNT 3
 #define DOG_BASE_VELOCITY 4.8f
 #define DOG_RUN_VELOCITY DOG_BASE_VELOCITY * 1.5f
+#define DOG_TELEPORT_VELOCITY DOG_BASE_VELOCITY * 5.0f
 #define MAX_DOG_STAMINA 3.0f	// Dog can sprint for three seconds max
 #define MAX_DOG_URINE 1.0f		// Dog can make one puddle per urine bar
 #define MAX_DOG_ESCAPE_PRESSES 12	// Dog must press button 12 times to escape trap
@@ -125,7 +126,9 @@ enum DogAction
 	ACTION_DOG_PEEING,
 	ACTION_DOG_DRINKING,
 	ACTION_DOG_SCRATCHING,
-	ACTION_DOG_TRAPPED
+	ACTION_DOG_TRAPPED,
+	ACTION_DOG_JAILED,	// Teleporting to jail
+	ACTION_DOG_TELEPORTING	// Teleporting between doghouses
 };
 
 /*

@@ -110,6 +110,10 @@ private:
   bool _inCountdown = false;
   bool _startHidden = false;
 
+  // Used to tell that the client has loaded the game 
+  bool _gameLoaded = false;
+  int _serverEntityCount = 0;
+
   // Time when pregame countdown ended
   std::chrono::time_point<std::chrono::steady_clock> _countdownEnd;
 

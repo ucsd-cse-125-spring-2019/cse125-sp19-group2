@@ -18,8 +18,8 @@
 
 Application::Application(const char* windowTitle, int argc, char** argv) {
   _win_title = windowTitle;
-  _win_width = 800;
-  _win_height = 600;
+  _win_width = 1280;
+  _win_height = 720;
 
   if (argc == 1) {
   }
@@ -286,6 +286,8 @@ void Application::Update()
         {
             auto gameState = std::static_pointer_cast<GameState>(state);
 
+			_serverEntityCount = gameState->entityCount;
+
 			// Update client-side state and UI
             // Timer, winner of game, in lobby, etc
 			if (gameState->inLobby)
@@ -307,6 +309,7 @@ void Application::Update()
 			if (_inLobby && !gameState->inLobby)
 			{
 				_inLobby = false;
+				_gameLoaded = false;
 				GuiManager::getInstance().getWidget(WIDGET_LOBBY)->setVisible(false);
 				GuiManager::getInstance().getWidget(WIDGET_OPTIONS)->setVisible(false);
 				GuiManager::getInstance().setReadyEnabled(true);
@@ -524,6 +527,24 @@ void Application::Draw() {
 
   // Finish drawing scene
   glFinish();
+
+  // If we rendered all the server entities, send a gameReady event
+  if (!_gameLoaded && !_inLobby &&
+	  EntityManager::getInstance().getEntityCount() >= _serverEntityCount) {
+	  auto readyEvent = std::make_shared<GameEvent>();
+	  readyEvent->type = EVENT_CLIENT_READY;
+	  readyEvent->playerId = _localPlayer->getPlayerId();
+	  try {
+		  _networkClient->sendEvent(readyEvent);
+	  }
+	  catch (std::runtime_error e) {};
+
+	  _gameLoaded = true;
+
+	  // Trigger a manual resize
+	  auto screen = GuiManager::getInstance().getScreen();
+	  StaticResize(_window, screen->size().x(), screen->size().y());
+  }
 }
 
 void Application::Reset() {

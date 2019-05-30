@@ -118,16 +118,13 @@ public:
 		std::function<void()> onInterrupt = 0,
 		bool allowInterrupt = true) 
 	{
-		if (!_isInterpolating)
-		{
-			_isInterpolating = true;
-			_destination = destination;
-			_finalDirection = finalDirection;
-			_interpVelocity = velocity;
-			_interpOnComplete = onComplete;
-			_interpOnInterrupt = onInterrupt;
-			_allowInterrupt = allowInterrupt;
-		}
+		_isInterpolating = true;
+		_destination = destination;
+		_finalDirection = finalDirection;
+		_interpVelocity = velocity;
+		_interpOnComplete = onComplete;
+		_interpOnInterrupt = onInterrupt;
+		_allowInterrupt = allowInterrupt;
 	}
 
 	// Stage of current action

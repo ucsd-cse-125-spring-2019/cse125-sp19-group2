@@ -133,6 +133,11 @@ std::shared_ptr<CBaseEntity> EntityManager::getEntity(std::shared_ptr<BaseState>
     return entity;
 }
 
+int EntityManager::getEntityCount()
+{
+	return _entityList.size();
+}
+
 void EntityManager::update(std::shared_ptr<BaseState> const &state)
 {
 	auto entity = getEntity(state);
@@ -206,6 +211,7 @@ void EntityManager::render(std::unique_ptr<Camera> const &camera)
     }
 
     glDisable(GL_CULL_FACE);
+    glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
     // Render Transparent objects from far to close
@@ -225,7 +231,7 @@ void EntityManager::render(std::unique_ptr<Camera> const &camera)
 
     // restore
     glEnable(GL_CULL_FACE);
-    glBlendFunc(blendSrc, blendDst);
+    //glBlendFunc(blendSrc, blendDst);
 
     // render collider
     ColliderManager::getInstance().render(camera);

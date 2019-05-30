@@ -21,11 +21,12 @@ public:
 		_state->colliderType = COLLIDER_CAPSULE;
 		_state->width = 1.5f;
 		_state->depth = 1.5f;
-		_state->height = 2.3f;
+		_state->height = 4.6f;
+		_state->scale.y = 2.0f;
 
 		// Plunger collider
 		_children.push_back(std::make_shared<SCylinderPlungerEntity>(
-			pos, glm::vec3(1.3f, 2.3f, 1.3f)));
+			pos, glm::vec3(1.3f, 4.6f, 1.3f)));
 	}
 
 	~STreeEntity()

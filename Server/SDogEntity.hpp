@@ -18,6 +18,7 @@ public:
 	~SDogEntity() {};
 
 	bool isCaught = false;
+	bool isTeleporting = false;
 
 	void update(std::vector<std::shared_ptr<GameEvent>> events) override;
 
@@ -35,6 +36,22 @@ public:
 		_nearFountain = val;
 	}
 
+	void setTeleporting(bool val) {
+		_isTeleporting = val;
+	}
+
+	void setSourceDoghouseDir(glm::vec3 dir) {
+		_sourceDoghouseDir = dir;
+	}
+
+	void setTargetDoghousePos(glm::vec3 pos) {
+		_targetDoghousePos = pos;
+	}
+
+	void setTargetDoghouseDir(glm::vec3 dir) {
+		_targetDoghouseDir = dir;
+	}
+
 private:
 	int type = 0;
 
@@ -43,6 +60,16 @@ private:
 	bool _isRunning = false;
 	bool _isInteracting = false;
 	bool _isTrapped = false;
+	bool _isJailed = false;	// Teleporting to jail
+	bool _isTeleporting = false;	// Teleporting to a doghouse
+
+	// Jail teleportation stuff
+	glm::vec3 _targetJailPos;
+
+	// Doghouse teleportation stuff
+	glm::vec3 _sourceDoghouseDir;
+	glm::vec3 _targetDoghousePos;
+	glm::vec3 _targetDoghouseDir;
 
 	// Number of times the dog has pressed a button to escape trap
 	int _numEscapePressed = 0;

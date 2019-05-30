@@ -53,6 +53,20 @@ bool EventManager::update()
 			handlePlayerReady(event);
 			break;
 		}
+		case EVENT_CLIENT_READY:
+		{
+			// Client has fully loaded the game
+			_gameState->clientReadyCount++;
+			if (_gameState->waitingForClients &&
+				_gameState->clientReadyCount >= _gameState->dogs.size() + _gameState->humans.size())
+			{
+				_gameState->pregameCountdown = true;
+				_gameState->_pregameStart = std::chrono::steady_clock::now();
+				_gameState->waitingForClients = false;
+				_gameState->clientReadyCount = 0;
+			}
+			break;
+		}
 		default:
 			// By default, the entity handles the event
 			auto it = eventMap.find(event->playerId);
@@ -205,6 +219,9 @@ bool EventManager::handlePlayerLeave(std::shared_ptr<GameEvent> event)
 
 void EventManager::startGame()
 {
+	// Reset entity count
+	_structureInfo->gameState->entityCount = 0;
+
 	// Immediately send a new GameState to try and update ready button before
 	// the game loads on the client
 	_networkInterface->sendUpdate(_structureInfo->gameState);
@@ -266,6 +283,13 @@ void EventManager::startGame()
 	for (auto& entityPair : *_structureInfo->entityMap)
 	{
 		updateVec.push_back(entityPair.second->getState());
+
+		// Visible entity count. Used by the client to determine whether
+		// the game is fully rendered or not
+		if (entityPair.second->getState()->isVisible)
+		{
+			_structureInfo->gameState->entityCount++;
+		}
 	}
 	_networkInterface->sendUpdates(updateVec);
 
@@ -276,9 +300,10 @@ void EventManager::startGame()
 	// for debugging purposes, but there will be no winning or losing
 	if (_gameState->dogs.size() && _gameState->humans.size())
 	{
-		// Game has started!
-		_gameState->pregameCountdown = true;
-		_gameState->_pregameStart = std::chrono::steady_clock::now();
+		// Game has started! We are now waiting for players to become
+		// ready
+		_gameState->clientReadyCount = 0;
+		_gameState->waitingForClients = true;
 	}
 
 	// Optimization: remove all tile entities from the server map
