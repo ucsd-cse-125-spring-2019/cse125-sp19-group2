@@ -6,13 +6,18 @@
 class CHumanEntity : public CPlayerEntity
 {
 public:
-    CHumanEntity(uint32_t id) : CPlayerEntity()
+    CHumanEntity(uint32_t id, int skinID) : CPlayerEntity()
     {
 		// Init player state
 		_state = std::make_shared<HumanState>();
 
-        // Load Animation
-        initAnimation("./Resources/Models/human.dae");
+        // Load Animation based on skin
+		std::string modelLoc = "./Resources/Models/human";
+		int usedSkin = skinID % HUMAN_SKIN_AMOUNT;
+		if (usedSkin != 0)
+			modelLoc += std::to_string(usedSkin);
+		modelLoc += ".dae";
+        initAnimation(modelLoc);
 
 		// Load positional sounds
 		_runningSound = AudioManager::getInstance().getAudioSource("human running" + std::to_string(id));

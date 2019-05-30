@@ -13,6 +13,8 @@ struct PlayerState : BaseState
 	bool isPlayOnce;	// Whether the current animation is playOnce
 	float animationDuration;	// Animation duration in milliseconds if playOnce
 
+	int skinID;
+
 	template<class Archive>
 	void serialize(Archive & archive)
 	{
@@ -21,7 +23,8 @@ struct PlayerState : BaseState
 			playerName,
 			message,
 			isPlayOnce,
-			animationDuration);
+			animationDuration,
+			skinID);
 	}
 };
 

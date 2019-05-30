@@ -209,6 +209,9 @@ void EventManager::startGame()
 	// the game loads on the client
 	_networkInterface->sendUpdate(_structureInfo->gameState);
 
+	// Create human with different skins
+	int skinID = 0;
+
 	// Build player entities for each human
 	for (auto& humanPair : _gameState->humans)
 	{
@@ -220,14 +223,20 @@ void EventManager::startGame()
 		auto humanEntity = std::make_shared<SHumanEntity>(
 			humanPair.first, // ID
 			humanPair.second, // Name
-			_structureInfo);
+			_structureInfo,
+			skinID);
 
 		// Set location
 		humanEntity->getState()->pos = glm::vec3(humanSpawn.x, 0, humanSpawn.y);
 
 		// Insert into global map
 		_structureInfo->entityMap->insert({ humanPair.first, humanEntity });
+
+		skinID++;
 	}
+
+	// Create dog with different skins
+	skinID = 0;
 
 	// Build player entities for each dog
 	for (auto& dogPair : _gameState->dogs)
@@ -240,13 +249,16 @@ void EventManager::startGame()
 		auto dogEntity = std::make_shared<SDogEntity>(
 			dogPair.first, // ID
 			dogPair.second, // Name
-			_structureInfo);
+			_structureInfo,
+			skinID);
 
 		// Set location
 		dogEntity->getState()->pos = glm::vec3(dogSpawn.x, 0, dogSpawn.y);
 
 		// Insert into global map
 		_structureInfo->entityMap->insert({ dogPair.first, dogEntity });
+
+		skinID++;
 	}
 
 	// Send state of every object to every player
