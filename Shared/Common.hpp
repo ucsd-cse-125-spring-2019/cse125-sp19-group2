@@ -35,7 +35,7 @@ const std::chrono::seconds PLUNGER_COOLDOWN(5);
 const std::chrono::seconds TRAP_COOLDOWN(10);
 
 // Dog-specific stats
-#define DOG_SKIN_AMOUNT 2
+#define DOG_SKIN_AMOUNT 3
 #define DOG_BASE_VELOCITY 4.8f
 #define DOG_RUN_VELOCITY DOG_BASE_VELOCITY * 1.5f
 #define MAX_DOG_STAMINA 3.0f	// Dog can sprint for three seconds max
@@ -43,7 +43,7 @@ const std::chrono::seconds TRAP_COOLDOWN(10);
 #define MAX_DOG_ESCAPE_PRESSES 12	// Dog must press button 12 times to escape trap
 
 // Human-spedific stats
-#define HUMAN_SKIN_AMOUNT 2
+#define HUMAN_SKIN_AMOUNT 3
 #define HUMAN_BASE_VELOCITY 5.0f
 #define HUMAN_SWING_VELOCITY 10.0f
 #define MAX_HUMAN_CHARGE 2.0f
