@@ -1,5 +1,6 @@
 #pragma once
 #include "CBaseEntity.hpp"
+#include "Shared/GateState.hpp"
 #include "Model.hpp"
 
 class CGateEntity : public CBaseEntity
@@ -11,7 +12,7 @@ public:
 		_objectModel = std::make_unique<Model>("./Resources/Models/gate.fbx");
 		_bottomModel = std::make_unique<Model>("./Resources/Models/gate_bottom.fbx");
 		_objectShader = std::make_unique<Shader>();
-		_state = std::make_shared<BaseState>();
+		_state = std::make_shared<GateState>();
 
 		_objectShader->LoadFromFile(GL_VERTEX_SHADER, "./Resources/Shaders/wall.vert");
 		_objectShader->LoadFromFile(GL_FRAGMENT_SHADER, "./Resources/Shaders/basiclight.frag");
@@ -48,6 +49,23 @@ public:
 		_bottomModel->render(_objectShader);
 	}
 
+	void updateState(std::shared_ptr<BaseState> state) override
+	{
+		CBaseEntity::updateState(state);
+
+		// Gate-specific stuff
+		auto gateState = std::static_pointer_cast<GateState>(state);
+
+		if (!_gateSound) {
+			_gateSound = AudioManager::getInstance().getAudioSource("gate sound" + std::to_string(state->id));
+			_gateSound->init("Resources/Sounds/gates_raising.wav", true, true);
+			_gateSound->setVolume(0.5f);
+		}
+		_gateSound->setPosition(_state->pos);
+		_gateSound->play(gateState->isLifting);
+	}
+
 private:
 	std::unique_ptr<Drawable> _bottomModel;
+	AudioSource* _gateSound = nullptr;
 };

@@ -241,6 +241,9 @@ public:
 				for (int i = 0; i < _gates.size(); i++) {
 					_gates[i]->getState()->pos.y = gateHeight;
 					_gates[i]->hasChanged = true;
+
+					auto gateState = std::static_pointer_cast<GateState>(_gates[i]->getState());
+					gateState->isLifting = true;
 				}
 			}
 			for (int i = 0; i < _triggers.size(); i++) {
@@ -253,6 +256,8 @@ public:
 				for (int i = 0; i < _gates.size(); i++) {
 					_gates[i]->getState()->pos.y = gateHeight;
 					_gates[i]->hasChanged = true;
+					auto gateState = std::static_pointer_cast<GateState>(_gates[i]->getState());
+					gateState->isLifting = false;
 				}
 				for (int i = 0; i < _triggers.size(); i++) {
 					_triggers[i]->updateForward(-2);
