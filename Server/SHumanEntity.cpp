@@ -4,7 +4,8 @@
 SHumanEntity::SHumanEntity(
 	uint32_t playerId,
 	std::string playerName,
-	StructureInfo* structureInfo)
+	StructureInfo* structureInfo,
+	int skinID)
 {
 	_structureInfo = structureInfo;
 
@@ -32,6 +33,7 @@ SHumanEntity::SHumanEntity(
 	humanState->playerName = playerName;
 	humanState->plungerCooldown = 0;
 	humanState->trapCooldown = 0;
+	humanState->skinID = skinID;
 
 	// Plunger finish handler
 	_launchingReset = [&] {

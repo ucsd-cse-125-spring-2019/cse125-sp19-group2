@@ -3,7 +3,8 @@
 SDogEntity::SDogEntity(
 	uint32_t playerId,
 	std::string playerName,
-	StructureInfo* structureInfo)
+	StructureInfo* structureInfo,
+	int skinID)
 {
 	_structureInfo = structureInfo;
 
@@ -31,6 +32,7 @@ SDogEntity::SDogEntity(
 
 	// Player-specific stuff
 	dogState->playerName = playerName;
+	dogState->skinID = skinID;
 }
 
 void SDogEntity::update(std::vector<std::shared_ptr<GameEvent>> events)

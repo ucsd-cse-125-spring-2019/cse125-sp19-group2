@@ -12,7 +12,8 @@ public:
 	SDogEntity(
 		uint32_t playerId,
 		std::string playerName,
-		StructureInfo* structureInfo);
+		StructureInfo* structureInfo,
+		int skinID);
 
 	~SDogEntity() {};
 
