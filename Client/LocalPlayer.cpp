@@ -493,3 +493,20 @@ uint32_t LocalPlayer::getPlayerId()
 void LocalPlayer::resize(int x, int y) {
 	_camera->resize(x, y);
 }
+
+void LocalPlayer::getCompassDirection(glm::vec3 pos){
+	Logger::getInstance()->debug("Po x:" + std::to_string(pos.x) + "Po y: " + std::to_string(pos.y) + "Po z: " + std::to_string(pos.z));
+	if (_playerEntity)
+	{
+		auto playerPos = _playerEntity->getState()->pos;
+		//Logger::getInstance()->debug("P x:" + std::to_string(playerPos.x) + "P y: " + std::to_string(playerPos.y) + "P z: " + std::to_string(playerPos.z));
+		glm::vec3 distance(pos.x - playerPos.x, pos.y - playerPos.y, pos.z - playerPos.z);
+		auto cameraPos = _camera->position();
+		//Logger::getInstance()->debug("x:" + std::to_string(cameraPos.x) + " y: " + std::to_string(cameraPos.y));
+		glm::vec3 result = glm::normalize(cameraPos - playerPos);
+		
+
+	}
+
+	//auto currentPos = _playerEntity->getState()->pos;
+}

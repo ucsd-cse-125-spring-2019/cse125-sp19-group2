@@ -329,6 +329,7 @@ void Application::Update()
 						GuiManager::getInstance().setVisibility(WIDGET_HUD_HUMAN_SKILLS, false);
 						break;
 					}
+					
 				}
 
 				// Hide dog skills if we are a human
@@ -343,6 +344,7 @@ void Application::Update()
 
 				// Redraw
 				auto screen = GuiManager::getInstance().getScreen();
+
 				GuiManager::getInstance().resize(screen->size().x(), screen->size().y());
 			}
 			// Conversely, did a game just end and send us back to the lobby?
@@ -444,7 +446,7 @@ void Application::Update()
 
 			// Update countdown timer
 			GuiManager::getInstance().updateTimer(gameState->millisecondsLeft);
-
+			_localPlayer->getCompassDirection(glm::vec3(30, 0, -0.75));
 			_inLobby = gameState->inLobby;
         }
     }
