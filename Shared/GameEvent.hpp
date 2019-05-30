@@ -39,7 +39,8 @@ enum EventType
 	EVENT_PLAYER_SWING_NET,
 	EVENT_PLAYER_LAUNCH_START,
 	EVENT_PLAYER_LAUNCH_END,
-	EVENT_PLAYER_PLACE_TRAP
+	EVENT_PLAYER_PLACE_TRAP,
+	EVENT_CLIENT_READY	// Game is fully rendered on the client
     // TODO: more event types here
 };
 // GamePad Indexes

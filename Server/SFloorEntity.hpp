@@ -34,6 +34,8 @@ public:
 		// Floor tiles don't collide with anything
 		_collider = std::make_unique<EmptyCollider>();
 		_state->colliderType = COLLIDER_NONE;
+
+		_state->isVisible = false;
 	};
 	~SFloorEntity() {};
 };

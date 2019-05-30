@@ -20,7 +20,7 @@
 #define FENCE_HEIGHT 3.0f
 
 // Pregame countdown
-const std::chrono::seconds PREGAME_LENGTH(6);
+const std::chrono::seconds PREGAME_LENGTH(5);
 
 // Max game length
 const std::chrono::seconds MAX_GAME_LENGTH(90);

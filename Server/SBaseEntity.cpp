@@ -69,6 +69,7 @@ void SBaseEntity::initState(bool generateId)
 	_state->isDestroyed = false;
 	_state->isStatic = true;
 	_state->isSolid = true;
+	_state->isVisible = true;
 
 	hasChanged = false;
 }

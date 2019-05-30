@@ -259,6 +259,9 @@ void GameServer::resetGameState()
 		_gameState->readyPlayers.clear();
 	}
 	_gameState->type = ENTITY_STATE;
+	_gameState->entityCount = 0;
+	_gameState->waitingForClients = false;
+	_gameState->clientReadyCount = 0;
 	_gameState->gameStarted = false;
 	_gameState->gameOver = false;
 	_gameState->inLobby = true;

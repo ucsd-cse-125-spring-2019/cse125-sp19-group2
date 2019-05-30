@@ -41,6 +41,7 @@ public:
 
 		// Jails are not rendered at all
 		_state->isSolid = false;
+		_state->isVisible = false;
 
 		float xScale = scale.x / 3;
 		float zScale = scale.z / 3;

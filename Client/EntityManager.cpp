@@ -129,6 +129,11 @@ std::shared_ptr<CBaseEntity> EntityManager::getEntity(std::shared_ptr<BaseState>
     return entity;
 }
 
+int EntityManager::getEntityCount()
+{
+	return _entityList.size();
+}
+
 void EntityManager::update(std::shared_ptr<BaseState> const &state)
 {
 	auto entity = getEntity(state);
