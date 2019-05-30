@@ -223,7 +223,6 @@ void SDogEntity::update(std::vector<std::shared_ptr<GameEvent>> events)
 		hasChanged = true;
 
 		if (actionChanged) {
-			// Replace with walking animation
 			dogState->currentAnimation = ANIMATION_DOG_WALKING;
 
 			// Interpolate to trap
@@ -255,13 +254,68 @@ void SDogEntity::update(std::vector<std::shared_ptr<GameEvent>> events)
 					_isJailed = false;
 				},
 				0,
-					false /* Disable interp interrupt */);
+				false /* Disable interp interrupt */);
 		}
 		break;
 	case ACTION_DOG_TELEPORTING:
 		if (actionChanged)
 		{
+			// TODO: force camera to move
+
 			// Play digging animation first
+			dogState->currentAnimation = ANIMATION_DOG_DIGGING_IN;
+			dogState->isPlayOnce = true;
+			dogState->animationDuration = 300;
+			hasChanged = true;
+			
+			// Timer until dog digging end
+			registerTimer(300, [&]()
+				{
+					if (_curAction == ACTION_DOG_TELEPORTING)
+					{
+						hasChanged = true;
+						_state->isSolid = false;
+						_state->transparency = 0.0f;
+						actionStage++;
+					}
+				});
+		}
+
+		// stage 1: interpolate dog
+		if (actionStage == 1)
+		{
+			interpolateMovement(
+				_targetDoghousePos,
+				_targetDoghouseDir,
+				DOG_TELEPORT_VELOCITY,
+				[&]()
+				{
+					// On finish, move to stage 2
+					actionStage++;
+				},
+				0,
+				false /* Do not allow interrupt */);
+		}
+
+		// stage 2: digging up animation
+		if (actionStage == 2)
+		{
+			// TODO: force camera to move
+
+			dogState->currentAnimation = ANIMATION_DOG_DIGGING_OUT;
+			dogState->isPlayOnce = true;
+			dogState->animationDuration = 100;
+
+			_state->isSolid = true;
+			_state->transparency = 1.0f;
+			_state->forward = -(_targetDoghouseDir);
+			hasChanged = true;
+
+			// Timer until digging end
+			registerTimer(400, [&]()
+				{
+					_isTeleporting = false;
+				});
 		}
 		break;
 	}
@@ -365,7 +419,7 @@ bool SDogEntity::updateAction()
 	}
 
 	// Dog being jailed takes absolute precedence
-	if (_isJailed && !isCaught)
+	if (_isJailed && !isCaught && _state->isSolid)
 	{
 		_curAction = ACTION_DOG_JAILED;
 	}
