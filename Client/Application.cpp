@@ -18,8 +18,8 @@
 
 Application::Application(const char* windowTitle, int argc, char** argv) {
   _win_title = windowTitle;
-  _win_width = 800;
-  _win_height = 600;
+  _win_width = 1280;
+  _win_height = 720;
 
   if (argc == 1) {
   }
@@ -540,6 +540,10 @@ void Application::Draw() {
 	  catch (std::runtime_error e) {};
 
 	  _gameLoaded = true;
+
+	  // Trigger a manual resize
+	  auto screen = GuiManager::getInstance().getScreen();
+	  StaticResize(_window, screen->size().x(), screen->size().y());
   }
 }
 
