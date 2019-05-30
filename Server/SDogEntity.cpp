@@ -237,6 +237,7 @@ void SDogEntity::update(std::vector<std::shared_ptr<GameEvent>> events)
 		}
 		break;
 	case ACTION_DOG_JAILED:
+		isCaught = true;
 		if (actionChanged)
 		{
 			// Make dog invisible and non-solid
@@ -326,7 +327,11 @@ void SDogEntity::update(std::vector<std::shared_ptr<GameEvent>> events)
 
 	// Reset state handled by collision logic
 	_isTrapped = false;
-	isCaught = false;
+
+	if (_curAction != ACTION_DOG_JAILED)
+	{
+		isCaught = false;
+	}
 }
 
 void SDogEntity::generalHandleCollision(SBaseEntity * entity)
@@ -340,9 +345,10 @@ void SDogEntity::generalHandleCollision(SBaseEntity * entity)
 	// Dog getting caught is handled by the dog, not the human
 	if (entity->getState()->type == ENTITY_NET &&
 		!isCaught &&
-		!_structureInfo->gameState->gameOver)
+		!_structureInfo->gameState->gameOver &&
+		_state->isSolid)
 	{
-		// Teleport to a random jail
+		// Send to a random jail
 		unsigned int seed = (unsigned int)std::chrono::system_clock::now().time_since_epoch().count();
 		std::shuffle(
 			_structureInfo->jailsPos->begin(),
@@ -351,7 +357,6 @@ void SDogEntity::generalHandleCollision(SBaseEntity * entity)
 		glm::vec2 jailPos = (*(_structureInfo->jailsPos))[0];
 		_targetJailPos = glm::vec3(jailPos.x, 0, jailPos.y);
 		_isJailed = true;
-		//getState()->pos = glm::vec3(jailPos.x, 0, jailPos.y);
 	}
 	else if (entity->getState()->type == ENTITY_BONE)
 	{

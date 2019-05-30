@@ -486,12 +486,6 @@ void NetworkServer::socketWriteHandler()
 					}
 				}
 			}
-			else if (!FD_ISSET(session.socket, &writeSet))
-			{
-				// If we couldn't send the update to the player, push it back
-				// onto the queue
-				_updateQueue->push(nextPair);
-			}
 		}
 		free(databuf);
 
