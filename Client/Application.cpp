@@ -347,8 +347,7 @@ void Application::Update()
 				}
 
 				// Redraw
-				auto screen = GuiManager::getInstance().getScreen();
-				GuiManager::getInstance().resize(screen->size().x(), screen->size().y());
+				GuiManager::getInstance().refresh();
 			}
 			// Conversely, did a game just end and send us back to the lobby?
 			else if (gameState->inLobby && !_inLobby)
@@ -378,8 +377,7 @@ void Application::Update()
 				_localPlayer->setMouseCaptured(false);
 
 				// Redraw
-				auto screen = GuiManager::getInstance().getScreen();
-				GuiManager::getInstance().resize(screen->size().x(), screen->size().y());
+				GuiManager::getInstance().refresh();
 			}
 
 			// Update pregame timer
@@ -399,8 +397,7 @@ void Application::Update()
 				}
 				GuiManager::getInstance().setSecondaryMessage(std::to_string(secondsLeft));
 
-				auto screen = GuiManager::getInstance().getScreen();
-				GuiManager::getInstance().resize(screen->size().x(), screen->size().y());
+				GuiManager::getInstance().refresh();
 			}
 			else if (_inCountdown)
 			{
@@ -410,8 +407,7 @@ void Application::Update()
 				GuiManager::getInstance().setPrimaryMessage("Go!");
 				GuiManager::getInstance().setSecondaryMessage("");
 
-				auto screen = GuiManager::getInstance().getScreen();
-				GuiManager::getInstance().resize(screen->size().x(), screen->size().y());
+				GuiManager::getInstance().refresh();
 			}
 			else if (!_startHidden)
 			{
@@ -424,8 +420,7 @@ void Application::Update()
 					GuiManager::getInstance().setPrimaryMessage("");
 					_startHidden = true;
 
-					auto screen = GuiManager::getInstance().getScreen();
-					GuiManager::getInstance().resize(screen->size().x(), screen->size().y());
+					GuiManager::getInstance().refresh();
 				}
 			}
 
@@ -443,8 +438,7 @@ void Application::Update()
 				auto secondsLeft = (int)(std::ceil(gameState->millisecondsToLobby / 1000.0f));
 				GuiManager::getInstance().setSecondaryMessage("Returning to lobby in " + std::to_string(secondsLeft) + "...");
 
-				auto screen = GuiManager::getInstance().getScreen();
-				GuiManager::getInstance().resize(screen->size().x(), screen->size().y());
+				GuiManager::getInstance().refresh();
 			}
 
 			// Update countdown timer

@@ -36,6 +36,8 @@ public:
 
     void draw();
 
+	void refresh();
+
 	void resize(int x, int y);
 
     nanogui::Screen* getScreen();
