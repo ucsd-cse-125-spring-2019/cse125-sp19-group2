@@ -75,14 +75,14 @@ public:
 
     void play(std::string newTake, bool noTransition = false) {
         if (newTake != _currentTakeStr && !_isPlayOnce) {
-            if(noTransition){
-                std::cout << "NoTran Play:" << newTake << std::endl;
-			}else {
-                if(newTake == "swinging1") {
-                    //std::cout << "bp" << std::endl;
-                }
-			    std::cout << "Tran Play:" << newTake << std::endl;
-			}
+            //if(noTransition){
+            //    std::cout << "NoTran Play:" << newTake << std::endl;
+			//}else {
+            //    if(newTake == "swinging1") {
+            //        //std::cout << "bp" << std::endl;
+            //    }
+			//    std::cout << "Tran Play:" << newTake << std::endl;
+			//}
             _lastTakeStr = _currentTakeStr;
             if(!noTransition) {
                 //_takeBeforeTransitionStr = _lastTakeStr;
@@ -98,14 +98,14 @@ public:
 
     void playOnce(std::string newTake, float endingTime, bool noTransition = false) {
         if (newTake != _currentTakeStr && !_isPlayOnce) {
-            if(noTransition){
-                std::cout << "NoTran Playonce:" << newTake << std::endl;
-			}else {
-                if(newTake == "swinging1") {
-                    //std::cout << "bp" << std::endl;
-                }
-			    std::cout << "Tran Playonce:" << newTake << std::endl;
-			}
+            //if(noTransition){
+            //    std::cout << "NoTran Playonce:" << newTake << std::endl;
+			//}else {
+            //    if(newTake == "swinging1") {
+            //        //std::cout << "bp" << std::endl;
+            //    }
+			//    std::cout << "Tran Playonce:" << newTake << std::endl;
+			//}
             _lastTakeStr = _currentTakeStr;
             if(!noTransition) {
                 _takeBeforeTransitionStr = _lastTakeStr;
