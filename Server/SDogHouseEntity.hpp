@@ -63,8 +63,8 @@ public:
 
 		// Sensor for dogs. Performs actual logic on the doghouse
 		auto sensorBox = std::make_shared<SBoxEntity>(
-			glm::vec3(pos.x, 0, pos.z - _state->depth / 4),
-			glm::vec3(_state->width - DOGHOUSE_WALL_WIDTH * 2, 0.5, _state->depth / 3));
+			glm::vec3(pos.x, 0, pos.z + _state->depth / 2),
+			glm::vec3(_state->width - DOGHOUSE_WALL_WIDTH * 2, 0.5, _state->depth * 0.10));
 		sensorBox->getState()->transparency = 0.0f;
 		sensorBox->getState()->isSolid = false;
 		
@@ -104,11 +104,10 @@ public:
 
 						// Teleport to this house
 						dogEntity->setTeleporting(true);
+						dogEntity->setSourceDoghousePos(_state->pos - (_state->forward * 0.3f));
 						dogEntity->setSourceDoghouseDir(_state->forward);
 						dogEntity->setTargetDoghousePos(house->getState()->pos);
 						dogEntity->setTargetDoghouseDir(house->getState()->forward);
-						dogEntity->getState()->pos = _state->pos;
-						dogEntity->getState()->forward = _state->forward;
 
 						// Reset cooldowns
 						_cooldowns.insert({ collidingEntity->getState()->id, std::chrono::steady_clock::now() });

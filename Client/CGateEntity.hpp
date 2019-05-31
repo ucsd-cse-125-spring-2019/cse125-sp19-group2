@@ -59,7 +59,7 @@ public:
 		if (!_gateSound) {
 			_gateSound = AudioManager::getInstance().getAudioSource("gate sound" + std::to_string(state->id));
 			_gateSound->init("Resources/Sounds/gates_raising.wav", true, true);
-			_gateSound->setVolume(0.5f);
+			_gateSound->setVolume(0.35f);
 		}
 		_gateSound->setPosition(_state->pos);
 		_gateSound->play(gateState->isLifting);

@@ -40,6 +40,10 @@ public:
 		_isTeleporting = val;
 	}
 
+	void setSourceDoghousePos(glm::vec3 pos) {
+		_sourceDoghousePos = pos;
+	}
+
 	void setSourceDoghouseDir(glm::vec3 dir) {
 		_sourceDoghouseDir = dir;
 	}
@@ -67,6 +71,7 @@ private:
 	glm::vec3 _targetJailPos;
 
 	// Doghouse teleportation stuff
+	glm::vec3 _sourceDoghousePos;
 	glm::vec3 _sourceDoghouseDir;
 	glm::vec3 _targetDoghousePos;
 	glm::vec3 _targetDoghouseDir;

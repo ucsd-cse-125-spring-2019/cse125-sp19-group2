@@ -129,6 +129,7 @@ void SDogEntity::update(std::vector<std::shared_ptr<GameEvent>> events)
 	// Reset stage of action if changed to a new action
 	if (actionChanged) {
 		actionStage = 0;
+		lastStage = 0;
 	}
 
 	switch (_curAction)
@@ -265,49 +266,73 @@ void SDogEntity::update(std::vector<std::shared_ptr<GameEvent>> events)
 		{
 			// TODO: force camera to move
 
-			// Play digging animation first
+			dogState->currentAnimation = ANIMATION_DOG_WALKING;
+
+			// Make the dog walk slowly into the doghouse
+			interpolateMovement(
+				_sourceDoghousePos,
+				_sourceDoghouseDir,
+				DOG_BASE_VELOCITY / 5,
+				[&]()
+				{
+					actionStage++;
+				},
+				0,
+				false);
+
+			hasChanged = true;
+		}
+
+		// stage 1: start digging animation
+		if (actionStage == 1 && lastStage != 1)
+		{
+			lastStage = 1;
+
+			// Play digging animation
 			dogState->currentAnimation = ANIMATION_DOG_DIGGING_IN;
 			dogState->isPlayOnce = true;
 			dogState->animationDuration = 300;
 			hasChanged = true;
-			
+
 			// Timer until dog digging end
 			registerTimer(300, [&]()
+			{
+				if (_curAction == ACTION_DOG_TELEPORTING)
 				{
-					if (_curAction == ACTION_DOG_TELEPORTING)
-					{
-						hasChanged = true;
-						_state->isSolid = false;
-						_state->transparency = 0.0f;
-						actionStage++;
-					}
-				});
+					hasChanged = true;
+					_state->isSolid = false;
+					_state->transparency = 0.0f;
+					actionStage++;
+				}
+			});
 		}
 
-		// stage 1: interpolate dog
-		if (actionStage == 1)
+		// stage 2: interpolate dog
+		if (actionStage == 2 && lastStage != 2)
 		{
+			lastStage = 2;
 			interpolateMovement(
 				_targetDoghousePos,
 				_targetDoghouseDir,
 				DOG_TELEPORT_VELOCITY,
 				[&]()
 				{
-					// On finish, move to stage 2
+					// On finish, move to stage 3
 					actionStage++;
 				},
 				0,
 				false /* Do not allow interrupt */);
 		}
 
-		// stage 2: digging up animation
-		if (actionStage == 2)
+		// stage 3: digging up animation
+		if (actionStage == 3 && lastStage != 3)
 		{
+			lastStage = 3;
 			// TODO: force camera to move
 
 			dogState->currentAnimation = ANIMATION_DOG_DIGGING_OUT;
 			dogState->isPlayOnce = true;
-			dogState->animationDuration = 100;
+			dogState->animationDuration = 300;
 
 			_state->isSolid = true;
 			_state->transparency = 1.0f;
@@ -315,10 +340,29 @@ void SDogEntity::update(std::vector<std::shared_ptr<GameEvent>> events)
 			hasChanged = true;
 
 			// Timer until digging end
-			registerTimer(400, [&]()
+			registerTimer(300, [&]()
+				{
+					// Move to stage 4
+					actionStage++;
+				});
+		}
+
+		// stage 4: push dog out of doghouse
+		if (actionStage == 4 && lastStage != 4)
+		{
+			lastStage = 4;
+
+			dogState->currentAnimation = ANIMATION_DOG_WALKING;
+			interpolateMovement(
+				_targetDoghousePos - _targetDoghouseDir * 1.5f,
+				-_targetDoghouseDir,
+				DOG_BASE_VELOCITY / 2,
+				[&]()
 				{
 					_isTeleporting = false;
-				});
+				},
+				0,
+				false);
 		}
 		break;
 	}
@@ -423,6 +467,12 @@ bool SDogEntity::updateAction()
 		else if (_isInteracting && _nearFountain) _curAction = ACTION_DOG_DRINKING;
 		else if (_isTrapped) _curAction = ACTION_DOG_TRAPPED;
 		else if (_isTeleporting) _curAction = ACTION_DOG_TELEPORTING;
+	}
+
+	// Dog getting trapped takes second highest precedence
+	if (_isTrapped && _state->isSolid)
+	{
+		_curAction = ACTION_DOG_TRAPPED;
 	}
 
 	// Dog being jailed takes absolute precedence
