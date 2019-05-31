@@ -8,6 +8,7 @@ enum WidgetType {
 	WIDGET_LOBBY,
 	WIDGET_LIST_DOGS,
 	WIDGET_LIST_HUMANS,
+	WIDGET_LOADING,
 	WIDGET_OPTIONS,
 	WIDGET_HUD,
 	WIDGET_HUD_TOP,
@@ -109,6 +110,7 @@ private:
 	/*** Functions ***/
 	void initConnectScreen();
 	void initLobbyScreen();
+	void initLoadingScreen();
 	void initHUD();
 	void initControlMenu();
 

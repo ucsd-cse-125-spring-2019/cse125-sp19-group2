@@ -308,6 +308,14 @@ void Application::Update()
 				// Ready button text
 				int numPlayers = gameState->dogs.size() + gameState->humans.size();
 				GuiManager::getInstance().setReadyText("Ready (" + std::to_string(gameState->readyPlayers.size()) + std::string("/") + std::to_string(numPlayers) + std::string(")"));
+
+				// If everyone is ready, show loading screen
+				if (numPlayers == gameState->readyPlayers.size())
+				{
+					GuiManager::getInstance().getWidget(WIDGET_LOBBY)->setVisible(false);
+					GuiManager::getInstance().getWidget(WIDGET_OPTIONS)->setVisible(false);
+					GuiManager::getInstance().getWidget(WIDGET_LOADING)->setVisible(true);
+				}
 			}
 
 			// Did a game just start? If so, hide lobby UI
@@ -315,8 +323,7 @@ void Application::Update()
 			{
 				_inLobby = false;
 				_gameLoaded = false;
-				GuiManager::getInstance().getWidget(WIDGET_LOBBY)->setVisible(false);
-				GuiManager::getInstance().getWidget(WIDGET_OPTIONS)->setVisible(false);
+				GuiManager::getInstance().getWidget(WIDGET_LOADING)->setVisible(false);
 				GuiManager::getInstance().setReadyEnabled(true);
 				GuiManager::getInstance().setSwitchEnabled(true);
 

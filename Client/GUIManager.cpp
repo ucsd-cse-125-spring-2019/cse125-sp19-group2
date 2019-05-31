@@ -83,6 +83,7 @@ void GuiManager::resize(int x, int y) {
 		}
 		else if (widgetPair.first == WIDGET_CONNECT ||
 			widgetPair.first == WIDGET_LOBBY ||
+			widgetPair.first == WIDGET_LOADING ||
 			widgetPair.first == WIDGET_HUD) {
 			widgetPair.second->setFixedSize(nanogui::Vector2i(x / _screen->pixelRatio(), y / _screen->pixelRatio()));
 		}
@@ -154,6 +155,7 @@ nanogui::Widget* GuiManager::getWidget(WidgetType name) {
 void GuiManager::initWidgets() {
 	initConnectScreen();
 	initLobbyScreen();
+	initLoadingScreen();
 	initHUD();
 	initControlMenu();
 	hideAll();
@@ -492,6 +494,17 @@ void GuiManager::initLobbyScreen() {
 
 	// Ready button
 	_readyButton = new nanogui::Button(lobbyScreen, "");
+}
+
+void GuiManager::initLoadingScreen() {
+	auto loadingScreen = createWidget(_screen, WIDGET_LOADING);
+
+	// TODO: loading screen background goes here
+    auto bg = LoadTextureFromFile("background.png", "./Resources/Textures/Menu/");
+    loadingScreen->setVisible(false);
+    loadingScreen->alpha = 1.0;
+    loadingScreen->setBackgroundTexture(bg, 0, 0);
+    loadingScreen->drawBackground = true;
 }
 
 void GuiManager::initHUD() {
