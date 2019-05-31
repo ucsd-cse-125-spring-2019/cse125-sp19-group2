@@ -318,11 +318,15 @@ void Application::Update()
 				}
 			}
 
-			// Did a game just start? If so, hide lobby UI
+			// Did a game just start?
 			if (_inLobby && !gameState->inLobby)
 			{
 				_inLobby = false;
 				_gameLoaded = false;
+			}
+			// If everything is loaded, hide loading screen and show HUD
+			else if (!_inLobby && !gameState->waitingForClients && gameState->pregameCountdown)
+			{
 				GuiManager::getInstance().getWidget(WIDGET_LOADING)->setVisible(false);
 				GuiManager::getInstance().setReadyEnabled(true);
 				GuiManager::getInstance().setSwitchEnabled(true);
