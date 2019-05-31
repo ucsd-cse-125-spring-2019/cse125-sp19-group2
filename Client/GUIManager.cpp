@@ -486,8 +486,6 @@ void GuiManager::initLobbyScreen() {
 	_switchSidesButton->setBackgroundTexture(switchUnfocused, switchFocused, switchPushed);
 	_switchSidesButton->alpha = 1;
 	_switchSidesButton->setTheme(new nanogui::Theme(_screen->nvgContext()));
-	_switchSidesButton->theme()->mTextColor = nanogui::Color(0, 0, 255, 255);
-	_switchSidesButton->theme()->mTextColorShadow = nanogui::Color(0, 0, 0, 0);
 	_switchSidesButton->setFixedHeight(40);
 	_switchSidesButton->setFixedWidth(100);
 
@@ -514,8 +512,6 @@ void GuiManager::initLobbyScreen() {
 	_readyButton->setBackgroundTexture(readyUnfocused, readyFocused, readyPushed);
 	_readyButton->alpha = 1;
 	_readyButton->setTheme(new nanogui::Theme(_screen->nvgContext()));
-	_readyButton->theme()->mTextColor = nanogui::Color(0, 0, 255, 255);
-	_readyButton->theme()->mTextColorShadow = nanogui::Color(0, 0, 0, 0);
 	_readyButton->setFixedHeight(40);
 	_readyButton->setFixedWidth(100);
 
