@@ -302,7 +302,7 @@ void Application::Update()
 
 				// Ready button text
 				int numPlayers = gameState->dogs.size() + gameState->humans.size();
-				GuiManager::getInstance().setReadyText("Ready (" + std::to_string(gameState->readyPlayers.size()) + std::string("/") + std::to_string(numPlayers) + std::string(")"));
+				GuiManager::getInstance().setReadyText("(" + std::to_string(gameState->readyPlayers.size()) + std::string("/") + std::to_string(numPlayers) + std::string(")"));
 			}
 
 			// Did a game just start? If so, hide lobby UI

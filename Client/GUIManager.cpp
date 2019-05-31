@@ -221,7 +221,7 @@ void GuiManager::updateDogsList(
 		if (_dogs.find(dogId) == _dogs.end())
 		{
 			auto dogName = dogPair.second;
-			auto playerLabel = new nanogui::Label(dogList, dogName, "sans", 28);
+			auto playerLabel = new nanogui::Label(dogList, dogName, "sans", 45);
 			playerLabel->setId(dogId);
 			_dogs[dogId] = dogName;
 			if (dogPair.first == playerId)
@@ -266,7 +266,7 @@ void GuiManager::updateHumansList(
 		if (_humans.find(humanId) == _humans.end())
 		{
 			auto humanName = humanPair.second;
-			auto playerLabel = new nanogui::Label(humanList, humanPair.second, "sans", 28);
+			auto playerLabel = new nanogui::Label(humanList, humanPair.second, "sans", 45);
 			playerLabel->setId(humanId);
 			_humans[humanId] = humanName;
 			if (humanPair.first == playerId)
@@ -278,7 +278,7 @@ void GuiManager::updateHumansList(
 }
 
 void GuiManager::setReadyText(std::string text) {
-	_readyButton->setCaption(text);
+	_readyLabel->setCaption(text);
 }
 
 void GuiManager::setSwitchEnabled(bool enabled) {
@@ -422,6 +422,11 @@ void GuiManager::initConnectScreen() {
 
 void GuiManager::initLobbyScreen() {
 	auto lobbyScreen = createWidget(_screen, WIDGET_LOBBY);
+	auto bg = LoadTextureFromFile("lobbybackground.png", "./Resources/Textures/Menu/");
+	lobbyScreen->setVisible(false);
+	lobbyScreen->alpha = 1.0;
+	lobbyScreen->setBackgroundTexture(bg, 0, 0);
+	lobbyScreen->drawBackground = true;
 
 	// Lobby layout
 	auto lobbyLayout = new nanogui::GridLayout(nanogui::Orientation::Horizontal, 3, nanogui::Alignment::Middle, 50, 0);
@@ -431,17 +436,27 @@ void GuiManager::initLobbyScreen() {
 	/** Row 1 **/
 
 	// Title for dogs list
-	auto dogsLabel = new nanogui::Label(lobbyScreen, "Dogs", "sans", 60);
+	auto dogsLabel = new nanogui::Label(lobbyScreen, " ", "sans", 60);
 
 	// Controls button
-	auto controlsButton = new nanogui::Button(lobbyScreen, "Controls");
+	auto controlsButton = new nanogui::Button(lobbyScreen, "");
+	auto controlsUnfocused = LoadTextureFromFile("controls.png", "./Resources/Textures/Menu/");
+	auto controlsFocused = LoadTextureFromFile("controlsfocused.png", "./Resources/Textures/Menu/");
+	auto controlsPushed = LoadTextureFromFile("controlsdown.png", "./Resources/Textures/Menu/");
+	controlsButton->setBackgroundTexture(controlsUnfocused, controlsFocused, controlsPushed);
+	controlsButton->alpha = 1;
+	controlsButton->setTheme(new nanogui::Theme(_screen->nvgContext()));
+	controlsButton->theme()->mTextColor = nanogui::Color(0, 0, 255, 255);
+	controlsButton->theme()->mTextColorShadow = nanogui::Color(0, 0, 0, 0);
+	controlsButton->setFixedHeight(40);
+	controlsButton->setFixedWidth(100);
 	controlsButton->setCallback([&]()
 		{
 			setVisibility(WIDGET_OPTIONS, !getWidget(WIDGET_OPTIONS)->visible());
 		});
 
 	// Title for humans list
-	auto humansLabel = new nanogui::Label(lobbyScreen, "Humans", "sans", 60);
+	auto humansLabel = new nanogui::Label(lobbyScreen, " ", "sans", 60);
 
 	/** Row 2: Fixed-width padding **/
 
@@ -464,7 +479,7 @@ void GuiManager::initLobbyScreen() {
 	dogsList->setLayout(dogsLayout);
 
 	// Switch sides button
-	_switchSidesButton = new nanogui::Button(lobbyScreen, "Switch sides");
+	_switchSidesButton = new nanogui::Button(lobbyScreen, "");
 	auto switchUnfocused = LoadTextureFromFile("switch.png", "./Resources/Textures/Menu/");
 	auto switchFocused = LoadTextureFromFile("switchfocused.png", "./Resources/Textures/Menu/");
 	auto switchPushed = LoadTextureFromFile("switchdown.png", "./Resources/Textures/Menu/");
@@ -503,6 +518,14 @@ void GuiManager::initLobbyScreen() {
 	_readyButton->theme()->mTextColorShadow = nanogui::Color(0, 0, 0, 0);
 	_readyButton->setFixedHeight(40);
 	_readyButton->setFixedWidth(100);
+
+
+	// Row 6
+	// Ready label TODO: get this to work
+	_readyLabel = new nanogui::Label(lobbyScreen, "(0/1)", "sans", 15);
+	_readyLabel->setTheme(new nanogui::Theme(_screen->nvgContext()));
+	_readyLabel->theme()->mTextColor = nanogui::Color(0, 0, 255, 255);
+	_readyLabel->theme()->mTextColorShadow = nanogui::Color(0, 0, 0, 0);
 }
 
 void GuiManager::initHUD() {
