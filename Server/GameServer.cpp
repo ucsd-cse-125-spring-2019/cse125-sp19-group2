@@ -244,6 +244,9 @@ void GameServer::updateGameState()
 
 void GameServer::resetGameState()
 {
+	// Clear internal network queues
+	_networkInterface->clearQueues();
+
 	// Initialize game state struct if it does not exist
 	if (!_structureInfo->gameState)
 	{
