@@ -360,6 +360,10 @@ void SDogEntity::update(std::vector<std::shared_ptr<GameEvent>> events)
 				[&]()
 				{
 					_isTeleporting = false;
+
+					// Reset cooldowns
+					_sourceCooldowns->insert({ _state->id, std::chrono::steady_clock::now() });
+					_targetCooldowns->insert({ _state->id, std::chrono::steady_clock::now() });
 				},
 				0,
 				false);
