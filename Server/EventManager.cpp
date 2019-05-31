@@ -242,6 +242,9 @@ void EventManager::handleResendRequest(std::shared_ptr<GameEvent> event)
 		serverList.begin(), serverList.end(),
 		std::back_inserter(diff));
 
+	Logger::getInstance()->debug("Received resend request from playerId " +
+		std::to_string(event->playerId));
+
 	// Build a list of updates for this client based on diff
 	std::vector<std::shared_ptr<BaseState>> updates;
 	for (auto& entityId : diff)
