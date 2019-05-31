@@ -11,7 +11,7 @@ namespace cereal
 	template<class Archive>
 	void serialize(Archive & archive, glm::vec2 &v)
 	{
-        archive(v.x, v.y);
+		archive(v.x, v.y);
 	}
 }
 
@@ -39,7 +39,8 @@ enum EventType
 	EVENT_PLAYER_SWING_NET,
 	EVENT_PLAYER_LAUNCH_START,
 	EVENT_PLAYER_LAUNCH_END,
-	EVENT_PLAYER_PLACE_TRAP
+	EVENT_PLAYER_PLACE_TRAP,
+	EVENT_CLIENT_READY	// Game is fully rendered on the client
     // TODO: more event types here
 };
 // GamePad Indexes
@@ -54,22 +55,22 @@ typedef enum
 */
 struct GameEvent
 {
-    EventType type;
-    uint32_t playerId; // Not used for EVENT_PLAYER_JOIN
-    std::string playerName; // Used only for EVENT_PLAYER_JOIN
+	EventType type;
+	uint32_t playerId; // Not used for EVENT_PLAYER_JOIN
+	std::string playerName; // Used only for EVENT_PLAYER_JOIN
 	glm::vec2 direction;	// Used only for PLAYER_TURN and PLAYER_MOVE
-    //TODO: add more elements as necessary
+		//TODO: add more elements as necessary
 
 	// Serialization for Cereal
-    template<class Archive>
-    void serialize(Archive & archive)
-    {
-        archive(
+	template<class Archive>
+	void serialize(Archive & archive)
+	{
+		archive(
 			type,
 			playerId,
 			playerName,
 			direction);
-    }
+	}
 
 	void print()
 	{

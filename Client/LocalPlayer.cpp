@@ -2,6 +2,7 @@
 #include "InputManager.h"
 #include "Shared/GameEvent.hpp"
 #include "EntityManager.hpp"
+#include "AudioManager.hpp"
 #include <glm/gtx/string_cast.hpp>
 
 LocalPlayer::LocalPlayer(uint32_t playerId, std::unique_ptr<NetworkClient> const& networkClient) {
@@ -300,37 +301,54 @@ LocalPlayer::LocalPlayer(uint32_t playerId, std::unique_ptr<NetworkClient> const
 
     _camera = std::make_unique<Camera>();
 
-    _networkClient = networkClient.get();
+	_networkClient = networkClient.get();
 
-    _moveKeysPressed = false;
-    _stopped = true;
-    _moveCamera = false;
+	_moveKeysPressed = false;
+	_stopped = true;
+	_moveCamera = false;
 
-    // TODO: set player model height properly
-    _height = 1.0f;
+	// TODO: set player model height properly
+	_height = 1.0f;
 }
 
 void LocalPlayer::update() {
-    if (!_playerEntity) {
-        _playerEntity = std::dynamic_pointer_cast<CPlayerEntity>(EntityManager::getInstance().getEntity(_playerId));
+	if (!_playerEntity) {
+		_playerEntity = std::dynamic_pointer_cast<CPlayerEntity>(EntityManager::getInstance().getEntity(_playerId));
 
-        // Break out if player entity does not yet exist
-        if (!_playerEntity) {
-            return;
-        }
-        _playerEntity->setLocal(true);
-        if (_playerEntity->getState()->type == ENTITY_HUMAN) {
-            _camera->set_heightfactor(0.8);
-        }
-        else if (_playerEntity->getState()->type == ENTITY_DOG) {
-            _camera->set_heightfactor(0.63);
-        }
-        _height = _playerEntity->getState()->height * 0.9f;
-    }
-    glm::vec3 pos = _playerEntity->getState()->pos;
-    pos.y += _height;
-    _camera->set_position(pos);
-    _camera->Update();
+		// Break out if player entity does not yet exist
+		if (!_playerEntity) {
+			return;
+		}
+		_playerEntity->setLocal(true);
+		if (_playerEntity->getState()->type == ENTITY_HUMAN) {
+			_camera->set_heightfactor(0.8);
+		}
+		else if (_playerEntity->getState()->type == ENTITY_DOG) {
+			_camera->set_heightfactor(0.63);
+		}
+		_height = _playerEntity->getState()->height * 0.9f;
+	}
+	glm::vec3 pos = _playerEntity->getState()->pos;
+	pos.y += _height;
+	_camera->set_position(pos);
+	_camera->Update();
+
+	// Stop events for the server
+	if (!_stopped && !_moveKeysPressed) {
+		_stopped = true;
+		auto event = std::make_shared<GameEvent>();
+		event->playerId = _playerId;
+		event->type = EVENT_PLAYER_STOP;
+		_networkClient->sendEvent(event);
+	}
+
+	if (_playerEntity)
+	{
+		AudioManager::getInstance().setListenerPos(_playerEntity->getState()->pos);
+		auto forward2D = _camera->convert_direction(glm::vec2(0, -1));
+		auto forward3D = glm::vec3(forward2D.x, 0, forward2D.y);
+		AudioManager::getInstance().setListenerDir(forward3D);
+	}
 
     // Stop events for the server
     if (!_stopped && !_moveKeysPressed) {
@@ -341,7 +359,7 @@ void LocalPlayer::update() {
         _networkClient->sendEvent(event);
     }
 
-    _moveKeysPressed = false;
+	_moveKeysPressed = false;
 }
 
 void LocalPlayer::updateController() {
@@ -434,7 +452,7 @@ void LocalPlayer::updateController() {
 }
 
 std::unique_ptr<Camera> const& LocalPlayer::getCamera() {
-    return _camera;
+	return _camera;
 }
 
 bool LocalPlayer::setControllerNum(GamePadIndex player)
@@ -475,5 +493,5 @@ uint32_t LocalPlayer::getPlayerId()
 }
 
 void LocalPlayer::resize(int x, int y) {
-    _camera->resize(x, y);
+	_camera->resize(x, y);
 }

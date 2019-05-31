@@ -32,6 +32,8 @@ public:
      */
     std::shared_ptr<CBaseEntity> getEntity(std::shared_ptr<BaseState> const& state);
 
+	int getEntityCount();
+
     /**
      * \brief Dispatch new state to the entity to update entity
      * \param state(std::shared_ptr<BaseState> const&) Update state

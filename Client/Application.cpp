@@ -13,12 +13,13 @@
 #include "GuiManager.hpp"
 #include "AudioManager.hpp"
 #include "ColliderManager.hpp"
+#include "ParticleSystemManager.hpp"
 #include "CFloorEntity.hpp"
 
 Application::Application(const char* windowTitle, int argc, char** argv) {
   _win_title = windowTitle;
-  _win_width = 800;
-  _win_height = 600;
+  _win_width = 1280;
+  _win_height = 720;
 
   if (argc == 1) {
   }
@@ -90,14 +91,6 @@ void Application::Setup() {
   _skybox = std::make_unique<Skybox>("skybox");
 
   // Create light
-  _point_light = std::make_unique<PointLight>(
-    PointLight{
-      "u_pointlight",
-      { { 0.05f, 0.05f, 0.05f }, { 0.8f, 0.8f, 0.8f }, { 1.0f, 1.0f, 1.0f } },
-      { -1.0f, 0.0f, 0.0f },
-      { 1.0f, 0.09f, 0.032f }
-    }
-  );
   _dir_light = std::make_unique<DirectionalLight>(
     DirectionalLight{
       "u_dirlight",
@@ -215,6 +208,11 @@ void Application::Setup() {
 			break;
 		}
 	});
+
+	_bgm = AudioManager::getInstance().getAudioSource("bgm");
+	_bgm->init("Resources/Sounds/bgm1.mp3");
+	_bgm->setVolume(0.05f);
+	_bgm->play(true);
 }
 
 void Application::Cleanup() {
@@ -280,10 +278,15 @@ void Application::Update()
         // Update entity
         EntityManager::getInstance().update(state);
 
+		// Update entity particle system
+		ParticleSystemManager::getInstance().updateState(state);
+
         // Check for special case of GameState update
         if (state->type == ENTITY_STATE)
         {
             auto gameState = std::static_pointer_cast<GameState>(state);
+
+			_serverEntityCount = gameState->entityCount;
 
 			// Update client-side state and UI
             // Timer, winner of game, in lobby, etc
@@ -306,7 +309,9 @@ void Application::Update()
 			if (_inLobby && !gameState->inLobby)
 			{
 				_inLobby = false;
+				_gameLoaded = false;
 				GuiManager::getInstance().getWidget(WIDGET_LOBBY)->setVisible(false);
+				GuiManager::getInstance().getWidget(WIDGET_OPTIONS)->setVisible(false);
 				GuiManager::getInstance().setReadyEnabled(true);
 				GuiManager::getInstance().setSwitchEnabled(true);
 
@@ -346,6 +351,10 @@ void Application::Update()
 				// Deallocate world objects
 				EntityManager::getInstance().clearAll();
 				ColliderManager::getInstance().clear();
+				ParticleSystemManager::getInstance().clear();
+
+				// Stop playing sounds
+				AudioManager::getInstance().reset();
 
 				// Set localPlayer's _playerEntity to null
 				_localPlayer->unpairEntity();
@@ -448,7 +457,9 @@ void Application::Update()
 	  _networkClient->closeConnection();
 	  EntityManager::getInstance().clearAll();
 	  InputManager::getInstance().reset();
+	  AudioManager::getInstance().reset();
 	  ColliderManager::getInstance().clear();
+	  ParticleSystemManager::getInstance().clear();
 	  GuiManager::getInstance().hideAll();
 	  GuiManager::getInstance().setVisibility(WIDGET_CONNECT, true);
 
@@ -462,12 +473,14 @@ void Application::Update()
   if (_localPlayer) {
       _localPlayer->update();
   }
+
+  // Update particle system physics
+  ParticleSystemManager::getInstance().updatePhysics(0.016f);
     
   // Update sound engine
   AudioManager::getInstance().update();
     
   _camera->Update();
-  _point_light->update();
 }
 
 void Application::Draw() {
@@ -494,6 +507,9 @@ void Application::Draw() {
 		  // Render floor before any entity
 		  CFloorEntity::getInstance().render(_localPlayer->getCamera());
 
+          // Render particles
+		  ParticleSystemManager::getInstance().render(_localPlayer->getCamera());
+
 		  EntityManager::getInstance().render(_localPlayer->getCamera());
 
 		  // Debug Shader
@@ -511,6 +527,24 @@ void Application::Draw() {
 
   // Finish drawing scene
   glFinish();
+
+  // If we rendered all the server entities, send a gameReady event
+  if (!_gameLoaded && !_inLobby &&
+	  EntityManager::getInstance().getEntityCount() >= _serverEntityCount) {
+	  auto readyEvent = std::make_shared<GameEvent>();
+	  readyEvent->type = EVENT_CLIENT_READY;
+	  readyEvent->playerId = _localPlayer->getPlayerId();
+	  try {
+		  _networkClient->sendEvent(readyEvent);
+	  }
+	  catch (std::runtime_error e) {};
+
+	  _gameLoaded = true;
+
+	  // Trigger a manual resize
+	  auto screen = GuiManager::getInstance().getScreen();
+	  StaticResize(_window, screen->size().x(), screen->size().y());
+  }
 }
 
 void Application::Reset() {

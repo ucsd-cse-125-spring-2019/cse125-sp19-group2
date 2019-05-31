@@ -373,24 +373,25 @@ void GuiManager::hideAll() {
 /*** Private functions ***/
 void GuiManager::initConnectScreen() {
 	auto connectScreen = createWidget(_screen, WIDGET_CONNECT);
+    auto bg = LoadTextureFromFile("background.png", "./Resources/Textures/Menu/");
     connectScreen->setVisible(false);
+    connectScreen->alpha = 1.0;
+    connectScreen->setBackgroundTexture(bg, 0, 0);
+    connectScreen->drawBackground = true;
 
 	// Resize handles margins, 50 pixel spacing
 	auto connectLayout = new nanogui::BoxLayout(nanogui::Orientation::Vertical, nanogui::Alignment::Middle, 0, 25);
 	connectScreen->setLayout(connectLayout);
 
 	// Game title
-	auto gameTitle = new nanogui::Label(connectScreen, "Project Bone", "sans", 72);
+	auto gameTitle = new nanogui::Label(connectScreen, " ", "sans", 125);
 
 	// Player name
 	_playerNameBox = new nanogui::TextBox(connectScreen, "PlayerName");
 	_playerNameBox->setEditable(true);
 	_playerNameBox->setFontSize(38);
+	_playerNameBox->setTextColor(nanogui::Color(233, 113, 136, 255));
 	_playerNameBox->setAlignment(nanogui::TextBox::Alignment::Center);
-
-    auto background = LoadTextureFromFile("1.jpg", "./Resources/Textures/Menu/");
-    	auto foreground1 = LoadTextureFromFile("2.jpg", "./Resources/Textures/Menu/");
-    	auto foreground2 = LoadTextureFromFile("3.jpg", "./Resources/Textures/Menu/");
     	//_playerNameBox->setBackgroundTexture(background, foreground1, foreground2);
     	//_playerNameBox->alpha = 0.5;
         //_playerNameBox->setTextColor(nanogui::Color(0, 0, 255, 255));
@@ -399,19 +400,24 @@ void GuiManager::initConnectScreen() {
 	_addressBox = new nanogui::TextBox(connectScreen, "localhost");
 	_addressBox->setEditable(true);
 	_addressBox->setFontSize(38);
+	_addressBox->setTextColor(nanogui::Color(233, 113, 136, 255));
 	_addressBox->setAlignment(nanogui::TextBox::Alignment::Center);
 
 	// Connect button
-	_connectButton = new nanogui::Button(connectScreen, "Connect");
+	_connectButton = new nanogui::Button(connectScreen, " ");
 	_connectButton->setFontSize(28);
-	
-    	auto unfocused = LoadTextureFromFile("1.jpg", "./Resources/Textures/Menu/");
-    	auto focused = LoadTextureFromFile("2.jpg", "./Resources/Textures/Menu/");
-    	auto pushed = LoadTextureFromFile("3.jpg", "./Resources/Textures/Menu/");
-    	_connectButton->setBackgroundTexture(unfocused, focused, pushed);
-    	_connectButton->alpha = 0.5;
-    	_connectButton->setTheme(new nanogui::Theme(_screen->nvgContext()));
-    	_connectButton->theme()->mTextColor = nanogui::Color(0, 0, 255, 255);
+	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+    auto unfocused = LoadTextureFromFile("connect.png", "./Resources/Textures/Menu/");
+    auto focused = LoadTextureFromFile("connectfocused.png", "./Resources/Textures/Menu/");
+    auto pushed = LoadTextureFromFile("connectpushed.png", "./Resources/Textures/Menu/");
+    _connectButton->setBackgroundTexture(unfocused, focused, pushed);
+    _connectButton->alpha = 1;
+    _connectButton->setTheme(new nanogui::Theme(_screen->nvgContext()));
+    _connectButton->theme()->mTextColor = nanogui::Color(0, 0, 255, 255);
+	_connectButton->theme()->mTextColorShadow = nanogui::Color(0, 0, 0, 0);
+	_connectButton->setFixedHeight(40);
+	_connectButton->setFixedWidth(100);
+		
 }
 
 void GuiManager::initLobbyScreen() {

@@ -58,6 +58,30 @@ struct BaseState
 	// Whether or not the object can be passed through
 	bool isSolid;
 
+	// Self-explanatory
+	bool isVisible;
+
+	// Serialization for Cereal
+	template<class Archive>
+	void serialize(Archive & archive)
+	{
+		archive(type,
+				id,
+				pos,
+				up,
+				forward,
+				scale,
+				width,
+				depth,
+				height,
+				colliderType,
+				transparency,
+				isDestroyed,
+				isStatic,
+				isSolid,
+				isVisible);
+	};
+
 	bool getSolidity(BaseState* entity)
 	{
 		if (solidFunc == 0)
@@ -77,25 +101,7 @@ struct BaseState
 
 	std::function<bool(BaseState* entity, BaseState* collidingEntity)> solidFunc = 0;
 
-	// Serialization for Cereal
-	template<class Archive>
-	void serialize(Archive & archive)
-	{
-		archive(type,
-				id,
-				pos,
-				up,
-				forward,
-				scale,
-				width,
-				depth,
-				height,
-				colliderType,
-				transparency,
-				isDestroyed,
-				isStatic,
-				isSolid);
-	};
+
 
 	virtual void print()
 	{

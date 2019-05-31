@@ -3,7 +3,8 @@
 SDogEntity::SDogEntity(
 	uint32_t playerId,
 	std::string playerName,
-	StructureInfo* structureInfo)
+	StructureInfo* structureInfo,
+	int skinID)
 {
 	_structureInfo = structureInfo;
 
@@ -31,15 +32,21 @@ SDogEntity::SDogEntity(
 
 	// Player-specific stuff
 	dogState->playerName = playerName;
+	dogState->skinID = skinID;
 }
 
 void SDogEntity::update(std::vector<std::shared_ptr<GameEvent>> events)
 {
-	isCaught = false;
 	if (!_isInteracting)
 	{
 		_nearTrigger = false;
 		_nearFountain = false;
+	}
+
+	// Dogs cannot clear trap bones from the jail
+	if (isCaught)
+	{
+		_isTrapped = false;
 	}
 
 	auto dogState = std::static_pointer_cast<DogState>(_state);
@@ -48,7 +55,7 @@ void SDogEntity::update(std::vector<std::shared_ptr<GameEvent>> events)
 	if (dogState->runStamina < MAX_DOG_STAMINA)
 	{
 		// Four seconds to charge 1 second of sprinting
-		dogState->runStamina += 1.0f / 3 / TICKS_PER_SEC;
+		dogState->runStamina += 1.0f / 4 / TICKS_PER_SEC;
 		hasChanged = true;
 	}
 	else
@@ -92,16 +99,17 @@ void SDogEntity::update(std::vector<std::shared_ptr<GameEvent>> events)
 				if (_isTrapped)
 				{
 					_numEscapePressed++;
-				}
 
-				// Mark player as no longer trapped if we reach the max
-				if (_numEscapePressed >= MAX_DOG_ESCAPE_PRESSES)
-				{
-					_numEscapePressed = 0;
-					_isTrapped = false;
-					_isInterpolating = false;
-					_curTrap->getState()->isDestroyed = true;
-					_curTrap = nullptr;
+					// Mark player as no longer trapped if we reach the max
+					if (_numEscapePressed >= MAX_DOG_ESCAPE_PRESSES)
+					{
+						_numEscapePressed = 0;
+						_isTrapped = false;
+						_isInterpolating = false;
+						_curTrap->getState()->isDestroyed = true;
+						_curTrap->hasChanged = true;
+						_curTrap = nullptr;
+					}
 				}
 				break;
 			case EVENT_PLAYER_INTERACT_END:
@@ -137,10 +145,10 @@ void SDogEntity::update(std::vector<std::shared_ptr<GameEvent>> events)
 			hasChanged = true;
 		}
 		if (_isRunning) {
-			if (dogState->runStamina >= 1.0f / TICKS_PER_SEC)
+			if (dogState->runStamina >= 1.5f / TICKS_PER_SEC)
 			{
 				_velocity = DOG_RUN_VELOCITY;
-				dogState->runStamina -= 1.0f / TICKS_PER_SEC;
+				dogState->runStamina -= 1.5f / TICKS_PER_SEC;
 			}
 			else {
 				dogState->runStamina = 0;
@@ -178,11 +186,11 @@ void SDogEntity::update(std::vector<std::shared_ptr<GameEvent>> events)
 			dogState->currentAnimation = ANIMATION_DOG_RUNNING;
 			interpolateMovement(dest, glm::normalize(targetPos - _state->pos), DOG_BASE_VELOCITY / 2,
 				[&] {
-				// Stage 1: start scratching animation and lifting the gate
-				actionStage++;
-				dogState->currentAnimation = ANIMATION_DOG_SCRATCHING;
-				hasChanged = true;
-			});
+					// Stage 1: start scratching animation and lifting the gate
+					actionStage++;
+					dogState->currentAnimation = ANIMATION_DOG_SCRATCHING;
+					hasChanged = true;
+				});
 		}
 		break;
 	case ACTION_DOG_DRINKING:
@@ -210,21 +218,120 @@ void SDogEntity::update(std::vector<std::shared_ptr<GameEvent>> events)
 		}
 		break;
 	case ACTION_DOG_TRAPPED:
+		// Update dog's message
+		dogState->message = "Escape (Left click / A) [" +
+			std::to_string(_numEscapePressed) + "/" +
+			std::to_string(MAX_DOG_ESCAPE_PRESSES) + "]";
+		hasChanged = true;
+
 		if (actionChanged) {
-			// Replace with walking animation
-			dogState->currentAnimation = ANIMATION_DOG_RUNNING;
+			dogState->currentAnimation = ANIMATION_DOG_WALKING;
 
 			// Interpolate to trap
 			interpolateMovement(_curTrap->getState()->pos, _state->forward, DOG_BASE_VELOCITY / 10,
 				[&]() {
 					// Switch to idle
-					dogState->currentAnimation = ANIMATION_DOG_IDLE;
+					dogState->currentAnimation = ANIMATION_DOG_EATING;
 					hasChanged = true;
 				});
 		}
+		break;
+	case ACTION_DOG_JAILED:
+		isCaught = true;
+		if (actionChanged)
+		{
+			// Make dog invisible and non-solid
+			_state->isSolid = false;
+			_state->transparency = 0.0f;
+
+			// Interpolate to jail
+			interpolateMovement(
+				_targetJailPos,
+				_state->forward,
+				DOG_TELEPORT_VELOCITY,
+				[&]()
+				{
+					// On finish, revert dog properties
+					_state->isSolid = true;
+					_state->transparency = 1.0f;
+					_isJailed = false;
+				},
+				0,
+				false /* Disable interp interrupt */);
+		}
+		break;
+	case ACTION_DOG_TELEPORTING:
+		if (actionChanged)
+		{
+			// TODO: force camera to move
+
+			// Play digging animation first
+			dogState->currentAnimation = ANIMATION_DOG_DIGGING_IN;
+			dogState->isPlayOnce = true;
+			dogState->animationDuration = 300;
+			hasChanged = true;
+			
+			// Timer until dog digging end
+			registerTimer(300, [&]()
+				{
+					if (_curAction == ACTION_DOG_TELEPORTING)
+					{
+						hasChanged = true;
+						_state->isSolid = false;
+						_state->transparency = 0.0f;
+						actionStage++;
+					}
+				});
+		}
+
+		// stage 1: interpolate dog
+		if (actionStage == 1)
+		{
+			interpolateMovement(
+				_targetDoghousePos,
+				_targetDoghouseDir,
+				DOG_TELEPORT_VELOCITY,
+				[&]()
+				{
+					// On finish, move to stage 2
+					actionStage++;
+				},
+				0,
+				false /* Do not allow interrupt */);
+		}
+
+		// stage 2: digging up animation
+		if (actionStage == 2)
+		{
+			// TODO: force camera to move
+
+			dogState->currentAnimation = ANIMATION_DOG_DIGGING_OUT;
+			dogState->isPlayOnce = true;
+			dogState->animationDuration = 100;
+
+			_state->isSolid = true;
+			_state->transparency = 1.0f;
+			_state->forward = -(_targetDoghouseDir);
+			hasChanged = true;
+
+			// Timer until digging end
+			registerTimer(400, [&]()
+				{
+					_isTeleporting = false;
+				});
+		}
+		break;
 	}
 
 	handleInterpolation();
+
+	// Reset state handled by collision logic
+	_isTrapped = false;
+
+	if (_curAction != ACTION_DOG_JAILED)
+	{
+		isCaught = false;
+	}
 }
 
 void SDogEntity::generalHandleCollision(SBaseEntity * entity)
@@ -238,21 +345,30 @@ void SDogEntity::generalHandleCollision(SBaseEntity * entity)
 	// Dog getting caught is handled by the dog, not the human
 	if (entity->getState()->type == ENTITY_NET &&
 		!isCaught &&
-		!_structureInfo->gameState->gameOver)
+		!_structureInfo->gameState->gameOver &&
+		_state->isSolid)
 	{
-		// Teleport to a random jail
+		// Send to a random jail
 		unsigned int seed = (unsigned int)std::chrono::system_clock::now().time_since_epoch().count();
 		std::shuffle(
 			_structureInfo->jailsPos->begin(),
 			_structureInfo->jailsPos->end(),
 			std::default_random_engine(seed));
 		glm::vec2 jailPos = (*(_structureInfo->jailsPos))[0];
-		getState()->pos = glm::vec3(jailPos.x, 0, jailPos.y);
+		_targetJailPos = glm::vec3(jailPos.x, 0, jailPos.y);
+		_isJailed = true;
 	}
 	else if (entity->getState()->type == ENTITY_BONE)
 	{
-		// Refill dog stamina
-		dogState->runStamina = MAX_DOG_STAMINA;
+		// Refill dog stamina by 25%
+		if (dogState->runStamina < MAX_DOG_STAMINA)
+		{
+			dogState->runStamina += MAX_DOG_STAMINA / 4.0f;
+		}
+		else
+		{
+			dogState->runStamina = MAX_DOG_STAMINA;
+		}
 		hasChanged = true;
 
 		// Remove dog bone
@@ -262,11 +378,9 @@ void SDogEntity::generalHandleCollision(SBaseEntity * entity)
 	else if (entity->getState()->type == ENTITY_TRAP)
 	{
 		// Mark dog as trapped if not yet slated for destruction
+		// and dog is not in the jail
 		if (!entity->getState()->isDestroyed)
 		{
-			dogState->message = "Escape (Left click / A) [" +
-				std::to_string(_numEscapePressed) + "/" +
-				std::to_string(MAX_DOG_ESCAPE_PRESSES) + "]";
 			_curTrap = entity;
 			_isTrapped = true;
 		}
@@ -287,12 +401,15 @@ bool SDogEntity::updateAction()
 	DogAction oldAction = _curAction;
 
 	// lower the priority of action if possible
-	if (_curAction == ACTION_DOG_PEEING && !_isUrinating ||
+	if (_curAction == ACTION_DOG_JAILED && !_isJailed ||
+		_curAction == ACTION_DOG_PEEING && !_isUrinating ||
 		_curAction == ACTION_DOG_DRINKING && !_isInteracting ||
 		_curAction == ACTION_DOG_SCRATCHING && !_isInteracting ||
-		_curAction == ACTION_DOG_TRAPPED && !_isTrapped)
+		_curAction == ACTION_DOG_TRAPPED && !_isTrapped ||
+		_curAction == ACTION_DOG_TELEPORTING && !_isTeleporting)
 	{
 		_curAction = ACTION_DOG_IDLE;
+		_isInterpolating = false;
 	}
 
 	// all other actions has higher priority than idle and moving
@@ -305,6 +422,13 @@ bool SDogEntity::updateAction()
 		else if (_isInteracting && _nearTrigger) _curAction = ACTION_DOG_SCRATCHING;
 		else if (_isInteracting && _nearFountain) _curAction = ACTION_DOG_DRINKING;
 		else if (_isTrapped) _curAction = ACTION_DOG_TRAPPED;
+		else if (_isTeleporting) _curAction = ACTION_DOG_TELEPORTING;
+	}
+
+	// Dog being jailed takes absolute precedence
+	if (_isJailed && !isCaught && _state->isSolid)
+	{
+		_curAction = ACTION_DOG_JAILED;
 	}
 
 	return oldAction != _curAction;

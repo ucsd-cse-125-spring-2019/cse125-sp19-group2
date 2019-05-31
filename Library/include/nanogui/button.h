@@ -128,11 +128,8 @@ public:
 
     /// Sets the state of this Button provided the given Serializer.
     virtual bool load(Serializer &s) override;
-
-  virtual void setBackgroundTexture(uint32_t unfocused, uint32_t focused, uint32_t pushed);
-
-  float alpha = 0.8;
-
+    virtual void setBackgroundTexture(uint32_t bg0, uint32_t bg1, uint32_t bg2) override;
+   
 protected:
     /// The caption of this Button.
     std::string mCaption;
@@ -174,13 +171,7 @@ protected:
     /// The button group for radio buttons.
     std::vector<Button *> mButtonGroup;
 
-  // hack
-    uint32_t backgroundTextureUnfocused = 0;
-    uint32_t backgroundTextureFocused = 0;
-    uint32_t backgroundTexturePushed = 0;
-  ImageView* _image;
-  //Window* _iwindow;
-  bool initialized = false;
+  
 
 public:
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW

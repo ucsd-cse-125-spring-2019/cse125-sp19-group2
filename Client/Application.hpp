@@ -15,7 +15,6 @@
 #include "Model.hpp"
 #include "Skybox.hpp"
 #include "LocalPlayer.hpp"
-#include "PointLight.hpp"
 #include "DirectionalLight.hpp"
 #include "AnimatedMesh.hpp"
 #include "Animation.hpp"
@@ -111,11 +110,17 @@ private:
   bool _inCountdown = false;
   bool _startHidden = false;
 
+  // Used to tell that the client has loaded the game 
+  bool _gameLoaded = false;
+  int _serverEntityCount = 0;
+
   // Time when pregame countdown ended
   std::chrono::time_point<std::chrono::steady_clock> _countdownEnd;
 
+  // Background music source
+  AudioSource* _bgm = nullptr;
+
   // Test Lights
-  std::unique_ptr<PointLight> _point_light;
   std::unique_ptr<DirectionalLight> _dir_light;
 
     // Test UI

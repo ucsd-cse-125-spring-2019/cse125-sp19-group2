@@ -4,7 +4,8 @@
 SHumanEntity::SHumanEntity(
 	uint32_t playerId,
 	std::string playerName,
-	StructureInfo* structureInfo)
+	StructureInfo* structureInfo,
+	int skinID)
 {
 	_structureInfo = structureInfo;
 
@@ -32,6 +33,7 @@ SHumanEntity::SHumanEntity(
 	humanState->playerName = playerName;
 	humanState->plungerCooldown = 0;
 	humanState->trapCooldown = 0;
+	humanState->skinID = skinID;
 
 	// Plunger finish handler
 	_launchingReset = [&] {
@@ -45,11 +47,13 @@ SHumanEntity::SHumanEntity(
 		if (plungerEntity != nullptr)
 		{
 			plungerEntity->getState()->isDestroyed = true;
+			plungerEntity->hasChanged = true;
 			plungerEntity = nullptr;
 		}
 		if (ropeEntity != nullptr)
 		{
 			ropeEntity->getState()->isDestroyed = true;
+			ropeEntity->hasChanged = true;
 			ropeEntity = nullptr;
 		}
 	};
@@ -58,6 +62,7 @@ SHumanEntity::SHumanEntity(
 		if (netEntity != nullptr)
 		{
 			netEntity->getState()->isDestroyed = true;
+			netEntity->hasChanged = true;
 			netEntity = nullptr;
 		}
 	};
@@ -156,22 +161,35 @@ void SHumanEntity::update(std::vector<std::shared_ptr<GameEvent>> events)
 		break;
 	case ACTION_HUMAN_LAUNCHING:
 		if (actionChanged) {
+			_launchCanStop = false;
 			_state->forward = _plungerDirection;
 			humanState->currentAnimation = ANIMATION_HUMAN_SHOOT;
+			humanState->isPlayOnce = true;
+			humanState->animationDuration = 450;
 			hasChanged = true;
 			// Timer until shooting animation end
-			registerTimer(360, [&]()
+			registerTimer(450, [&]()
 			{
-				humanState->currentAnimation = ANIMATION_HUMAN_IDLE_LAUNCHER;
-				hasChanged = true;
-				actionStage++;
+				if (_curAction == ACTION_HUMAN_LAUNCHING)
+				{
+					hasChanged = true;
+					actionStage++;
+				}
+			});
+			registerTimer(500, [&]()
+			{
+				_launchCanStop = true;
+				if (!_isLaunching)
+				{
+					_launchingReset();
+				}
 			});
 		}
 
 		// stage 1: create plunger entity and wait until it hit the wall
 		if (actionStage == 1) {
 			if (plungerEntity == nullptr) {
-				plungerEntity = std::make_shared<SPlungerEntity>(_state->pos, _state->forward);
+				plungerEntity = std::make_shared<SPlungerEntity>(_state->pos + _state->forward * 0.4f, _state->forward);
 				_structureInfo->newEntities->push_back(plungerEntity);
 			}
 			if (ropeEntity == nullptr) {
@@ -188,7 +206,7 @@ void SHumanEntity::update(std::vector<std::shared_ptr<GameEvent>> events)
 			humanState->currentAnimation = ANIMATION_HUMAN_FLYING;
 			hasChanged = true;
 			glm::vec3 plungerTailPos = plungerEntity->getState()->pos + glm::normalize(plungerEntity->getState()->forward) * -0.675f;
-			interpolateMovement(plungerTailPos, plungerEntity->getState()->forward, 20.0f,
+			interpolateMovement(plungerTailPos, plungerEntity->getState()->forward, HUMAN_FLY_VELOCITY,
 				_launchingReset, _launchingReset, false);
 			actionStage++;
 		}
@@ -228,7 +246,6 @@ void SHumanEntity::update(std::vector<std::shared_ptr<GameEvent>> events)
 		break;
 	case ACTION_HUMAN_SWINGING:
 		if (actionChanged) {
-
 			float chargeDistance = humanState->chargeMeter * 3.0f;
 			float chargeDuration = chargeDistance / HUMAN_SWING_VELOCITY;
 			stuntDuration = (chargeDistance / HUMAN_BASE_VELOCITY - chargeDistance / HUMAN_SWING_VELOCITY + 0.2f) * 1250;
@@ -366,7 +383,7 @@ bool SHumanEntity::updateAction()
 	HumanAction oldAction = _curAction;
 
 	// lower the priority of action if possible
-	if (_curAction == ACTION_HUMAN_LAUNCHING && !_isLaunching ||
+	if (_curAction == ACTION_HUMAN_LAUNCHING && !_isLaunching && _launchCanStop ||
 		_curAction == ACTION_HUMAN_SLIPPING && !_isSlipping ||
 		_curAction == ACTION_HUMAN_SWINGING && !_isSwinging ||
 		_curAction == ACTION_HUMAN_PLACING_TRAP && !_isPlacingTrap)
@@ -390,6 +407,12 @@ bool SHumanEntity::updateAction()
 	if (!_curAction == ACTION_HUMAN_SWINGING)
 	{
 		_isSwinging = false;
+	}
+
+	// Reset slipping
+	if (_curAction != ACTION_HUMAN_SLIPPING)
+	{
+		_isSlipping = false;
 	}
 
 	return oldAction != _curAction;

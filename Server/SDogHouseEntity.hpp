@@ -100,19 +100,20 @@ public:
 							}
 						}
 
+						SDogEntity* dogEntity = static_cast<SDogEntity*>(collidingEntity);
+
 						// Teleport to this house
-						collidingEntity->getState()->pos = house->getState()->pos;
+						dogEntity->setTeleporting(true);
+						dogEntity->setSourceDoghouseDir(_state->forward);
+						dogEntity->setTargetDoghousePos(house->getState()->pos);
+						dogEntity->setTargetDoghouseDir(house->getState()->forward);
+						dogEntity->getState()->pos = _state->pos;
+						dogEntity->getState()->forward = _state->forward;
 
 						// Reset cooldowns
 						_cooldowns.insert({ collidingEntity->getState()->id, std::chrono::steady_clock::now() });
 						castHouse->_cooldowns.insert({ collidingEntity->getState()->id, std::chrono::steady_clock::now() });
 
-						// Set source house as non-solid for next tick
-						SPlayerEntity* dogEntity = static_cast<SPlayerEntity*>(collidingEntity);
-						for (auto& wall : _walls)
-						{
-							wall->getState()->isSolid = false;
-						}
 						break;
 					}
 				}
@@ -126,7 +127,11 @@ public:
 
 		_children.push_back(std::make_shared<SBoxPlungerEntity>(pos, glm::vec3(1.0f, 1.2f, 1.0f)));
 	};
-	~SDogHouseEntity() {};
+
+	~SDogHouseEntity()
+	{
+		_children.clear();
+	};
 
 	// Reset solidity of doghouse walls
 	void update(std::vector<std::shared_ptr<GameEvent>> events) override

@@ -259,6 +259,10 @@ public:
     virtual bool load(Serializer &s);
     
     Widget* passthrough = nullptr;
+    virtual void setBackgroundTexture(uint32_t bg0, uint32_t bg1, uint32_t bg2);
+    float alpha = 0.8f;
+  bool drawBackground = false;
+
 protected:
     /// Free all resources used by the widget and any children
     virtual ~Widget();
@@ -282,7 +286,16 @@ protected:
     std::string mId;
     Vector2i mPos, mSize, mFixedSize;
     std::vector<Widget *> mChildren;
-    
+
+
+    // hack
+    uint32_t backgroundTextureUnfocused = 0;
+    uint32_t backgroundTextureFocused = 0;
+    uint32_t backgroundTexturePushed = 0;
+  ImageView* _image = nullptr;
+  //Window* _iwindow;
+  bool initialized = false;
+
     /**
      * Whether or not this Widget is currently visible.  When a Widget is not
      * currently visible, no time is wasted executing its drawing method.
