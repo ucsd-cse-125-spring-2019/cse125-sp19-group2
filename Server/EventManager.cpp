@@ -345,6 +345,11 @@ void EventManager::startGame()
 		_gameState->clientReadyCount = 0;
 		_gameState->waitingForClients = true;
 	}
+	else
+	{
+		// Otherwise we are in debug mode
+		_gameState->debugMode = true;
+	}
 
 	// Optimization: remove all tile entities from the server map
 	for (auto& entityPair : *_structureInfo->entityMap)

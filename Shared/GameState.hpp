@@ -17,6 +17,7 @@ struct GameState : public BaseState
 	int entityCount;	// Used by client to determine if the player's world is rendered
 	bool waitingForClients;	// Whether all the clients have fully rendered the game
 	int clientReadyCount;	// Number of clients who have fully rendered the game
+	bool debugMode;
 	bool gameStarted;
 	bool gameOver;
 	bool inLobby;
@@ -37,6 +38,7 @@ struct GameState : public BaseState
 			entityCount,
 			waitingForClients,
 			clientReadyCount,
+			debugMode,
 			gameStarted,
 			gameOver,
 			inLobby,

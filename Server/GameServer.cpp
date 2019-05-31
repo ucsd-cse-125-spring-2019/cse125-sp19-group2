@@ -265,6 +265,7 @@ void GameServer::resetGameState()
 	_gameState->entityCount = 0;
 	_gameState->waitingForClients = false;
 	_gameState->clientReadyCount = 0;
+	_gameState->debugMode = false;
 	_gameState->gameStarted = false;
 	_gameState->gameOver = false;
 	_gameState->inLobby = true;
