@@ -446,7 +446,6 @@ void Application::Update()
 
 			// Update countdown timer
 			GuiManager::getInstance().updateTimer(gameState->millisecondsLeft);
-			_localPlayer->getCompassDirection(glm::vec3(30, 0, -0.75));
 			_inLobby = gameState->inLobby;
         }
     }

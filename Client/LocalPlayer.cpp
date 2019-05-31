@@ -4,6 +4,7 @@
 #include "EntityManager.hpp"
 #include "AudioManager.hpp"
 #include <glm/gtx/string_cast.hpp>
+const double M_PI = 3.14;
 
 LocalPlayer::LocalPlayer(uint32_t playerId, std::unique_ptr<NetworkClient> const& networkClient) {
     _playerId = playerId;
@@ -494,19 +495,23 @@ void LocalPlayer::resize(int x, int y) {
 	_camera->resize(x, y);
 }
 
-void LocalPlayer::getCompassDirection(glm::vec3 pos){
-	Logger::getInstance()->debug("Po x:" + std::to_string(pos.x) + "Po y: " + std::to_string(pos.y) + "Po z: " + std::to_string(pos.z));
+float LocalPlayer::getCompassDirection(glm::vec3 pos){
 	if (_playerEntity)
 	{
+		// first get player position
 		auto playerPos = _playerEntity->getState()->pos;
-		//Logger::getInstance()->debug("P x:" + std::to_string(playerPos.x) + "P y: " + std::to_string(playerPos.y) + "P z: " + std::to_string(playerPos.z));
+		// get the distance vector between given pos and player position
 		glm::vec3 distance(pos.x - playerPos.x, pos.y - playerPos.y, pos.z - playerPos.z);
+		// get camera position
 		auto cameraPos = _camera->position();
-		//Logger::getInstance()->debug("x:" + std::to_string(cameraPos.x) + " y: " + std::to_string(cameraPos.y));
-		glm::vec3 result = glm::normalize(cameraPos - playerPos);
-		
-
+		// x1 is distance.x, y1 is distance.z, x2 is cameraPos.x, y2 is cameraPos.z
+		auto dot = distance.x * cameraPos.x + distance.z * cameraPos.z;      // dot product between[x1, y1] and [x2, y2]
+		auto det = distance.x * cameraPos.z - distance.z * cameraPos.x;      // determinant
+		// this is the angle in rad
+		auto angle = std::atan2(det, dot);  // atan2(y, x) or atan2(sin, cos)
+		// convert it to degree
+		const double halfC = 180 / M_PI ;
+		return angle * halfC;
 	}
-
-	//auto currentPos = _playerEntity->getState()->pos;
+	return 0;
 }

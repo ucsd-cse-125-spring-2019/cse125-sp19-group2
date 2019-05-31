@@ -88,5 +88,5 @@ public:
      */
     void resize(int x, int y);
 
-	void getCompassDirection(glm::vec3 pos);
+	float getCompassDirection(glm::vec3 pos);
 };
