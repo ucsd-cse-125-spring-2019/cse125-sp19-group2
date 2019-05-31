@@ -150,6 +150,7 @@ private:
 
 	// Lobby screen
 	nanogui::Button* _switchSidesButton;
+	nanogui::Label* _lobbyPadding;
 	nanogui::Button* _readyButton;
 	nanogui::Label* _readyLabel;
 
