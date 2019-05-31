@@ -354,7 +354,7 @@ void SDogEntity::update(std::vector<std::shared_ptr<GameEvent>> events)
 
 			dogState->currentAnimation = ANIMATION_DOG_WALKING;
 			interpolateMovement(
-				_targetDoghousePos - _targetDoghouseDir * 1.5f,
+				_targetDoghousePos - _targetDoghouseDir,
 				-_targetDoghouseDir,
 				DOG_BASE_VELOCITY / 2,
 				[&]()

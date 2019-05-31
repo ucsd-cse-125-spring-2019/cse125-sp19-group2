@@ -61,10 +61,21 @@ public:
 		rightWall->rotate(rightWall->getState()->pos, 1);
 		_walls.push_back(rightWall);
 
+		// Front wall, has variable solidity
+		auto frontWall = std::make_shared<SBoxEntity>(
+			glm::vec3(pos.x, 0, pos.z + backOffset),
+			glm::vec3(_state->width - DOGHOUSE_WALL_WIDTH * 2, _state->height, DOGHOUSE_WALL_WIDTH));
+		frontWall->getState()->transparency = 0.0f;
+		frontWall->getState()->setSolidity([&](BaseState* entity, BaseState* collidingEntity)
+		{
+			return false;
+		});
+		_walls.push_back(frontWall);
+
 		// Sensor for dogs. Performs actual logic on the doghouse
 		auto sensorBox = std::make_shared<SBoxEntity>(
-			glm::vec3(pos.x, 0, pos.z + _state->depth / 2),
-			glm::vec3(_state->width - DOGHOUSE_WALL_WIDTH * 2, 0.5, _state->depth * 0.10));
+			glm::vec3(pos.x, 0, pos.z + _state->depth / 4),
+			glm::vec3(_state->width - DOGHOUSE_WALL_WIDTH * 2, 0.5, _state->depth * 0.2));
 		sensorBox->getState()->transparency = 0.0f;
 		sensorBox->getState()->isSolid = false;
 		
@@ -122,6 +133,7 @@ public:
 		_children.push_back(backWall);
 		_children.push_back(leftWall);
 		_children.push_back(rightWall);
+		_children.push_back(frontWall);
 		_children.push_back(sensorBox);
 
 		_children.push_back(std::make_shared<SBoxPlungerEntity>(pos, glm::vec3(1.0f, 1.2f, 1.0f)));
