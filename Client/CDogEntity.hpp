@@ -28,6 +28,14 @@ public:
 		_runningSound = AudioManager::getInstance().getAudioSource("dog running" + std::to_string(id));
 		_runningSound->init("Resources/Sounds/dog_running.wav", true, true);
 		_runningSound->setVolume(0.2f);
+
+		_drinkingSound = AudioManager::getInstance().getAudioSource("dog drinking" + std::to_string(id));
+		_drinkingSound->init("Resources/Sounds/dog_drinking.wav", true, true);
+		_drinkingSound->setVolume(0.3f);
+
+		_peeingSound = AudioManager::getInstance().getAudioSource("dog peeing" + std::to_string(id));
+		_peeingSound->init("Resources/Sounds/dog_peeing.wav", true, true);
+		_peeingSound->setVolume(0.1f);
     };
     ~CDogEntity() {};
 
@@ -42,10 +50,20 @@ public:
 		/** Sounds **/
 		_pantingSound->setPosition(_state->pos);
 		_runningSound->setPosition(_state->pos);
+		_drinkingSound->setPosition(_state->pos);
+		_peeingSound->setPosition(_state->pos);
 
 		// Panting
 		_pantingSound->play(newState->currentAnimation == ANIMATION_DOG_IDLE);
+
+		// Running
 		_runningSound->play(newState->currentAnimation == ANIMATION_DOG_RUNNING);
+
+		// Drinking
+		_drinkingSound->play(newState->currentAnimation == ANIMATION_DOG_DRINKING);
+
+		// Peeing
+		_peeingSound->play(newState->currentAnimation == ANIMATION_DOG_PEEING);
 
 		// Animation
 		currentState->currentAnimation = newState->currentAnimation;
@@ -76,5 +94,7 @@ public:
 protected:
 	AudioSource * _pantingSound;
 	AudioSource * _runningSound;
+	AudioSource * _drinkingSound;
+	AudioSource * _peeingSound;
 };
 
