@@ -596,11 +596,8 @@ void GuiManager::initControlMenu() {
 	_muteButton = new nanogui::Button(controlsWidget, "Mute All");
 	_muteButton->setCallback([&]()
 	{
-		FMOD::ChannelGroup* masterGroup;
-		AudioManager::getInstance().getSystem()->getMasterChannelGroup(&masterGroup);
-		bool isMuted;
-		masterGroup->getMute(&isMuted);
-		masterGroup->setMute(!isMuted);
+		bool isMuted = AudioManager::getInstance().getMute();
+		AudioManager::getInstance().setMute(!isMuted);
 		if (isMuted)
 		{
 			_muteButton->setCaption("Mute All");

@@ -325,7 +325,8 @@ void Application::Update()
 				_gameLoaded = false;
 			}
 			// If everything is loaded, hide loading screen and show HUD
-			else if (!_inLobby && !gameState->waitingForClients && gameState->pregameCountdown)
+			else if (!_inLobby && !gameState->waitingForClients && gameState->pregameCountdown &&
+				GuiManager::getInstance().getWidget(WIDGET_LOADING)->visible())
 			{
 				GuiManager::getInstance().getWidget(WIDGET_LOADING)->setVisible(false);
 				GuiManager::getInstance().setReadyEnabled(true);
