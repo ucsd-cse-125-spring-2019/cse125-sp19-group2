@@ -33,10 +33,13 @@ SDogEntity::SDogEntity(
 	// Player-specific stuff
 	dogState->playerName = playerName;
 	dogState->skinID = skinID;
+	dogState->isCaught = false;
 }
 
 void SDogEntity::update(std::vector<std::shared_ptr<GameEvent>> events)
 {
+	auto dogState = std::static_pointer_cast<DogState>(_state);
+
 	if (!_isInteracting)
 	{
 		_nearTrigger = false;
@@ -44,12 +47,10 @@ void SDogEntity::update(std::vector<std::shared_ptr<GameEvent>> events)
 	}
 
 	// Dogs cannot clear trap bones from the jail
-	if (isCaught)
+	if (dogState->isCaught)
 	{
 		_isTrapped = false;
 	}
-
-	auto dogState = std::static_pointer_cast<DogState>(_state);
 
 	// Refill a little stamina
 	if (dogState->runStamina < MAX_DOG_STAMINA)
@@ -238,7 +239,8 @@ void SDogEntity::update(std::vector<std::shared_ptr<GameEvent>> events)
 		}
 		break;
 	case ACTION_DOG_JAILED:
-		isCaught = true;
+		dogState->isCaught = true;
+		hasChanged = true;
 		if (actionChanged)
 		{
 			// Make dog invisible and non-solid
@@ -378,7 +380,7 @@ void SDogEntity::update(std::vector<std::shared_ptr<GameEvent>> events)
 
 	if (_curAction != ACTION_DOG_JAILED)
 	{
-		isCaught = false;
+		dogState->isCaught = false;
 	}
 }
 
@@ -392,7 +394,7 @@ void SDogEntity::generalHandleCollision(SBaseEntity * entity)
 
 	// Dog getting caught is handled by the dog, not the human
 	if (entity->getState()->type == ENTITY_NET &&
-		!isCaught &&
+		!dogState->isCaught &&
 		!_structureInfo->gameState->gameOver &&
 		_state->isSolid)
 	{
@@ -406,7 +408,7 @@ void SDogEntity::generalHandleCollision(SBaseEntity * entity)
 		_targetJailPos = glm::vec3(jailPos.x, 0, jailPos.y);
 		_isJailed = true;
 	}
-	else if (entity->getState()->type == ENTITY_BONE)
+	else if (entity->getState()->type == ENTITY_BONE && _state->isSolid)
 	{
 		// Refill dog stamina by 25%
 		if (dogState->runStamina < MAX_DOG_STAMINA)
@@ -480,7 +482,7 @@ bool SDogEntity::updateAction()
 	}
 
 	// Dog being jailed takes absolute precedence
-	if (_isJailed && !isCaught && _state->isSolid)
+	if (_isJailed && !dogState->isCaught && _state->isSolid)
 	{
 		_curAction = ACTION_DOG_JAILED;
 	}

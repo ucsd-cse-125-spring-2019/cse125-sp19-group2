@@ -65,7 +65,17 @@ public:
 		// Peeing
 		_peeingSound->play(newState->currentAnimation == ANIMATION_DOG_PEEING);
 
-		// Animation
+		// Yelping when caught
+		if (!currentState->isCaught && newState->isCaught)
+		{
+			auto yelpingSound = AudioManager::getInstance().getAudioSource("dog yelping" + std::to_string(_state->id));
+			yelpingSound->init("Resources/Sounds/dog_yelping.wav", false, true);
+			yelpingSound->setPosition(_state->pos);
+			yelpingSound->setVolume(0.3f);
+			yelpingSound->play(true);
+		}
+
+		/** Animation **/
 		currentState->currentAnimation = newState->currentAnimation;
 
 		// Requires a cast
@@ -89,6 +99,8 @@ public:
 			GuiManager::getInstance().updateStamina(currentState->runStamina / MAX_DOG_STAMINA);
 			GuiManager::getInstance().updatePee(currentState->urineMeter / MAX_DOG_URINE);
 		}
+
+		currentState->isCaught = newState->isCaught;
 	}
 
 protected:

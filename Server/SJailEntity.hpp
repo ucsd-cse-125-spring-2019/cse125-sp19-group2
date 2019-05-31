@@ -213,8 +213,8 @@ public:
 		{
 			if (collidingEntity->getState()->type == ENTITY_DOG)
 			{
-				SDogEntity* collidingDog = static_cast<SDogEntity*>(collidingEntity);
-				collidingDog->isCaught = true;
+				DogState* dogState = static_cast<DogState*>(collidingEntity->getState().get());
+				dogState->isCaught = true;
 			}
 		});
 		_children.push_back(jailSensorBox);

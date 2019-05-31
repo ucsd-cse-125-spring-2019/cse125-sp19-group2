@@ -167,7 +167,7 @@ void GameServer::updateGameState()
 		auto dog = _structureInfo->entityMap->find(dogId);
 		if (dog != _structureInfo->entityMap->end())
 		{
-			dogsCaught &= std::static_pointer_cast<SDogEntity>(dog->second)->isCaught;
+			dogsCaught &= std::static_pointer_cast<DogState>(dog->second->getState())->isCaught;
 		}
 	}
 

@@ -17,8 +17,6 @@ public:
 
 	~SDogEntity() {};
 
-	bool isCaught = false;
-
 	void update(std::vector<std::shared_ptr<GameEvent>> events) override;
 
 	void generalHandleCollision(SBaseEntity* entity) override;
