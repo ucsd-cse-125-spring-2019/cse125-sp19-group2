@@ -73,37 +73,52 @@ public:
      */
     void init(const std::unique_ptr<Shader>& shader);
 
-    void play(std::string newTake, bool withTransition = true) {
+    void play(std::string newTake, bool noTransition = false) {
         if (newTake != _currentTakeStr && !_isPlayOnce) {
+            if(noTransition){
+                std::cout << "NoTran Play:" << newTake << std::endl;
+			}else {
+                if(newTake == "swinging1") {
+                    //std::cout << "bp" << std::endl;
+                }
+			    std::cout << "Tran Play:" << newTake << std::endl;
+			}
             _lastTakeStr = _currentTakeStr;
+            if(!noTransition) {
+                //_takeBeforeTransitionStr = _lastTakeStr;
+            }
             _currentTakeStr = newTake;
             _isTransition = true;
-            //playTransition(_lastTakeStr, _currentTakeStr, _timer);
-            /*if(withTransition){
-                playTransition(_lastTakeStr, _currentTakeStr, _timer);
-			}else {
-			    _animatedMesh->setTakes(_currentTakeStr);
-			}*/
-            _timer = 0;
+            if(!noTransition){
+                _takeAfterTransitionStr = newTake;
+                playTransition(_lastTakeStr, _takeAfterTransitionStr);
+			}
         }
     }
 
-    void playOnce(std::string newTake, float endingTime, bool withTransition = true) {
-        if (newTake != _currentTakeStr) {
-            if(!_isPlayOnce){
-                _lastTakeStr = _currentTakeStr;
+    void playOnce(std::string newTake, float endingTime, bool noTransition = false) {
+        if (newTake != _currentTakeStr && !_isPlayOnce) {
+            if(noTransition){
+                std::cout << "NoTran Playonce:" << newTake << std::endl;
+			}else {
+                if(newTake == "swinging1") {
+                    //std::cout << "bp" << std::endl;
+                }
+			    std::cout << "Tran Playonce:" << newTake << std::endl;
 			}
+            _lastTakeStr = _currentTakeStr;
+            if(!noTransition) {
+                _takeBeforeTransitionStr = _lastTakeStr;
+                _isPlayOnceAfter = true;
+            }
             _currentTakeStr = newTake;
             _isPlayOnce = true;
             _endingTime = endingTime;
             _isTransition = true;
-            //playTransition(_lastTakeStr, _currentTakeStr, _timer);
-            /*if(withTransition){
-                playTransition(_lastTakeStr, _currentTakeStr, _timer);
-			}else {
-			    _animatedMesh->setTakes(_currentTakeStr);
-			}*/
-            _timer = 0;
+			if(!noTransition){
+                _takeAfterTransitionStr = newTake;
+                playTransition(_lastTakeStr, _takeAfterTransitionStr);
+			}
         }
     }
 
@@ -116,26 +131,28 @@ public:
         if (auto* pval = std::get_if<KeyframePair>(&transition)) {
             // TODO
             //_isTransition = true;
+            _isPlayOnceAfter = false;
         }
         else if (auto* pval = std::get_if<Take*>(&transition)) {
-            playOnce((*pval)->takeName, 0, false);
+            _isPlayingTransition = true;
+            playOnce((*pval)->takeName, 0, true);
         }else {
             throw std::exception("Bad format in Transition");
         }
     }
 
     void playSequence(float totalTime) {
-        if (!_isPlayOnce) {
-            _isPlayingSequence = true;
-            sequence->isPlaying = true;
-            index = 0;
-            sequence->prepareSequence(_animatedMesh.get(), totalTime);
-            // seq
-            auto t = sequence->takesInSeq[index / 2];
-            _takeStrBeforeSeq = _currentTakeStr;
-            playOnce(t->takeName, 0, false);
-            index += 1;
-        }
+        //if (!_isPlayOnce) {
+        //    _isPlayingSequence = true;
+        //    sequence->isPlaying = true;
+        //    index = 0;
+        //    sequence->prepareSequence(_animatedMesh.get(), totalTime);
+        //    // seq
+        //    auto t = sequence->takesInSeq[index / 2];
+        //    _takeStrBeforeSeq = _currentTakeStr;
+        //    playOnce(t->takeName, 0, false);
+        //    index += 1;
+        //}
     }
 
     TakeSequence& getSequence() {
@@ -153,14 +170,20 @@ private:
     std::chrono::steady_clock::time_point _lastTime;
 
     std::string _lastTakeStr;
-    std::string _takeStrBeforeSeq;
+    std::string _takeBeforeTransitionStr;
+    std::string _takeAfterTransitionStr;
     std::string _currentTakeStr;
 
     // Value for transition
     bool _isTransition = false;
+    bool _isPlayingTransition = false;
 
     // Value for playOnce
     bool _isPlayOnce = false;
+
+    bool _isPlayOnceAfter = false;
+    float delay = -1;
+
     float _duration = -1;
     float _endingTime = -1; // in millisecond
     Transition transition;

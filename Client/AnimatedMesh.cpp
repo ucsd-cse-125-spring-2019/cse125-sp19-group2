@@ -247,8 +247,8 @@ KeyframeAll AnimatedMesh::getKeyframeAlongChannelByIndex(int takeIndex, int inde
         k.index = index;
     }
 
-    if (k.index >= take->channels[0]->keyframes.size() || 
-		k.index < 0) {
+    if (k.index >= take->channels[0]->keyframes.size() ||
+        k.index < 0) {
         throw std::runtime_error("Bad index value");
     }
 
@@ -674,16 +674,22 @@ void AnimatedMesh::computeWorldMatrix(
         const auto endTime = toKeyframe->time;
 
         const float dt = endTime - startTime;
-        float factor = (time - startTime) / dt;
-        const auto& startValue = *fromKeyframe;
-        const auto& endValue = *toKeyframe;
+        Keyframe k;
+        if (dt <= 0.00001) {
+            k = *fromKeyframe;
+        }
+        else {
+            float factor = (time - startTime) / dt;
+            const auto& startValue = *fromKeyframe;
+            const auto& endValue = *toKeyframe;
 
-        const Keyframe k = Keyframe::interpolatingFuntion(factor, startValue, endValue);
-
+            k = Keyframe::interpolatingFuntion(factor, startValue, endValue);
+        }
         const mat4 tMat = translate(mat4(1.0f), vec3(k.translate));
         const mat4 rMat = toMat4(k.rotation);
         const mat4 sMat = scale(mat4(1.0f), vec3(k.scale));
         nodeTransform = tMat * rMat * sMat;
+
     }
 
     mat4 world = parent * nodeTransform;
