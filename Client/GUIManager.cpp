@@ -75,6 +75,9 @@ void GuiManager::refresh() {
 void GuiManager::resize(int x, int y) {
 	_screen->resizeCallbackEvent(x, y);
 
+	// Lobby padding
+	_lobbyPadding->setFixedHeight(y / _screen->pixelRatio() / 6);
+
 	// Resize our widgets
 	for (auto& widgetPair : _widgets) {
 		if (widgetPair.first == WIDGET_OPTIONS) {
@@ -86,6 +89,10 @@ void GuiManager::resize(int x, int y) {
 			widgetPair.first == WIDGET_LOADING ||
 			widgetPair.first == WIDGET_HUD) {
 			widgetPair.second->setFixedSize(nanogui::Vector2i(x / _screen->pixelRatio(), y / _screen->pixelRatio()));
+		}
+		else if (widgetPair.first == WIDGET_LIST_DOGS ||
+			widgetPair.first == WIDGET_LIST_HUMANS) {
+			widgetPair.second->setFixedWidth(x / _screen->pixelRatio() / 3);
 		}
 
 		// Resize layout margins
@@ -232,12 +239,16 @@ void GuiManager::updateDogsList(
 		if (_dogs.find(dogId) == _dogs.end())
 		{
 			auto dogName = dogPair.second;
-			auto playerLabel = new nanogui::Label(dogList, dogName, "sans", 28);
+			auto playerLabel = new nanogui::Label(dogList, dogName, "sans", 45);
 			playerLabel->setId(dogId);
 			_dogs[dogId] = dogName;
 			if (dogPair.first == playerId)
 			{
 				playerLabel->setColor(SOLID_HIGHLIGHTED);
+			}
+			else
+			{
+				playerLabel->setColor(SOLID_WHITE);
 			}
 		}
 	}
@@ -277,19 +288,23 @@ void GuiManager::updateHumansList(
 		if (_humans.find(humanId) == _humans.end())
 		{
 			auto humanName = humanPair.second;
-			auto playerLabel = new nanogui::Label(humanList, humanPair.second, "sans", 28);
+			auto playerLabel = new nanogui::Label(humanList, humanPair.second, "sans", 45);
 			playerLabel->setId(humanId);
 			_humans[humanId] = humanName;
 			if (humanPair.first == playerId)
 			{
 				playerLabel->setColor(SOLID_HIGHLIGHTED);
 			}
+			else
+			{
+				playerLabel->setColor(SOLID_WHITE);
+			}
 		}
 	}
 }
 
 void GuiManager::setReadyText(std::string text) {
-	_readyButton->setCaption(text);
+	_readyLabel->setCaption(text);
 }
 
 void GuiManager::setSwitchEnabled(bool enabled) {
@@ -433,6 +448,11 @@ void GuiManager::initConnectScreen() {
 
 void GuiManager::initLobbyScreen() {
 	auto lobbyScreen = createWidget(_screen, WIDGET_LOBBY);
+	auto bg = LoadTextureFromFile("lobbybackground.png", "./Resources/Textures/Menu/");
+	lobbyScreen->setVisible(false);
+	lobbyScreen->alpha = 1.0;
+	lobbyScreen->setBackgroundTexture(bg, 0, 0);
+	lobbyScreen->drawBackground = true;
 
 	// Lobby layout
 	auto lobbyLayout = new nanogui::GridLayout(nanogui::Orientation::Horizontal, 3, nanogui::Alignment::Middle, 50, 0);
@@ -442,44 +462,58 @@ void GuiManager::initLobbyScreen() {
 	/** Row 1 **/
 
 	// Title for dogs list
-	auto dogsLabel = new nanogui::Label(lobbyScreen, "Dogs", "sans", 60);
+	auto dogsLabel = new nanogui::Label(lobbyScreen, " ", "sans", 60);
 
 	// Controls button
-	auto controlsButton = new nanogui::Button(lobbyScreen, "Controls");
+	auto controlsButton = new nanogui::Button(lobbyScreen, "");
+	auto controlsUnfocused = LoadTextureFromFile("controls.png", "./Resources/Textures/Menu/");
+	auto controlsFocused = LoadTextureFromFile("controlsfocused.png", "./Resources/Textures/Menu/");
+	auto controlsPushed = LoadTextureFromFile("controlsdown.png", "./Resources/Textures/Menu/");
+	controlsButton->setBackgroundTexture(controlsUnfocused, controlsFocused, controlsPushed);
+	controlsButton->alpha = 1;
+	controlsButton->setTheme(new nanogui::Theme(_screen->nvgContext()));
+	controlsButton->theme()->mTextColor = nanogui::Color(0, 0, 255, 255);
+	controlsButton->theme()->mTextColorShadow = nanogui::Color(0, 0, 0, 0);
+	controlsButton->setFixedHeight(40);
+	controlsButton->setFixedWidth(100);
 	controlsButton->setCallback([&]()
 		{
 			setVisibility(WIDGET_OPTIONS, !getWidget(WIDGET_OPTIONS)->visible());
 		});
 
 	// Title for humans list
-	auto humansLabel = new nanogui::Label(lobbyScreen, "Humans", "sans", 60);
+	auto humansLabel = new nanogui::Label(lobbyScreen, " ", "sans", 60);
 
 	/** Row 2: Fixed-width padding **/
+	_lobbyPadding = new nanogui::Label(lobbyScreen, " ", "sans", 60);
 
-	int maxWidth = std::max(dogsLabel->preferredSize(_screen->nvgContext()).x(), humansLabel->preferredSize(_screen->nvgContext()).x());
-
-	// Three empty widgets to fix size of each column
-	auto emptyLabel1 = new nanogui::Label(lobbyScreen, "", "sans", 5);
-	emptyLabel1->setFixedWidth(maxWidth);
-
-	auto emptyLabel2 = new nanogui::Label(lobbyScreen, "", "sans", 5);
-
-	auto emptyLabel3 = new nanogui::Label(lobbyScreen, "", "sans", 5);
-	emptyLabel3->setFixedWidth(maxWidth);
+	// Two empty widgets to fix size of each column
+	new nanogui::Label(lobbyScreen, "", "sans", 5);
+	new nanogui::Label(lobbyScreen, "", "sans", 5);
 
 	/** Row 3 **/
 
 	// List of dogs
 	auto dogsList = createWidget(lobbyScreen, WIDGET_LIST_DOGS);
-	auto dogsLayout = new nanogui::BoxLayout(nanogui::Orientation::Vertical, nanogui::Alignment::Fill, 0, 20);
+	auto dogsLayout = new nanogui::BoxLayout(nanogui::Orientation::Vertical, nanogui::Alignment::Middle, 0, 20);
 	dogsList->setLayout(dogsLayout);
 
 	// Switch sides button
-	_switchSidesButton = new nanogui::Button(lobbyScreen, "Switch sides");
+	_switchSidesButton = new nanogui::Button(lobbyScreen, "");
+	auto switchUnfocused = LoadTextureFromFile("switch.png", "./Resources/Textures/Menu/");
+	auto switchFocused = LoadTextureFromFile("switchfocused.png", "./Resources/Textures/Menu/");
+	auto switchPushed = LoadTextureFromFile("switchdown.png", "./Resources/Textures/Menu/");
+	_switchSidesButton->setBackgroundTexture(switchUnfocused, switchFocused, switchPushed);
+	_switchSidesButton->alpha = 1;
+	_switchSidesButton->setTheme(new nanogui::Theme(_screen->nvgContext()));
+	_switchSidesButton->theme()->mTextColor = nanogui::Color(0, 0, 255, 255);
+	_switchSidesButton->theme()->mTextColorShadow = nanogui::Color(0, 0, 0, 0);
+	_switchSidesButton->setFixedHeight(40);
+	_switchSidesButton->setFixedWidth(100);
 
 	// List of humans
 	auto humansList = GuiManager::getInstance().createWidget(lobbyScreen, WIDGET_LIST_HUMANS);
-	auto humansLayout = new nanogui::BoxLayout(nanogui::Orientation::Vertical, nanogui::Alignment::Fill, 0, 20);
+	auto humansLayout = new nanogui::BoxLayout(nanogui::Orientation::Vertical, nanogui::Alignment::Middle, 0, 20);
 	humansList->setLayout(humansLayout);
 
 	/** Row 4: padding **/
@@ -494,6 +528,24 @@ void GuiManager::initLobbyScreen() {
 
 	// Ready button
 	_readyButton = new nanogui::Button(lobbyScreen, "");
+	auto readyUnfocused = LoadTextureFromFile("ready.png", "./Resources/Textures/Menu/");
+	auto readyFocused = LoadTextureFromFile("readyfocused.png", "./Resources/Textures/Menu/");
+	auto readyPushed = LoadTextureFromFile("readydown.png", "./Resources/Textures/Menu/");
+	_readyButton->setBackgroundTexture(readyUnfocused, readyFocused, readyPushed);
+	_readyButton->alpha = 1;
+	_readyButton->setTheme(new nanogui::Theme(_screen->nvgContext()));
+	_readyButton->theme()->mTextColor = nanogui::Color(0, 0, 255, 255);
+	_readyButton->theme()->mTextColorShadow = nanogui::Color(0, 0, 0, 0);
+	_readyButton->setFixedHeight(40);
+	_readyButton->setFixedWidth(100);
+
+
+	// Row 6
+	// Ready label TODO: get this to work
+	_readyLabel = new nanogui::Label(lobbyScreen, "(0/1)", "sans", 15);
+	_readyLabel->setTheme(new nanogui::Theme(_screen->nvgContext()));
+	_readyLabel->theme()->mTextColor = nanogui::Color(0, 0, 255, 255);
+	_readyLabel->theme()->mTextColorShadow = nanogui::Color(0, 0, 0, 0);
 }
 
 void GuiManager::initLoadingScreen() {

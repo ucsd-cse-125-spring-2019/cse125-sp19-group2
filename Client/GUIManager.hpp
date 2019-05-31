@@ -20,7 +20,7 @@ enum WidgetType {
 
 #define CONNECT_MARGIN 0.15f
 
-static const nanogui::Color SOLID_HIGHLIGHTED = nanogui::Color(0.376f, 0.863f, 1.0f, 1.0f);
+static const nanogui::Color SOLID_HIGHLIGHTED = nanogui::Color(247, 201, 210, 255);
 static const nanogui::Color SOLID_WHITE = nanogui::Color(1.0f, 1.0f, 1.0f, 1.0f);
 
 class GuiManager {
@@ -155,7 +155,9 @@ private:
 
 	// Lobby screen
 	nanogui::Button* _switchSidesButton;
+	nanogui::Label* _lobbyPadding;
 	nanogui::Button* _readyButton;
+	nanogui::Label* _readyLabel;
 
 	// Controls menu
 	nanogui::detail::FormWidget<GamePadIndex, std::integral_constant<bool, true>>* _gamepadSelect;
