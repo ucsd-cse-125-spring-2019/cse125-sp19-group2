@@ -1,3 +1,4 @@
+#include "Shared/Logger.hpp"
 #include "QuadTree.hpp"
 
 QuadTree::~QuadTree()
@@ -7,6 +8,7 @@ QuadTree::~QuadTree()
 	if (_ne) delete _ne;
 	if (_sw) delete _sw;
 	if (_se) delete _se;
+	delete _quads;
 }
 
 int QuadTree::getIndex(BaseState * state)

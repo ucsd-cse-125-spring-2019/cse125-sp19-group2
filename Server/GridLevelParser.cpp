@@ -11,6 +11,7 @@
 #include "SHydrantEntity.hpp"
 #include "SFountainEntity.hpp"
 #include "SFenceEntity.hpp"
+#include "STreeEntity.hpp"
 
 GridLevelParser::GridLevelParser()
 {
@@ -296,6 +297,12 @@ void GridLevelParser::parseLevelFromFile(
 					case TILE_FOUNTAIN:
 					{
 						entity = std::make_shared<SFountainEntity>(
+							glm::vec3(avgPos.x, 0, avgPos.y));
+						break;
+					}
+					case TILE_TREE:
+					{
+						entity = std::make_shared<STreeEntity>(
 							glm::vec3(avgPos.x, 0, avgPos.y));
 						break;
 					}

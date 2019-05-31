@@ -16,6 +16,7 @@
 #include "CPlungerEntity.hpp"
 #include "CRopeEntity.hpp"
 #include "CTrapEntity.hpp"
+#include "CTreeEntity.hpp"
 #include "ColliderManager.hpp"
 #include "ParticleSystemManager.hpp"
 #include "Shared/Logger.hpp"
@@ -61,15 +62,19 @@ std::shared_ptr<CBaseEntity> EntityManager::getEntity(std::shared_ptr<BaseState>
     std::shared_ptr<CBaseEntity> entity = nullptr;
     EntityType type = state->type;
 
+	std::shared_ptr<PlayerState> playerState;
+
     switch (type)
     {
     case ENTITY_EXAMPLE:
         break;
     case ENTITY_DOG:
-        entity = std::make_shared<CDogEntity>(id);
+		playerState = std::static_pointer_cast<PlayerState>(state);
+        entity = std::make_shared<CDogEntity>(id, playerState->skinID);
         break;
     case ENTITY_HUMAN:
-      entity = std::make_shared<CHumanEntity>(id);
+		playerState = std::static_pointer_cast<PlayerState>(state);
+      entity = std::make_shared<CHumanEntity>(id, playerState->skinID);
       break;
     case ENTITY_HOUSE_6X6_A:
       entity = std::make_shared<CHouseEntity>(type);
@@ -110,9 +115,13 @@ std::shared_ptr<CBaseEntity> EntityManager::getEntity(std::shared_ptr<BaseState>
 	case ENTITY_TRAP:
 	  entity = std::make_shared<CTrapEntity>();
 	  break;
+	case ENTITY_TREE:
+	  entity = std::make_shared<CTreeEntity>();
+	  break;
     case ENTITY_FLOOR:
+	  // Floor tiles should not be placed in map
       CFloorEntity::getInstance().updateTile(state);
-      break;
+	  return nullptr;
     }
 
     if (entity)
@@ -124,12 +133,25 @@ std::shared_ptr<CBaseEntity> EntityManager::getEntity(std::shared_ptr<BaseState>
     return entity;
 }
 
+int EntityManager::getEntityCount()
+{
+	return _entityList.size();
+}
+
 void EntityManager::update(std::shared_ptr<BaseState> const &state)
 {
-    // First check if marked as destroyed
-    if (state->isDestroyed)
-    {
+	auto entity = getEntity(state);
 
+    if (entity)
+    {
+        entity->updateState(state);
+    }
+
+	ColliderManager::getInstance().updateState(state);
+
+	// Destroy entity if necessary
+	if (state->isDestroyed)
+    {
         // Find in map and destroy if it exists
         auto result = _entityMap.find(state->id);
         if (result != _entityMap.end())
@@ -145,15 +167,6 @@ void EntityManager::update(std::shared_ptr<BaseState> const &state)
 
         return;
     }
-
-    auto entity = getEntity(state);
-
-    if (entity)
-    {
-        entity->updateState(state);
-    }
-
-    ColliderManager::getInstance().updateState(state);
 }
 
 void EntityManager::render(std::unique_ptr<Camera> const &camera)

@@ -41,6 +41,7 @@ public:
 
 		// Jails are not rendered at all
 		_state->isSolid = false;
+		_state->isVisible = false;
 
 		float xScale = scale.x / 3;
 		float zScale = scale.z / 3;
@@ -147,6 +148,8 @@ public:
 				DogState* dogState = static_cast<DogState*>(collidingEntity->getState().get());
 				dogState->message = "Raise (Left click / A)";
 				collidingDog->setNearTrigger(true);
+				collidingDog->hasChanged = true;
+
 				// sending position of trigger to dogEntity for interpolate
 				collidingDog->targetPos = entity->getState()->pos;
 				
@@ -218,7 +221,11 @@ public:
 
 		_children.push_back(std::make_shared<SBoxPlungerEntity>(pos, scale));
 	};
-	~SJailEntity() {};
+
+	~SJailEntity()
+	{
+		_children.clear();
+	};
 
 	// If walls have children in the future, change this
 	std::vector<std::shared_ptr<SBaseEntity>> getChildren() override
@@ -249,14 +256,6 @@ public:
 				}
 				for (int i = 0; i < _triggers.size(); i++) {
 					_triggers[i]->updateForward(-2);
-				}
-			}
-			else {
-				for (int i = 0; i < _gates.size(); i++) {
-					_gates[i]->hasChanged = false;
-				}
-				for (int i = 0; i < _triggers.size(); i++) {
-					_triggers[i]->hasChanged = false;
 				}
 			}
 		}

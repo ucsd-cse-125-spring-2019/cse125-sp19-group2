@@ -4,7 +4,8 @@
 SHumanEntity::SHumanEntity(
 	uint32_t playerId,
 	std::string playerName,
-	StructureInfo* structureInfo)
+	StructureInfo* structureInfo,
+	int skinID)
 {
 	_structureInfo = structureInfo;
 
@@ -32,6 +33,7 @@ SHumanEntity::SHumanEntity(
 	humanState->playerName = playerName;
 	humanState->plungerCooldown = 0;
 	humanState->trapCooldown = 0;
+	humanState->skinID = skinID;
 
 	// Plunger finish handler
 	_launchingReset = [&] {
@@ -45,11 +47,13 @@ SHumanEntity::SHumanEntity(
 		if (plungerEntity != nullptr)
 		{
 			plungerEntity->getState()->isDestroyed = true;
+			plungerEntity->hasChanged = true;
 			plungerEntity = nullptr;
 		}
 		if (ropeEntity != nullptr)
 		{
 			ropeEntity->getState()->isDestroyed = true;
+			ropeEntity->hasChanged = true;
 			ropeEntity = nullptr;
 		}
 	};
@@ -58,6 +62,7 @@ SHumanEntity::SHumanEntity(
 		if (netEntity != nullptr)
 		{
 			netEntity->getState()->isDestroyed = true;
+			netEntity->hasChanged = true;
 			netEntity = nullptr;
 		}
 	};

@@ -24,6 +24,8 @@ class SBaseEntity
 public:
 	bool hasChanged;	// If object state has changed during the last iteration
 
+	virtual ~SBaseEntity();	// Destroys local state and collider objects
+
 	// Update function, called every tick. Override if additional functionality
 	// is desired
 	virtual void update(std::vector<std::shared_ptr<GameEvent>> events) {};

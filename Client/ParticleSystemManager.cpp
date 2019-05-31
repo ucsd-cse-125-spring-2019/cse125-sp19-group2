@@ -65,12 +65,10 @@ void ParticleSystemManager::updateState(std::shared_ptr<BaseState> const & state
 
 			urineSystem->set_origin(origin);
 			urineSystem->set_velocity(velocity);
-			Logger::getInstance()->info("Urinating...");
 		}
 		else
 		{
 			urineSystem->set_is_urinating(false);
-			Logger::getInstance()->info("Stopping urination...");
 		}
 	}
 	else if (state->type == ENTITY_FOUNTAIN)

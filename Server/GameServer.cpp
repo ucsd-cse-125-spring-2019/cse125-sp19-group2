@@ -45,8 +45,11 @@ void GameServer::start()
 		_networkInterface.get(),
 		_structureInfo);
 
+	_isRunning = true;
+	_isFinished = false;
+
     // Run update loop, keeping each iteration at a minimum of 1 tick
-	while (true)
+	while (_isRunning)
 	{
 		auto timerStart = std::chrono::steady_clock::now();
 
@@ -73,6 +76,8 @@ void GameServer::start()
 			std::this_thread::sleep_for(tick(1) - elapsed);
 		}
 	}
+
+	_isFinished = true;
 }
 
 
@@ -143,6 +148,12 @@ void GameServer::update()
 	for (auto& id : deletedEntities)
 	{
 		_structureInfo->entityMap->erase(_structureInfo->entityMap->find(id));
+	}
+
+	// Reset hasChanged for all entities
+	for (auto& entityPair : *_structureInfo->entityMap)
+	{
+		entityPair.second->hasChanged = false;
 	}
 }
 
@@ -248,6 +259,9 @@ void GameServer::resetGameState()
 		_gameState->readyPlayers.clear();
 	}
 	_gameState->type = ENTITY_STATE;
+	_gameState->entityCount = 0;
+	_gameState->waitingForClients = false;
+	_gameState->clientReadyCount = 0;
 	_gameState->gameStarted = false;
 	_gameState->gameOver = false;
 	_gameState->inLobby = true;
@@ -280,4 +294,45 @@ void GameServer::resetGameState()
 		fgetc(stdin);
 		exit(1);
 	}
+}
+
+
+void GameServer::shutdown()
+{
+	Logger::getInstance()->info("Shutting down server");
+
+	// Signal main thread to stop and wait for it to finish
+	_isRunning = false;
+
+	while (!_isFinished)
+	{
+		std::this_thread::sleep_for(tick(1));
+	}
+
+	// Disconnect all clients gracefully first
+	// If a message is to be shown to players on server shutdown, send it here
+	if (_networkInterface)
+	{
+		for (auto& client : _networkInterface->getPlayerList())
+		{
+			_networkInterface->closePlayerSession(client);
+		}
+	}
+
+	// Deallocate state structures
+	_structureInfo->entityMap->clear();
+	delete _structureInfo->entityMap;
+
+	_structureInfo->newEntities->clear();
+	delete _structureInfo->newEntities;
+
+	delete _structureInfo->jailsPos;
+	delete _structureInfo->humanSpawns;
+	delete _structureInfo->dogSpawns;
+	
+	_structureInfo->dogHouses->clear();
+	delete _structureInfo->dogHouses;
+
+	_structureInfo->jails->clear();
+	delete _structureInfo->jails;
 }

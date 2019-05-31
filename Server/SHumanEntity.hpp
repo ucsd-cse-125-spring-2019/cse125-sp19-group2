@@ -11,7 +11,8 @@ class SHumanEntity : public SPlayerEntity
 public:
 	SHumanEntity(uint32_t playerId,
 		std::string playerName,
-		StructureInfo* structureInfo);
+		StructureInfo* structureInfo,
+		int skinID);
 
 	~SHumanEntity() {};
 

@@ -40,6 +40,7 @@ public:
 
 					DogState* dogState = static_cast<DogState*>(collidingEntity->getState().get());
 					dogState->message = "Drink (Left click / A)";
+					collidingEntity->hasChanged = true;
 
 					// Get unit vector of dog to fountain
 					glm::vec3 fountainDir = glm::normalize(_state->pos - collidingDog->getState()->pos);
@@ -52,7 +53,11 @@ public:
 
 		_children.push_back(dogSensor);
 	};
-	~SFountainEntity() {};
+
+	~SFountainEntity()
+	{
+		_children.clear();
+	};
 
 	std::vector<std::shared_ptr<SBaseEntity>> getChildren() override
 	{

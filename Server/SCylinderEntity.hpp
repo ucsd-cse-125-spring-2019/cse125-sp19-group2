@@ -31,6 +31,8 @@ public:
 		_state->width = scale.x;
 		_state->height = scale.y;
 		_state->depth = scale.z;
+
+		_state->isVisible = false;
 	};
 	~SCylinderEntity() {};
 };

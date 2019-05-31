@@ -7,13 +7,18 @@
 class CDogEntity : public CPlayerEntity
 {
 public:
-    CDogEntity(uint32_t id) : CPlayerEntity()
+    CDogEntity(uint32_t id, int skinID) : CPlayerEntity()
     {
 		// Init player state
 		_state = std::make_shared<DogState>();
 
-        // Load Animation
-        initAnimation("./Resources/Models/dog.dae");
+		// Load Animation based on skin
+		std::string modelLoc = "./Resources/Models/dog";
+		int usedSkin = skinID % DOG_SKIN_AMOUNT;
+		if (usedSkin != 0)
+			modelLoc += std::to_string(usedSkin);
+		modelLoc += ".dae";
+        initAnimation(modelLoc);
 
 		// Load positional sounds
 		_pantingSound = AudioManager::getInstance().getAudioSource("dog panting" + std::to_string(id));
