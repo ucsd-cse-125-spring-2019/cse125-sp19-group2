@@ -233,8 +233,8 @@ void Shader::RegisterUniform(const char* uniform) {
   else
   {
     _uniforms.emplace(std::string(uniform), uniform_loc);
-    Logger::getInstance()->info("For program " + std::to_string(_program) + ": \""
-      + std::string(uniform) + "\" registered.");
+    //Logger::getInstance()->info("For program " + std::to_string(_program) + ": \""
+    //  + std::string(uniform) + "\" registered.");
   }
 }
 
@@ -246,8 +246,8 @@ void Shader::AutoRegisterUniforms()
   // Get max uniform name length and number of uniforms for shader program
   glGetProgramiv(_program, GL_ACTIVE_UNIFORM_MAX_LENGTH, &uniform_name_max_len);
   glGetProgramiv(_program, GL_ACTIVE_UNIFORMS, &num_uniforms);
-  Logger::getInstance()->info("For program " + std::to_string(_program) + ": "
-    + std::to_string(num_uniforms) + " uniforms.");
+  //Logger::getInstance()->info("For program " + std::to_string(_program) + ": "
+  //  + std::to_string(num_uniforms) + " uniforms.");
 
   // Uniform info
   GLsizei length;

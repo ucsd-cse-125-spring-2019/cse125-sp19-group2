@@ -113,10 +113,16 @@ public:
             }
             _currentTakeStr = newTake;
             _isPlayOnce = true;
-            _endingTime = endingTime;
+			if (endingTime > 0) {
+				_endingTime = endingTime;
+			}
+			else {
+				_endingTime = 0;
+			}
             _isTransition = true;
 			if(!noTransition){
                 _takeAfterTransitionStr = newTake;
+				_endingTime -= _animatedMesh->getDuration(newTake) * 1000;
                 playTransition(_lastTakeStr, _takeAfterTransitionStr);
 			}
         }
@@ -135,7 +141,8 @@ public:
         }
         else if (auto* pval = std::get_if<Take*>(&transition)) {
             _isPlayingTransition = true;
-            playOnce((*pval)->takeName, 0, true);
+            playOnce((*pval)->takeName, -1, true);
+			_endingTime -= _animatedMesh->getDuration((*pval)->takeName) * 1000;
         }else {
             throw std::exception("Bad format in Transition");
         }

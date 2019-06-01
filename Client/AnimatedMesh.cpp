@@ -152,7 +152,7 @@ void AnimatedMesh::getTransform(float second, vector<mat4>& transforms) {
 }
 
 void AnimatedMesh::setTakes(std::string name) {
-    //std::cout << name << std::endl;
+    std::cout << name << std::endl;
     auto res = getTakeIndex(name);
     if (!res.has_value()) {
         throw std::exception("Non-exist animation name");
@@ -495,7 +495,7 @@ bool AnimatedMesh::initScene(const aiScene* scene, const string& filename) {
     return glGetError() == GL_NO_ERROR;
 }
 
-unique_ptr<Channel> AnimatedMesh::initChannel(const aiNodeAnim* node) {
+shared_ptr<Channel> AnimatedMesh::initChannel(const aiNodeAnim* node) {
     auto cha = make_unique<Channel>();
 
     // Get joint name
@@ -524,7 +524,7 @@ unique_ptr<Channel> AnimatedMesh::initChannel(const aiNodeAnim* node) {
     return cha;
 }
 
-unique_ptr<Node> AnimatedMesh::initNode(const Node* parent, const aiNode* node) {
+shared_ptr<Node> AnimatedMesh::initNode(const Node* parent, const aiNode* node) {
     auto n = make_unique<Node>();
 
     // Fill in data
@@ -554,7 +554,7 @@ unique_ptr<Node> AnimatedMesh::initNode(const Node* parent, const aiNode* node) 
     return n;
 }
 
-unique_ptr<Take> AnimatedMesh::initTake(const aiAnimation* animation) {
+shared_ptr<Take> AnimatedMesh::initTake(const aiAnimation* animation) {
 
     auto take = make_unique<Take>();
     // Fill in metadata
@@ -613,7 +613,7 @@ uint32_t AnimatedMesh::findFrame(float time, const Channel& channel) {
 
 Keyframe AnimatedMesh::getInterpolatedValue(
     float time, uint32_t start,
-    const vector<unique_ptr<Keyframe>>& keyframes,
+    const vector<shared_ptr<Keyframe>>& keyframes,
     std::function<Keyframe(float, const Keyframe&, const Keyframe&)> interpolateFunction) {
 
     Keyframe ret;
@@ -732,7 +732,7 @@ void AnimatedMesh::loadTakes(const std::string& filename) {
     }
 
     // Process takes based on loaded in information
-    std::vector<std::unique_ptr<Take>> temp;
+    std::vector<std::shared_ptr<Take>> temp;
     const auto& allTake = _takes[0];
     for (uint32_t i = 0; i < _takeInfo.size(); i++) {
         const auto& info = _takeInfo[i];

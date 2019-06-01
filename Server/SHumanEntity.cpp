@@ -153,6 +153,7 @@ void SHumanEntity::update(std::vector<std::shared_ptr<GameEvent>> events)
 		}
 		break;
 	case ACTION_HUMAN_MOVING:
+		Logger::getInstance()->debug("running");
 		if (actionChanged) {
 			humanState->currentAnimation = ANIMATION_HUMAN_RUNNING;
 			hasChanged = true;
@@ -245,6 +246,7 @@ void SHumanEntity::update(std::vector<std::shared_ptr<GameEvent>> events)
 		}
 		break;
 	case ACTION_HUMAN_SWINGING:
+		Logger::getInstance()->debug("swinging");
 		if (actionChanged) {
 			float chargeDistance = humanState->chargeMeter * 3.0f;
 			float chargeDuration = chargeDistance / HUMAN_SWING_VELOCITY;
@@ -257,7 +259,7 @@ void SHumanEntity::update(std::vector<std::shared_ptr<GameEvent>> events)
 				stuntDuration = std::max(stuntDuration, (19.0f / 60 - chargeDuration) * 1000);
 				humanState->currentAnimation = ANIMATION_HUMAN_SWINGING1;
 				humanState->isPlayOnce = true;
-				humanState->animationDuration = stuntDuration + chargeDuration;
+				humanState->animationDuration = stuntDuration + chargeDuration * 1000;
 				if (netEntity == nullptr)
 				{
 					netEntity = std::make_shared<SNetEntity>(_state->pos, 0.08f, 1.0f);
@@ -270,7 +272,7 @@ void SHumanEntity::update(std::vector<std::shared_ptr<GameEvent>> events)
 				stuntDuration = std::max(stuntDuration, (36.0f / 60 - chargeDuration) * 1000);
 				humanState->currentAnimation = ANIMATION_HUMAN_SWINGING2;
 				humanState->isPlayOnce = true;
-				humanState->animationDuration = stuntDuration + chargeDuration;
+				humanState->animationDuration = stuntDuration + chargeDuration * 1000;
 				if (netEntity == nullptr)
 				{
 					netEntity = std::make_shared<SNetEntity>(_state->pos, 0.08f, 1.8f);
@@ -283,7 +285,7 @@ void SHumanEntity::update(std::vector<std::shared_ptr<GameEvent>> events)
 				stuntDuration = std::max(stuntDuration, (55.0f / 60 - chargeDuration) * 1000);
 				humanState->currentAnimation = ANIMATION_HUMAN_SWINGING3;
 				humanState->isPlayOnce = true;
-				humanState->animationDuration = stuntDuration + chargeDuration;
+				humanState->animationDuration = stuntDuration + chargeDuration * 1000;
 				if (netEntity == nullptr)
 				{
 					netEntity = std::make_shared<SNetEntity>(_state->pos, 0.07f, 2.0f);

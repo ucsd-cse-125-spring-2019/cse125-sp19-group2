@@ -144,13 +144,13 @@ void Animation::eval() {
             const float endingTime = _animatedMesh->getTimeInTick(_currentTakeStr, _endingTime / 1000.0f);
             const float duration = _animatedMesh->getDuration(_currentTakeStr);
             
-            std::cout << "currentTime: " << currentTime << ";duration: " << duration << std::endl;
+            std::cout << "currentTime: " << currentTime << ";duration: " << duration << ";endingTime: " << endingTime << std::endl;
             if (currentTime > duration) {
                 if (currentTime > duration + endingTime) {
                     _isPlayOnce = false;
                     if(_isPlayingTransition) {
                         if(_isPlayOnceAfter) {
-                            playOnce(_takeAfterTransitionStr, delay, true);
+                            playOnce(_takeAfterTransitionStr, -1, true);
                             _isPlayOnceAfter = false;
                         }else {
                             play(_takeAfterTransitionStr, true);

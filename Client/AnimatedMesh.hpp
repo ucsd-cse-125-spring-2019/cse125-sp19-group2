@@ -42,7 +42,7 @@ struct Node {
     std::string name;
     glm::mat4 transform{};
     const Node* parent{};
-    std::vector<std::unique_ptr<Node>> children;
+    std::vector<std::shared_ptr<Node>> children;
 };
 
 struct Keyframe {
@@ -67,14 +67,14 @@ struct KeyframeAll {
 
 struct Channel {
     std::string jointName;
-    std::vector<std::unique_ptr<Keyframe>> keyframes;
+    std::vector<std::shared_ptr<Keyframe>> keyframes;
 };
 
 struct Take {
     std::string takeName;
     float tickrate{};
     float duration{};
-    std::vector<std::unique_ptr<Channel>> channels;
+    std::vector<std::shared_ptr<Channel>> channels;
     std::unordered_map<std::string, uint32_t> channelMap;
 };
 
@@ -203,11 +203,11 @@ private:
 
     bool initScene(const aiScene* scene, const std::string& filename);
 
-    std::unique_ptr<Channel> initChannel(const aiNodeAnim* node);
+    std::shared_ptr<Channel> initChannel(const aiNodeAnim* node);
 
-    std::unique_ptr<Node> initNode(const Node* parent, const aiNode* node);
+    std::shared_ptr<Node> initNode(const Node* parent, const aiNode* node);
 
-    std::unique_ptr<Take> initTake(const aiAnimation* animation);
+    std::shared_ptr<Take> initTake(const aiAnimation* animation);
 
     // Helper functions related to frame look up
     const Channel* findChannel(const std::string& nodeName);
@@ -217,7 +217,7 @@ private:
     uint32_t findFrame(float time, const Channel& channel);
 
     Keyframe getInterpolatedValue(float time, uint32_t start,
-                                        const std::vector<std::unique_ptr<Keyframe>>& keyframes,
+                                        const std::vector<std::shared_ptr<Keyframe>>& keyframes,
                                         std::function<Keyframe(float, const Keyframe&, const Keyframe&)> interpolateFunction);
 
     bool computeWorldMatrix(float time, const Node* node, const glm::mat4& parent);
@@ -244,12 +244,12 @@ private:
 
     glm::mat4 _globalInverseTransform{};
 
-    std::unique_ptr<Node> _root;
+    std::shared_ptr<Node> _root;
     
     int _takeIndex;
     std::vector<MeshData> _entries;
     std::vector<Texture*> _textures;
-    std::vector<std::unique_ptr<Take>> _takes;
+    std::vector<std::shared_ptr<Take>> _takes;
     std::vector<BoneData> _boneInfo;
     std::map<std::string, uint32_t> _boneMap;
     std::map<std::string, uint32_t> _takeMap;
@@ -260,20 +260,20 @@ private:
 template <typename T>
 void AnimatedMesh::move(std::vector<T>& to, std::vector<T>& from) {
     for (uint32_t i = 0; i < from.size(); i ++) {
-        to.push_back(std::move(from[i]));
+        to.push_back((from[i]));
     }
 }
 
 template <typename T>
 void AnimatedMesh::move(std::vector<T>& to, std::vector<T>& from, size_t start, size_t size) {
     for (uint32_t i = start; i < size + start && i < from.size(); i++) {
-        to.push_back(std::move(from[i]));
+        to.push_back((from[i]));
     }
 }
 
 template <typename T, class Iterator, class I>
 void AnimatedMesh::move(std::vector<T>& to, I& fromStart, I& fromEnd) {
     for (auto it = fromStart; it < fromEnd; ++it) {
-        to.push_back(std::move(*it));
+        to.push_back((*it));
     }
 }
