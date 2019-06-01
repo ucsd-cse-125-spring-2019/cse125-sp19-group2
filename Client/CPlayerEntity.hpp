@@ -44,7 +44,7 @@ public:
 		const auto s = glm::scale(glm::mat4(1.0f), _state->scale);
 
 		auto model = t * r * s;
-        _nameTag->display(true, camera, model, _name.c_str(), 2);
+        _nameTag->display(false, camera, model, _name.c_str(), 2);
 	}
 
 	virtual void updateState(std::shared_ptr<BaseState> state) override
