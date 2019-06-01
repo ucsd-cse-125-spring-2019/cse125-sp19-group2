@@ -239,6 +239,7 @@ void SDogEntity::update(std::vector<std::shared_ptr<GameEvent>> events)
 		}
 		break;
 	case ACTION_DOG_JAILED:
+		_isTeleporting = false;
 		dogState->isCaught = true;
 		hasChanged = true;
 		if (actionChanged)
@@ -476,17 +477,15 @@ bool SDogEntity::updateAction()
 	}
 
 	// Dog getting trapped takes second highest precedence
-	if (_isTrapped && _state->isSolid)
+	if (_isTrapped && _state->isSolid && !_isTeleporting)
 	{
 		_curAction = ACTION_DOG_TRAPPED;
-		_isTeleporting = false;
 	}
 
 	// Dog being jailed takes absolute precedence
 	if (_isJailed && !dogState->isCaught && _state->isSolid)
 	{
 		_curAction = ACTION_DOG_JAILED;
-		_isTeleporting = false;
 	}
 
 	return oldAction != _curAction;
