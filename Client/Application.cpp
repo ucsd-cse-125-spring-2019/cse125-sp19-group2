@@ -316,6 +316,10 @@ void Application::Update()
 					GuiManager::getInstance().getWidget(WIDGET_OPTIONS)->setVisible(false);
 					GuiManager::getInstance().getWidget(WIDGET_LOADING)->setVisible(true);
 
+					// Get mute status first, then mute
+					_muteSetting = AudioManager::getInstance().getMute();
+					AudioManager::getInstance().setMute(true);
+
 					// Start timer
 					_startTime = std::chrono::steady_clock::now();
 				}
@@ -335,6 +339,9 @@ void Application::Update()
 				GuiManager::getInstance().getWidget(WIDGET_LOADING)->setVisible(false);
 				GuiManager::getInstance().setReadyEnabled(true);
 				GuiManager::getInstance().setSwitchEnabled(true);
+
+				// Back to user setting for audio mute
+				AudioManager::getInstance().setMute(_muteSetting);
 
 				// Capture mouse
 				_localPlayer->setMouseCaptured(true);

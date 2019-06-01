@@ -91,6 +91,9 @@ private:
 	glm::vec3 _targetDoghouseDir;
 	std::unordered_map<uint32_t, std::chrono::time_point<std::chrono::steady_clock>>* _targetCooldowns;
 
+	// Time since last dog bark
+	std::chrono::time_point<std::chrono::steady_clock> _barkTime;
+
 	// Number of times the dog has pressed a button to escape trap
 	int _numEscapePressed = 0;
 

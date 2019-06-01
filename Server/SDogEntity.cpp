@@ -29,16 +29,19 @@ SDogEntity::SDogEntity(
 	dogState->currentAnimation = ANIMATION_DOG_IDLE;
 	dogState->runStamina = MAX_DOG_STAMINA;
 	dogState->urineMeter = MAX_DOG_URINE;
+	dogState->isCaught = false;
+	_barkTime = std::chrono::steady_clock::now();
 
 	// Player-specific stuff
 	dogState->playerName = playerName;
 	dogState->skinID = skinID;
-	dogState->isCaught = false;
 }
 
 void SDogEntity::update(std::vector<std::shared_ptr<GameEvent>> events)
 {
 	auto dogState = std::static_pointer_cast<DogState>(_state);
+
+	dogState->isBarking = false;
 
 	if (!_isInteracting)
 	{
@@ -375,6 +378,17 @@ void SDogEntity::update(std::vector<std::shared_ptr<GameEvent>> events)
 	}
 
 	handleInterpolation();
+
+	// Dogs can bark if idle or running
+	auto elapsed = std::chrono::steady_clock::now() - _barkTime;
+	if ((_curAction == ACTION_DOG_IDLE || _curAction == ACTION_DOG_MOVING) &&
+		_isInteracting &&
+		std::chrono::duration_cast<std::chrono::seconds>(elapsed) >= std::chrono::seconds(1))
+	{
+		_barkTime = std::chrono::steady_clock::now();
+		dogState->isBarking = true;
+		hasChanged = true;
+	}
 
 	// Reset state handled by collision logic
 	_isTrapped = false;

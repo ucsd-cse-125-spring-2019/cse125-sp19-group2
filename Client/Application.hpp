@@ -109,6 +109,7 @@ private:
   bool _inLobby = true;
   bool _inCountdown = false;
   bool _startHidden = false;
+  bool _muteSetting = false;	// Not muted by default
 
   // Used to tell that the client has loaded the game 
   bool _gameLoaded = false;

@@ -48,10 +48,22 @@ public:
 		auto newState = std::static_pointer_cast<DogState>(state);
 		
 		/** Sounds **/
+		if (!_yelpingSound)
+		{
+			_yelpingSound = AudioManager::getInstance().getAudioSource("dog yelping" + std::to_string(_state->id));
+		}
+
+		if (!_barkingSound)
+		{
+			_barkingSound = AudioManager::getInstance().getAudioSource("dog barking" + std::to_string(_state->id));
+		}
+
 		_pantingSound->setPosition(_state->pos);
 		_runningSound->setPosition(_state->pos);
 		_drinkingSound->setPosition(_state->pos);
 		_peeingSound->setPosition(_state->pos);
+		_yelpingSound->setPosition(_state->pos);
+		_barkingSound->setPosition(_state->pos);
 
 		// Panting
 		_pantingSound->play(newState->currentAnimation == ANIMATION_DOG_IDLE);
@@ -68,12 +80,23 @@ public:
 		// Yelping when caught
 		if (!currentState->isCaught && newState->isCaught)
 		{
-			auto yelpingSound = AudioManager::getInstance().getAudioSource("dog yelping" + std::to_string(_state->id));
-			yelpingSound->init("Resources/Sounds/dog_yelping.wav", false, true);
-			yelpingSound->setPosition(_state->pos);
-			yelpingSound->setVolume(0.3f);
-			yelpingSound->play(true);
+			_yelpingSound->init("Resources/Sounds/dog_yelping.wav", false, true);
+			_yelpingSound->setVolume(0.3f);
+			_yelpingSound->play(true);
 		}
+
+		// Barking on interact button
+		if (!currentState->isBarking && newState->isBarking)
+		{
+			/* Disabled for now, creates some strange artifacts*/
+
+			//_barkingSound->init("Resources/Sounds/dog_barking.wav", false, true);
+			//_barkingSound->setVolume(0.3f);
+			//_barkingSound->play(true);
+		}
+
+		currentState->isCaught = newState->isCaught;
+		currentState->isBarking = newState->isBarking;
 
 		/** Animation **/
 		currentState->currentAnimation = newState->currentAnimation;
@@ -99,8 +122,6 @@ public:
 			GuiManager::getInstance().updateStamina(currentState->runStamina / MAX_DOG_STAMINA);
 			GuiManager::getInstance().updatePee(currentState->urineMeter / MAX_DOG_URINE);
 		}
-
-		currentState->isCaught = newState->isCaught;
 	}
 
 protected:
@@ -108,5 +129,7 @@ protected:
 	AudioSource * _runningSound;
 	AudioSource * _drinkingSound;
 	AudioSource * _peeingSound;
+	AudioSource * _yelpingSound = nullptr;
+	AudioSource * _barkingSound = nullptr;
 };
 
