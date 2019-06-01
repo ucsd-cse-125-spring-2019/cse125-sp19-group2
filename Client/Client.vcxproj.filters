@@ -103,6 +103,9 @@
     <ClCompile Include="FountainParticleSystem.cpp">
       <Filter>Source Files\Graphics</Filter>
     </ClCompile>
+    <ClCompile Include="Font.cpp">
+      <Filter>Header Files\Graphics</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Application.hpp">
@@ -270,6 +273,9 @@
     <ClInclude Include="CTreeEntity.hpp">
       <Filter>Header Files\Entity</Filter>
     </ClInclude>
+    <ClInclude Include="Font.h">
+      <Filter>Header Files\Graphics</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
@@ -334,6 +340,12 @@
       <Filter>Resource Files</Filter>
     </None>
     <None Include="Resources\Shaders\urine.frag">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="Resources\Shaders\font.frag">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="Resources\Shaders\font.vert">
       <Filter>Resource Files</Filter>
     </None>
   </ItemGroup>

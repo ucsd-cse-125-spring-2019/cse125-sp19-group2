@@ -8,6 +8,7 @@
 #include "GuiManager.hpp"
 #include "AudioManager.hpp"
 #include "Shared/PlayerState.hpp"
+#include "Font.h"
 
 class CPlayerEntity : public CBaseEntity
 {
@@ -20,6 +21,10 @@ public:
 		_objectShader->LoadFromFile(GL_VERTEX_SHADER, "./Resources/Shaders/animation.vert");
 		_objectShader->LoadFromFile(GL_FRAGMENT_SHADER, "./Resources/Shaders/animation.frag");
 		_objectShader->CreateProgram();
+
+        _name = "PlayerName";
+        _nameTag = std::make_unique<Font>();
+        _nameTag->_textColor = glm::vec4(1,0,0,0.5);
 	}
 
 	void render(std::unique_ptr<Camera> const& camera) override
@@ -29,6 +34,17 @@ public:
 
 		// Base render
 		CBaseEntity::render(camera);
+	    
+	    // Compute model matrix based on state: t * r * s
+        glm::vec3 pos = _state->pos;
+        pos.y += 1;
+        glm::vec3 forward = camera->position() - _state->pos;
+		const auto t = glm::translate(glm::mat4(1.0f), pos);
+		const auto r = glm::mat4(glm::transpose(glm::mat3(camera->view_matrix())));
+		const auto s = glm::scale(glm::mat4(1.0f), _state->scale);
+
+		auto model = t * r * s;
+        _nameTag->display(true, camera, model, _name.c_str(), 2);
 	}
 
 	virtual void updateState(std::shared_ptr<BaseState> state) override
@@ -93,4 +109,6 @@ protected:
 	}
 
 	bool _isLocal = false;
+    std::string _name;
+    std::unique_ptr<Font> _nameTag;
 };

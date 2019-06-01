@@ -22,6 +22,7 @@
 #include "fmod/fmod.hpp"
 #include "fmod/fmod_errors.h"
 #include "Shared/GameEvent.hpp"
+#include "Font.h"
 
 #define SESSION_FILE_PATH "last_session.txt"
 
@@ -123,6 +124,11 @@ private:
 
   // Test Lights
   std::unique_ptr<DirectionalLight> _dir_light;
+
+  // Test Font
+    std::unique_ptr<Font> _font;
+    float xc = 400;
+    float yc = 400;
 
     // Test UI
     bool _playAmbient = false;
