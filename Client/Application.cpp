@@ -52,7 +52,7 @@ void Application::Setup() {
   glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
   glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
   glEnable(GL_CULL_FACE);
-
+	glEnable(GL_MULTISAMPLE);
     
 
   // Initialize pointers
@@ -63,7 +63,7 @@ void Application::Setup() {
 
   _camera = std::make_unique<Camera>();
   _camera->set_position(0, 0, 3.0f);
-  _frameBuffer = std::make_unique<FrameBuffer>(800, 600);
+  _frameBuffer = std::make_unique<FrameBuffer>(800, 600, true);
   _quadFrameBuffer = std::make_unique<FrameBuffer>(800, 600);
 
   // Set up testing shader program
@@ -433,11 +433,11 @@ void Application::Draw() {
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
   // Test FBO
-  _quadFrameBuffer->renderScene([this]
+  _frameBuffer->renderScene([this]
   {
     // render scene
     //_frameBuffer->drawQuad(_testShader);
-      glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT| GL_STENCIL_BUFFER_BIT);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT| GL_STENCIL_BUFFER_BIT);
 
 	  // Non-UI elements depend on localPlayer and that we're not in the lobby
 	  if (_localPlayer && !_inLobby) {
@@ -464,7 +464,10 @@ void Application::Draw() {
   });
 
   // Render _frameBuffer Quad
-  _quadFrameBuffer->drawQuad(_quadShader);
+  //_frameBuffer->drawQuad(_quadShader);
+
+	_frameBuffer->blit(_quadFrameBuffer);
+	_quadFrameBuffer->drawQuad(_quadShader);
 
   // Finish drawing scene
   glFinish();
@@ -509,7 +512,8 @@ void Application::Resize(int x, int y) {
   _win_width = x;
   _win_height = y;
   glViewport(0, 0, x, y);
-  _quadFrameBuffer->resize(x, y);
+  _frameBuffer->resize(x, y);
+	_quadFrameBuffer->resize(x, y);
   if (_localPlayer) {
 	  _localPlayer->resize(x, y);
   }
