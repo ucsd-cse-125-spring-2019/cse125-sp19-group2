@@ -75,6 +75,12 @@ void GuiManager::refresh() {
 void GuiManager::resize(int x, int y) {
 	_screen->resizeCallbackEvent(x, y);
 
+	// Connect padding
+	if (_connectPadding)
+	{
+		_connectPadding->setFixedHeight(y / _screen->pixelRatio() / 4);
+	}
+
 	// Lobby padding
 	if (_lobbyPadding)
 	{
@@ -100,9 +106,6 @@ void GuiManager::resize(int x, int y) {
 
 		// Resize layout margins
 		switch (widgetPair.first) {
-		case WIDGET_CONNECT:
-			static_cast<nanogui::BoxLayout*>(widgetPair.second->layout())->setMargin(x * CONNECT_MARGIN);
-			break;
 		case WIDGET_HUD:
 			// Set spacing for parent HUD widget to "clamp" bottom and top HUD 
 			int topHeight = getWidget(WIDGET_HUD_TOP)->preferredSize(_screen->nvgContext()).y();
@@ -411,6 +414,9 @@ void GuiManager::initConnectScreen() {
 	// Resize handles margins, 50 pixel spacing
 	auto connectLayout = new nanogui::BoxLayout(nanogui::Orientation::Vertical, nanogui::Alignment::Middle, 0, 25);
 	connectScreen->setLayout(connectLayout);
+
+	// Padding on top, handled by resize
+	_connectPadding = new nanogui::Label(connectScreen, " ");
 
 	// Game title
 	auto gameTitle = new nanogui::Label(connectScreen, " ", "sans", 125);

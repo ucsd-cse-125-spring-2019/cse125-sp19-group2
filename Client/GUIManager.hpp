@@ -149,6 +149,7 @@ private:
 	/*** UI elements ***/
 
 	// Connect screen
+	nanogui::Label* _connectPadding;
 	nanogui::TextBox* _playerNameBox;
 	nanogui::TextBox* _addressBox;
 	nanogui::Button* _connectButton;
