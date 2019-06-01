@@ -78,7 +78,14 @@ void GuiManager::resize(int x, int y) {
 	// Connect padding
 	if (_connectPadding)
 	{
-		_connectPadding->setFixedHeight(y / _screen->pixelRatio() / 4);
+		if (y / _screen->pixelRatio() < 500)
+		{
+			_connectPadding->setFixedHeight((y / _screen->pixelRatio()) * 0.05f);
+		}
+		else
+		{
+			_connectPadding->setFixedHeight(y / _screen->pixelRatio() * 0.3f);
+		}
 	}
 
 	// Lobby padding

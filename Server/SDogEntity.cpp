@@ -479,12 +479,14 @@ bool SDogEntity::updateAction()
 	if (_isTrapped && _state->isSolid)
 	{
 		_curAction = ACTION_DOG_TRAPPED;
+		_isTeleporting = false;
 	}
 
 	// Dog being jailed takes absolute precedence
 	if (_isJailed && !dogState->isCaught && _state->isSolid)
 	{
 		_curAction = ACTION_DOG_JAILED;
+		_isTeleporting = false;
 	}
 
 	return oldAction != _curAction;
