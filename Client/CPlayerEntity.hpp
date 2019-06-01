@@ -22,13 +22,14 @@ public:
 		_objectShader->LoadFromFile(GL_FRAGMENT_SHADER, "./Resources/Shaders/animation.frag");
 		_objectShader->CreateProgram();
 
-        _name = "PlayerName";
         _nameTag = std::make_unique<Font>();
-        _nameTag->_textColor = glm::vec4(1,0,0,0.5);
+        _nameTag->_textColor = glm::vec4(1,1,1,0.5);
 	}
 
 	void render(std::unique_ptr<Camera> const& camera) override
 	{
+		auto playerState = std::static_pointer_cast<PlayerState>(_state);
+
 		// Update Animation
 		_objectModel->update();
 
@@ -37,14 +38,14 @@ public:
 	    
 	    // Compute model matrix based on state: t * r * s
         glm::vec3 pos = _state->pos;
-        pos.y += 1;
+		pos.y += _state->height;
         glm::vec3 forward = camera->position() - _state->pos;
 		const auto t = glm::translate(glm::mat4(1.0f), pos);
 		const auto r = glm::mat4(glm::transpose(glm::mat3(camera->view_matrix())));
 		const auto s = glm::scale(glm::mat4(1.0f), _state->scale);
 
 		auto model = t * r * s;
-        _nameTag->display(false, camera, model, _name.c_str(), 2);
+        _nameTag->display(false, camera, model, playerState->playerName.c_str(), 2);
 	}
 
 	virtual void updateState(std::shared_ptr<BaseState> state) override
@@ -69,6 +70,8 @@ public:
 				GuiManager::getInstance().refresh();
 			}
 		}
+
+		currentState->playerName = newState->playerName;
 	}
 
 	std::shared_ptr<BaseState> const& getState() { return _state; }
