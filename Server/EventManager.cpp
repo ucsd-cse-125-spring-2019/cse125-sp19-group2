@@ -224,6 +224,7 @@ bool EventManager::handlePlayerLeave(std::shared_ptr<GameEvent> event)
 
 void EventManager::handleResendRequest(std::shared_ptr<GameEvent> event)
 {
+	/*
 	// List of entities known to the client
 	std::vector<uint32_t> clientList = event->entityList;
 
@@ -242,16 +243,26 @@ void EventManager::handleResendRequest(std::shared_ptr<GameEvent> event)
 		serverList.begin(), serverList.end(),
 		std::back_inserter(diff));
 
+	*/
+
 	Logger::getInstance()->debug("Received resend request from playerId " +
 		std::to_string(event->playerId));
 
 	// Build a list of updates for this client based on diff
 	std::vector<std::shared_ptr<BaseState>> updates;
+
+	for (auto& entityPair : *_structureInfo->entityMap)
+	{
+		updates.push_back(entityPair.second->getState());
+	}
+
+	/*
 	for (auto& entityId : diff)
 	{
 		std::shared_ptr<SBaseEntity> entity = _structureInfo->entityMap->find(entityId)->second;
 		updates.push_back(entity->getState());
 	}
+	*/
 
 	// Send updates to client
 	_networkInterface->sendUpdates(updates, event->playerId);

@@ -76,7 +76,10 @@ void GuiManager::resize(int x, int y) {
 	_screen->resizeCallbackEvent(x, y);
 
 	// Lobby padding
-	_lobbyPadding->setFixedHeight(y / _screen->pixelRatio() / 6);
+	if (_lobbyPadding)
+	{
+		_lobbyPadding->setFixedHeight(y / _screen->pixelRatio() / 6);
+	}
 
 	// Resize our widgets
 	for (auto& widgetPair : _widgets) {

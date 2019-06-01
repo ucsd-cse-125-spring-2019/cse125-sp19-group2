@@ -315,6 +315,9 @@ void Application::Update()
 					GuiManager::getInstance().getWidget(WIDGET_LOBBY)->setVisible(false);
 					GuiManager::getInstance().getWidget(WIDGET_OPTIONS)->setVisible(false);
 					GuiManager::getInstance().getWidget(WIDGET_LOADING)->setVisible(true);
+
+					// Start timer
+					_startTime = std::chrono::steady_clock::now();
 				}
 			}
 
@@ -561,18 +564,27 @@ void Application::Draw() {
   else if (!_gameLoaded && !_inLobby &&
 	  EntityManager::getInstance().getEntityCount() > 0 &&
 	  EntityManager::getInstance().getEntityCount() < _serverEntityCount) {
-	  // Build a list of the entities we have
-	  auto entityList = EntityManager::getInstance().getEntityIdList();
 
-	  // Request a re-send from the server
-	  auto resendEvent = std::make_shared<GameEvent>();
-	  resendEvent->type = EVENT_REQUEST_RESEND;
-	  resendEvent->playerId = _localPlayer->getPlayerId();
-	  resendEvent->entityList = entityList;
-	  try {
-		  _networkClient->sendEvent(resendEvent);
+	  // Check time since start
+	  auto elapsed = std::chrono::steady_clock::now() - _startTime;
+	  if (std::chrono::duration_cast<std::chrono::seconds>(elapsed) > std::chrono::seconds(4))
+	  {
+		  // Build a list of the entities we have
+		  auto entityList = EntityManager::getInstance().getEntityIdList();
+
+		  // Request a re-send from the server
+		  auto resendEvent = std::make_shared<GameEvent>();
+		  resendEvent->type = EVENT_REQUEST_RESEND;
+		  resendEvent->playerId = _localPlayer->getPlayerId();
+		  resendEvent->entityList = entityList;
+		  try {
+			  _networkClient->sendEvent(resendEvent);
+		  }
+		  catch (std::runtime_error e) {};
+
+		  // Reset timer
+		  _startTime = std::chrono::steady_clock::now();
 	  }
-	  catch (std::runtime_error e) {};
   }
 }
 
