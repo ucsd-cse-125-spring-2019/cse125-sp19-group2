@@ -5,10 +5,10 @@
 #include "Animation.hpp"
 #include "glad/glad.h"
 #include "InputManager.h"
+#include "CBillboardEntity.hpp"
 #include "GuiManager.hpp"
 #include "AudioManager.hpp"
 #include "Shared/PlayerState.hpp"
-#include "Font.h"
 
 class CPlayerEntity : public CBaseEntity
 {
@@ -24,6 +24,8 @@ public:
 
         _nameTag = std::make_unique<Font>();
         _nameTag->_textColor = glm::vec4(1,1,1,0.5);
+
+		_billboard = std::make_unique<CBillboardEntity>();
 	}
 
 	void render(std::unique_ptr<Camera> const& camera) override
@@ -35,17 +37,9 @@ public:
 
 		// Base render
 		CBaseEntity::render(camera);
-	    
-	    // Compute model matrix based on state: t * r * s
-        glm::vec3 pos = _state->pos;
-		pos.y += _state->height;
-        glm::vec3 forward = camera->position() - _state->pos;
-		const auto t = glm::translate(glm::mat4(1.0f), pos);
-		const auto r = glm::mat4(glm::transpose(glm::mat3(camera->view_matrix())));
-		const auto s = glm::scale(glm::mat4(1.0f), _state->scale);
 
-		auto model = t * r * s;
-        _nameTag->display(false, camera, model, playerState->playerName.c_str(), 2);
+		// Also render the billboard. Note: this may need to be moved outside the player
+		_billboard->render(camera);
 	}
 
 	virtual void updateState(std::shared_ptr<BaseState> state) override
@@ -72,6 +66,10 @@ public:
 		}
 
 		currentState->playerName = newState->playerName;
+
+		// Also update billboard
+		_billboard->updateState(_state);
+		_billboard->setText(newState->playerName);
 	}
 
 	std::shared_ptr<BaseState> const& getState() { return _state; }
@@ -114,4 +112,6 @@ protected:
 	bool _isLocal = false;
     std::string _name;
     std::unique_ptr<Font> _nameTag;
+
+	std::unique_ptr<CBillboardEntity> _billboard;
 };
