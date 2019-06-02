@@ -82,11 +82,13 @@ Font::Font() {
     _objectShader->CreateProgram();
     _textColor = glm::vec4(1,1,1,1);
     _backgroundColor = glm::vec4(0,0,0,0);
-    screenSize = glm::vec2(1920, 1080);
+    screenSize = glm::ivec2(1280, 720);
+    _fb = std::make_unique<FrameBuffer>(1280, 720);
 }
 
-void Font::setScreenSize(glm::vec2 s) {
+void Font::setScreenSize(glm::ivec2 s) {
     screenSize = s;
+    _fb->resize(s.x, s.y);
 }
 
 void Font::render_text(const char* text, float x, float y, float sx, float sy) {
@@ -153,7 +155,7 @@ void Font::render_text(const char* text, float x, float y, float sx, float sy) {
 }
 
 void Font::display(
-    bool depth, std::unique_ptr<Camera> const& camera, glm::mat4 toWorld, std::string str, float size,
+    bool depth, std::unique_ptr<Camera> const& camera, glm::mat4 toWorld, const std::string & str, float size,
     float xcoord, float ycoord) {
     _objectShader->Use();
     glBindVertexArray(vao);
@@ -197,7 +199,7 @@ void Font::display(
     glDepthMask(GL_TRUE);
 }
 
-void Font::display(std::string str, float xcoord, float ycoord) {
+void Font::display(const std::string & str, float size, float xcoord, float ycoord) {
     _objectShader->Use();
     glDepthMask(GL_FALSE);
     glBindVertexArray(vao);
@@ -211,8 +213,8 @@ void Font::display(std::string str, float xcoord, float ycoord) {
     _objectShader->set_uniform("textColor", _textColor);
     glActiveTexture(GL_TEXTURE0);
     _objectShader->set_uniform("tex", 0);
-    float sx = 2.0 / screenSize.x;
-    float sy = 2.0 / screenSize.y;
+    float sx = 2.0 * size / screenSize.x;
+    float sy = 2.0 * size / screenSize.y;
 
     if(xcoord < 0) {
         xcoord = 1.0 / sx;
@@ -229,4 +231,19 @@ void Font::display(std::string str, float xcoord, float ycoord) {
     glBindTexture(GL_TEXTURE_2D, 0);
     glBindVertexArray(0);
     glDepthMask(GL_TRUE);
+}
+
+void Font::renderToTexture(const std::string & str, float size, float xcoord, float ycoord) {
+    _fb->renderScene([&]() {
+        GLfloat bkColor[4];
+        glGetFloatv(GL_COLOR_CLEAR_VALUE, bkColor);
+        glClearColor(_backgroundColor.r, _backgroundColor.g, _backgroundColor.b, _backgroundColor.a);
+        glClear(GL_COLOR_BUFFER_BIT |GL_DEPTH_BUFFER_BIT);
+        display(str, size, xcoord, ycoord);
+        glClearColor(bkColor[0], bkColor[1],bkColor[2],bkColor[3]);
+    });
+}
+
+GLuint Font::getTexture() const {
+    return _fb->getRGBA();
 }

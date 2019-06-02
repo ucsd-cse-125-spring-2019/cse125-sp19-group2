@@ -541,8 +541,11 @@ void Application::Draw() {
     GuiManager::getInstance().draw();
 
       //_font->display("test font rendering", 1920/2.0, 1080/2.0);
+      
+      _font->renderToTexture("test font rendering");
+      _font->_backgroundColor = glm::vec4(0,1,1,1);
+      //_font->getTexture()
   });
-
   // Render _frameBuffer Quad
   _quadFrameBuffer->drawQuad(_quadShader);
 

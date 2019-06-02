@@ -5,6 +5,7 @@
 #include "Shader.hpp"
 #include <memory>
 #include "Camera.hpp"
+#include "FrameBuffer.h"
 
 struct Char {
     GLuint textureID;   // ID handle of the glyph texture
@@ -24,8 +25,9 @@ class Font {
     // Shader program for object
     std::unique_ptr<Shader> _objectShader;
     std::unordered_map<char, Char> _textures;
+    std::unique_ptr<FrameBuffer> _fb;
 
-    glm::vec2 screenSize;
+    glm::ivec2 screenSize;
 
     
 public:
@@ -36,13 +38,20 @@ public:
 
     Font();
 
-    void setScreenSize(glm::vec2 s);
+    void setScreenSize(glm::ivec2 s);
 
     void render_text(const char* text, float x, float y, float sx, float sy);
 
     void display(
-        bool depth, std::unique_ptr<Camera> const &camera, glm::mat4 toWorld, std::string str, float size = 1.0f,
+        bool depth, std::unique_ptr<Camera> const &camera, glm::mat4 toWorld, const std::string & str, float size = 1.0f,
         float xcoord = -1, float ycoord = -1);
 
-    void display(std::string str, float xcoord = -1, float ycoord = -1);
+    void display(const std::string & str, float size = 1.0f, float xcoord = -1, float ycoord = -1);
+
+    void renderToTexture(const std::string & str, float size = 1.0f,
+        float xcoord = -1, float ycoord = -1);
+
+    GLuint getTexture() const;
+
+
 };
