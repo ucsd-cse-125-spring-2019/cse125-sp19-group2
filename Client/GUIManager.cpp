@@ -354,15 +354,15 @@ void GuiManager::setActiveSkill(bool usePlunger) {
 		//_trapInfo->setColor(SOLID_WHITE);
 
 		// TODO: change frame image as well
-		_plungerCooldown->setColor(Color(0.0f, 1.0f, 0.0f, 0.5f));
-		_trapCooldown->setColor(Color(0, 160));
+		_plungerCooldown->setColor(SKILL_HIGHLIGHTED);
+		_trapCooldown->setColor(SKILL_NORMAL);
 	}
 	else
 	{
 		//_plungerInfo->setColor(SOLID_WHITE);
 		//_trapInfo->setColor(SOLID_HIGHLIGHTED);
-		_trapCooldown->setColor(Color(0.0f, 1.0f, 0.0f, 0.5f));
-		_plungerCooldown->setColor(Color(0,160));
+		_trapCooldown->setColor(SKILL_HIGHLIGHTED);
+		_plungerCooldown->setColor(SKILL_NORMAL);
 	}
 }
 
@@ -671,7 +671,7 @@ void GuiManager::initHUD() {
 	_plungerCooldown->alpha = 1.0;
 	_plungerCooldown->setBackgroundTexture(plungerIcon, 0, 0);
 	_plungerCooldown->drawBackground = true;
-	_plungerCooldown->setColor(Color(0.0f, 1.0f, 0.0f, 0.5f));
+	_plungerCooldown->setColor(SKILL_HIGHLIGHTED);
 	_plungerCooldown->setDirection(Vector2i(0, 1)); // Up
 
 	//_plungerInfo = new nanogui::Label(humanSkills, "Plunger: Ready", "sans", 32);
@@ -684,7 +684,7 @@ void GuiManager::initHUD() {
 	_trapCooldown->alpha = 1.0;
 	_trapCooldown->setBackgroundTexture(trapIcon, 0, 0);
 	_trapCooldown->drawBackground = true;
-	_trapCooldown->setColor(Color(0, 160));
+	_trapCooldown->setColor(SKILL_NORMAL);
 	_trapCooldown->setDirection(Vector2i(0, 1)); // Up
 
 	//_trapInfo = new nanogui::Label(humanSkills, "Trap: Ready", "sans", 32);
@@ -697,7 +697,7 @@ void GuiManager::initHUD() {
 	_swingCharge->alpha = 1.0;
 	_swingCharge->setBackgroundTexture(swingIcon, 0, 0);
 	_swingCharge->drawBackground = true;
-	_swingCharge->setColor(Color(0, 160));
+	_swingCharge->setColor(SKILL_NORMAL);
 	_swingCharge->setDirection(Vector2i(0, 1)); // Up
 
 	//_chargeInfo = new nanogui::Label(humanSkills, "Charge: 0%", "sans", 32);

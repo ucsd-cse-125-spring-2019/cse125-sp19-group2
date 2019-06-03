@@ -20,8 +20,13 @@ enum WidgetType {
 
 #define CONNECT_MARGIN 0.15f
 
+// Standard text elements
 static const nanogui::Color SOLID_HIGHLIGHTED = nanogui::Color(247, 201, 210, 255);
 static const nanogui::Color SOLID_WHITE = nanogui::Color(1.0f, 1.0f, 1.0f, 1.0f);
+
+// Skill elements
+static const nanogui::Color SKILL_NORMAL = nanogui::Color(0, 160);
+static const nanogui::Color SKILL_HIGHLIGHTED = nanogui::Color(168, 255, 255, 160);
 
 class GuiManager {
 public: 
