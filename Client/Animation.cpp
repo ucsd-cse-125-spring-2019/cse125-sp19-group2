@@ -157,7 +157,11 @@ void Animation::eval() {
                         }
                         _isPlayingTransition = false;
                     }else{
-                        play(_takeBeforeTransitionStr);
+                        if(_currentTakeStr == "shoot"){
+                            play("idleLauncher");
+						}else{
+                            play(_takeBeforeTransitionStr);
+						}
 					}
                     _lastTime = high_resolution_clock::now();
                     return;
