@@ -18,4 +18,21 @@ public:
 	};
 
 	~CBoneEntity() {};
+
+	virtual void updateState(std::shared_ptr<BaseState> state) override
+	{
+		CBaseEntity::updateState(state);
+
+		// If slated to be destroyed, play eating sound
+		if (!_state->isDestroyed && state->isDestroyed)
+		{
+			auto eatingSound = AudioManager::getInstance().getAudioSource("dog eating" + std::to_string(_state->id));
+			eatingSound->init("Resources/Sounds/dog_eating.wav", false, true);
+			eatingSound->setPosition(_state->pos);
+			eatingSound->setVolume(0.3f);
+			eatingSound->play(true);
+		}
+
+		_state->isDestroyed = state->isDestroyed;
+	}
 };

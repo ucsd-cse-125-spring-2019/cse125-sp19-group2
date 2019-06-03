@@ -22,6 +22,10 @@ public:
 
     AudioManager();
 
+	bool getMute();
+
+	void setMute(bool mute);
+
     void setListenerPos(glm::vec3 pos);
 
 	void setListenerDir(glm::vec3 forward);

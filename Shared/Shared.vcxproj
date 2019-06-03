@@ -149,6 +149,7 @@
     <ClInclude Include="ExampleState.hpp" />
     <ClInclude Include="GameEvent.hpp" />
     <ClInclude Include="GameState.hpp" />
+    <ClInclude Include="GateState.hpp" />
     <ClInclude Include="HumanState.hpp" />
     <ClInclude Include="Logger.hpp" />
     <ClInclude Include="PlayerState.hpp" />

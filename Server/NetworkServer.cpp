@@ -552,6 +552,26 @@ void NetworkServer::closePlayerSession(uint32_t playerId)
 }
 
 
+void NetworkServer::clearQueues()
+{
+	// Event queue first
+	std::unique_lock<std::mutex> eventLock(_eventMutex);
+	while (!_eventQueue->empty())
+	{
+		_eventQueue->pop();
+	}
+	eventLock.unlock();
+
+	// Update queue next. The blocking queue is internally
+	// mutexed, so no need for external locks
+	while (!_updateQueue->isEmpty())
+	{
+		std::pair<uint32_t, std::shared_ptr<BaseState>> garbage;
+		_updateQueue->pop(garbage);
+	}
+}
+
+
 std::vector<std::shared_ptr<GameEvent>> NetworkServer::receiveEvents()
 {
 	auto eventList = std::vector<std::shared_ptr<GameEvent>>();

@@ -4,6 +4,7 @@
 #include <memory>
 #include <iostream>
 #include "Shader.hpp"
+#include "Shared/Logger.hpp"
 
 static const GLfloat g_quad_vertex_buffer_data[] = {
   -1.0f, -1.0f, 0.0f,
@@ -18,45 +19,87 @@ FrameBuffer::FrameBuffer() : FrameBuffer(1024, 1024) {
 
 }
 
-FrameBuffer::FrameBuffer(int width, int height) {
+FrameBuffer::FrameBuffer(int width, int height, bool multisample) {
   this->width = width;
   this->height = height;
+	this->multisample = multisample;
   glGenFramebuffers(1, &frameBufferID);
   glBindFramebuffer(GL_FRAMEBUFFER, frameBufferID);
 
   glGenTextures(1, &rgbaTexture);
 
+	float color[] = { 0.0f, 0.0f, 0.0f, 0.0f };
+
   // "Bind" the newly created texture : all future texture functions will modify this texture
-  glBindTexture(GL_TEXTURE_2D, rgbaTexture);
+	if (multisample)
+	{
+		glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, rgbaTexture);
 
-  // Give an empty image to OpenGL ( the last "0" )
-  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, this->width, this->height, 0, GL_RGBA, GL_UNSIGNED_BYTE, 0);
+		// Give an empty image to OpenGL ( the last "0" )
+		glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, 4, GL_RGBA, this->width, this->height, GL_TRUE);
 
-  // Poor filtering. Needed !
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
-  float color[] = {0.0f, 0.0f, 0.0f, 0.0f};
-  glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, color);
+		// Poor filtering. Needed !
+		glTexParameteri(GL_TEXTURE_2D_MULTISAMPLE, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+		glTexParameteri(GL_TEXTURE_2D_MULTISAMPLE, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+		glTexParameteri(GL_TEXTURE_2D_MULTISAMPLE, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+		glTexParameteri(GL_TEXTURE_2D_MULTISAMPLE, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+		glTexParameterfv(GL_TEXTURE_2D_MULTISAMPLE, GL_TEXTURE_BORDER_COLOR, color);
 
-  glGenRenderbuffers(1, &depthBufferID);
-  glBindRenderbuffer(GL_RENDERBUFFER, depthBufferID);
-  glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, this->width, this->height);
-  glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, depthBufferID);
+		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D_MULTISAMPLE, rgbaTexture, 0);
 
-  glGenTextures(1, &depthTexture);
-  glBindTexture(GL_TEXTURE_2D, depthTexture);
-  glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT24, this->width, this->height, 0, GL_DEPTH_COMPONENT, GL_FLOAT, 0);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
-  glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, color);
+		glGenRenderbuffers(1, &depthBufferID);
+		glBindRenderbuffer(GL_RENDERBUFFER, depthBufferID);
+		glRenderbufferStorageMultisample(GL_RENDERBUFFER, 4, GL_DEPTH_COMPONENT, this->width, this->height);
+		glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, depthBufferID);
 
-  // Set "renderedTexture" as our colour attachement #0
-  glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, rgbaTexture, 0);
-  glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, depthTexture, 0);
+		glGenTextures(1, &depthTexture);
+		glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, depthTexture);
+		glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, 4, GL_DEPTH_COMPONENT24, this->width, this->height, GL_TRUE);
+		
+		glTexParameteri(GL_TEXTURE_2D_MULTISAMPLE, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+		glTexParameteri(GL_TEXTURE_2D_MULTISAMPLE, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+		glTexParameteri(GL_TEXTURE_2D_MULTISAMPLE, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+		glTexParameteri(GL_TEXTURE_2D_MULTISAMPLE, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+		glTexParameterfv(GL_TEXTURE_2D_MULTISAMPLE, GL_TEXTURE_BORDER_COLOR, color);
+
+		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D_MULTISAMPLE, depthTexture, 0);
+	}
+	else
+	{
+		glBindTexture(GL_TEXTURE_2D, rgbaTexture);
+
+		// Give an empty image to OpenGL ( the last "0" )
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, this->width, this->height, 0, GL_RGBA, GL_UNSIGNED_BYTE, 0);
+
+		// Poor filtering. Needed !
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+		glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, color);
+
+		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, rgbaTexture, 0);
+
+		glGenRenderbuffers(1, &depthBufferID);
+		glBindRenderbuffer(GL_RENDERBUFFER, depthBufferID);
+		glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, this->width, this->height);
+		glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, depthBufferID);
+
+		glGenTextures(1, &depthTexture);
+		glBindTexture(GL_TEXTURE_2D, depthTexture);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT24, this->width, this->height, 0, GL_DEPTH_COMPONENT, GL_FLOAT, 0);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+		glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, color);
+
+		glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, depthTexture, 0);
+	}
+
+	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+		Logger::getInstance()->info("Framebuffer not complete!");
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
   // Set the list of draw buffers.
   GLenum DrawBuffers[1] = {GL_COLOR_ATTACHMENT0};
@@ -133,19 +176,62 @@ unsigned FrameBuffer::getDepth() {
 void FrameBuffer::resize(int x, int y) {
     this->width = x;
     this->height = y;
-    // resize color texture
-    glBindTexture(GL_TEXTURE_2D, rgbaTexture);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, this->width, this->height, 0, GL_RGBA, GL_UNSIGNED_BYTE, 0);
-    glBindTexture(GL_TEXTURE_2D, 0);
 
-    // resize depth attachment
-    glBindRenderbuffer(GL_RENDERBUFFER, depthBufferID);
-    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, this->width, this->height);
-    glBindRenderbuffer(GL_RENDERBUFFER, 0);
+		if (this->multisample)
+		{
+			// resize color texture
+			glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, rgbaTexture);
+			glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, 4, GL_RGBA, this->width, this->height, GL_TRUE);
+			glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, 0);
 
-    //resize depth texture
-    glBindTexture(GL_TEXTURE_2D, depthTexture);
-    glTexImage2D(
-        GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT24, this->width, this->height, 0, GL_DEPTH_COMPONENT, GL_FLOAT, 0);
+			// resize depth attachment
+			glBindRenderbuffer(GL_RENDERBUFFER, depthBufferID);
+			glRenderbufferStorageMultisample(GL_RENDERBUFFER, 4, GL_DEPTH_COMPONENT, this->width, this->height);
+			glBindRenderbuffer(GL_RENDERBUFFER, 0);
 
+			//resize depth texture
+			glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, depthTexture);
+			glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, 4, GL_DEPTH_COMPONENT24, this->width, this->height, GL_TRUE);
+		}
+		else
+		{
+			// resize color texture
+			glBindTexture(GL_TEXTURE_2D, rgbaTexture);
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, this->width, this->height, 0, GL_RGBA, GL_UNSIGNED_BYTE, 0);
+			glBindTexture(GL_TEXTURE_2D, 0);
+
+			// resize depth attachment
+			glBindRenderbuffer(GL_RENDERBUFFER, depthBufferID);
+			glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, this->width, this->height);
+			glBindRenderbuffer(GL_RENDERBUFFER, 0);
+
+			//resize depth texture
+			glBindTexture(GL_TEXTURE_2D, depthTexture);
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT24, this->width, this->height, 0, GL_DEPTH_COMPONENT, GL_FLOAT, 0);
+		}
+
+}
+
+void FrameBuffer::blit(std::unique_ptr<FrameBuffer> const & targetFramebuffer)
+{
+	if (targetFramebuffer == nullptr)
+	{
+		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+		glBindFramebuffer(GL_READ_FRAMEBUFFER, this->frameBufferID);
+		glBlitFramebuffer(0, 0, this->width, this->height,
+			0, 0, this->width, this->height,
+			GL_COLOR_BUFFER_BIT, GL_NEAREST);
+		glDrawBuffer(GL_BACK);
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	}
+	else
+	{
+		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, targetFramebuffer->frameBufferID);
+		glBindFramebuffer(GL_READ_FRAMEBUFFER, this->frameBufferID);
+		glBlitFramebuffer(0, 0, this->width, this->height,
+			0, 0, targetFramebuffer->width, targetFramebuffer->height,
+			GL_COLOR_BUFFER_BIT, GL_NEAREST);
+		glDrawBuffer(GL_BACK);
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	}
 }

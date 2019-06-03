@@ -1,6 +1,7 @@
 ﻿#include "GuiManager.hpp"
 #include "Shared/Logger.hpp"
 #include "stb_image.h"
+#include "AudioManager.hpp"
 #include <chrono>
 #include "Texture.hpp"
 
@@ -67,11 +68,31 @@ void GuiManager::draw() {
     glDepthFunc(GL_LEQUAL);
 }
 
+void GuiManager::refresh() {
+	resize(_screen->size().x() * _screen->pixelRatio(), _screen->size().y() * _screen->pixelRatio());
+}
+
 void GuiManager::resize(int x, int y) {
 	_screen->resizeCallbackEvent(x, y);
 
+	// Connect padding
+	if (_connectPadding)
+	{
+		if (y / _screen->pixelRatio() < 500)
+		{
+			_connectPadding->setFixedHeight((y / _screen->pixelRatio()) * 0.05f);
+		}
+		else
+		{
+			_connectPadding->setFixedHeight(y / _screen->pixelRatio() * 0.3f);
+		}
+	}
+
 	// Lobby padding
-	_lobbyPadding->setFixedHeight(y / _screen->pixelRatio() / 6);
+	if (_lobbyPadding)
+	{
+		_lobbyPadding->setFixedHeight(y / _screen->pixelRatio() / 6);
+	}
 
 	// Resize our widgets
 	for (auto& widgetPair : _widgets) {
@@ -81,6 +102,7 @@ void GuiManager::resize(int x, int y) {
 		}
 		else if (widgetPair.first == WIDGET_CONNECT ||
 			widgetPair.first == WIDGET_LOBBY ||
+			widgetPair.first == WIDGET_LOADING ||
 			widgetPair.first == WIDGET_HUD) {
 			widgetPair.second->setFixedSize(nanogui::Vector2i(x / _screen->pixelRatio(), y / _screen->pixelRatio()));
 		}
@@ -91,14 +113,11 @@ void GuiManager::resize(int x, int y) {
 
 		// Resize layout margins
 		switch (widgetPair.first) {
-		case WIDGET_CONNECT:
-			static_cast<nanogui::BoxLayout*>(widgetPair.second->layout())->setMargin(x * CONNECT_MARGIN);
-			break;
 		case WIDGET_HUD:
 			// Set spacing for parent HUD widget to "clamp" bottom and top HUD 
-			int topHeight = getWidget(WIDGET_HUD_TOP)->preferredSize(_screen->nvgContext()).y() / _screen->pixelRatio();
-			int middleHeight = getWidget(WIDGET_HUD_MIDDLE)->preferredSize(_screen->nvgContext()).y() / _screen->pixelRatio();
-			int bottomHeight = getWidget(WIDGET_HUD_BOTTOM)->preferredSize(_screen->nvgContext()).y() / _screen->pixelRatio();
+			int topHeight = getWidget(WIDGET_HUD_TOP)->preferredSize(_screen->nvgContext()).y();
+			int middleHeight = getWidget(WIDGET_HUD_MIDDLE)->preferredSize(_screen->nvgContext()).y();
+			int bottomHeight = getWidget(WIDGET_HUD_BOTTOM)->preferredSize(_screen->nvgContext()).y();
 
 			int spacing = (y / _screen->pixelRatio() - middleHeight - topHeight - bottomHeight);
 			static_cast<nanogui::BoxLayout*>(widgetPair.second->layout())->setSpacing(spacing / 2);
@@ -156,6 +175,7 @@ nanogui::Widget* GuiManager::getWidget(WidgetType name) {
 void GuiManager::initWidgets() {
 	initConnectScreen();
 	initLobbyScreen();
+	initLoadingScreen();
 	initHUD();
 	initControlMenu();
 	hideAll();
@@ -176,6 +196,10 @@ void GuiManager::registerReadyCallback(const std::function<void()> f) {
 void GuiManager::registerControllerCallback(const std::function<void(GamePadIndex)> f)
 {
 	_gamepadSelect->setCallback(f);
+}
+
+void GuiManager::registerDisconnectCallback(const std::function<void()> f) {
+	_disconnectButton->setCallback(f);
 }
 
 std::string GuiManager::getPlayerName() {
@@ -417,6 +441,9 @@ void GuiManager::initConnectScreen() {
 	auto connectLayout = new nanogui::BoxLayout(nanogui::Orientation::Vertical, nanogui::Alignment::Middle, 0, 25);
 	connectScreen->setLayout(connectLayout);
 
+	// Padding on top, handled by resize
+	_connectPadding = new nanogui::Label(connectScreen, " ");
+
 	// Game title
 	auto gameTitle = new nanogui::Label(connectScreen, " ", "sans", 125);
 
@@ -551,6 +578,17 @@ void GuiManager::initLobbyScreen() {
 	_readyLabel->theme()->mTextColorShadow = nanogui::Color(0, 0, 0, 0);
 }
 
+void GuiManager::initLoadingScreen() {
+	auto loadingScreen = createWidget(_screen, WIDGET_LOADING);
+
+	// TODO: loading screen background goes here
+    auto bg = LoadTextureFromFile("background.png", "./Resources/Textures/Menu/");
+    loadingScreen->setVisible(false);
+    loadingScreen->alpha = 1.0;
+    loadingScreen->setBackgroundTexture(bg, 0, 0);
+    loadingScreen->drawBackground = true;
+}
+
 void GuiManager::initHUD() {
 	// HUD container
 	auto hudContainer = createWidget(_screen, WIDGET_HUD);
@@ -679,6 +717,29 @@ void GuiManager::initControlMenu() {
 	auto controllerLabel = new Label(controlsWidget, "Select Controller", "sans", 16);
 	_gamepadSelect = new nanogui::detail::FormWidget<GamePadIndex, std::integral_constant<bool, true>>(controlsWidget);
 	_gamepadSelect->setItems({ "None", "1", "2", "3", "4" });
+
+	// Mute button
+	new Label(controlsWidget, "Audio options", "sans", 16);
+	_muteButton = new nanogui::Button(controlsWidget, "Mute All");
+	_muteButton->setCallback([&]()
+	{
+		bool isMuted = AudioManager::getInstance().getMute();
+		AudioManager::getInstance().setMute(!isMuted);
+		if (isMuted)
+		{
+			_muteButton->setCaption("Mute All");
+		}
+		else
+		{
+			_muteButton->setCaption("Unmute All");
+		}
+	});
+
+	// Other miscellaneous buttons
+	new Label(controlsWidget, "Other", "sans", 16);
+
+	// Disconnect from server
+	_disconnectButton = new nanogui::Button(controlsWidget, "Disconnect");
 
 	auto windowCast = static_cast<nanogui::Window*>(controlsWidget);
 }
