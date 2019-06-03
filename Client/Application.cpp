@@ -469,12 +469,17 @@ void Application::Update()
 
 			// Increase speed of bgm if less than 30 seconds left
 			auto bgmSource = AudioManager::getInstance().getAudioSource("bgm");
-			if (!_inLobby && !gameState->gameOver && gameState->millisecondsLeft < 30000)
+			if (!_musicSpeedup && !_inLobby && !gameState->gameOver &&
+				gameState->millisecondsLeft < 30000)
 			{
-				bgmSource->_channel->setPitch(1.5f);
+				// Start song from the beginning
+				_musicSpeedup = true;
+				bgmSource->_channel->setPosition(0, FMOD_TIMEUNIT_MS);
+				bgmSource->_channel->setPitch(1.3f);
 			}
-			else
+			else if (gameState->gameOver)
 			{
+				_musicSpeedup = false;
 				bgmSource->_channel->setPitch(1.0f);
 			}
 
