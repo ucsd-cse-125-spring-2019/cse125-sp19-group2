@@ -50,8 +50,7 @@ public:
 			{
 				currentState->message = newState->message;
 				GuiManager::getInstance().setSecondaryMessage(currentState->message);
-				auto screen = GuiManager::getInstance().getScreen();
-				GuiManager::getInstance().resize(screen->size().x(), screen->size().y());
+				GuiManager::getInstance().refresh();
 			}
 		}
 	}

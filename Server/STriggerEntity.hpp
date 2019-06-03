@@ -12,7 +12,7 @@ public:
 		_state->type = ENTITY_TRIGGER;
 		_state->forward = forward;
 		origForward = forward;
-
+		_state->isVisible = true;
 	};
 
 	void updateForward(int degree) {
