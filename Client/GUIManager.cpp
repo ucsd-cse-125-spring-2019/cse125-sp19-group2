@@ -636,12 +636,13 @@ void GuiManager::initHUD() {
 	// Stamina
     _staminaCooldown = new nanogui::CooldownBar(dogSkills);
 	auto staminaIcon = LoadTextureFromFile("sprint.png", "./Resources/Textures/Menu/");
-	_staminaCooldown->setFixedSize(Vector2i(80,80));
+	_staminaCooldown->setFixedSize(Vector2i(100, 100));
     _staminaCooldown->alpha = 1.0;
 	_staminaCooldown->setBackgroundTexture(staminaIcon, 0, 0);
 	_staminaCooldown->drawBackground = true;
     _staminaCooldown->setColor(Color(0,160));
     _staminaCooldown->setDirection(Vector2i(0,1)); // Up
+	_staminaCooldown->setOffset(nanogui::Vector2f(6.0f, 6.0f));
 
 	//_staminaInfo = new nanogui::Label(dogSkills, "Stamina: 100%", "sans", 32);
 	//_staminaInfo->setColor(SOLID_WHITE);
@@ -649,12 +650,13 @@ void GuiManager::initHUD() {
 	// Pee
 	_peeCooldown = new nanogui::CooldownBar(dogSkills);
 	auto peeIcon = LoadTextureFromFile("pee.png", "Resources/Textures/Menu/");
-	_peeCooldown->setFixedSize(Vector2i(80, 80));
+	_peeCooldown->setFixedSize(Vector2i(100, 100));
 	_peeCooldown->alpha = 1.0;
 	_peeCooldown->setBackgroundTexture(peeIcon, 0, 0);
 	_peeCooldown->drawBackground = true;
 	_peeCooldown->setColor(Color(0,160));
 	_peeCooldown->setDirection(Vector2i(0,1)); // Up
+	_peeCooldown->setOffset(nanogui::Vector2f(6.0f, 6.0f));
 
 	//_peeInfo = new nanogui::Label(dogSkills, "Pee: 100%", "sans", 32);
 	//_peeInfo->setColor(SOLID_WHITE);
@@ -667,7 +669,7 @@ void GuiManager::initHUD() {
 	// Plunger
 	_plungerCooldown = new nanogui::CooldownBar(humanSkills);
 	auto plungerIcon = LoadTextureFromFile("plunger.png", "./Resources/Textures/Menu/");
-	_plungerCooldown->setFixedSize(Vector2i(80, 80));
+	_plungerCooldown->setFixedSize(Vector2i(100, 100));
 	_plungerCooldown->alpha = 1.0;
 	_plungerCooldown->setBackgroundTexture(plungerIcon, 0, 0);
 	_plungerCooldown->drawBackground = true;
@@ -680,7 +682,7 @@ void GuiManager::initHUD() {
 	// Trap
 	_trapCooldown = new nanogui::CooldownBar(humanSkills);
 	auto trapIcon = LoadTextureFromFile("trapbone.png", "./Resources/Textures/Menu/");
-	_trapCooldown->setFixedSize(Vector2i(80, 80));
+	_trapCooldown->setFixedSize(Vector2i(100, 100));
 	_trapCooldown->alpha = 1.0;
 	_trapCooldown->setBackgroundTexture(trapIcon, 0, 0);
 	_trapCooldown->drawBackground = true;
@@ -693,7 +695,7 @@ void GuiManager::initHUD() {
 	// Charge rate of swinging
 	_swingCharge = new nanogui::CooldownBar(humanSkills);
 	auto swingIcon = LoadTextureFromFile("swing.png", "./Resources/Textures/Menu/");
-	_swingCharge->setFixedSize(Vector2i(80, 80));
+	_swingCharge->setFixedSize(Vector2i(100, 100));
 	_swingCharge->alpha = 1.0;
 	_swingCharge->setBackgroundTexture(swingIcon, 0, 0);
 	_swingCharge->drawBackground = true;
