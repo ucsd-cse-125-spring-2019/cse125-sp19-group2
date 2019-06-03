@@ -326,28 +326,36 @@ void GuiManager::setSecondaryMessage(std::string message) {
 
 void GuiManager::setActiveSkill(bool usePlunger) {
 	if (usePlunger) {
-		_plungerInfo->setColor(SOLID_HIGHLIGHTED);
-		_trapInfo->setColor(SOLID_WHITE);
+		//_plungerInfo->setColor(SOLID_HIGHLIGHTED);
+		//_trapInfo->setColor(SOLID_WHITE);
+
+		// TODO: change frame image as well
+		_plungerCooldown->setColor(Color(0.0f, 1.0f, 0.0f, 0.5f));
+		_trapCooldown->setColor(Color(0, 160));
 	}
 	else
 	{
-		_plungerInfo->setColor(SOLID_WHITE);
-		_trapInfo->setColor(SOLID_HIGHLIGHTED);
+		//_plungerInfo->setColor(SOLID_WHITE);
+		//_trapInfo->setColor(SOLID_HIGHLIGHTED);
+		_trapCooldown->setColor(Color(0.0f, 1.0f, 0.0f, 0.5f));
+		_plungerCooldown->setColor(Color(0,160));
 	}
 }
 
 void GuiManager::updateStamina(float val) {
 	int percentage = (int)(val * 100);
-    _staminaCooldown->setPercentage(1.0 - val);
+	_staminaCooldown->setPercentage(1 - val);
 	//_staminaInfo->setCaption("Stamina: " + std::to_string(percentage) + "%");
 }
 
 void GuiManager::updatePee(float val) {
 	int percentage = (int)(val * 100);
-	_peeInfo->setCaption("Pee: " + std::to_string(percentage) + "%");
+	_peeCooldown->setPercentage(1 - val);
+	//_peeInfo->setCaption("Pee: " + std::to_string(percentage) + "%");
 }
 
 void GuiManager::updatePlunger(long millisecondsLeft) {
+	/*
 	if (millisecondsLeft == 0)
 	{
 		_plungerInfo->setCaption("Plunger: Ready");
@@ -357,9 +365,14 @@ void GuiManager::updatePlunger(long millisecondsLeft) {
 		auto seconds = (int)(std::ceil(millisecondsLeft / 1000.0f));
 		_plungerInfo->setCaption("Plunger: " + std::to_string(seconds));
 	}
+	*/
+	auto plungerMaxMs = std::chrono::duration_cast<std::chrono::milliseconds>(PLUNGER_COOLDOWN).count();
+	float val = (float)millisecondsLeft / plungerMaxMs;
+	_plungerCooldown->setPercentage(val);
 }
 
 void GuiManager::updateTrap(long millisecondsLeft) {
+	/*
 	if (millisecondsLeft == 0)
 	{
 		_trapInfo->setCaption("Trap: Ready");
@@ -369,11 +382,16 @@ void GuiManager::updateTrap(long millisecondsLeft) {
 		auto seconds = (int)(std::ceil(millisecondsLeft / 1000.0f));
 		_trapInfo->setCaption("Trap: " + std::to_string(seconds));
 	}
+	*/
+	auto trapMaxMs = std::chrono::duration_cast<std::chrono::milliseconds>(TRAP_COOLDOWN).count();
+	float val = (float)millisecondsLeft / trapMaxMs;
+	_trapCooldown->setPercentage(val);
 }
 
 void GuiManager::updateCharge(float val) {
 	int percentage = (int)(val * 100);
-	_chargeInfo->setCaption("Charge: " + std::to_string(percentage) + "%");
+	//_chargeInfo->setCaption("Charge: " + std::to_string(percentage) + "%");
+	_swingCharge->setPercentage(1 - val);
 }
 
 void GuiManager::setVisibility(WidgetType name, bool visibility) {
@@ -433,7 +451,6 @@ void GuiManager::initConnectScreen() {
 	_connectButton->theme()->mTextColorShadow = nanogui::Color(0, 0, 0, 0);
 	_connectButton->setFixedHeight(40);
 	_connectButton->setFixedWidth(100);
-		
 }
 
 void GuiManager::initLobbyScreen() {
@@ -580,12 +597,11 @@ void GuiManager::initHUD() {
 
 	// Stamina
     _staminaCooldown = new nanogui::CooldownBar(dogSkills);
-	auto staminaIcon = LoadTextureFromFile("3.png", "./Resources/Textures/Menu/");
+	auto staminaIcon = LoadTextureFromFile("sprint.png", "./Resources/Textures/Menu/");
 	_staminaCooldown->setFixedSize(Vector2i(80,80));
     _staminaCooldown->alpha = 1.0;
 	_staminaCooldown->setBackgroundTexture(staminaIcon, 0, 0);
 	_staminaCooldown->drawBackground = true;
-    _staminaCooldown->setPercentage(0.0);
     _staminaCooldown->setColor(Color(0,160));
     _staminaCooldown->setDirection(Vector2i(0,1)); // Up
 
@@ -593,8 +609,17 @@ void GuiManager::initHUD() {
 	//_staminaInfo->setColor(SOLID_WHITE);
 
 	// Pee
-	_peeInfo = new nanogui::Label(dogSkills, "Pee: 100%", "sans", 32);
-	_peeInfo->setColor(SOLID_WHITE);
+	_peeCooldown = new nanogui::CooldownBar(dogSkills);
+	auto peeIcon = LoadTextureFromFile("pee.png", "Resources/Textures/Menu/");
+	_peeCooldown->setFixedSize(Vector2i(80, 80));
+	_peeCooldown->alpha = 1.0;
+	_peeCooldown->setBackgroundTexture(peeIcon, 0, 0);
+	_peeCooldown->drawBackground = true;
+	_peeCooldown->setColor(Color(0,160));
+	_peeCooldown->setDirection(Vector2i(0,1)); // Up
+
+	//_peeInfo = new nanogui::Label(dogSkills, "Pee: 100%", "sans", 32);
+	//_peeInfo->setColor(SOLID_WHITE);
 
 	// Human skills
 	auto humanSkills = createWidget(bottomHUD, WIDGET_HUD_HUMAN_SKILLS);
@@ -602,16 +627,43 @@ void GuiManager::initHUD() {
 	humanSkills->setLayout(humanSkillsLayout);
 
 	// Plunger
-	_plungerInfo = new nanogui::Label(humanSkills, "Plunger: Ready", "sans", 32);
-	_plungerInfo->setColor(SOLID_HIGHLIGHTED);
+	_plungerCooldown = new nanogui::CooldownBar(humanSkills);
+	auto plungerIcon = LoadTextureFromFile("plunger.png", "./Resources/Textures/Menu/");
+	_plungerCooldown->setFixedSize(Vector2i(80, 80));
+	_plungerCooldown->alpha = 1.0;
+	_plungerCooldown->setBackgroundTexture(plungerIcon, 0, 0);
+	_plungerCooldown->drawBackground = true;
+	_plungerCooldown->setColor(Color(0.0f, 1.0f, 0.0f, 0.5f));
+	_plungerCooldown->setDirection(Vector2i(0, 1)); // Up
+
+	//_plungerInfo = new nanogui::Label(humanSkills, "Plunger: Ready", "sans", 32);
+	//_plungerInfo->setColor(SOLID_HIGHLIGHTED);
 
 	// Trap
-	_trapInfo = new nanogui::Label(humanSkills, "Trap: Ready", "sans", 32);
-	_trapInfo->setColor(SOLID_WHITE);
+	_trapCooldown = new nanogui::CooldownBar(humanSkills);
+	auto trapIcon = LoadTextureFromFile("trapbone.png", "./Resources/Textures/Menu/");
+	_trapCooldown->setFixedSize(Vector2i(80, 80));
+	_trapCooldown->alpha = 1.0;
+	_trapCooldown->setBackgroundTexture(trapIcon, 0, 0);
+	_trapCooldown->drawBackground = true;
+	_trapCooldown->setColor(Color(0, 160));
+	_trapCooldown->setDirection(Vector2i(0, 1)); // Up
+
+	//_trapInfo = new nanogui::Label(humanSkills, "Trap: Ready", "sans", 32);
+	//_trapInfo->setColor(SOLID_WHITE);
 
 	// Charge rate of swinging
-	_chargeInfo = new nanogui::Label(humanSkills, "Charge: 0%", "sans", 32);
-	_chargeInfo->setColor(SOLID_WHITE);
+	_swingCharge = new nanogui::CooldownBar(humanSkills);
+	auto swingIcon = LoadTextureFromFile("swing.png", "./Resources/Textures/Menu/");
+	_swingCharge->setFixedSize(Vector2i(80, 80));
+	_swingCharge->alpha = 1.0;
+	_swingCharge->setBackgroundTexture(swingIcon, 0, 0);
+	_swingCharge->drawBackground = true;
+	_swingCharge->setColor(Color(0, 160));
+	_swingCharge->setDirection(Vector2i(0, 1)); // Up
+
+	//_chargeInfo = new nanogui::Label(humanSkills, "Charge: 0%", "sans", 32);
+	//chargeInfo->setColor(SOLID_WHITE);
 
 	//auto skillsPlaceholder = new nanogui::Label(bottomHUD, "Skills go here", "sans", 52);
 	//skillsPlaceholder->setColor(Color(Vector4f(1,1,1,0.2f)));

@@ -167,12 +167,16 @@ private:
 	// Lower HUD
 
 	// Dog skills
-	nanogui::Label* _staminaInfo;
+	nanogui::Label* _staminaInfo;	// Not used
     nanogui::CooldownBar* _staminaCooldown;
-	nanogui::Label* _peeInfo;
+	nanogui::Label* _peeInfo;	// Not used
+	nanogui::CooldownBar* _peeCooldown;
 
 	// Human skills
 	nanogui::Label* _plungerInfo;
+	nanogui::CooldownBar* _plungerCooldown;
 	nanogui::Label* _trapInfo;
+	nanogui::CooldownBar* _trapCooldown;
 	nanogui::Label* _chargeInfo;
+	nanogui::CooldownBar* _swingCharge;
 };
