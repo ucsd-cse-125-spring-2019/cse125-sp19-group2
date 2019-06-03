@@ -137,10 +137,6 @@ void Application::Setup() {
 		joinEvent->playerName = playerName;
 		_networkClient->sendEvent(joinEvent);
 
-
-		// Reset hotkeys first
-	    InputManager::getInstance().reset();
-
 		// Create local player
 		_localPlayer = std::make_unique<LocalPlayer>(playerId, _networkClient);
 
@@ -222,9 +218,6 @@ void Application::Setup() {
 	_bgm->init("Resources/Sounds/bgm1.mp3");
 	_bgm->setVolume(0.05f);
 	_bgm->play(true);
-
-	// Register global keys
-	registerGlobalKeys();
 }
 
 void Application::Cleanup() {
@@ -495,6 +488,7 @@ void Application::Update()
 	  // show connection screen
 	  _localPlayer = nullptr;
 	  _networkClient->closeConnection();
+	  InputManager::getInstance().reset();
 	  EntityManager::getInstance().clearAll();
 	  AudioManager::getInstance().reset();
 	  ColliderManager::getInstance().clear();
