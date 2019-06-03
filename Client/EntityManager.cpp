@@ -77,7 +77,7 @@ std::shared_ptr<CBaseEntity> EntityManager::getEntity(std::shared_ptr<BaseState>
       entity = std::make_shared<CHumanEntity>(id, playerState->skinID);
       break;
     case ENTITY_HOUSE_6X6_A:
-      entity = std::make_shared<CHouseEntity>(type);
+      entity = std::make_shared<CHouseEntity>(id);
       break;
     case ENTITY_BONE:
       entity = std::make_shared<CBoneEntity>();
@@ -126,11 +126,27 @@ std::shared_ptr<CBaseEntity> EntityManager::getEntity(std::shared_ptr<BaseState>
 
     if (entity)
     {
+		if (!state->isVisible)
+		{
+			Logger::getInstance()->debug("type:" + std::to_string(state->type));
+		}
         _entityList.push_back(entity);
         _entityMap.insert({id, _entityList.size() - 1});
     }
 
     return entity;
+}
+
+std::vector<uint32_t> EntityManager::getEntityIdList()
+{
+	std::vector<uint32_t> idList;
+	
+	for (auto& entity : _entityList)
+	{
+		idList.push_back(entity->getId());
+	}
+
+	return idList;
 }
 
 int EntityManager::getEntityCount()

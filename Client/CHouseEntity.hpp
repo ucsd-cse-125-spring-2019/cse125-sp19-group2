@@ -7,19 +7,19 @@
 class CHouseEntity : public CBaseEntity
 {
 public:
-	CHouseEntity(EntityType type)
+	CHouseEntity(uint32_t id)
 	{
 		// Allocate member variables
 
 		// House model depends on type. We may want a mapping from type enum to
 		// model paths
-		switch (type)
-		{
-		case ENTITY_HOUSE_6X6_A:
-		{
-			_objectModel = std::make_unique<Model>("./Resources/Models/house_6x6_A.fbx");
-		}
-		}
+		std::string modelLoc = "./Resources/Models/house_6x6_A";
+		int usedSkin = id % HOUSE_SKIN_AMOUNT;
+		if (usedSkin != 0)
+			modelLoc += std::to_string(usedSkin);
+		modelLoc += ".fbx";
+		const char * modelSource = modelLoc.c_str();
+		_objectModel = std::make_unique<Model>(modelSource);
 
 		_objectShader = std::make_unique<Shader>();
 		_state = std::make_shared<BaseState>();

@@ -9,6 +9,7 @@ public:
 		glm::vec3 scale) : SBoxEntity(pos, scale)
 	{
 		_state->type = ENTITY_BAR;
+		_state->isVisible = true;
 	};
 	~SBarEntity() {};
 };

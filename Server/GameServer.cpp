@@ -167,7 +167,7 @@ void GameServer::updateGameState()
 		auto dog = _structureInfo->entityMap->find(dogId);
 		if (dog != _structureInfo->entityMap->end())
 		{
-			dogsCaught &= std::static_pointer_cast<SDogEntity>(dog->second)->isCaught;
+			dogsCaught &= std::static_pointer_cast<DogState>(dog->second->getState())->isCaught;
 		}
 	}
 
@@ -244,6 +244,9 @@ void GameServer::updateGameState()
 
 void GameServer::resetGameState()
 {
+	// Clear internal network queues
+	_networkInterface->clearQueues();
+
 	// Initialize game state struct if it does not exist
 	if (!_structureInfo->gameState)
 	{
@@ -262,6 +265,7 @@ void GameServer::resetGameState()
 	_gameState->entityCount = 0;
 	_gameState->waitingForClients = false;
 	_gameState->clientReadyCount = 0;
+	_gameState->debugMode = false;
 	_gameState->gameStarted = false;
 	_gameState->gameOver = false;
 	_gameState->inLobby = true;

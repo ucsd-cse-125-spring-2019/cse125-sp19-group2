@@ -53,6 +53,8 @@ const std::chrono::seconds TRAP_COOLDOWN(10);
 #define LAUNCHING_VELOCITY 25.0f	// Plunger speed
 #define HUMAN_FLY_VELOCITY 30.0f
 
+#define HOUSE_SKIN_AMOUNT 4
+
 // This is absolutely filthy code but it is necessary when multiple machines
 // enter the picture.
 enum EntityType

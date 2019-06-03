@@ -8,6 +8,7 @@ enum WidgetType {
 	WIDGET_LOBBY,
 	WIDGET_LIST_DOGS,
 	WIDGET_LIST_HUMANS,
+	WIDGET_LOADING,
 	WIDGET_OPTIONS,
 	WIDGET_HUD,
 	WIDGET_HUD_TOP,
@@ -36,6 +37,8 @@ public:
 
     void draw();
 
+	void refresh();
+
 	void resize(int x, int y);
 
     nanogui::Screen* getScreen();
@@ -59,6 +62,7 @@ public:
 	void registerSwitchSidesCallback(const std::function<void()> f);
 	void registerReadyCallback(const std::function<void()> f);
 	void registerControllerCallback(const std::function<void(GamePadIndex)> f);
+	void registerDisconnectCallback(const std::function<void()> f);
 
 	// Text in player name and address boxes
 	std::string getPlayerName();
@@ -106,6 +110,7 @@ private:
 	/*** Functions ***/
 	void initConnectScreen();
 	void initLobbyScreen();
+	void initLoadingScreen();
 	void initHUD();
 	void initControlMenu();
 
@@ -144,6 +149,7 @@ private:
 	/*** UI elements ***/
 
 	// Connect screen
+	nanogui::Label* _connectPadding;
 	nanogui::TextBox* _playerNameBox;
 	nanogui::TextBox* _addressBox;
 	nanogui::Button* _connectButton;
@@ -156,6 +162,8 @@ private:
 
 	// Controls menu
 	nanogui::detail::FormWidget<GamePadIndex, std::integral_constant<bool, true>>* _gamepadSelect;
+	nanogui::Button* _muteButton;
+	nanogui::Button* _disconnectButton;
 
 	// Upper HUD
 	nanogui::Label* _timer;	// Countdown timer

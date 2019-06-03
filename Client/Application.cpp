@@ -54,7 +54,7 @@ void Application::Setup() {
   glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
   glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
   glEnable(GL_CULL_FACE);
-
+	glEnable(GL_MULTISAMPLE);
     
 
   // Initialize pointers
@@ -65,7 +65,7 @@ void Application::Setup() {
 
   _camera = std::make_unique<Camera>();
   _camera->set_position(0, 0, 3.0f);
-  _frameBuffer = std::make_unique<FrameBuffer>(800, 600);
+  _frameBuffer = std::make_unique<FrameBuffer>(800, 600, true);
   _quadFrameBuffer = std::make_unique<FrameBuffer>(800, 600);
 
   // Set up testing shader program
@@ -209,6 +209,11 @@ void Application::Setup() {
 		}
 	});
 
+	// Disconnect button
+	GuiManager::getInstance().registerDisconnectCallback([&]() {
+		_networkClient->closeConnection();
+	});
+
 	_bgm = AudioManager::getInstance().getAudioSource("bgm");
 	_bgm->init("Resources/Sounds/bgm1.mp3");
 	_bgm->setVolume(0.05f);
@@ -245,7 +250,7 @@ void Application::Run() {
 
   Setup();
 
-  glfwSwapInterval(0);
+  glfwSwapInterval(1);
   glfwGetFramebufferSize(_window, &_win_width, &_win_height);
   StaticResize(_window, _win_width, _win_height);
 
@@ -303,17 +308,40 @@ void Application::Update()
 				// Ready button text
 				int numPlayers = gameState->dogs.size() + gameState->humans.size();
 				GuiManager::getInstance().setReadyText("(" + std::to_string(gameState->readyPlayers.size()) + std::string("/") + std::to_string(numPlayers) + std::string(")"));
+
+				// If everyone is ready, show loading screen
+				if (numPlayers == gameState->readyPlayers.size())
+				{
+					GuiManager::getInstance().getWidget(WIDGET_LOBBY)->setVisible(false);
+					GuiManager::getInstance().getWidget(WIDGET_OPTIONS)->setVisible(false);
+					GuiManager::getInstance().getWidget(WIDGET_LOADING)->setVisible(true);
+
+					// Get mute status first, then mute
+					_muteSetting = AudioManager::getInstance().getMute();
+					AudioManager::getInstance().setMute(true);
+
+					// Start timer
+					_startTime = std::chrono::steady_clock::now();
+				}
 			}
 
-			// Did a game just start? If so, hide lobby UI
+			// Did a game just start?
 			if (_inLobby && !gameState->inLobby)
 			{
 				_inLobby = false;
 				_gameLoaded = false;
-				GuiManager::getInstance().getWidget(WIDGET_LOBBY)->setVisible(false);
-				GuiManager::getInstance().getWidget(WIDGET_OPTIONS)->setVisible(false);
+			}
+			// If everything is loaded, hide loading screen and show HUD
+			else if (((!_inLobby && !gameState->waitingForClients && gameState->pregameCountdown) ||
+				gameState->debugMode) &&
+				GuiManager::getInstance().getWidget(WIDGET_LOADING)->visible())
+			{
+				GuiManager::getInstance().getWidget(WIDGET_LOADING)->setVisible(false);
 				GuiManager::getInstance().setReadyEnabled(true);
 				GuiManager::getInstance().setSwitchEnabled(true);
+
+				// Back to user setting for audio mute
+				AudioManager::getInstance().setMute(_muteSetting);
 
 				// Capture mouse
 				_localPlayer->setMouseCaptured(true);
@@ -342,8 +370,7 @@ void Application::Update()
 				}
 
 				// Redraw
-				auto screen = GuiManager::getInstance().getScreen();
-				GuiManager::getInstance().resize(screen->size().x(), screen->size().y());
+				GuiManager::getInstance().refresh();
 			}
 			// Conversely, did a game just end and send us back to the lobby?
 			else if (gameState->inLobby && !_inLobby)
@@ -373,8 +400,7 @@ void Application::Update()
 				_localPlayer->setMouseCaptured(false);
 
 				// Redraw
-				auto screen = GuiManager::getInstance().getScreen();
-				GuiManager::getInstance().resize(screen->size().x(), screen->size().y());
+				GuiManager::getInstance().refresh();
 			}
 
 			// Update pregame timer
@@ -394,8 +420,7 @@ void Application::Update()
 				}
 				GuiManager::getInstance().setSecondaryMessage(std::to_string(secondsLeft));
 
-				auto screen = GuiManager::getInstance().getScreen();
-				GuiManager::getInstance().resize(screen->size().x(), screen->size().y());
+				GuiManager::getInstance().refresh();
 			}
 			else if (_inCountdown)
 			{
@@ -405,8 +430,7 @@ void Application::Update()
 				GuiManager::getInstance().setPrimaryMessage("Go!");
 				GuiManager::getInstance().setSecondaryMessage("");
 
-				auto screen = GuiManager::getInstance().getScreen();
-				GuiManager::getInstance().resize(screen->size().x(), screen->size().y());
+				GuiManager::getInstance().refresh();
 			}
 			else if (!_startHidden)
 			{
@@ -419,8 +443,7 @@ void Application::Update()
 					GuiManager::getInstance().setPrimaryMessage("");
 					_startHidden = true;
 
-					auto screen = GuiManager::getInstance().getScreen();
-					GuiManager::getInstance().resize(screen->size().x(), screen->size().y());
+					GuiManager::getInstance().refresh();
 				}
 			}
 
@@ -438,8 +461,7 @@ void Application::Update()
 				auto secondsLeft = (int)(std::ceil(gameState->millisecondsToLobby / 1000.0f));
 				GuiManager::getInstance().setSecondaryMessage("Returning to lobby in " + std::to_string(secondsLeft) + "...");
 
-				auto screen = GuiManager::getInstance().getScreen();
-				GuiManager::getInstance().resize(screen->size().x(), screen->size().y());
+				GuiManager::getInstance().refresh();
 			}
 
 			// Update countdown timer
@@ -489,11 +511,11 @@ void Application::Draw() {
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
   // Test FBO
-  _quadFrameBuffer->renderScene([this]
+  _frameBuffer->renderScene([this]
   {
     // render scene
     //_frameBuffer->drawQuad(_testShader);
-      glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT| GL_STENCIL_BUFFER_BIT);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT| GL_STENCIL_BUFFER_BIT);
 
 	  // Non-UI elements depend on localPlayer and that we're not in the lobby
 	  if (_localPlayer && !_inLobby) {
@@ -523,7 +545,10 @@ void Application::Draw() {
   });
 
   // Render _frameBuffer Quad
-  _quadFrameBuffer->drawQuad(_quadShader);
+  //_frameBuffer->drawQuad(_quadShader);
+
+	_frameBuffer->blit(_quadFrameBuffer);
+	_quadFrameBuffer->drawQuad(_quadShader);
 
   // Finish drawing scene
   glFinish();
@@ -544,6 +569,32 @@ void Application::Draw() {
 	  // Trigger a manual resize
 	  auto screen = GuiManager::getInstance().getScreen();
 	  StaticResize(_window, screen->size().x(), screen->size().y());
+  }
+  // Edge case in which not all state was received by the client
+  else if (!_gameLoaded && !_inLobby &&
+	  EntityManager::getInstance().getEntityCount() > 0 &&
+	  EntityManager::getInstance().getEntityCount() < _serverEntityCount) {
+
+	  // Check time since start
+	  auto elapsed = std::chrono::steady_clock::now() - _startTime;
+	  if (std::chrono::duration_cast<std::chrono::seconds>(elapsed) > std::chrono::seconds(4))
+	  {
+		  // Build a list of the entities we have
+		  auto entityList = EntityManager::getInstance().getEntityIdList();
+
+		  // Request a re-send from the server
+		  auto resendEvent = std::make_shared<GameEvent>();
+		  resendEvent->type = EVENT_REQUEST_RESEND;
+		  resendEvent->playerId = _localPlayer->getPlayerId();
+		  resendEvent->entityList = entityList;
+		  try {
+			  _networkClient->sendEvent(resendEvent);
+		  }
+		  catch (std::runtime_error e) {};
+
+		  // Reset timer
+		  _startTime = std::chrono::steady_clock::now();
+	  }
   }
 }
 
@@ -586,7 +637,8 @@ void Application::Resize(int x, int y) {
   _win_width = x;
   _win_height = y;
   glViewport(0, 0, x, y);
-  _quadFrameBuffer->resize(x, y);
+  _frameBuffer->resize(x, y);
+	_quadFrameBuffer->resize(x, y);
   if (_localPlayer) {
 	  _localPlayer->resize(x, y);
   }
