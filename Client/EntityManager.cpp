@@ -77,7 +77,7 @@ std::shared_ptr<CBaseEntity> EntityManager::getEntity(std::shared_ptr<BaseState>
       entity = std::make_shared<CHumanEntity>(id, playerState->skinID);
       break;
     case ENTITY_HOUSE_6X6_A:
-      entity = std::make_shared<CHouseEntity>(type);
+      entity = std::make_shared<CHouseEntity>(id);
       break;
     case ENTITY_BONE:
       entity = std::make_shared<CBoneEntity>();
