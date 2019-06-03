@@ -150,6 +150,7 @@ private:
 
 	// Lobby screen
 	nanogui::Button* _switchSidesButton;
+	nanogui::Label* _lobbyPadding;
 	nanogui::Button* _readyButton;
 	nanogui::Label* _readyLabel;
 
@@ -167,6 +168,7 @@ private:
 
 	// Dog skills
 	nanogui::Label* _staminaInfo;
+    nanogui::CooldownBar* _staminaCooldown;
 	nanogui::Label* _peeInfo;
 
 	// Human skills
