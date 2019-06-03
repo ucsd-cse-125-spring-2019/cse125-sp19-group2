@@ -34,9 +34,15 @@ public:
 	void updateTile(std::shared_ptr<BaseState> const& state);
 
 	/**
-	* \brief Render all collision boxes in the game world
+	* \brief Render floor
 	* \param camera(std::unique_ptr<Camera> const&) Local camera
 	*/
 	void render(std::unique_ptr<Camera> const& camera) override;
+
+	/**
+	* \brief Generate floor textures for each type of tiles
+	* \param camera(std::unique_ptr<Camera> const&) Local camera
+	*/
+	void createFloorTexture(std::unique_ptr<Camera> const& camera);
 };
 
