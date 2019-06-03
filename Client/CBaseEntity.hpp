@@ -54,6 +54,8 @@ public:
 	// Every child must override this if they carry additional state
 	virtual void updateState(std::shared_ptr<BaseState> state)
 	{
+		_state->id = state->id;
+
 		// Translation
 		_state->pos = state->pos;
 

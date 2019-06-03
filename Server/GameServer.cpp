@@ -24,54 +24,18 @@ void GameServer::start()
     // Start network server
     _networkInterface = std::make_unique<NetworkServer>(PORTNUM);
 
-	// Initialize game state struct
-	_gameState = std::make_shared<GameState>();
-	_gameState->type = ENTITY_STATE;
-	_gameState->gameStarted = false;
-	_gameState->gameOver = false;
-	_gameState->inLobby = true;
-	_gameState->pregameCountdown = false;
-	_gameState->millisecondsToStart = 0;
-	_gameState->millisecondsLeft = std::chrono::duration_cast<std::chrono::milliseconds>(MAX_GAME_LENGTH).count();
-	_gameState->millisecondsToLobby = 0;
-	_gameState->dogs = std::unordered_map<uint32_t, std::string>();
-	_gameState->humans = std::unordered_map<uint32_t, std::string>();
-	_gameState->readyPlayers = std::vector<uint32_t>();
+	// Init level parser
+	_levelParser = std::make_unique<GridLevelParser>();
+	
+	// Struct containing pointers to all gamestate related objects
+	_structureInfo = new StructureInfo();
+
+	// Load and initialize all server gamestate. This includes loading entities
+	// from the level file, and initializing the gameState struct
+	resetGameState();
 
 	// Server utilization monitor
 	Logger::getInstance()->initUtilizationMonitor();
-
-	// Struct of all useful objects for event manager and otherwise
-	_structureInfo = new StructureInfo();
-
-	// Init level parser
-	_levelParser = std::make_unique<GridLevelParser>();
-
-	// Map initialization
-	_levelParser->parseLevelFromFile("Levels/map.dat", _structureInfo);
-
-	Logger::getInstance()->debug("Parsed " + std::to_string(_structureInfo->entityMap->size()) + " entities from file.");
-
-	// Ensure at least one human spawn, dog spawn, and jail
-	// TODO: convert these to exceptions, or find a cleaner way to handle this
-	if (!_structureInfo->jails->size())
-	{
-		Logger::getInstance()->fatal("No jails found in level file");
-		fgetc(stdin);
-		exit(1);
-	}
-	if (!_structureInfo->humanSpawns->size())
-	{
-		Logger::getInstance()->fatal("No human spawn locations found in level file");
-		fgetc(stdin);
-		exit(1);
-	}
-	if (!_structureInfo->dogSpawns->size())
-	{
-		Logger::getInstance()->fatal("No dog spawn locations found in level file");
-		fgetc(stdin);
-		exit(1);
-	}
 
 	// Init collision manager
 	_collisionManager = std::make_unique<CollisionManager>(_structureInfo->entityMap);
@@ -79,11 +43,13 @@ void GameServer::start()
 	// Init event handler
 	_eventManager = std::make_unique<EventManager>(
 		_networkInterface.get(),
-		_structureInfo,
-		_gameState);
+		_structureInfo);
+
+	_isRunning = true;
+	_isFinished = false;
 
     // Run update loop, keeping each iteration at a minimum of 1 tick
-	while (true)
+	while (_isRunning)
 	{
 		auto timerStart = std::chrono::steady_clock::now();
 
@@ -110,14 +76,14 @@ void GameServer::start()
 			std::this_thread::sleep_for(tick(1) - elapsed);
 		}
 	}
+
+	_isFinished = true;
 }
 
 
 void GameServer::update()
 {
 	// General game state and network updates
-
-
 
 	// add new entities from last tick to the entity map
 	for (auto& newEntity : *_structureInfo->newEntities)
@@ -126,8 +92,12 @@ void GameServer::update()
 	}
 	_structureInfo->newEntities->clear();
 
-	// Handle events from clients and update() each entity
-	_eventManager->update();
+	// Handle events from clients and update() each entity. If it returns false,
+	// we need to reset the state of the server.
+	if (!_eventManager->update())
+	{
+		resetGameState();
+	}
 
 	// Collision resolution
 	_collisionManager->handleCollisions();
@@ -159,7 +129,7 @@ void GameServer::update()
 	// own clocks for the countdown.
 	if (_gameState->dogs.size() || _gameState->humans.size())
 	{
-		_networkInterface->sendUpdate(_gameState);
+		_networkInterface->sendUpdate(_structureInfo->gameState);
 	}
 
 	// Remove all entities marked for deletion
@@ -179,8 +149,13 @@ void GameServer::update()
 	{
 		_structureInfo->entityMap->erase(_structureInfo->entityMap->find(id));
 	}
-}
 
+	// Reset hasChanged for all entities
+	for (auto& entityPair : *_structureInfo->entityMap)
+	{
+		entityPair.second->hasChanged = false;
+	}
+}
 
 void GameServer::updateGameState()
 {
@@ -192,7 +167,7 @@ void GameServer::updateGameState()
 		auto dog = _structureInfo->entityMap->find(dogId);
 		if (dog != _structureInfo->entityMap->end())
 		{
-			dogsCaught &= std::static_pointer_cast<SDogEntity>(dog->second)->isCaught;
+			dogsCaught &= std::static_pointer_cast<DogState>(dog->second->getState())->isCaught;
 		}
 	}
 
@@ -240,24 +215,10 @@ void GameServer::updateGameState()
 				std::chrono::duration_cast<std::chrono::nanoseconds>(POSTGAME_LENGTH)
 				- duration).count();
 
+		// Reset game if we are past the lobby timer
 		if (_gameState->millisecondsToLobby <= 0)
 		{
-			_gameState->inLobby = true;
-			_gameState->gameOver = false;
-			_gameState->readyPlayers.clear();
-			_gameState->millisecondsLeft = std::chrono::duration_cast<std::chrono::milliseconds>(MAX_GAME_LENGTH).count();
-
-			// Reset game state
-			for (auto& entityPair : *_structureInfo->entityMap)
-			{
-				// Remove players and pee puddles. TODO: other state reset stuff
-				if (entityPair.second->getState()->type == ENTITY_HUMAN ||
-					entityPair.second->getState()->type == ENTITY_DOG ||
-					entityPair.second->getState()->type == ENTITY_PUDDLE)
-				{
-					entityPair.second->getState()->isDestroyed = true;
-				}
-			}
+			resetGameState();
 		}
 	}
 
@@ -278,4 +239,104 @@ void GameServer::updateGameState()
 		_gameState->_endgameStart = std::chrono::steady_clock::now();
 		Logger::getInstance()->debug("Dogs won!");
 	}
+}
+
+
+void GameServer::resetGameState()
+{
+	// Clear internal network queues
+	_networkInterface->clearQueues();
+
+	// Initialize game state struct if it does not exist
+	if (!_structureInfo->gameState)
+	{
+		_structureInfo->gameState = std::make_shared<GameState>();
+		_gameState = _structureInfo->gameState.get();
+		_gameState->readyPlayers = std::vector<uint32_t>();
+		_gameState->dogs = std::unordered_map<uint32_t, std::string>();
+		_gameState->humans = std::unordered_map<uint32_t, std::string>();
+	}
+	// Otherwise we are working with an old state struct
+	else
+	{
+		_gameState->readyPlayers.clear();
+	}
+	_gameState->type = ENTITY_STATE;
+	_gameState->entityCount = 0;
+	_gameState->waitingForClients = false;
+	_gameState->clientReadyCount = 0;
+	_gameState->debugMode = false;
+	_gameState->gameStarted = false;
+	_gameState->gameOver = false;
+	_gameState->inLobby = true;
+	_gameState->pregameCountdown = false;
+	_gameState->millisecondsToStart = 0;
+	_gameState->millisecondsLeft = std::chrono::duration_cast<std::chrono::milliseconds>(MAX_GAME_LENGTH).count();
+	_gameState->millisecondsToLobby = 0;
+
+	// Map initialization
+	_levelParser->parseLevelFromFile("Levels/map.dat", _structureInfo);
+
+	Logger::getInstance()->debug("Parsed " + std::to_string(_structureInfo->entityMap->size()) + " entities from file.");
+
+	// Ensure at least one human spawn, dog spawn, and jail
+	if (!_structureInfo->jails->size())
+	{
+		Logger::getInstance()->fatal("No jails found in level file");
+		fgetc(stdin);
+		exit(1);
+	}
+	if (!_structureInfo->humanSpawns->size())
+	{
+		Logger::getInstance()->fatal("No human spawn locations found in level file");
+		fgetc(stdin);
+		exit(1);
+	}
+	if (!_structureInfo->dogSpawns->size())
+	{
+		Logger::getInstance()->fatal("No dog spawn locations found in level file");
+		fgetc(stdin);
+		exit(1);
+	}
+}
+
+
+void GameServer::shutdown()
+{
+	Logger::getInstance()->info("Shutting down server");
+
+	// Signal main thread to stop and wait for it to finish
+	_isRunning = false;
+
+	while (!_isFinished)
+	{
+		std::this_thread::sleep_for(tick(1));
+	}
+
+	// Disconnect all clients gracefully first
+	// If a message is to be shown to players on server shutdown, send it here
+	if (_networkInterface)
+	{
+		for (auto& client : _networkInterface->getPlayerList())
+		{
+			_networkInterface->closePlayerSession(client);
+		}
+	}
+
+	// Deallocate state structures
+	_structureInfo->entityMap->clear();
+	delete _structureInfo->entityMap;
+
+	_structureInfo->newEntities->clear();
+	delete _structureInfo->newEntities;
+
+	delete _structureInfo->jailsPos;
+	delete _structureInfo->humanSpawns;
+	delete _structureInfo->dogSpawns;
+	
+	_structureInfo->dogHouses->clear();
+	delete _structureInfo->dogHouses;
+
+	_structureInfo->jails->clear();
+	delete _structureInfo->jails;
 }

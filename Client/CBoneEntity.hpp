@@ -1,12 +1,8 @@
 #pragma once
+
 #include "CBaseEntity.hpp"
 #include "Model.hpp"
-#include "Shared/Logger.hpp"
-#include <glm/mat4x4.hpp>
-#include <glm/gtc/matrix_transform.hpp>
 
-// As with server, TONS of copied code. Need to refactor static objects
-// to initialize all this junk in a parent class.
 class CBoneEntity : public CBaseEntity
 {
 public:
@@ -22,6 +18,21 @@ public:
 	};
 
 	~CBoneEntity() {};
-};
 
-#pragma once
+	virtual void updateState(std::shared_ptr<BaseState> state) override
+	{
+		CBaseEntity::updateState(state);
+
+		// If slated to be destroyed, play eating sound
+		if (!_state->isDestroyed && state->isDestroyed)
+		{
+			auto eatingSound = AudioManager::getInstance().getAudioSource("dog eating" + std::to_string(_state->id));
+			eatingSound->init("Resources/Sounds/dog_eating.wav", false, true);
+			eatingSound->setPosition(_state->pos);
+			eatingSound->setVolume(0.3f);
+			eatingSound->play(true);
+		}
+
+		_state->isDestroyed = state->isDestroyed;
+	}
+};

@@ -378,6 +378,8 @@ void NetworkServer::socketReadHandler()
 
 void NetworkServer::socketWriteHandler()
 {
+	// Set of write sockets; written to by the select() system call
+	FD_SET writeSet;
 
 	// List of dead sockets to kill
 	std::queue<uint32_t> sessionsToKill = std::queue<uint32_t>();
@@ -420,15 +422,35 @@ void NetworkServer::socketWriteHandler()
 		memcpy(databuf, &size, sizeof(uint32_t));
 		ss.read(databuf + sizeof(uint32_t), size);
 
+		// Reset writeSet first
+		FD_ZERO(&writeSet);
+
 		// Lock and iterate over player sessions
 		std::shared_lock<std::shared_mutex> lock(_sessionMutex);
+
+		// Add sockets to writeSet
+		for (auto& pair : _sessions)
+		{
+			FD_SET(pair.second.socket, &writeSet);
+		}
+
+		// Call select() without a timeout to see which sockets are
+		// writable. This should not block.
+		if (select(0, NULL, &writeSet, NULL, NULL) == SOCKET_ERROR)
+		{
+			Logger::getInstance()->warn(
+				"select() returned error in write thread: " +
+				std::to_string(WSAGetLastError()));
+		}
+
 		for (auto& pair : _sessions)
 		{
 			SocketState session = pair.second;
 
 			// Only send the data if this is the correct playerId or if no
-			// playerId was specified
-			if (!playerId || session.playerId == playerId)
+			// playerId was specified, AND the socket is writable
+			if ((!playerId || session.playerId == playerId) &&
+				FD_ISSET(session.socket, &writeSet))
 			{
 				std::copy(
 					databuf,
@@ -526,6 +548,26 @@ void NetworkServer::closePlayerSession(uint32_t playerId)
 		Logger::getInstance()->info(
 				"Failed to find session for player " +
 				std::to_string(playerId));
+	}
+}
+
+
+void NetworkServer::clearQueues()
+{
+	// Event queue first
+	std::unique_lock<std::mutex> eventLock(_eventMutex);
+	while (!_eventQueue->empty())
+	{
+		_eventQueue->pop();
+	}
+	eventLock.unlock();
+
+	// Update queue next. The blocking queue is internally
+	// mutexed, so no need for external locks
+	while (!_updateQueue->isEmpty())
+	{
+		std::pair<uint32_t, std::shared_ptr<BaseState>> garbage;
+		_updateQueue->pop(garbage);
 	}
 }
 

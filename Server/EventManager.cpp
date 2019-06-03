@@ -4,12 +4,11 @@
 
 EventManager::EventManager(
 	NetworkServer* networkInterface,
-	StructureInfo* structureInfo,
-	std::shared_ptr<GameState> gameState)
+	StructureInfo* structureInfo)
 {
 	_networkInterface = networkInterface;
 	_structureInfo = structureInfo;
-	_gameState = gameState;
+	_gameState = structureInfo->gameState.get();
 }
 
 EventManager::~EventManager()
@@ -17,7 +16,7 @@ EventManager::~EventManager()
 }
 
 
-void EventManager::update()
+bool EventManager::update()
 {
 	auto playerEvents = _networkInterface->receiveEvents();
 
@@ -43,12 +42,34 @@ void EventManager::update()
 		}
 		case EVENT_PLAYER_LEAVE:
 		{
-			handlePlayerLeave(event);
+			if (!handlePlayerLeave(event))
+			{
+				return false;
+			}
 			break;
 		}
 		case EVENT_PLAYER_READY:
 		{
 			handlePlayerReady(event);
+			break;
+		}
+		case EVENT_CLIENT_READY:
+		{
+			// Client has fully loaded the game
+			_gameState->clientReadyCount++;
+			if (_gameState->waitingForClients &&
+				_gameState->clientReadyCount >= _gameState->dogs.size() + _gameState->humans.size())
+			{
+				_gameState->pregameCountdown = true;
+				_gameState->_pregameStart = std::chrono::steady_clock::now();
+				_gameState->waitingForClients = false;
+				_gameState->clientReadyCount = 0;
+			}
+			break;
+		}
+		case EVENT_REQUEST_RESEND:
+		{
+			handleResendRequest(event);
 			break;
 		}
 		default:
@@ -63,7 +84,7 @@ void EventManager::update()
 	}
 
 	// Call update() on all entities if we are not in the pregame countdown
-	if (!_gameState->pregameCountdown)
+	if (!_gameState->pregameCountdown && !_gameState->waitingForClients)
 	{
 		for (auto& entityPair : *_structureInfo->entityMap)
 		{
@@ -86,6 +107,8 @@ void EventManager::update()
 			entityPair.second->update(eventVec);
 		}
 	}
+
+	return true;
 }
 
 void EventManager::handlePlayerJoin(std::shared_ptr<GameEvent> event)
@@ -148,7 +171,7 @@ void EventManager::handlePlayerReady(std::shared_ptr<GameEvent> event)
 	}
 }
 
-void EventManager::handlePlayerLeave(std::shared_ptr<GameEvent> event)
+bool EventManager::handlePlayerLeave(std::shared_ptr<GameEvent> event)
 {
 	if (_gameState->dogs.find(event->playerId) != _gameState->dogs.end())
 	{
@@ -169,14 +192,6 @@ void EventManager::handlePlayerLeave(std::shared_ptr<GameEvent> event)
 			event->playerId),
 		_gameState->readyPlayers.end());
 
-	// If everyone is now ready, start the game
-	if (_gameState->inLobby &&
-		_gameState->readyPlayers.size() ==
-		_gameState->dogs.size() + _gameState->humans.size())
-	{
-		startGame();
-	}
-
 	// Reset the game if no other players
 	if (!_gameState->dogs.size() && !_gameState->humans.size())
 	{
@@ -185,6 +200,15 @@ void EventManager::handlePlayerLeave(std::shared_ptr<GameEvent> event)
 		_gameState->gameOver = false;
 		_gameState->readyPlayers.clear();
 		_gameState->millisecondsLeft = std::chrono::duration_cast<std::chrono::milliseconds>(MAX_GAME_LENGTH).count();
+		return false;
+	}
+	
+	// If everyone is now ready, start the game
+	if (_gameState->inLobby &&
+		_gameState->readyPlayers.size() ==
+		_gameState->dogs.size() + _gameState->humans.size())
+	{
+		startGame();
 	}
 
 	// Mark entity for deletion if it exists
@@ -194,13 +218,67 @@ void EventManager::handlePlayerLeave(std::shared_ptr<GameEvent> event)
 		entity->getState()->isDestroyed = true;
 		entity->hasChanged = true;
 	}
+
+	return true;
+}
+
+void EventManager::handleResendRequest(std::shared_ptr<GameEvent> event)
+{
+	/*
+	// List of entities known to the client
+	std::vector<uint32_t> clientList = event->entityList;
+
+	// Get list of entities currently on the server
+	std::vector<uint32_t> serverList;
+
+	for (auto& entityPair : *_structureInfo->entityMap)
+	{
+		serverList.push_back(entityPair.first);
+	}
+
+	// Difference between the two vectors
+	std::vector<uint32_t> diff;
+	std::set_difference(
+		clientList.begin(), clientList.end(),
+		serverList.begin(), serverList.end(),
+		std::back_inserter(diff));
+
+	*/
+
+	Logger::getInstance()->debug("Received resend request from playerId " +
+		std::to_string(event->playerId));
+
+	// Build a list of updates for this client based on diff
+	std::vector<std::shared_ptr<BaseState>> updates;
+
+	for (auto& entityPair : *_structureInfo->entityMap)
+	{
+		updates.push_back(entityPair.second->getState());
+	}
+
+	/*
+	for (auto& entityId : diff)
+	{
+		std::shared_ptr<SBaseEntity> entity = _structureInfo->entityMap->find(entityId)->second;
+		updates.push_back(entity->getState());
+	}
+	*/
+
+	// Send updates to client
+	_networkInterface->sendUpdates(updates, event->playerId);
 }
 
 void EventManager::startGame()
 {
+	// Reset entity count
+	_structureInfo->gameState->entityCount = 0;
+
 	// Immediately send a new GameState to try and update ready button before
 	// the game loads on the client
-	_networkInterface->sendUpdate(_gameState);
+	_networkInterface->sendUpdate(_structureInfo->gameState);
+
+	// Create human with different skins
+	int skinID = 0;
 
 	// Build player entities for each human
 	for (auto& humanPair : _gameState->humans)
@@ -211,16 +289,22 @@ void EventManager::startGame()
 		_structureInfo->humanSpawns->push(humanSpawn);
 
 		auto humanEntity = std::make_shared<SHumanEntity>(
-			humanPair.first,
-			humanPair.second,
-			_structureInfo->newEntities);
+			humanPair.first, // ID
+			humanPair.second, // Name
+			_structureInfo,
+			skinID);
 
 		// Set location
 		humanEntity->getState()->pos = glm::vec3(humanSpawn.x, 0, humanSpawn.y);
 
 		// Insert into global map
 		_structureInfo->entityMap->insert({ humanPair.first, humanEntity });
+
+		skinID++;
 	}
+
+	// Create dog with different skins
+	skinID = 0;
 
 	// Build player entities for each dog
 	for (auto& dogPair : _gameState->dogs)
@@ -233,14 +317,16 @@ void EventManager::startGame()
 		auto dogEntity = std::make_shared<SDogEntity>(
 			dogPair.first, // ID
 			dogPair.second, // Name
-			_structureInfo->jailsPos,
-			_structureInfo->newEntities);
+			_structureInfo,
+			skinID);
 
 		// Set location
 		dogEntity->getState()->pos = glm::vec3(dogSpawn.x, 0, dogSpawn.y);
 
 		// Insert into global map
 		_structureInfo->entityMap->insert({ dogPair.first, dogEntity });
+
+		skinID++;
 	}
 
 	// Send state of every object to every player
@@ -248,6 +334,13 @@ void EventManager::startGame()
 	for (auto& entityPair : *_structureInfo->entityMap)
 	{
 		updateVec.push_back(entityPair.second->getState());
+
+		// Visible entity count. Used by the client to determine whether
+		// the game is fully rendered or not
+		if (entityPair.second->getState()->isVisible)
+		{
+			_structureInfo->gameState->entityCount++;
+		}
 	}
 	_networkInterface->sendUpdates(updateVec);
 
@@ -258,8 +351,23 @@ void EventManager::startGame()
 	// for debugging purposes, but there will be no winning or losing
 	if (_gameState->dogs.size() && _gameState->humans.size())
 	{
-		// Game has started!
-		_gameState->pregameCountdown = true;
-		_gameState->_pregameStart = std::chrono::steady_clock::now();
+		// Game has started! We are now waiting for players to become
+		// ready
+		_gameState->clientReadyCount = 0;
+		_gameState->waitingForClients = true;
+	}
+	else
+	{
+		// Otherwise we are in debug mode
+		_gameState->debugMode = true;
+	}
+
+	// Optimization: remove all tile entities from the server map
+	for (auto& entityPair : *_structureInfo->entityMap)
+	{
+		if (entityPair.second->getState()->type == ENTITY_FLOOR)
+		{
+			entityPair.second->getState()->isDestroyed = true;
+		}
 	}
 }

@@ -13,24 +13,47 @@
 #define PORTNUM "4000"
 
 // Map is a square so this is the same as height
-#define MAP_WIDTH 48
+#define MAP_WIDTH 72
 
 // Width and height of walls and fences
 #define FENCE_WIDTH 0.2f
 #define FENCE_HEIGHT 3.0f
 
 // Pregame countdown
-const std::chrono::seconds PREGAME_LENGTH(6);
+const std::chrono::seconds PREGAME_LENGTH(5);
 
 // Max game length
-const std::chrono::seconds MAX_GAME_LENGTH(30);
+const std::chrono::seconds MAX_GAME_LENGTH(90);
 
 // Back to lobby countdown
 const std::chrono::seconds POSTGAME_LENGTH(15);
 
+// Plunger cooldown
+const std::chrono::seconds PLUNGER_COOLDOWN(5);
+
+// Dogbone trap cooldown
+const std::chrono::seconds TRAP_COOLDOWN(10);
+
 // Dog-specific stats
+#define DOG_SKIN_AMOUNT 3
+#define DOG_BASE_VELOCITY 4.8f
+#define DOG_RUN_VELOCITY DOG_BASE_VELOCITY * 1.5f
+#define DOG_TELEPORT_VELOCITY DOG_BASE_VELOCITY * 5.0f
 #define MAX_DOG_STAMINA 3.0f	// Dog can sprint for three seconds max
 #define MAX_DOG_URINE 1.0f		// Dog can make one puddle per urine bar
+#define MAX_DOG_ESCAPE_PRESSES 12	// Dog must press button 12 times to escape trap
+
+// Human-spedific stats
+#define HUMAN_SKIN_AMOUNT 3
+#define HUMAN_BASE_VELOCITY 5.0f
+#define HUMAN_SWING_VELOCITY 10.0f
+#define MAX_HUMAN_CHARGE 2.0f
+#define HUMAN_CHARGE_THRESHOLD1 0.5f	// lower than that will be swing1
+#define HUMAN_CHARGE_THRESHOLD2 1.5f    // lower than that will be swing2
+#define LAUNCHING_VELOCITY 25.0f	// Plunger speed
+#define HUMAN_FLY_VELOCITY 30.0f
+
+#define HOUSE_SKIN_AMOUNT 4
 
 // This is absolutely filthy code but it is necessary when multiple machines
 // enter the picture.
@@ -56,7 +79,11 @@ enum EntityType
 	ENTITY_TRIGGER,
 	ENTITY_CYLINDER,
 	ENTITY_HIT_PLUNGER,
-	ENTITY_PLUNGER
+	ENTITY_PLUNGER,
+	ENTITY_ROPE,
+	ENTITY_TRAP,
+	ENTITY_NET,
+	ENTITY_TREE
 	// TODO: add new types here, e.g. ENTITY_DOGBONE
 };
 
@@ -81,10 +108,10 @@ enum HumanAction
 {
 	ACTION_HUMAN_IDLE,
 	ACTION_HUMAN_MOVING,
-
 	ACTION_HUMAN_SLIPPING,
 	ACTION_HUMAN_LAUNCHING,
-	ACTION_HUMAN_SWINGING
+	ACTION_HUMAN_SWINGING,
+	ACTION_HUMAN_PLACING_TRAP
 };
 
 /*
@@ -100,7 +127,10 @@ enum DogAction
 	ACTION_DOG_MOVING,
 	ACTION_DOG_PEEING,
 	ACTION_DOG_DRINKING,
-	ACTION_DOG_SCRATCHING
+	ACTION_DOG_SCRATCHING,
+	ACTION_DOG_TRAPPED,
+	ACTION_DOG_JAILED,	// Teleporting to jail
+	ACTION_DOG_TELEPORTING	// Teleporting between doghouses
 };
 
 /*
@@ -129,7 +159,9 @@ enum HumanAnimation
 	ANIMATION_HUMAN_SWINGING1,
 	ANIMATION_HUMAN_SWINGING1_IDLE, // transition
 	ANIMATION_HUMAN_SWINGING3,
-	ANIMATION_HUMAN_SWINGING3_IDLE // transition
+	ANIMATION_HUMAN_SWINGING3_IDLE, // transition
+	ANIMATION_HUMAN_PLACING,
+	ANIMATION_HUMAN_PLACING_IDLE // transition
 };
 
 // Animations for dogs
@@ -143,7 +175,9 @@ enum DogAnimation
 	ANIMATION_DOG_DIGGING_IN,
 	ANIMATION_DOG_DIGGING_IN_DIGGING_OUT, // transition
 	ANIMATION_DOG_DIGGING_OUT,
-	ANIMATION_DOG_IDLE_RUNNING // transition
+	ANIMATION_DOG_IDLE_RUNNING, // transition
+	ANIMATION_DOG_WALKING,
+	ANIMATION_DOG_EATING
 };
 
 //Logger::getInstance()->debug("x: " + std::to_string(dir.x) + " y: " + std::to_string(dir.y) + " z: " + std::to_string(dir.z));

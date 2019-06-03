@@ -11,6 +11,7 @@
 #include "SHydrantEntity.hpp"
 #include "SFountainEntity.hpp"
 #include "SFenceEntity.hpp"
+#include "STreeEntity.hpp"
 
 GridLevelParser::GridLevelParser()
 {
@@ -26,14 +27,31 @@ void GridLevelParser::parseLevelFromFile(
 	std::string path,
 	StructureInfo* structureInfo)
 {
-	// Allocate structureInfo objects
-	structureInfo->entityMap = new std::unordered_map<uint32_t, std::shared_ptr<SBaseEntity>>();
-	structureInfo->newEntities = new std::vector<std::shared_ptr<SBaseEntity>>();
-	structureInfo->jailsPos = new std::vector<glm::vec2>();
-	structureInfo->humanSpawns = new std::queue<glm::vec2>();
-	structureInfo->dogSpawns = new std::queue<glm::vec2>();
-	structureInfo->dogHouses = new std::vector<std::shared_ptr<SBaseEntity>>();
-	structureInfo->jails = new std::vector<std::shared_ptr<SJailEntity>>();
+	// Reset state structures if they exist, else allocate them
+	if (structureInfo->entityMap)
+	{
+		Logger::getInstance()->debug("Resetting gameState structures");
+		structureInfo->entityMap->clear();
+		structureInfo->newEntities->clear();
+		structureInfo->jailsPos->clear();
+
+		// Stupid way of clearing queues
+		std::queue<glm::vec2>().swap(*(structureInfo->humanSpawns));
+		std::queue<glm::vec2>().swap(*(structureInfo->dogSpawns));
+
+		structureInfo->dogHouses->clear();
+		structureInfo->jails->clear();
+	}
+	else
+	{
+		structureInfo->entityMap = new std::unordered_map<uint32_t, std::shared_ptr<SBaseEntity>>();
+		structureInfo->newEntities = new std::vector<std::shared_ptr<SBaseEntity>>();
+		structureInfo->jailsPos = new std::vector<glm::vec2>();
+		structureInfo->humanSpawns = new std::queue<glm::vec2>();
+		structureInfo->dogSpawns = new std::queue<glm::vec2>();
+		structureInfo->dogHouses = new std::vector<std::shared_ptr<SBaseEntity>>();
+		structureInfo->jails = new std::vector<std::shared_ptr<SJailEntity>>();
+	}
 
 	// Open level file
 	std::ifstream levelFile;
@@ -279,6 +297,12 @@ void GridLevelParser::parseLevelFromFile(
 					case TILE_FOUNTAIN:
 					{
 						entity = std::make_shared<SFountainEntity>(
+							glm::vec3(avgPos.x, 0, avgPos.y));
+						break;
+					}
+					case TILE_TREE:
+					{
+						entity = std::make_shared<STreeEntity>(
 							glm::vec3(avgPos.x, 0, avgPos.y));
 						break;
 					}

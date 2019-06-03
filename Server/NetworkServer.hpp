@@ -62,6 +62,9 @@ public:
 	*/
 	void closePlayerSession(uint32_t playerId);
 
+	// Reset all queues completely
+	void clearQueues();
+
 	/*
 	** API: receive events from all clients. No guarantees on client order, but
 	** events should be received in order on a per-client basis. Synchronous

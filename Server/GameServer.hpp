@@ -3,6 +3,7 @@
 #include <memory>
 #include <unordered_map>
 #include <unordered_set>
+#include <atomic>
 
 #include "Shared/Logger.hpp"
 #include "Shared/QuadTree.hpp"
@@ -30,13 +31,22 @@ public:
     // Main update loop
     void update();
 
+	// Shutdown the server
+	void shutdown();
+
 private:
 	/** Functions **/
 
 	// Update basic game state info (started, inLobby, etc)
 	void updateGameState();
 
+	// Reset state on the server. This includes deleting all existing entities,
+	// and parsing new ones from the level file.
+	void resetGameState();
+
 	/** Variables **/
+	std::atomic<bool> _isRunning;
+	std::atomic<bool> _isFinished;
 
     // Interface for client communication
     std::unique_ptr<NetworkServer> _networkInterface;
@@ -51,7 +61,7 @@ private:
 	std::unique_ptr<CollisionManager> _collisionManager;
 
 	// Struct to keep track of game state
-	std::shared_ptr<GameState> _gameState;
+	GameState* _gameState;
 
 	// Struct containing general game info
 	StructureInfo* _structureInfo;

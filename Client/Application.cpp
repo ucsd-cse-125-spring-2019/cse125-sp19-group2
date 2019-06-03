@@ -4,6 +4,7 @@
 
 #include "Application.hpp"
 #include <iostream>
+#include <fstream>
 #include "Camera.hpp"
 #include "InputManager.h"
 #include "Shared/Logger.hpp"
@@ -12,12 +13,13 @@
 #include "GuiManager.hpp"
 #include "AudioManager.hpp"
 #include "ColliderManager.hpp"
+#include "ParticleSystemManager.hpp"
 #include "CFloorEntity.hpp"
 
 Application::Application(const char* windowTitle, int argc, char** argv) {
   _win_title = windowTitle;
-  _win_width = 800;
-  _win_height = 600;
+  _win_width = 1280;
+  _win_height = 720;
 
   if (argc == 1) {
   }
@@ -89,14 +91,6 @@ void Application::Setup() {
   _skybox = std::make_unique<Skybox>("skybox");
 
   // Create light
-  _point_light = std::make_unique<PointLight>(
-    PointLight{
-      "u_pointlight",
-      { { 0.05f, 0.05f, 0.05f }, { 0.8f, 0.8f, 0.8f }, { 1.0f, 1.0f, 1.0f } },
-      { -1.0f, 0.0f, 0.0f },
-      { 1.0f, 0.09f, 0.032f }
-    }
-  );
   _dir_light = std::make_unique<DirectionalLight>(
     DirectionalLight{
       "u_dirlight",
@@ -120,6 +114,13 @@ void Application::Setup() {
 		std::string address = GuiManager::getInstance().getAddress();
 		std::string playerName = GuiManager::getInstance().getPlayerName();
 
+		// Save address and playername to session file
+		std::ofstream ofs;
+		ofs.open(SESSION_FILE_PATH, std::ofstream::out | std::ofstream::trunc);
+		ofs << address << std::endl;
+		ofs << playerName << std::endl;
+		ofs.close();
+
 		uint32_t playerId;
 		try {
 			playerId = _networkClient->connect(address, PORTNUM);
@@ -142,13 +143,24 @@ void Application::Setup() {
 		// Register global keys
 		registerGlobalKeys();
 
-
 		// Hide connect screen
 		GuiManager::getInstance().hideAll();
 
 		// Show lobby
 		GuiManager::getInstance().setVisibility(WIDGET_LOBBY, true);
 	});
+
+	// Connect screen default address and player name from session file
+	std::ifstream ifs;
+	ifs.open(SESSION_FILE_PATH);
+	if (!ifs.fail()) {
+		std::string address, playerName;
+		ifs >> address;
+		ifs >> playerName;
+		ifs.close();
+		GuiManager::getInstance().setAddress(address);
+		GuiManager::getInstance().setPlayerName(playerName);
+	}
 
 	// Switch sides button callback
 	GuiManager::getInstance().registerSwitchSidesCallback([&]() {
@@ -196,6 +208,16 @@ void Application::Setup() {
 			break;
 		}
 	});
+
+	// Disconnect button
+	GuiManager::getInstance().registerDisconnectCallback([&]() {
+		_networkClient->closeConnection();
+	});
+
+	_bgm = AudioManager::getInstance().getAudioSource("bgm");
+	_bgm->init("Resources/Sounds/bgm1.mp3");
+	_bgm->setVolume(0.05f);
+	_bgm->play(true);
 }
 
 void Application::Cleanup() {
@@ -228,7 +250,7 @@ void Application::Run() {
 
   Setup();
 
-  glfwSwapInterval(0);
+  glfwSwapInterval(1);
   glfwGetFramebufferSize(_window, &_win_width, &_win_height);
   StaticResize(_window, _win_width, _win_height);
 
@@ -261,10 +283,15 @@ void Application::Update()
         // Update entity
         EntityManager::getInstance().update(state);
 
+		// Update entity particle system
+		ParticleSystemManager::getInstance().updateState(state);
+
         // Check for special case of GameState update
         if (state->type == ENTITY_STATE)
         {
             auto gameState = std::static_pointer_cast<GameState>(state);
+
+			_serverEntityCount = gameState->entityCount;
 
 			// Update client-side state and UI
             // Timer, winner of game, in lobby, etc
@@ -280,22 +307,70 @@ void Application::Update()
 
 				// Ready button text
 				int numPlayers = gameState->dogs.size() + gameState->humans.size();
-				GuiManager::getInstance().setReadyText("Ready (" + std::to_string(gameState->readyPlayers.size()) + std::string("/") + std::to_string(numPlayers) + std::string(")"));
+				GuiManager::getInstance().setReadyText("(" + std::to_string(gameState->readyPlayers.size()) + std::string("/") + std::to_string(numPlayers) + std::string(")"));
+
+				// If everyone is ready, show loading screen
+				if (numPlayers == gameState->readyPlayers.size())
+				{
+					GuiManager::getInstance().getWidget(WIDGET_LOBBY)->setVisible(false);
+					GuiManager::getInstance().getWidget(WIDGET_OPTIONS)->setVisible(false);
+					GuiManager::getInstance().getWidget(WIDGET_LOADING)->setVisible(true);
+
+					// Get mute status first, then mute
+					_muteSetting = AudioManager::getInstance().getMute();
+					AudioManager::getInstance().setMute(true);
+
+					// Start timer
+					_startTime = std::chrono::steady_clock::now();
+				}
 			}
 
-			// Did a game just start? If so, hide lobby UI
+			// Did a game just start?
 			if (_inLobby && !gameState->inLobby)
 			{
 				_inLobby = false;
-				GuiManager::getInstance().getWidget(WIDGET_LOBBY)->setVisible(false);
+				_gameLoaded = false;
+			}
+			// If everything is loaded, hide loading screen and show HUD
+			else if (((!_inLobby && !gameState->waitingForClients && gameState->pregameCountdown) ||
+				gameState->debugMode) &&
+				GuiManager::getInstance().getWidget(WIDGET_LOADING)->visible())
+			{
+				GuiManager::getInstance().getWidget(WIDGET_LOADING)->setVisible(false);
 				GuiManager::getInstance().setReadyEnabled(true);
 				GuiManager::getInstance().setSwitchEnabled(true);
+
+				// Back to user setting for audio mute
+				AudioManager::getInstance().setMute(_muteSetting);
 
 				// Capture mouse
 				_localPlayer->setMouseCaptured(true);
 
 				// Show game HUD
 				GuiManager::getInstance().setVisibility(WIDGET_HUD, true);
+
+				// Hide human skills if we are a dog
+				for (auto& player : gameState->dogs)
+				{
+					if (player.first == _localPlayer->getPlayerId())
+					{
+						GuiManager::getInstance().setVisibility(WIDGET_HUD_HUMAN_SKILLS, false);
+						break;
+					}
+				}
+
+				// Hide dog skills if we are a human
+				for (auto& player : gameState->humans)
+				{
+					if (player.first == _localPlayer->getPlayerId())
+					{
+						GuiManager::getInstance().setVisibility(WIDGET_HUD_DOG_SKILLS, false);
+						break;
+					}
+				}
+
+				// Redraw
+				GuiManager::getInstance().refresh();
 			}
 			// Conversely, did a game just end and send us back to the lobby?
 			else if (gameState->inLobby && !_inLobby)
@@ -303,6 +378,10 @@ void Application::Update()
 				// Deallocate world objects
 				EntityManager::getInstance().clearAll();
 				ColliderManager::getInstance().clear();
+				ParticleSystemManager::getInstance().clear();
+
+				// Stop playing sounds
+				AudioManager::getInstance().reset();
 
 				// Set localPlayer's _playerEntity to null
 				_localPlayer->unpairEntity();
@@ -321,8 +400,7 @@ void Application::Update()
 				_localPlayer->setMouseCaptured(false);
 
 				// Redraw
-				auto screen = GuiManager::getInstance().getScreen();
-				GuiManager::getInstance().resize(screen->size().x(), screen->size().y());
+				GuiManager::getInstance().refresh();
 			}
 
 			// Update pregame timer
@@ -342,8 +420,7 @@ void Application::Update()
 				}
 				GuiManager::getInstance().setSecondaryMessage(std::to_string(secondsLeft));
 
-				auto screen = GuiManager::getInstance().getScreen();
-				GuiManager::getInstance().resize(screen->size().x(), screen->size().y());
+				GuiManager::getInstance().refresh();
 			}
 			else if (_inCountdown)
 			{
@@ -353,8 +430,7 @@ void Application::Update()
 				GuiManager::getInstance().setPrimaryMessage("Go!");
 				GuiManager::getInstance().setSecondaryMessage("");
 
-				auto screen = GuiManager::getInstance().getScreen();
-				GuiManager::getInstance().resize(screen->size().x(), screen->size().y());
+				GuiManager::getInstance().refresh();
 			}
 			else if (!_startHidden)
 			{
@@ -367,8 +443,7 @@ void Application::Update()
 					GuiManager::getInstance().setPrimaryMessage("");
 					_startHidden = true;
 
-					auto screen = GuiManager::getInstance().getScreen();
-					GuiManager::getInstance().resize(screen->size().x(), screen->size().y());
+					GuiManager::getInstance().refresh();
 				}
 			}
 
@@ -386,8 +461,7 @@ void Application::Update()
 				auto secondsLeft = (int)(std::ceil(gameState->millisecondsToLobby / 1000.0f));
 				GuiManager::getInstance().setSecondaryMessage("Returning to lobby in " + std::to_string(secondsLeft) + "...");
 
-				auto screen = GuiManager::getInstance().getScreen();
-				GuiManager::getInstance().resize(screen->size().x(), screen->size().y());
+				GuiManager::getInstance().refresh();
 			}
 
 			// Update countdown timer
@@ -405,7 +479,9 @@ void Application::Update()
 	  _networkClient->closeConnection();
 	  EntityManager::getInstance().clearAll();
 	  InputManager::getInstance().reset();
+	  AudioManager::getInstance().reset();
 	  ColliderManager::getInstance().clear();
+	  ParticleSystemManager::getInstance().clear();
 	  GuiManager::getInstance().hideAll();
 	  GuiManager::getInstance().setVisibility(WIDGET_CONNECT, true);
 
@@ -419,12 +495,14 @@ void Application::Update()
   if (_localPlayer) {
       _localPlayer->update();
   }
+
+  // Update particle system physics
+  ParticleSystemManager::getInstance().updatePhysics(0.016f);
     
   // Update sound engine
   AudioManager::getInstance().update();
     
   _camera->Update();
-  _point_light->update();
 }
 
 void Application::Draw() {
@@ -451,6 +529,9 @@ void Application::Draw() {
 		  // Render floor before any entity
 		  CFloorEntity::getInstance().render(_localPlayer->getCamera());
 
+          // Render particles
+		  ParticleSystemManager::getInstance().render(_localPlayer->getCamera());
+
 		  EntityManager::getInstance().render(_localPlayer->getCamera());
 
 		  // Debug Shader
@@ -471,6 +552,50 @@ void Application::Draw() {
 
   // Finish drawing scene
   glFinish();
+
+  // If we rendered all the server entities, send a gameReady event
+  if (!_gameLoaded && !_inLobby &&
+	  EntityManager::getInstance().getEntityCount() >= _serverEntityCount) {
+	  auto readyEvent = std::make_shared<GameEvent>();
+	  readyEvent->type = EVENT_CLIENT_READY;
+	  readyEvent->playerId = _localPlayer->getPlayerId();
+	  try {
+		  _networkClient->sendEvent(readyEvent);
+	  }
+	  catch (std::runtime_error e) {};
+
+	  _gameLoaded = true;
+
+	  // Trigger a manual resize
+	  auto screen = GuiManager::getInstance().getScreen();
+	  StaticResize(_window, screen->size().x(), screen->size().y());
+  }
+  // Edge case in which not all state was received by the client
+  else if (!_gameLoaded && !_inLobby &&
+	  EntityManager::getInstance().getEntityCount() > 0 &&
+	  EntityManager::getInstance().getEntityCount() < _serverEntityCount) {
+
+	  // Check time since start
+	  auto elapsed = std::chrono::steady_clock::now() - _startTime;
+	  if (std::chrono::duration_cast<std::chrono::seconds>(elapsed) > std::chrono::seconds(4))
+	  {
+		  // Build a list of the entities we have
+		  auto entityList = EntityManager::getInstance().getEntityIdList();
+
+		  // Request a re-send from the server
+		  auto resendEvent = std::make_shared<GameEvent>();
+		  resendEvent->type = EVENT_REQUEST_RESEND;
+		  resendEvent->playerId = _localPlayer->getPlayerId();
+		  resendEvent->entityList = entityList;
+		  try {
+			  _networkClient->sendEvent(resendEvent);
+		  }
+		  catch (std::runtime_error e) {};
+
+		  // Reset timer
+		  _startTime = std::chrono::steady_clock::now();
+	  }
+  }
 }
 
 void Application::Reset() {

@@ -14,6 +14,10 @@ struct GameState : public BaseState
 	// Stuff that the client uses
 	// There are probably a few extra booleans than needed, but we want to make
 	// sure state is exactly what we think it is
+	int entityCount;	// Used by client to determine if the player's world is rendered
+	bool waitingForClients;	// Whether all the clients have fully rendered the game
+	int clientReadyCount;	// Number of clients who have fully rendered the game
+	bool debugMode;
 	bool gameStarted;
 	bool gameOver;
 	bool inLobby;
@@ -31,6 +35,10 @@ struct GameState : public BaseState
 	{
 		archive(
 			cereal::base_class<BaseState>(this),
+			entityCount,
+			waitingForClients,
+			clientReadyCount,
+			debugMode,
 			gameStarted,
 			gameOver,
 			inLobby,

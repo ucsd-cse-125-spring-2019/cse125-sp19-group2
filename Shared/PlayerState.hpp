@@ -7,15 +7,24 @@
 
 struct PlayerState : BaseState
 {
-	// TODO: player-specific variables
 	std::string playerName;
+	std::string message;	// Custom message to be displayed to player
+
+	bool isPlayOnce;	// Whether the current animation is playOnce
+	float animationDuration;	// Animation duration in milliseconds if playOnce
+
+	int skinID;
 
 	template<class Archive>
 	void serialize(Archive & archive)
 	{
 		archive(
 			cereal::base_class<BaseState>(this),
-			playerName);
+			playerName,
+			message,
+			isPlayOnce,
+			animationDuration,
+			skinID);
 	}
 };
 

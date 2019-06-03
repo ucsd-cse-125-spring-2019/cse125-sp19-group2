@@ -1,0 +1,19 @@
+Music:
+bgm1: Village Tarantella by Kevin MacLeod (freepd.com)
+
+Positional Sounds:
+plunger_hit: https://freesound.org/people/LloydEvans09/sounds/321807/ (Creative Commons: Attribution Noncommercial License)
+human_running: https://freesound.org/people/Juandamb/sounds/430708/ (Creative Commons 0)
+swing1: https://freesound.org/people/Josethehedgehog/sounds/390360/ (Creative Commons 0)
+plunger_shoot: https://freesound.org/people/muel2002/sounds/266966/ (Creative Commons 0)
+human_flying: https://freesound.org/people/LuannWepener/sounds/326105/ (Creative Commons: Attribition Noncommercial License)
+human_slipping: https://freesound.org/people/soundscalpel.com/sounds/110390/ (Creative Commons: Attribution License)
+dog_barking: https://freesound.org/people/beerbelly38/sounds/162148/ (Creative Commons: Attribution License)
+dog_panting: https://freesound.org/people/keweldog/sounds/181767/ (Creative Commons 0)
+dog_running: https://freesound.org/people/ETM654/sounds/411148/ (Creative Commons 0)
+fountain: https://freesound.org/people/roman_cgr/sounds/415027/ (Creative Commons 0)
+gates_raising: https://freesound.org/people/timgormly/sounds/162806/ (Creative Commons 0)
+dog_drinking: https://freesound.org/people/Mystikuum/sounds/401821/ (Creative Commons 0)
+dog_peeing: https://freesound.org/people/ftpalad/sounds/119927/ (Creative Commons 0)
+dog_eating: https://freesound.org/people/MATTIX/sounds/348112/ (Creative Commons: Attribution License)
+dog_yelping: https://freesound.org/people/TobiasKosmos/sounds/163280/ (Creative Commons: Attribution License)

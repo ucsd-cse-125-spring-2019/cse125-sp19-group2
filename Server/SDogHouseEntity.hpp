@@ -3,10 +3,11 @@
 #include "SBaseEntity.hpp"
 #include "AABBCollider.hpp"
 #include "SBoxPlungerEntity.hpp"
+#include "EmptyCollider.hpp"
 #include <glm/gtx/rotate_vector.hpp>
 #include <glm/gtx/vector_angle.hpp>
 
-#define DOGHOUSE_COOLDOWN_SECS 5
+#define DOGHOUSE_COOLDOWN_SECS 10
 #define DOGHOUSE_WALL_WIDTH 0.2f
 
 class SDogHouseEntity : public SBaseEntity
@@ -61,10 +62,35 @@ public:
 		rightWall->rotate(rightWall->getState()->pos, 1);
 		_walls.push_back(rightWall);
 
+		// Front wall, has variable solidity
+		auto frontWall = std::make_shared<SBoxEntity>(
+			glm::vec3(pos.x, 0, pos.z + backOffset),
+			glm::vec3(_state->width - DOGHOUSE_WALL_WIDTH * 2, _state->height, DOGHOUSE_WALL_WIDTH));
+		frontWall->getState()->transparency = 0.0f;
+		frontWall->getState()->setSolidity([&](BaseState* entity, BaseState* collidingEntity)
+		{
+			if (collidingEntity->type == ENTITY_DOG)
+			{
+				// Lookup dog cooldown
+				auto result = _cooldowns.find(collidingEntity->id);
+				if (result != _cooldowns.end())
+				{
+					auto elapsed = std::chrono::steady_clock::now() - result->second;
+					return (std::chrono::duration_cast<std::chrono::seconds>(elapsed).count() < DOGHOUSE_COOLDOWN_SECS);
+				}
+				else
+				{
+					return false;
+				}
+			}
+			return true;
+		});
+		_walls.push_back(frontWall);
+
 		// Sensor for dogs. Performs actual logic on the doghouse
 		auto sensorBox = std::make_shared<SBoxEntity>(
-			glm::vec3(pos.x, 0, pos.z - _state->depth / 4),
-			glm::vec3(_state->width - DOGHOUSE_WALL_WIDTH * 2, 0.5, _state->depth / 3));
+			glm::vec3(pos.x, 0, pos.z + _state->depth / 4),
+			glm::vec3(_state->width - DOGHOUSE_WALL_WIDTH * 2, 0.5, _state->depth * 0.2));
 		sensorBox->getState()->transparency = 0.0f;
 		sensorBox->getState()->isSolid = false;
 		
@@ -73,6 +99,13 @@ public:
 		{
 			if (collidingEntity->getState()->type == ENTITY_DOG)
 			{
+				SDogEntity* dogEntity = static_cast<SDogEntity*>(collidingEntity);
+
+				if (dogEntity->isTeleporting())
+				{
+					return;
+				}
+
 				// Choose another dog house to teleport to
 				for (int i = 0; i < _dogHouses->size(); i++)
 				{
@@ -101,18 +134,16 @@ public:
 						}
 
 						// Teleport to this house
-						collidingEntity->getState()->pos = house->getState()->pos;
+						dogEntity->setTeleporting(true);
+						dogEntity->setSourceDoghousePos(_state->pos - (_state->forward * 0.3f));
+						dogEntity->setSourceDoghouseDir(_state->forward);
+						dogEntity->setTargetDoghousePos(house->getState()->pos);
+						dogEntity->setTargetDoghouseDir(house->getState()->forward);
 
-						// Reset cooldowns
-						_cooldowns.insert({ collidingEntity->getState()->id, std::chrono::steady_clock::now() });
-						castHouse->_cooldowns.insert({ collidingEntity->getState()->id, std::chrono::steady_clock::now() });
+						// Let dog handle cooldowns
+						dogEntity->setSourceDoghouseCooldowns(&_cooldowns);
+						dogEntity->setTargetDoghouseCooldowns(&castHouse->_cooldowns);
 
-						// Set source house as non-solid for next tick
-						SPlayerEntity* dogEntity = static_cast<SPlayerEntity*>(collidingEntity);
-						for (auto& wall : _walls)
-						{
-							wall->getState()->isSolid = false;
-						}
 						break;
 					}
 				}
@@ -122,11 +153,16 @@ public:
 		_children.push_back(backWall);
 		_children.push_back(leftWall);
 		_children.push_back(rightWall);
+		_children.push_back(frontWall);
 		_children.push_back(sensorBox);
 
 		_children.push_back(std::make_shared<SBoxPlungerEntity>(pos, glm::vec3(1.0f, 1.2f, 1.0f)));
 	};
-	~SDogHouseEntity() {};
+
+	~SDogHouseEntity()
+	{
+		_children.clear();
+	};
 
 	// Reset solidity of doghouse walls
 	void update(std::vector<std::shared_ptr<GameEvent>> events) override

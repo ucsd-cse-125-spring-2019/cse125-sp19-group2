@@ -159,7 +159,7 @@ bool Camera::isInFrustum(glm::vec3 p, float radius) const {
 float Camera::getTransparency(glm::vec3 p, float radius) const {
     // Make close object transparent
     float dist = glm::length(p - _position);
-    float closenessFactor = std::min(std::max(0.0f, (dist - 0.001f * radius) / (radius)), 1.0f);
+    float closenessFactor = std::min(std::max(0.0f, (dist - 0.003f * radius) / (radius)), 1.0f);
 
     // Make intersect object transparent
     float intersectFactor = 1.0f;
@@ -247,12 +247,12 @@ void Camera::update_distance() {
     }
 
     // Set _pitchLimit
-    // 0 -> 89.0, 1 -> 0, 30 -> -89.0, lerp
-    if (_distance <= 1) {
-        _pitchLimit = 89.0f - (89.0f * _distance);
+    // 0 -> 89.0, 2.0 -> 0, 30 -> -89.0, lerp
+    if (_distance <= 2.0) {
+        _pitchLimit = 89.0f - (89.0f * _distance / 2.0);
     }
     else {
-        _pitchLimit = 0 - (89.0f / 30.0f * _distance);
+        _pitchLimit = 0 - (89.0f / (30.0f - 2.0f) * (_distance - 2.0f));
     }
 }
 
