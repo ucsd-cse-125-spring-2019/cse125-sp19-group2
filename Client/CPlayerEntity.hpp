@@ -38,8 +38,11 @@ public:
 		// Base render
 		CBaseEntity::render(camera);
 
-		// Also render the billboard. Note: this may need to be moved outside the player
-		_billboard->render(camera);
+		// Only render the billboard if this is another player
+		if (!_isLocal)
+		{
+			_billboard->render(camera);
+		}
 	}
 
 	virtual void updateState(std::shared_ptr<BaseState> state) override

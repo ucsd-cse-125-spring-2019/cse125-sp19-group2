@@ -8,7 +8,7 @@ class CBillboardEntity : public CBaseEntity
 public:
 	CBillboardEntity()
 	{
-		_objectModel = std::make_unique<Model>("./Resources/Models/cube.fbx");
+		_objectModel = std::make_unique<Model>("Resources/Models/billboardcube.obj");
 		_objectShader = std::make_unique<Shader>();
 
 		// Same base info as the object it is attached to
@@ -19,20 +19,33 @@ public:
 		_objectShader->CreateProgram();
 
 		_text = std::make_unique<Font>();
-		_text->_textColor = glm::vec4(1, 1, 1, 0.5);
+		_text->_textColor = glm::vec4(1, 1, 1, 1);
 	}
 
 	~CBillboardEntity() {};
 
 	void render(std::unique_ptr<Camera> const& camera) override
 	{
+		// Save previous framebuffer
+		GLint oldFBO;
+		glGetIntegerv(GL_DRAW_FRAMEBUFFER_BINDING, &oldFBO);
+
+		// Render text with its own framebuffer
+		_text->_backgroundColor = glm::vec4(1, 1, 1, 0.2f);
+		_text->renderToTexture(_string.c_str(), 2.0f);
+
+		// Bind previous framebuffer
+		glBindFramebuffer(GL_FRAMEBUFFER, oldFBO);
+
 		_objectShader->Use();
+		_state->scale.z = 0.001f;
+		_state->scale.y = 1.0f;
 		
 		CBaseEntity::setUniforms(camera);
 
 		// Uniforms
         glm::vec3 pos = _state->pos;
-		pos.y += _state->height;
+		pos.y += _state->height + 0.25f;
         glm::vec3 forward = camera->position() - _state->pos;
 		const auto t = glm::translate(glm::mat4(1.0f), pos);
 		const auto r = glm::mat4(glm::transpose(glm::mat3(camera->view_matrix())));
@@ -41,14 +54,9 @@ public:
 		auto model = t * r * s;
 		_objectShader->set_uniform("u_model", model);
 
-		// Render text
-        _text->display(false, camera, model, _string.c_str(), 2);
-
-		// TODO: only create text texture, then render the cube with it
-
-		// Render billboard with texture (not working)
-		//Mesh cubeMesh = (static_cast<Model*>(_objectModel.get()))->getMeshAt(0);
-		//cubeMesh.Draw(_objectShader, _text->getTexture());
+		// Render billboard with texture
+		Mesh cubeMesh = (static_cast<Model*>(_objectModel.get()))->getMeshAt(0);
+		cubeMesh.Draw(_objectShader, _text->getTexture());
 	}
 
 	void setText(std::string string)
@@ -59,4 +67,6 @@ public:
 private:
 	std::string _string;
 	std::unique_ptr<Font> _text;
+
+	std::vector<Vertex> _billboardVertices;
 };
