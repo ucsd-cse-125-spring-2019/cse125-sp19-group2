@@ -2,6 +2,7 @@
 #include "CBaseEntity.hpp"
 #include "Font.h"
 #include "Model.hpp"
+#include "GUIManager.hpp"
 
 class CBillboardEntity : public CBaseEntity
 {
@@ -31,8 +32,10 @@ public:
 		glGetIntegerv(GL_DRAW_FRAMEBUFFER_BINDING, &oldFBO);
 
 		// Render text with its own framebuffer
+		auto screen = GuiManager::getInstance().getScreen();
+		_text->setScreenSize(glm::ivec2(screen->size().x(), screen->size().y()));
 		_text->_backgroundColor = glm::vec4(1, 1, 1, 0.2f);
-		_text->renderToTexture(_string.c_str(), 2.0f);
+		_text->renderToTexture(_string.c_str(), 2.5f);
 
 		// Bind previous framebuffer
 		glBindFramebuffer(GL_FRAMEBUFFER, oldFBO);
