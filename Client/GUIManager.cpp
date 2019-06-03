@@ -338,7 +338,8 @@ void GuiManager::setActiveSkill(bool usePlunger) {
 
 void GuiManager::updateStamina(float val) {
 	int percentage = (int)(val * 100);
-	_staminaInfo->setCaption("Stamina: " + std::to_string(percentage) + "%");
+    _staminaCooldown->setPercentage(1.0 - val);
+	//_staminaInfo->setCaption("Stamina: " + std::to_string(percentage) + "%");
 }
 
 void GuiManager::updatePee(float val) {
@@ -582,8 +583,18 @@ void GuiManager::initHUD() {
 	dogSkills->setLayout(dogSkillsLayout);
 
 	// Stamina
-	_staminaInfo = new nanogui::Label(dogSkills, "Stamina: 100%", "sans", 32);
-	_staminaInfo->setColor(SOLID_WHITE);
+    _staminaCooldown = new nanogui::CooldownBar(dogSkills);
+	auto staminaIcon = LoadTextureFromFile("3.png", "./Resources/Textures/Menu/");
+	_staminaCooldown->setFixedSize(Vector2i(80,80));
+    _staminaCooldown->alpha = 1.0;
+	_staminaCooldown->setBackgroundTexture(staminaIcon, 0, 0);
+	_staminaCooldown->drawBackground = true;
+    _staminaCooldown->setPercentage(0.0);
+    _staminaCooldown->setColor(Color(0,160));
+    _staminaCooldown->setDirection(Vector2i(0,1)); // Up
+
+	//_staminaInfo = new nanogui::Label(dogSkills, "Stamina: 100%", "sans", 32);
+	//_staminaInfo->setColor(SOLID_WHITE);
 
 	// Pee
 	_peeInfo = new nanogui::Label(dogSkills, "Pee: 100%", "sans", 32);
