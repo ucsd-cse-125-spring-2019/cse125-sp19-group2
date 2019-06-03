@@ -16,7 +16,7 @@ CFloorEntity::CFloorEntity()
 	_state = std::make_shared<BaseState>();
 
 	_state->scale = glm::vec3(MAP_WIDTH, 1, MAP_WIDTH);
-	_state->pos = glm::vec3(0);
+	_state->pos = glm::vec3(0.0f, -0.01f, 0.0f);
 	_state->forward = glm::vec3(0, 0, 1.0f);
 	_state->up = glm::vec3(0, 1.0f, 0);
 
