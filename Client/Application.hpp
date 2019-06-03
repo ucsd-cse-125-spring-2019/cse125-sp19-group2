@@ -122,6 +122,9 @@ private:
 
   // Background music source
   AudioSource* _bgm = nullptr;
+  
+  // Whether the music is playing fast
+  bool _musicSpeedup = false;
 
   // Test Lights
   std::unique_ptr<DirectionalLight> _dir_light;

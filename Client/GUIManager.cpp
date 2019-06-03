@@ -202,6 +202,14 @@ void GuiManager::registerDisconnectCallback(const std::function<void()> f) {
 	_disconnectButton->setCallback(f);
 }
 
+void GuiManager::toggleMute() {
+	_muteButton->callback()();
+}
+
+void GuiManager::toggleMusicMute() {
+	_muteMusicButton->callback()();
+}
+
 std::string GuiManager::getPlayerName() {
 	return _playerNameBox->value();
 }
@@ -673,6 +681,23 @@ void GuiManager::initControlMenu() {
 		else
 		{
 			_muteButton->setCaption("Unmute All");
+		}
+	});
+
+	_muteMusicButton = new nanogui::Button(controlsWidget, "Mute Music");
+	_muteMusicButton->setCallback([&]()
+	{
+		auto musicChannel = AudioManager::getInstance().getAudioSource("bgm")->_channel;
+		bool isPaused;
+		musicChannel->getPaused(&isPaused);
+		musicChannel->setPaused(!isPaused);
+		if (isPaused)
+		{
+			_muteMusicButton->setCaption("Mute Music");
+		}
+		else
+		{
+			_muteMusicButton->setCaption("Unmute Music");
 		}
 	});
 

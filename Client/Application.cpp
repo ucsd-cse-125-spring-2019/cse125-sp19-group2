@@ -470,6 +470,22 @@ void Application::Update()
 			// Update countdown timer
 			GuiManager::getInstance().updateTimer(gameState->millisecondsLeft);
 
+			// Increase speed of bgm if less than 30 seconds left
+			auto bgmSource = AudioManager::getInstance().getAudioSource("bgm");
+			if (!_musicSpeedup && !_inLobby && !gameState->gameOver &&
+				gameState->millisecondsLeft < 30000)
+			{
+				// Start song from the beginning
+				_musicSpeedup = true;
+				bgmSource->_channel->setPosition(0, FMOD_TIMEUNIT_MS);
+				bgmSource->_channel->setPitch(1.3f);
+			}
+			else if (gameState->gameOver)
+			{
+				_musicSpeedup = false;
+				bgmSource->_channel->setPitch(1.0f);
+			}
+
 			_inLobby = gameState->inLobby;
         }
     }
@@ -480,13 +496,23 @@ void Application::Update()
 	  // show connection screen
 	  _localPlayer = nullptr;
 	  _networkClient->closeConnection();
-	  EntityManager::getInstance().clearAll();
 	  InputManager::getInstance().reset();
+	  EntityManager::getInstance().clearAll();
 	  AudioManager::getInstance().reset();
 	  ColliderManager::getInstance().clear();
 	  ParticleSystemManager::getInstance().clear();
+
+	  // GUI stuff
+	  auto controls = GuiManager::getInstance().getWidget(WIDGET_OPTIONS);
+	  bool controlsShown = (controls && controls->visible());
+
 	  GuiManager::getInstance().hideAll();
 	  GuiManager::getInstance().setVisibility(WIDGET_CONNECT, true);
+	  
+	  if (controls)
+	  {
+		  controls->setVisible(controlsShown);
+	  }
 
 	  // Un-capture mouse
  	  glfwSetInputMode(
@@ -733,18 +759,7 @@ void Application::DestroyWindow() {
 }
 
 void Application::registerGlobalKeys() {
-	// Test input; to be removed
-	InputManager::getInstance().getKey(GLFW_KEY_G)->onPress([&]
-	{
-		std::cout << "Hello World!" << this->count << std::endl;
-	});
-
-	InputManager::getInstance().getKey(GLFW_KEY_K)->onRepeat([&]
-	{
-		this->count += 1;
-		std::cout << this->count << std::endl;
-	});
-
+	// Collider visualization
 	InputManager::getInstance().getKey(GLFW_KEY_T)->onPress([&]
 	{
 		ColliderManager::getInstance().renderMode = !ColliderManager::getInstance().renderMode;
@@ -752,14 +767,28 @@ void Application::registerGlobalKeys() {
 
 	InputManager::getInstance().getKey(GLFW_KEY_ESCAPE)->onPress([&]
 	{
+		GuiManager::getInstance().setVisibility(WIDGET_OPTIONS,
+			!GuiManager::getInstance().getWidget(WIDGET_OPTIONS)->visible());
 		if (_localPlayer) {
 			bool curState = _localPlayer->getMouseCaptured();
-			GuiManager::getInstance().setVisibility(WIDGET_OPTIONS,
-				!GuiManager::getInstance().getWidget(WIDGET_OPTIONS)->visible());
 			if (!_inLobby)
 			{
 				_localPlayer->setMouseCaptured(!curState);
 			}
 		}
 	});
+
+	// N to toggle master mute
+	InputManager::getInstance().getKey(GLFW_KEY_N)->onPress([&]
+	{
+		GuiManager::getInstance().toggleMute();
+	});
+
+	// M to toggle music mute
+	InputManager::getInstance().getKey(GLFW_KEY_M)->onPress([&]
+	{
+		GuiManager::getInstance().toggleMusicMute();
+	});
+
+
 }
