@@ -104,6 +104,7 @@ bool InputManager::isForegroundWindow() const {
 void InputManager::reset() {
 	_lock.lock();
 	_keyList.clear();
+	_onScroll.clear();
 	_lock.unlock();
 }
 
