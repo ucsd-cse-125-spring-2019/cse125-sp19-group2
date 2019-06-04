@@ -23,6 +23,7 @@
 #include "fmod/fmod_errors.h"
 #include "Shared/GameEvent.hpp"
 #include "Font.h"
+#include "CompassGUI.hpp"
 
 #define SESSION_FILE_PATH "last_session.txt"
 
@@ -143,6 +144,9 @@ private:
     Enum _enum;
 	GamePadIndex _gamepad_num;
 	PlayerType _player_type;
+
+	// Compass GUI
+	std::unique_ptr<CompassGUI> compassGUI;
 };
 
 #endif

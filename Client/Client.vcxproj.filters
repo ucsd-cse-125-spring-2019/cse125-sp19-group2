@@ -279,6 +279,12 @@
     <ClInclude Include="CBillboardEntity.hpp">
       <Filter>Header Files\Entity</Filter>
     </ClInclude>
+    <ClInclude Include="CompassGUI.hpp">
+      <Filter>Header Files\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="ImageGUI.hpp">
+      <Filter>Header Files\Graphics</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
@@ -349,6 +355,12 @@
       <Filter>Resource Files</Filter>
     </None>
     <None Include="Resources\Shaders\font.vert">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="Resources\Shaders\imageGUI.frag">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="Resources\Shaders\imageGUI.vert">
       <Filter>Resource Files</Filter>
     </None>
   </ItemGroup>

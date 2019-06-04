@@ -214,6 +214,8 @@ void Application::Setup() {
 		_networkClient->closeConnection();
 	});
 
+	compassGUI = std::make_unique<CompassGUI>(_win_width, _win_height);
+
 	_bgm = AudioManager::getInstance().getAudioSource("bgm");
 	_bgm->init("Resources/Sounds/bgm1.mp3");
 	_bgm->setVolume(0.05f);
@@ -282,6 +284,9 @@ void Application::Update()
     {
         // Update entity
         EntityManager::getInstance().update(state);
+		auto playerEntity = _localPlayer->getPlayerEntity();
+		if (playerEntity != nullptr)
+			compassGUI->updateRotation(_localPlayer->getCompassDirection(playerEntity->getPos() + glm::vec3(0,0,1)));
 
 		// Update entity particle system
 		ParticleSystemManager::getInstance().updateState(state);
@@ -357,6 +362,7 @@ void Application::Update()
 						GuiManager::getInstance().setVisibility(WIDGET_HUD_HUMAN_SKILLS, false);
 						break;
 					}
+					
 				}
 
 				// Hide dog skills if we are a human
@@ -564,7 +570,10 @@ void Application::Draw() {
 		  _debuglightShader->Use();
 		  _debuglightShader->set_uniform("u_projection", _localPlayer->getCamera()->projection_matrix());
 		  _debuglightShader->set_uniform("u_view", _localPlayer->getCamera()->view_matrix());
-	  
+
+		  glDisable(GL_DEPTH_TEST);
+		  compassGUI->render();
+		  glEnable(GL_DEPTH_TEST);
 	  }
 
     // Draw UI
@@ -665,6 +674,7 @@ void Application::Resize(int x, int y) {
   glViewport(0, 0, x, y);
   _frameBuffer->resize(x, y);
 	_quadFrameBuffer->resize(x, y);
+	compassGUI->updateWindowSize(x, y);
   if (_localPlayer) {
 	  _localPlayer->resize(x, y);
   }

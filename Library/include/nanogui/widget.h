@@ -353,4 +353,38 @@ public:
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 };
 
+class CooldownBar : public Widget {
+protected:
+  float percentage = 1.0f;
+  Vector2i direction;
+  Color mShadowColor;
+  Vector2f offset;
+
+public:
+  CooldownBar(Widget* parent);
+
+  // When p = 1, the shadow will fully block the image
+  void setPercentage(float p);
+
+  // Set shrinking direction, ex. (0, 1) will grow/shrink up and down by moving upper edge
+  void setDirection(Vector2i dir);
+
+  // Set shadow color
+  void setColor(Color c);
+
+  // Set shadow edge offset
+  void setOffset(Vector2f o);
+
+  Vector2f getOffset() const;
+
+  float getPercentage() const;
+
+  Vector2i getDirection() const;
+
+  Color getColor() const;
+
+   /// Draw the widget (and all child widgets)
+  virtual void draw(NVGcontext* ctx) override;
+};
+
 NAMESPACE_END(nanogui)
