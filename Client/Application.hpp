@@ -22,6 +22,7 @@
 #include "fmod/fmod.hpp"
 #include "fmod/fmod_errors.h"
 #include "Shared/GameEvent.hpp"
+#include "Font.h"
 #include "CompassGUI.hpp"
 
 #define SESSION_FILE_PATH "last_session.txt"
@@ -122,6 +123,9 @@ private:
 
   // Background music source
   AudioSource* _bgm = nullptr;
+  
+  // Whether the music is playing fast
+  bool _musicSpeedup = false;
 
   // Test Lights
   std::unique_ptr<DirectionalLight> _dir_light;

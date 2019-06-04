@@ -3,7 +3,6 @@
 #include <GLFW/glfw3.h>
 #include "NetworkClient.hpp"
 #include "GamePadXbox.hpp"
-
 /**
  * \brief A class that handles the entity corresponding to local player and camera movement.
  */
@@ -88,4 +87,6 @@ public:
      * \param y(int) Height of the window
      */
     void resize(int x, int y);
+
+	float getCompassDirection(glm::vec3 pos);
 };
