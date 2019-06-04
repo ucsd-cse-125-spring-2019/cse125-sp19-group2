@@ -69,6 +69,10 @@ public:
 	void registerControllerCallback(const std::function<void(GamePadIndex)> f);
 	void registerDisconnectCallback(const std::function<void()> f);
 
+	// Callbacks on mute buttons
+	void toggleMute();
+	void toggleMusicMute();
+
 	// Text in player name and address boxes
 	std::string getPlayerName();
 	void setPlayerName(std::string val);
@@ -168,6 +172,7 @@ private:
 	// Controls menu
 	nanogui::detail::FormWidget<GamePadIndex, std::integral_constant<bool, true>>* _gamepadSelect;
 	nanogui::Button* _muteButton;
+	nanogui::Button* _muteMusicButton;
 	nanogui::Button* _disconnectButton;
 
 	// Upper HUD
