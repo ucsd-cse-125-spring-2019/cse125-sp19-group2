@@ -370,7 +370,8 @@ void GuiManager::setActiveSkill(bool usePlunger) {
 
 void GuiManager::updateStamina(float val) {
 	int percentage = (int)(val * 100);
-	_staminaInfo->setCaption("Stamina: " + std::to_string(percentage) + "%");
+    _staminaCooldown->setPercentage(1.0 - val);
+	//_staminaInfo->setCaption("Stamina: " + std::to_string(percentage) + "%");
 }
 
 void GuiManager::updatePee(float val) {
@@ -530,8 +531,6 @@ void GuiManager::initLobbyScreen() {
 	_switchSidesButton->setBackgroundTexture(switchUnfocused, switchFocused, switchPushed);
 	_switchSidesButton->alpha = 1;
 	_switchSidesButton->setTheme(new nanogui::Theme(_screen->nvgContext()));
-	_switchSidesButton->theme()->mTextColor = nanogui::Color(0, 0, 255, 255);
-	_switchSidesButton->theme()->mTextColorShadow = nanogui::Color(0, 0, 0, 0);
 	_switchSidesButton->setFixedHeight(40);
 	_switchSidesButton->setFixedWidth(100);
 
@@ -558,8 +557,6 @@ void GuiManager::initLobbyScreen() {
 	_readyButton->setBackgroundTexture(readyUnfocused, readyFocused, readyPushed);
 	_readyButton->alpha = 1;
 	_readyButton->setTheme(new nanogui::Theme(_screen->nvgContext()));
-	_readyButton->theme()->mTextColor = nanogui::Color(0, 0, 255, 255);
-	_readyButton->theme()->mTextColorShadow = nanogui::Color(0, 0, 0, 0);
 	_readyButton->setFixedHeight(40);
 	_readyButton->setFixedWidth(100);
 
@@ -628,8 +625,18 @@ void GuiManager::initHUD() {
 	dogSkills->setLayout(dogSkillsLayout);
 
 	// Stamina
-	_staminaInfo = new nanogui::Label(dogSkills, "Stamina: 100%", "sans", 32);
-	_staminaInfo->setColor(SOLID_WHITE);
+    _staminaCooldown = new nanogui::CooldownBar(dogSkills);
+	auto staminaIcon = LoadTextureFromFile("3.png", "./Resources/Textures/Menu/");
+	_staminaCooldown->setFixedSize(Vector2i(80,80));
+    _staminaCooldown->alpha = 1.0;
+	_staminaCooldown->setBackgroundTexture(staminaIcon, 0, 0);
+	_staminaCooldown->drawBackground = true;
+    _staminaCooldown->setPercentage(0.0);
+    _staminaCooldown->setColor(Color(0,160));
+    _staminaCooldown->setDirection(Vector2i(0,1)); // Up
+
+	//_staminaInfo = new nanogui::Label(dogSkills, "Stamina: 100%", "sans", 32);
+	//_staminaInfo->setColor(SOLID_WHITE);
 
 	// Pee
 	_peeInfo = new nanogui::Label(dogSkills, "Pee: 100%", "sans", 32);

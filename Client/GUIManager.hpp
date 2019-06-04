@@ -181,6 +181,7 @@ private:
 
 	// Dog skills
 	nanogui::Label* _staminaInfo;
+    nanogui::CooldownBar* _staminaCooldown;
 	nanogui::Label* _peeInfo;
 
 	// Human skills

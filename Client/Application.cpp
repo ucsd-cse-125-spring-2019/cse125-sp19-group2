@@ -214,6 +214,8 @@ void Application::Setup() {
 		_networkClient->closeConnection();
 	});
 
+	compassGUI = std::make_unique<CompassGUI>(_win_width, _win_height);
+
 	_bgm = AudioManager::getInstance().getAudioSource("bgm");
 	_bgm->init("Resources/Sounds/bgm1.mp3");
 	_bgm->setVolume(0.05f);
@@ -565,7 +567,8 @@ void Application::Draw() {
 		  _debuglightShader->Use();
 		  _debuglightShader->set_uniform("u_projection", _localPlayer->getCamera()->projection_matrix());
 		  _debuglightShader->set_uniform("u_view", _localPlayer->getCamera()->view_matrix());
-	  
+
+		  compassGUI->render();
 	  }
 
     // Draw UI
@@ -666,6 +669,7 @@ void Application::Resize(int x, int y) {
   glViewport(0, 0, x, y);
   _frameBuffer->resize(x, y);
 	_quadFrameBuffer->resize(x, y);
+	compassGUI->updateWindowSize(x, y);
   if (_localPlayer) {
 	  _localPlayer->resize(x, y);
   }

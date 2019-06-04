@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="..\packages\soil.1.16.0\build\native\soil.props" Condition="Exists('..\packages\soil.1.16.0\build\native\soil.props')" />
   <ItemGroup Label="ProjectConfigurations">
@@ -288,6 +288,8 @@ xcopy /y /d  "$(SolutionDir)Library\lib\x64\Release\*.dll" "$(OutDir)"</Command>
     <None Include="Resources\Shaders\basiclight.vert" />
     <None Include="Resources\Shaders\collider.frag" />
     <None Include="Resources\Shaders\collider.vert" />
+    <None Include="Resources\Shaders\imageGUI.frag" />
+    <None Include="Resources\Shaders\imageGUI.vert" />
     <None Include="Resources\Shaders\debuglight.frag" />
     <None Include="Resources\Shaders\debuglight.vert" />
     <None Include="Resources\Shaders\floorTexture.frag" />
@@ -326,6 +328,7 @@ xcopy /y /d  "$(SolutionDir)Library\lib\x64\Release\*.dll" "$(OutDir)"</Command>
     <ClInclude Include="CHumanEntity.hpp" />
     <ClInclude Include="CHydrantEntity.hpp" />
     <ClInclude Include="ColliderManager.hpp" />
+    <ClInclude Include="CompassGUI.hpp" />
     <ClInclude Include="CPlayerEntity.hpp" />
     <ClInclude Include="CPlungerEntity.hpp" />
     <ClInclude Include="CPuddleEntity.hpp" />
@@ -340,6 +343,7 @@ xcopy /y /d  "$(SolutionDir)Library\lib\x64\Release\*.dll" "$(OutDir)"</Command>
     <ClInclude Include="FrameBuffer.h" />
     <ClInclude Include="GamePadXbox.hpp" />
     <ClInclude Include="GUIManager.hpp" />
+    <ClInclude Include="ImageGUI.hpp" />
     <ClInclude Include="LocalPlayer.hpp" />
     <ClInclude Include="DirectionalLight.hpp" />
     <ClInclude Include="Light.hpp" />
