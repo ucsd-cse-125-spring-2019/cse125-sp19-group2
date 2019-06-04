@@ -582,7 +582,7 @@ void GuiManager::initLoadingScreen() {
 	auto loadingScreen = createWidget(_screen, WIDGET_LOADING);
 
 	// TODO: loading screen background goes here
-    auto bg = LoadTextureFromFile("background.png", "./Resources/Textures/Menu/");
+    auto bg = LoadTextureFromFile("loadingscreen.png", "./Resources/Textures/Menu/");
     loadingScreen->setVisible(false);
     loadingScreen->alpha = 1.0;
     loadingScreen->setBackgroundTexture(bg, 0, 0);
@@ -612,7 +612,7 @@ void GuiManager::initHUD() {
 
 	// Middle HUD
 	auto middleHUD = createWidget(hudContainer, WIDGET_HUD_MIDDLE);
-	auto middleHUDLayout = new nanogui::BoxLayout(nanogui::Orientation::Vertical, nanogui::Alignment::Middle, 0, 50);
+	auto middleHUDLayout = new nanogui::BoxLayout(nanogui::Orientation::Vertical, nanogui::Alignment::Middle, 0, 35);
 	middleHUD->setLayout(middleHUDLayout);
 
 	_primaryMessage = new nanogui::Label(middleHUD, "", "sans", 72);
@@ -622,7 +622,7 @@ void GuiManager::initHUD() {
 
 	// Bottom HUD
 	auto bottomHUD = createWidget(hudContainer, WIDGET_HUD_BOTTOM);
-	auto bottomHUDLayout = new nanogui::GridLayout(nanogui::Orientation::Horizontal, 3, nanogui::Alignment::Middle, 5);
+	auto bottomHUDLayout = new nanogui::GridLayout(nanogui::Orientation::Horizontal, 3, nanogui::Alignment::Middle);
 	bottomHUD->setLayout(bottomHUDLayout);
 
 	// Empty left widget
@@ -630,7 +630,7 @@ void GuiManager::initHUD() {
 
 	// Dog skills
 	auto dogSkills= createWidget(bottomHUD, WIDGET_HUD_DOG_SKILLS);
-	auto dogSkillsLayout = new nanogui::BoxLayout(nanogui::Orientation::Horizontal, nanogui::Alignment::Middle, 0, 50);
+	auto dogSkillsLayout = new nanogui::BoxLayout(nanogui::Orientation::Horizontal, nanogui::Alignment::Middle, 0, 35);
 	dogSkills->setLayout(dogSkillsLayout);
 
 	// Stamina
@@ -643,6 +643,7 @@ void GuiManager::initHUD() {
     _staminaCooldown->setColor(Color(0,160));
     _staminaCooldown->setDirection(Vector2i(0,1)); // Up
 	_staminaCooldown->setOffset(nanogui::Vector2f(6.0f, 6.0f));
+	_staminaCooldown->setPercentage(0);
 
 	//_staminaInfo = new nanogui::Label(dogSkills, "Stamina: 100%", "sans", 32);
 	//_staminaInfo->setColor(SOLID_WHITE);
@@ -657,6 +658,7 @@ void GuiManager::initHUD() {
 	_peeCooldown->setColor(Color(0,160));
 	_peeCooldown->setDirection(Vector2i(0,1)); // Up
 	_peeCooldown->setOffset(nanogui::Vector2f(6.0f, 6.0f));
+	_peeCooldown->setPercentage(0);
 
 	//_peeInfo = new nanogui::Label(dogSkills, "Pee: 100%", "sans", 32);
 	//_peeInfo->setColor(SOLID_WHITE);
@@ -675,6 +677,8 @@ void GuiManager::initHUD() {
 	_plungerCooldown->drawBackground = true;
 	_plungerCooldown->setColor(SKILL_HIGHLIGHTED);
 	_plungerCooldown->setDirection(Vector2i(0, 1)); // Up
+	_plungerCooldown->setOffset(nanogui::Vector2f(6.0f, 6.0f));
+	_plungerCooldown->setPercentage(0);
 
 	//_plungerInfo = new nanogui::Label(humanSkills, "Plunger: Ready", "sans", 32);
 	//_plungerInfo->setColor(SOLID_HIGHLIGHTED);
@@ -688,6 +692,8 @@ void GuiManager::initHUD() {
 	_trapCooldown->drawBackground = true;
 	_trapCooldown->setColor(SKILL_NORMAL);
 	_trapCooldown->setDirection(Vector2i(0, 1)); // Up
+	_trapCooldown->setOffset(nanogui::Vector2f(6.0f, 6.0f));
+	_trapCooldown->setPercentage(0);
 
 	//_trapInfo = new nanogui::Label(humanSkills, "Trap: Ready", "sans", 32);
 	//_trapInfo->setColor(SOLID_WHITE);
@@ -701,6 +707,8 @@ void GuiManager::initHUD() {
 	_swingCharge->drawBackground = true;
 	_swingCharge->setColor(SKILL_NORMAL);
 	_swingCharge->setDirection(Vector2i(0, 1)); // Up
+	_swingCharge->setOffset(nanogui::Vector2f(6.0f, 6.0f));
+	_swingCharge->setPercentage(1.0f);
 
 	//_chargeInfo = new nanogui::Label(humanSkills, "Charge: 0%", "sans", 32);
 	//chargeInfo->setColor(SOLID_WHITE);
