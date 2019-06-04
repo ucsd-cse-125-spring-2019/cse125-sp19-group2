@@ -214,6 +214,8 @@ void Application::Setup() {
 		_networkClient->closeConnection();
 	});
 
+	compassGUI = std::make_unique<CompassGUI>(_win_width, _win_height);
+
 	_bgm = AudioManager::getInstance().getAudioSource("bgm");
 	_bgm->init("Resources/Sounds/bgm1.mp3");
 	_bgm->setVolume(0.05f);
@@ -542,6 +544,7 @@ void Application::Draw() {
 
     // Draw UI
     GuiManager::getInstance().draw();
+	compassGUI->render();
   });
 
   // Render _frameBuffer Quad
