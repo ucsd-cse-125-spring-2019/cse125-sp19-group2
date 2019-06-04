@@ -103,9 +103,6 @@
     <ClCompile Include="FountainParticleSystem.cpp">
       <Filter>Source Files\Graphics</Filter>
     </ClCompile>
-    <ClCompile Include="CompassGUI.cpp">
-      <Filter>Source Files\Graphics</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Application.hpp">
@@ -276,6 +273,9 @@
     <ClInclude Include="CompassGUI.hpp">
       <Filter>Header Files\Graphics</Filter>
     </ClInclude>
+    <ClInclude Include="ImageGUI.hpp">
+      <Filter>Header Files\Graphics</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
@@ -342,10 +342,10 @@
     <None Include="Resources\Shaders\urine.frag">
       <Filter>Resource Files</Filter>
     </None>
-    <None Include="Resources\Shaders\compass.frag">
+    <None Include="Resources\Shaders\imageGUI.frag">
       <Filter>Resource Files</Filter>
     </None>
-    <None Include="Resources\Shaders\compass.vert">
+    <None Include="Resources\Shaders\imageGUI.vert">
       <Filter>Resource Files</Filter>
     </None>
   </ItemGroup>

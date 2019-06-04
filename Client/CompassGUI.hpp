@@ -1,22 +1,48 @@
 #pragma once
-#include "Model.hpp"
-#include "Shader.hpp"
+#include "ImageGUI.hpp"
 
-class CompassGUI
+class CompassGUI : public ImageGUI
 {
-private:
-	std::unique_ptr<Model> _compassQuad;
-	// Shader program for object
-	std::unique_ptr<Shader> _objectShader;
-	float width, height;
-	glm::mat4 ortho;
+protected:
+	unsigned int compassTextureID;
+	unsigned int pointerTextureID;
 
 public:
 
-	CompassGUI(float width, float height);
+	CompassGUI(float width, float height) {
+		ImageGUI::init(width, height);
+		_quad_size = glm::vec2(COMPASS_SIZE, COMPASS_SIZE);
+		compassTextureID = LoadTextureFromFile("compass.png", "./Resources/Textures/Menu");
+		pointerTextureID = LoadTextureFromFile("compassneedle.png", "./Resources/Textures/Menu");
+	};
 
-	void updateWindowSize(float width, float height);
+	virtual void updateWindowSize(float width, float height) override {
+		ImageGUI::updateWindowSize(width, height);
+		_quad_pos = glm::vec2(width - COMPASS_POS_OFFSET, height - COMPASS_POS_OFFSET);
+	}
 
-	void render();
+	virtual void render() override {
+		_quadShader->Use();
+
+		// Compute model matrix for compass
+		const auto t = glm::translate(glm::mat4(1.0f), glm::vec3((_quad_pos / _win_size * 2.0f) - 1.0f, 0));
+		const auto r = glm::rotate(glm::mat4(1.0f), _quad_rotation, glm::vec3(0, 0, 1));
+		const auto s = glm::scale(glm::mat4(1.0f), glm::vec3(_quad_size / _win_size, 1));
+
+		auto model = t * s * r;
+
+		// Pass model matrix into shader
+		_quadShader->set_uniform("u_model", model);
+
+		_quadFrameBuffer->drawQuad(_quadShader, compassTextureID);
+
+		// Compute model matrix for pointer
+		model = t * s;
+
+		// Pass model matrix into shader
+		_quadShader->set_uniform("u_model", model);
+
+		_quadFrameBuffer->drawQuad(_quadShader, pointerTextureID);
+	}
 };
 

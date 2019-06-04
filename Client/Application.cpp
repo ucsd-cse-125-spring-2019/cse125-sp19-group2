@@ -540,11 +540,12 @@ void Application::Draw() {
 		  _debuglightShader->Use();
 		  _debuglightShader->set_uniform("u_projection", _localPlayer->getCamera()->projection_matrix());
 		  _debuglightShader->set_uniform("u_view", _localPlayer->getCamera()->view_matrix());
+
+		  compassGUI->render();
 	  }
 
     // Draw UI
     GuiManager::getInstance().draw();
-	compassGUI->render();
   });
 
   // Render _frameBuffer Quad
@@ -642,6 +643,7 @@ void Application::Resize(int x, int y) {
   glViewport(0, 0, x, y);
   _frameBuffer->resize(x, y);
 	_quadFrameBuffer->resize(x, y);
+	compassGUI->updateWindowSize(x, y);
   if (_localPlayer) {
 	  _localPlayer->resize(x, y);
   }
