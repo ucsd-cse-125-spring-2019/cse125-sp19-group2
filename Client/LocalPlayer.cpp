@@ -503,15 +503,21 @@ float LocalPlayer::getCompassDirection(glm::vec3 pos){
 		// get the distance vector between given pos and player position
 		glm::vec3 distance(pos.x - playerPos.x, pos.y - playerPos.y, pos.z - playerPos.z);
 		// get camera position
-		auto cameraPos = _camera->position();
+		auto cameraDir = _camera->convert_direction(glm::vec2(0, -1));;
 		// x1 is distance.x, y1 is distance.z, x2 is cameraPos.x, y2 is cameraPos.z
-		auto dot = distance.x * cameraPos.x + distance.z * cameraPos.z;      // dot product between[x1, y1] and [x2, y2]
-		auto det = distance.x * cameraPos.z - distance.z * cameraPos.x;      // determinant
+		auto dot = distance.x * cameraDir.x + distance.z * cameraDir.y;      // dot product between[x1, y1] and [x2, y2]
+		auto det = distance.x * cameraDir.y - distance.z * cameraDir.x;      // determinant
 		// this is the angle in rad
 		auto angle = std::atan2(det, dot);  // atan2(y, x) or atan2(sin, cos)
 		// convert it to degree
-		const double halfC = 180 / M_PI ;
-		return angle * halfC;
+		std::cout << angle << " " << glm::degrees(angle) << std::endl;
+		return angle;
 	}
 	return 0;
 }
+
+std::shared_ptr<CPlayerEntity> LocalPlayer::getPlayerEntity()
+{
+	return _playerEntity;
+}
+

@@ -89,4 +89,6 @@ public:
     void resize(int x, int y);
 
 	float getCompassDirection(glm::vec3 pos);
+
+	std::shared_ptr<CPlayerEntity> getPlayerEntity();
 };

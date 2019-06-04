@@ -284,6 +284,9 @@ void Application::Update()
     {
         // Update entity
         EntityManager::getInstance().update(state);
+		auto playerEntity = _localPlayer->getPlayerEntity();
+		if (playerEntity != nullptr)
+			compassGUI->updateRotation(_localPlayer->getCompassDirection(playerEntity->getPos() + glm::vec3(0,0,1)));
 
 		// Update entity particle system
 		ParticleSystemManager::getInstance().updateState(state);
