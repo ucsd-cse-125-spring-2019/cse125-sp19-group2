@@ -22,6 +22,7 @@
 #include "fmod/fmod.hpp"
 #include "fmod/fmod_errors.h"
 #include "Shared/GameEvent.hpp"
+#include "Font.h"
 
 #define SESSION_FILE_PATH "last_session.txt"
 
@@ -109,16 +110,21 @@ private:
   bool _inLobby = true;
   bool _inCountdown = false;
   bool _startHidden = false;
+  bool _muteSetting = false;	// Not muted by default
 
   // Used to tell that the client has loaded the game 
   bool _gameLoaded = false;
   int _serverEntityCount = 0;
+  std::chrono::time_point<std::chrono::steady_clock> _startTime;
 
   // Time when pregame countdown ended
   std::chrono::time_point<std::chrono::steady_clock> _countdownEnd;
 
   // Background music source
   AudioSource* _bgm = nullptr;
+  
+  // Whether the music is playing fast
+  bool _musicSpeedup = false;
 
   // Test Lights
   std::unique_ptr<DirectionalLight> _dir_light;

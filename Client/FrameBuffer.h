@@ -25,7 +25,7 @@ public:
      * \param width(int) Width of the RGBA and Depth texture
      * \param height(int) Height of the RGBA and Depth texture
      */
-    FrameBuffer(int width, int height);
+    FrameBuffer(int width, int height, bool multisample = false);
 
     ~FrameBuffer();
 
@@ -67,6 +67,12 @@ public:
      */
     void resize(int x, int y);
 
+		/**
+		 * \brief Copies a block of pixels from this framebuffer to a target framebuffer.
+		 * \param targetFramebuffer(std::unique_ptr<FrameBuffer>const&) Target framebuffer to copy data to.
+		 */
+		void blit(std::unique_ptr<FrameBuffer> const &targetFramebuffer = nullptr);
+
 private:
     void setEnable(bool status);
 
@@ -74,6 +80,8 @@ private:
     GLuint rgbaTexture, depthTexture;
     GLuint VAO, VBO;
     GLuint width, height;
+
+		bool multisample;
 };
 
 template <typename T>

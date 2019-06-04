@@ -8,6 +8,7 @@ enum WidgetType {
 	WIDGET_LOBBY,
 	WIDGET_LIST_DOGS,
 	WIDGET_LIST_HUMANS,
+	WIDGET_LOADING,
 	WIDGET_OPTIONS,
 	WIDGET_HUD,
 	WIDGET_HUD_TOP,
@@ -19,7 +20,7 @@ enum WidgetType {
 
 #define CONNECT_MARGIN 0.15f
 
-static const nanogui::Color SOLID_HIGHLIGHTED = nanogui::Color(0.376f, 0.863f, 1.0f, 1.0f);
+static const nanogui::Color SOLID_HIGHLIGHTED = nanogui::Color(247, 201, 210, 255);
 static const nanogui::Color SOLID_WHITE = nanogui::Color(1.0f, 1.0f, 1.0f, 1.0f);
 
 class GuiManager {
@@ -35,6 +36,8 @@ public:
     void init(GLFWwindow* window);
 
     void draw();
+
+	void refresh();
 
 	void resize(int x, int y);
 
@@ -59,6 +62,11 @@ public:
 	void registerSwitchSidesCallback(const std::function<void()> f);
 	void registerReadyCallback(const std::function<void()> f);
 	void registerControllerCallback(const std::function<void(GamePadIndex)> f);
+	void registerDisconnectCallback(const std::function<void()> f);
+
+	// Callbacks on mute buttons
+	void toggleMute();
+	void toggleMusicMute();
 
 	// Text in player name and address boxes
 	std::string getPlayerName();
@@ -106,6 +114,7 @@ private:
 	/*** Functions ***/
 	void initConnectScreen();
 	void initLobbyScreen();
+	void initLoadingScreen();
 	void initHUD();
 	void initControlMenu();
 
@@ -144,16 +153,22 @@ private:
 	/*** UI elements ***/
 
 	// Connect screen
+	nanogui::Label* _connectPadding;
 	nanogui::TextBox* _playerNameBox;
 	nanogui::TextBox* _addressBox;
 	nanogui::Button* _connectButton;
 
 	// Lobby screen
 	nanogui::Button* _switchSidesButton;
+	nanogui::Label* _lobbyPadding;
 	nanogui::Button* _readyButton;
+	nanogui::Label* _readyLabel;
 
 	// Controls menu
 	nanogui::detail::FormWidget<GamePadIndex, std::integral_constant<bool, true>>* _gamepadSelect;
+	nanogui::Button* _muteButton;
+	nanogui::Button* _muteMusicButton;
+	nanogui::Button* _disconnectButton;
 
 	// Upper HUD
 	nanogui::Label* _timer;	// Countdown timer

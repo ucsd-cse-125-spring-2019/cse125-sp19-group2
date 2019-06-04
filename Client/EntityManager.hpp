@@ -32,6 +32,8 @@ public:
      */
     std::shared_ptr<CBaseEntity> getEntity(std::shared_ptr<BaseState> const& state);
 
+	std::vector<uint32_t> getEntityIdList();
+
 	int getEntityCount();
 
     /**

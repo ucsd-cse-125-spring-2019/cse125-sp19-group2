@@ -42,6 +42,20 @@ AudioManager::AudioManager() {
 
 }
 
+bool AudioManager::getMute() {
+	FMOD::ChannelGroup* masterGroup;
+	getSystem()->getMasterChannelGroup(&masterGroup);
+	bool isMuted;
+	masterGroup->getMute(&isMuted);
+	return isMuted;
+}
+
+void AudioManager::setMute(bool mute) {
+	FMOD::ChannelGroup* masterGroup;
+	getSystem()->getMasterChannelGroup(&masterGroup);
+	masterGroup->setMute(mute);
+}
+
 void AudioManager::setListenerPos(vec3 pos) {
     _pos = pos;
     FMOD_VECTOR p, f, u;

@@ -129,6 +129,7 @@ public:
 
 	// Stage of current action
 	int actionStage = 0;
+	int lastStage = 0;
 
 	// Used when interpolating to a colliding object
 	glm::vec3 targetPos;
