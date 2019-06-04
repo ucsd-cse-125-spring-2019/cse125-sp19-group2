@@ -571,7 +571,9 @@ void Application::Draw() {
 		  _debuglightShader->set_uniform("u_projection", _localPlayer->getCamera()->projection_matrix());
 		  _debuglightShader->set_uniform("u_view", _localPlayer->getCamera()->view_matrix());
 
+		  glDisable(GL_DEPTH_TEST);
 		  compassGUI->render();
+		  glEnable(GL_DEPTH_TEST);
 	  }
 
     // Draw UI
