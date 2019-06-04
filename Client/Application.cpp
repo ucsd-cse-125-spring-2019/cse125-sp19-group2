@@ -218,9 +218,6 @@ void Application::Setup() {
 	_bgm->init("Resources/Sounds/bgm1.mp3");
 	_bgm->setVolume(0.05f);
 	_bgm->play(true);
-
-    _font = std::make_unique<Font>();
-    _font->_textColor = glm::vec4(1,0,0,1);
 }
 
 void Application::Cleanup() {
@@ -572,12 +569,6 @@ void Application::Draw() {
 
     // Draw UI
     GuiManager::getInstance().draw();
-
-      //_font->display("test font rendering", 1920/2.0, 1080/2.0);
-      
-      _font->renderToTexture("test font rendering");
-      _font->_backgroundColor = glm::vec4(0,1,1,1);
-      //_font->getTexture()
   });
   // Render _frameBuffer Quad
   //_frameBuffer->drawQuad(_quadShader);

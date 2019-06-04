@@ -129,11 +129,6 @@ private:
   // Test Lights
   std::unique_ptr<DirectionalLight> _dir_light;
 
-  // Test Font
-    std::unique_ptr<Font> _font;
-    float xc = 400;
-    float yc = 400;
-
     // Test UI
     bool _playAmbient = false;
     bool _playPositional;
