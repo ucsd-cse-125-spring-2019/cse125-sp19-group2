@@ -20,7 +20,7 @@ public:
 		_objectShader->CreateProgram();
 
 		_text = std::make_unique<Font>();
-		_text->_textColor = glm::vec4(1, 1, 1, 1);
+		_text->_textColor = glm::vec4(0, 0, 0, 1);
 	}
 
 	~CBillboardEntity() {};
@@ -34,7 +34,7 @@ public:
 		// Render text with its own framebuffer
 		auto screen = GuiManager::getInstance().getScreen();
 		_text->setScreenSize(glm::ivec2(screen->size().x(), screen->size().y()));
-		_text->_backgroundColor = glm::vec4(1, 1, 1, 0.2f);
+		_text->_backgroundColor = glm::vec4(1, 1, 1, 1.0f);
 		_text->renderToTexture(_string.c_str(), 2.5f);
 
 		// Bind previous framebuffer
