@@ -497,7 +497,6 @@ void Application::Update()
 	auto playerEntity = _localPlayer->getPlayerEntity();
 	if (playerEntity != nullptr)
 		compassGUI->updateRotation(_localPlayer->getCompassDirection(playerEntity->getPos() + glm::vec3(0, 0, 1)));
-	dogPointerGUI->updateRotation(_localPlayer->getCompassDirection(glm::vec3(0,0,0)));
   }
   catch (std::runtime_error e)
   {
@@ -579,7 +578,11 @@ void Application::Draw() {
 
 		  glDisable(GL_DEPTH_TEST);
 		  compassGUI->render();
-		  dogPointerGUI->render();
+		  glm::vec3 targetPos = glm::vec3(0, 0, 0);
+		  if (glm::length(_localPlayer->getPlayerEntity()->getPos() - targetPos) > 8.0f) {
+			  dogPointerGUI->updateRotation(_localPlayer->getCompassDirection(targetPos));
+			  dogPointerGUI->render();
+		  }
 		  glEnable(GL_DEPTH_TEST);
 	  }
 
