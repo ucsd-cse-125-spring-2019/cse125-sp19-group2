@@ -44,5 +44,7 @@ public:
 	* \param camera(std::unique_ptr<Camera> const&) Local camera
 	*/
 	void createFloorTexture(std::unique_ptr<Camera> const& camera);
+
+	void initGrass();
 };
 

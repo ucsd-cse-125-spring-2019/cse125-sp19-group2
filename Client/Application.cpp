@@ -560,6 +560,7 @@ void Application::Draw() {
 
 		  // Render floor before any entity
 		  CFloorEntity::getInstance().render(_localPlayer->getCamera());
+		  CFloorEntity::getInstance().initGrass();
 
           // Render particles
 		  ParticleSystemManager::getInstance().render(_localPlayer->getCamera());

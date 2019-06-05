@@ -1,6 +1,7 @@
 #include "CFloorEntity.hpp"
 #include "Shared/Logger.hpp"
 #include <string.h>
+#include "EntityManager.hpp"
 
 std::vector<std::vector<FloorType>> CFloorEntity::_floorMap;
 
@@ -80,7 +81,10 @@ void CFloorEntity::render(std::unique_ptr<Camera> const & camera)
 	for (int x = 0; x < _floorMap.size(); x++) {
 		for (int z = 0; z < _floorMap[0].size(); z++) {
 			// skip the tile that is default
-			if (_floorMap[x][z] == FLOOR_GRASS) continue;
+			if (_floorMap[x][z] == FLOOR_GRASS) {
+
+				continue;
+			};
 
 			// get actual position and scale of tile
 			float xPos = ((float)x * tileScale) - (MAP_WIDTH / 2) + tileScale / 2;
@@ -105,7 +109,24 @@ void CFloorEntity::render(std::unique_ptr<Camera> const & camera)
 	//floorMesh.Draw(_objectShader, fbo->getRGBA());
 
 }
-
+void CFloorEntity::initGrass()
+{
+	for (int x = 0; x < _floorMap.size(); x++) {
+		for (int z = 0; z < _floorMap[0].size(); z++) {
+			// skip the tile that is default
+			if (_floorMap[x][z] == FLOOR_GRASS) {
+				//Logger::getInstance()->debug("x: " + std::to_string(x) + " z " + std::to_string(z));
+				std::shared_ptr<BaseState> state = std::make_shared<BaseState>();
+				state->type = ENTITY_GRASS;
+				// get actual position and scale of tile
+				float xPos = ((float)x * tileScale) - (MAP_WIDTH / 2) + tileScale / 2;
+				float zPos = ((float)z * tileScale) - (MAP_WIDTH / 2) + tileScale / 2;
+				state->pos = glm::vec3(xPos, 0.002f, zPos);
+				EntityManager::getInstance().update(state);
+			}
+		}
+	}
+}
 void CFloorEntity::createFloorTexture(std::unique_ptr<Camera> const & camera)
 {
 	// save previous framebuffer and viewport

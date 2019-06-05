@@ -86,7 +86,8 @@ enum EntityType
 	ENTITY_ROPE,
 	ENTITY_TRAP,
 	ENTITY_NET,
-	ENTITY_TREE
+	ENTITY_TREE,
+	ENTITY_GRASS
 	// TODO: add new types here, e.g. ENTITY_DOGBONE
 };
 
