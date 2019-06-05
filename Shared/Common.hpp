@@ -58,6 +58,10 @@ const std::chrono::seconds TRAP_COOLDOWN(10);
 #define COMPASS_SIZE 200
 #define COMPASS_POS_OFFSET 110
 
+#define DOGPOINTER_SIZE 75
+#define DOGPOINTER_RADIUS_RATIO 0.75f
+
+
 // This is absolutely filthy code but it is necessary when multiple machines
 // enter the picture.
 enum EntityType

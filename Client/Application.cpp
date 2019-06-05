@@ -215,6 +215,7 @@ void Application::Setup() {
 	});
 
 	compassGUI = std::make_unique<CompassGUI>(_win_width, _win_height);
+	dogPointerGUI = std::make_unique<DogPointerGUI>(_win_width, _win_height);
 
 	_bgm = AudioManager::getInstance().getAudioSource("bgm");
 	_bgm->init("Resources/Sounds/bgm1.mp3");
@@ -284,9 +285,8 @@ void Application::Update()
     {
         // Update entity
         EntityManager::getInstance().update(state);
-		auto playerEntity = _localPlayer->getPlayerEntity();
-		if (playerEntity != nullptr)
-			compassGUI->updateRotation(_localPlayer->getCompassDirection(playerEntity->getPos() + glm::vec3(0,0,1)));
+
+		
 
 		// Update entity particle system
 		ParticleSystemManager::getInstance().updateState(state);
@@ -492,6 +492,12 @@ void Application::Update()
 			_inLobby = gameState->inLobby;
         }
     }
+
+	// update compass rotation
+	auto playerEntity = _localPlayer->getPlayerEntity();
+	if (playerEntity != nullptr)
+		compassGUI->updateRotation(_localPlayer->getCompassDirection(playerEntity->getPos() + glm::vec3(0, 0, 1)));
+	dogPointerGUI->updateRotation(_localPlayer->getCompassDirection(glm::vec3(0,0,0)));
   }
   catch (std::runtime_error e)
   {
@@ -573,6 +579,7 @@ void Application::Draw() {
 
 		  glDisable(GL_DEPTH_TEST);
 		  compassGUI->render();
+		  dogPointerGUI->render();
 		  glEnable(GL_DEPTH_TEST);
 	  }
 
@@ -674,7 +681,12 @@ void Application::Resize(int x, int y) {
   glViewport(0, 0, x, y);
   _frameBuffer->resize(x, y);
 	_quadFrameBuffer->resize(x, y);
-	compassGUI->updateWindowSize(x, y);
+	if (compassGUI != nullptr) {
+		compassGUI->updateWindowSize(x, y);
+	}
+	if (dogPointerGUI != nullptr) {
+		dogPointerGUI->updateWindowSize(x, y);
+	}
   if (_localPlayer) {
 	  _localPlayer->resize(x, y);
   }

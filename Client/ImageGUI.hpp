@@ -30,6 +30,7 @@ public:
 
 		_quad_size = glm::vec2(width, height);
 		_quadFrameBuffer = std::make_unique<FrameBuffer>();
+		_quad_pos = glm::vec2(0);
 	}
 
 	virtual void updateWindowSize(float width, float height) {

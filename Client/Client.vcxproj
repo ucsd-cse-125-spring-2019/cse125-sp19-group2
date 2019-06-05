@@ -336,6 +336,7 @@ xcopy /y /d  "$(SolutionDir)Library\lib\x64\Release\*.dll" "$(OutDir)"</Command>
     <ClInclude Include="CTrapEntity.hpp" />
     <ClInclude Include="CTreeEntity.hpp" />
     <ClInclude Include="CTriggerEntity.hpp" />
+    <ClInclude Include="DogPointerGUI.hpp" />
     <ClInclude Include="Drawable.hpp" />
     <ClInclude Include="EntityManager.hpp" />
     <ClInclude Include="Font.h" />
