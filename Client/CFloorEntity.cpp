@@ -122,7 +122,7 @@ void CFloorEntity::initGrass()
 				float xPos = ((float)x * tileScale) - (MAP_WIDTH / 2) + tileScale / 2;
 				float zPos = ((float)z * tileScale) - (MAP_WIDTH / 2) + tileScale / 2;
 				state->pos = glm::vec3(xPos, 0.002f, zPos);
-				EntityManager::getInstance().update(state);
+				EntityManager::getInstance().createEntity(state);
 			}
 		}
 	}

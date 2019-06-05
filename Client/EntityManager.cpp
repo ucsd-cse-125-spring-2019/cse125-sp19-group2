@@ -46,7 +46,90 @@ std::shared_ptr<CBaseEntity> EntityManager::getEntity(uint32_t id)
     }
     return nullptr;
 }
+void EntityManager::createEntity(std::shared_ptr<BaseState> const& state)
+{
+	// Check if the Entity is already created
+	uint32_t id = state->id;
 
+	// Otherwise create the Entity based on its type
+	std::shared_ptr<CBaseEntity> entity = nullptr;
+	EntityType type = state->type;
+
+	std::shared_ptr<PlayerState> playerState;
+
+	switch (type)
+	{
+	case ENTITY_EXAMPLE:
+		break;
+	case ENTITY_DOG:
+		playerState = std::static_pointer_cast<PlayerState>(state);
+		entity = std::make_shared<CDogEntity>(id, playerState->skinID);
+		break;
+	case ENTITY_HUMAN:
+		playerState = std::static_pointer_cast<PlayerState>(state);
+		entity = std::make_shared<CHumanEntity>(id, playerState->skinID);
+		break;
+	case ENTITY_HOUSE_6X6_A:
+		entity = std::make_shared<CHouseEntity>(id);
+		break;
+	case ENTITY_BONE:
+		entity = std::make_shared<CBoneEntity>();
+		break;
+	case ENTITY_DOGHOUSE:
+		entity = std::make_shared<CDogHouseEntity>();
+		break;
+	case ENTITY_HYDRANT:
+		entity = std::make_shared<CHydrantEntity>();
+		break;
+	case ENTITY_FOUNTAIN:
+		entity = std::make_shared<CFountainEntity>();
+		break;
+	case ENTITY_PUDDLE:
+		entity = std::make_shared<CPuddleEntity>();
+		break;
+	case ENTITY_FENCE:
+		entity = std::make_shared<CFenceEntity>();
+		break;
+	case ENTITY_BAR:
+		entity = std::make_shared<CBarEntity>();
+		break;
+	case ENTITY_GATE:
+		entity = std::make_shared<CGateEntity>();
+		break;
+	case ENTITY_GRASS:
+		Logger::getInstance()->debug("Created Grass at" + std::to_string(state->pos.x) + std::to_string(state->pos.z));
+		entity = std::make_shared<CGrassEntity>(state->pos);
+		break;
+	case ENTITY_TRIGGER:
+		entity = std::make_shared<CTriggerEntity>();
+		break;
+	case ENTITY_PLUNGER:
+		entity = std::make_shared<CPlungerEntity>();
+		break;
+	case ENTITY_ROPE:
+		entity = std::make_shared<CRopeEntity>();
+		break;
+	case ENTITY_TRAP:
+		entity = std::make_shared<CTrapEntity>();
+		break;
+	case ENTITY_TREE:
+		entity = std::make_shared<CTreeEntity>();
+		break;
+	case ENTITY_FLOOR:
+		// Floor tiles should not be placed in map
+		CFloorEntity::getInstance().updateTile(state);
+		return;
+	}
+
+	if (entity)
+	{
+		if (!state->isVisible)
+		{
+			Logger::getInstance()->debug("type:" + std::to_string(state->type));
+		}
+		_entityList.push_back(entity);
+	}
+}
 std::shared_ptr<CBaseEntity> EntityManager::getEntity(std::shared_ptr<BaseState> const &state)
 {
     // Check if the Entity is already created

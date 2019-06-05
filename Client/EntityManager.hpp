@@ -32,6 +32,12 @@ public:
      */
     std::shared_ptr<CBaseEntity> getEntity(std::shared_ptr<BaseState> const& state);
 
+	/**
+	 * \brief Create one entity without having an ID
+	 * \param state(std::shared_ptr<BaseState> const&) Entity state
+	 */
+	void createEntity(std::shared_ptr<BaseState> const& state);
+
 	std::vector<uint32_t> getEntityIdList();
 
 	int getEntityCount();
