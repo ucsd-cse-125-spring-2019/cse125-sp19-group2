@@ -35,7 +35,9 @@ public:
 		auto screen = GuiManager::getInstance().getScreen();
 		_text->setScreenSize(glm::ivec2(screen->size().x(), screen->size().y()));
 		_text->_backgroundColor = glm::vec4(1, 1, 1, 1.0f);
+        _text->cut = true;
 		_text->renderToTexture(_string.c_str(), 2.5f);
+        _text->edge = glm::vec2(0.03,0.03);
 
 		// Bind previous framebuffer
 		glBindFramebuffer(GL_FRAMEBUFFER, oldFBO);

@@ -1,5 +1,7 @@
 ﻿#include "Font.h"
 #include "Font.h"
+#include <iostream>
+#include <algorithm>
 
 Font::Font() {
     if (FT_Init_FreeType(&ft)) {
@@ -90,7 +92,7 @@ void Font::setScreenSize(glm::ivec2 s) {
     screenSize = s;
     _fb->resize(s.x, s.y);
 }
-
+#pragma optimize("", off)
 void Font::render_text(const char* text, float x, float y, float sx, float sy) {
     
     const char* p;
@@ -108,12 +110,57 @@ void Font::render_text(const char* text, float x, float y, float sx, float sy) {
             }
             auto c = res->second;
             x -= (c.advancex / 128) * sx;
-            //if(!yModified) {
-            //    y -= (c.advancey / 128) * sy;
-            //    yModified = true;
-            //}
+            if(!yModified) {
+                y -= (c.advancey / 128) * sy;
+                yModified = true;
+            }
 		}
     }
+    
+    GLfloat box[4];
+    GLfloat viewport[4];
+    glGetFloatv(GL_SCISSOR_BOX, box);
+    glGetFloatv(GL_VIEWPORT, viewport);
+
+	if(cut) {
+	    glEnable(GL_SCISSOR_TEST);
+        float cx = x;
+        float cy = y;
+        float w = 0;
+        float h = 0;
+        bool init = false;
+        for (p = text; *p; p++) {
+            auto res = _textures.find(*p);
+            if(res == _textures.end()) {
+                continue;
+            }
+            auto c = res->second;
+            if(!init) {
+                cx += c.bearing.x * sx;
+                cy -= (c.size.y - c.bearing.y) * sy;
+                init = true;
+            }
+            w += (c.advancex / 64) * sx;
+            h = std::max<float>(h, c.size.y * sy);
+		}
+        cx = ((cx + 1) / 2.0) - edge.x;
+        cy = ((cy + 1) / 2.0) - edge.y;
+        cx *= viewport[2];
+        cy *= viewport[3];
+
+        w /= 2.0;
+        h /= 2.0;
+        w += edge.x * 2;
+        h += edge.y * 2;
+        w *= viewport[2];
+        h *= viewport[3];
+        if(h > 0 && w > 0){
+            glScissor(cx, cy, w, h);
+		}
+	}
+
+    glClearColor(_backgroundColor.r, _backgroundColor.g,_backgroundColor.b,_backgroundColor.a);
+    glClear(GL_COLOR_BUFFER_BIT);
 
     for (p = text; *p; p++) {
 
@@ -152,8 +199,12 @@ void Font::render_text(const char* text, float x, float y, float sx, float sy) {
         x += (c.advancex / 64) * sx;
         y += (c.advancey / 64) * sy; 
     }
-}
 
+    if(cut) {
+        glScissor(box[0], box[1], box[2], box[3]);
+    }
+}
+#pragma optimize("", on)
 void Font::display(
     bool depth, std::unique_ptr<Camera> const& camera, glm::mat4 toWorld, const std::string & str, float size,
     float xcoord, float ycoord) {
@@ -237,7 +288,7 @@ void Font::renderToTexture(const std::string & str, float size, float xcoord, fl
     _fb->renderScene([&]() {
         GLfloat bkColor[4];
         glGetFloatv(GL_COLOR_CLEAR_VALUE, bkColor);
-        glClearColor(_backgroundColor.r, _backgroundColor.g, _backgroundColor.b, _backgroundColor.a);
+        glClearColor(0, 0, 0, 0);
         glClear(GL_COLOR_BUFFER_BIT |GL_DEPTH_BUFFER_BIT);
         display(str, size, xcoord, ycoord);
         glClearColor(bkColor[0], bkColor[1],bkColor[2],bkColor[3]);
