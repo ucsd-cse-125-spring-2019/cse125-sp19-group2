@@ -364,6 +364,8 @@ void GuiManager::setActiveSkill(bool usePlunger) {
 		// TODO: change frame image as well
 		_plungerCooldown->setColor(SKILL_HIGHLIGHTED);
 		_trapCooldown->setColor(SKILL_NORMAL);
+		_trapCooldown->setBackgroundTexture(_trapIcon, 0, 0);
+		_plungerCooldown->setBackgroundTexture(_plungerIconSelected, 0, 0);
 	}
 	else
 	{
@@ -371,6 +373,8 @@ void GuiManager::setActiveSkill(bool usePlunger) {
 		//_trapInfo->setColor(SOLID_HIGHLIGHTED);
 		_trapCooldown->setColor(SKILL_HIGHLIGHTED);
 		_plungerCooldown->setColor(SKILL_NORMAL);
+		_trapCooldown->setBackgroundTexture(_trapIconSelected, 0, 0);
+		_plungerCooldown->setBackgroundTexture(_plungerIcon, 0, 0);
 	}
 }
 
@@ -678,10 +682,11 @@ void GuiManager::initHUD() {
 
 	// Plunger
 	_plungerCooldown = new nanogui::CooldownBar(humanSkills);
-	auto plungerIcon = LoadTextureFromFile("plunger.png", "./Resources/Textures/Menu/");
+	_plungerIcon = LoadTextureFromFile("plunger.png", "./Resources/Textures/Menu/");
+	_plungerIconSelected = LoadTextureFromFile("plunger_selected.png", "./Resources/Textures/Menu/");
 	_plungerCooldown->setFixedSize(Vector2i(100, 100));
 	_plungerCooldown->alpha = 1.0;
-	_plungerCooldown->setBackgroundTexture(plungerIcon, 0, 0);
+	_plungerCooldown->setBackgroundTexture(_plungerIconSelected, 0, 0);
 	_plungerCooldown->drawBackground = true;
 	_plungerCooldown->setColor(SKILL_HIGHLIGHTED);
 	_plungerCooldown->setDirection(Vector2i(0, 1)); // Up
@@ -693,10 +698,11 @@ void GuiManager::initHUD() {
 
 	// Trap
 	_trapCooldown = new nanogui::CooldownBar(humanSkills);
-	auto trapIcon = LoadTextureFromFile("trapbone.png", "./Resources/Textures/Menu/");
+	_trapIcon = LoadTextureFromFile("trapbone.png", "./Resources/Textures/Menu/");
+	_trapIconSelected = LoadTextureFromFile("trapbone_selected.png", "./Resources/Textures/Menu/");
 	_trapCooldown->setFixedSize(Vector2i(100, 100));
 	_trapCooldown->alpha = 1.0;
-	_trapCooldown->setBackgroundTexture(trapIcon, 0, 0);
+	_trapCooldown->setBackgroundTexture(_trapIcon, 0, 0);
 	_trapCooldown->drawBackground = true;
 	_trapCooldown->setColor(SKILL_NORMAL);
 	_trapCooldown->setDirection(Vector2i(0, 1)); // Up
@@ -708,10 +714,11 @@ void GuiManager::initHUD() {
 
 	// Charge rate of swinging
 	_swingCharge = new nanogui::CooldownBar(humanSkills);
-	auto swingIcon = LoadTextureFromFile("swing.png", "./Resources/Textures/Menu/");
+	_swingIcon = LoadTextureFromFile("swing.png", "./Resources/Textures/Menu/");
+	_swingIconSelected = LoadTextureFromFile("swing_selected.png", "./Resources/Textures/Menu/");
 	_swingCharge->setFixedSize(Vector2i(100, 100));
 	_swingCharge->alpha = 1.0;
-	_swingCharge->setBackgroundTexture(swingIcon, 0, 0);
+	_swingCharge->setBackgroundTexture(_swingIcon, 0, 0);
 	_swingCharge->drawBackground = true;
 	_swingCharge->setColor(SKILL_NORMAL);
 	_swingCharge->setDirection(Vector2i(0, 1)); // Up

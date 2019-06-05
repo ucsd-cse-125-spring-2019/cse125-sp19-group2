@@ -197,4 +197,10 @@ private:
 	nanogui::CooldownBar* _trapCooldown;
 	nanogui::Label* _chargeInfo;
 	nanogui::CooldownBar* _swingCharge;
+	GLuint _plungerIcon;
+	GLuint _plungerIconSelected;
+	GLuint _trapIcon;
+	GLuint _trapIconSelected;
+	GLuint _swingIcon;
+	GLuint _swingIconSelected;
 };
