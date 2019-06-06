@@ -8,10 +8,10 @@ Font::Font() {
         fprintf(stderr, "Could not init freetype library\n");
     }
 
-    if (FT_New_Face(ft, "./Resources/Font/AgentOrange.ttf", 0, &face)) {
+    if (FT_New_Face(ft, "./Resources/Font/ComicSansBold.ttf", 0, &face)) {
         fprintf(stderr, "Could not open font\n");
     }
-    FT_Set_Pixel_Sizes(face, 0, 48);
+    FT_Set_Pixel_Sizes(face, 0, 52);
     
     FT_GlyphSlot g = face->glyph;
 
