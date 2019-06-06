@@ -357,6 +357,9 @@
     <None Include="Resources\Shaders\font.vert">
       <Filter>Resource Files</Filter>
     </None>
+    <None Include="Resources\Shaders\wall.frag">
+      <Filter>Resource Files</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Header Files">
