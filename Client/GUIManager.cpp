@@ -41,7 +41,7 @@ void GuiManager::init(GLFWwindow* window) {
     nvgCreateFont(_screen->nvgContext(), "ComicSansBold", "./Resources/Font/ComicSansBold.ttf");
     
     _fpsCounter = new Label(_screen, "fps: 0", DEFAULT_FONT, 32);
-    _fpsCounter->setColor(SOLID_WHITE);
+    _fpsCounter->setColor(SOLID_NONE);
 }
 
 void GuiManager::draw() {
@@ -234,6 +234,20 @@ void GuiManager::toggleMute() {
 
 void GuiManager::toggleMusicMute() {
 	_muteMusicButton->callback()();
+}
+
+void GuiManager::toggleFPS() {
+	if (_fpsCounter)
+	{
+		if (_fpsCounter->color() == SOLID_NONE)
+		{
+			_fpsCounter->setColor(SOLID_WHITE);
+		}
+		else
+		{
+			_fpsCounter->setColor(SOLID_NONE);
+		}
+	}
 }
 
 std::string GuiManager::getPlayerName() {
