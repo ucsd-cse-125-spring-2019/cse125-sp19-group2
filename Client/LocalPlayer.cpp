@@ -509,8 +509,6 @@ float LocalPlayer::getCompassDirection(glm::vec3 pos){
 		auto det = distance.x * cameraDir.y - distance.z * cameraDir.x;      // determinant
 		// this is the angle in rad
 		auto angle = std::atan2(det, dot);  // atan2(y, x) or atan2(sin, cos)
-		// convert it to degree
-		std::cout << angle << " " << glm::degrees(angle) << std::endl;
 		return angle;
 	}
 	return 0;

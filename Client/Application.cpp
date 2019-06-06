@@ -577,12 +577,21 @@ void Application::Draw() {
 		  _debuglightShader->set_uniform("u_view", _localPlayer->getCamera()->view_matrix());
 
 		  glDisable(GL_DEPTH_TEST);
-		  compassGUI->render();
-		  glm::vec3 targetPos = glm::vec3(0, 0, 0);
-		  if (glm::length(_localPlayer->getPlayerEntity()->getPos() - targetPos) > 8.0f) {
-			  dogPointerGUI->updateRotation(_localPlayer->getCompassDirection(targetPos));
-			  dogPointerGUI->render();
+
+		  if (_localPlayer->getPlayerEntity()->getType() == ENTITY_DOG) {
+			  auto dogEntity = std::static_pointer_cast<CDogEntity>(_localPlayer->getPlayerEntity());
+			  if (!dogEntity->isCaught()) {
+				  auto dogList = EntityManager::getInstance().getDogList();
+				  for (int i = 0; i < dogList.size(); i++) {
+					  if (dogList[i]->getId() != _localPlayer->getPlayerId() && dogList[i]->isCaught())
+						  dogPointerGUI->render(_localPlayer->getCamera(), dogList[i]->getPos() + glm::vec3(0, 1.5f, 0));
+				  }
+			  }
 		  }
+		  else if (_localPlayer->getPlayerEntity()->getType() == ENTITY_HUMAN) {
+			  compassGUI->render();
+		  }
+
 		  glEnable(GL_DEPTH_TEST);
 	  }
 

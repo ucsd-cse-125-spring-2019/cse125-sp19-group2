@@ -124,6 +124,11 @@ public:
 		}
 	}
 
+	bool isCaught() {
+		auto currentState = std::static_pointer_cast<DogState>(_state);
+		return currentState->isCaught;
+	}
+
 protected:
 	AudioSource * _pantingSound;
 	AudioSource * _runningSound;

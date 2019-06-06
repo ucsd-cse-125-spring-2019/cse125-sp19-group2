@@ -1,6 +1,7 @@
 ﻿#pragma once
 #include <unordered_map>
 #include "CBaseEntity.hpp"
+#include "CDogEntity.hpp"
 
 /**
  * \brief Manage all entities. Handle entities' updating and rendering.
@@ -11,6 +12,7 @@ private:
 
 	std::unordered_map<uint32_t, int> _entityMap;
     std::vector<std::shared_ptr<CBaseEntity>> _entityList;
+	std::vector<std::shared_ptr<CDogEntity>> _dogList;
 public:
 	/**
 	 * \brief The singleton getter of EntityManager (create one if not exist)
@@ -52,4 +54,6 @@ public:
 	 * \brief Deletes all entities from the server
 	 */
 	void clearAll();
+
+	std::vector<std::shared_ptr<CDogEntity>> getDogList();
 };

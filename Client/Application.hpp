@@ -25,6 +25,7 @@
 #include "Font.h"
 #include "CompassGUI.hpp"
 #include "DogPointerGUI.hpp"
+#include "CDogEntity.hpp"
 
 #define SESSION_FILE_PATH "last_session.txt"
 

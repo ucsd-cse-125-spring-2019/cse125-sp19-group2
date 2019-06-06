@@ -60,6 +60,7 @@ const std::chrono::seconds TRAP_COOLDOWN(10);
 
 #define DOGPOINTER_SIZE 75
 #define DOGPOINTER_RADIUS_RATIO 0.75f
+#define DOGPOINTER_BORDER_OFFSET 100
 
 
 // This is absolutely filthy code but it is necessary when multiple machines
