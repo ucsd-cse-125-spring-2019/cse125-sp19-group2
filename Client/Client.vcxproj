@@ -288,6 +288,7 @@ xcopy /y /d  "$(SolutionDir)Library\lib\x64\Release\*.dll" "$(OutDir)"</Command>
     <None Include="Resources\Shaders\basiclight.vert" />
     <None Include="Resources\Shaders\collider.frag" />
     <None Include="Resources\Shaders\collider.vert" />
+    <None Include="Resources\Shaders\floorBlend.frag" />
     <None Include="Resources\Shaders\imageGUI.frag" />
     <None Include="Resources\Shaders\imageGUI.vert" />
     <None Include="Resources\Shaders\debuglight.frag" />
@@ -324,7 +325,6 @@ xcopy /y /d  "$(SolutionDir)Library\lib\x64\Release\*.dll" "$(OutDir)"</Command>
     <ClInclude Include="CFloorEntity.hpp" />
     <ClInclude Include="CFountainEntity.hpp" />
     <ClInclude Include="CGateEntity.hpp" />
-    <ClInclude Include="CGrassEntity.hpp" />
     <ClInclude Include="CHouseEntity.hpp" />
     <ClInclude Include="CHumanEntity.hpp" />
     <ClInclude Include="CHydrantEntity.hpp" />

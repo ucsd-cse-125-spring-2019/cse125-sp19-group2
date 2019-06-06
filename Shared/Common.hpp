@@ -14,6 +14,8 @@
 
 // Map is a square so this is the same as height
 #define MAP_WIDTH 72
+#define MAP_BLEND_NUM 10.0f
+#define MAP_BLEND_DIST 7
 
 // Width and height of walls and fences
 #define FENCE_WIDTH 0.2f
@@ -59,6 +61,8 @@ const std::chrono::seconds TRAP_COOLDOWN(10);
 #define COMPASS_POS_OFFSET 110
 
 #define GRASS_SEED 100
+#define PEBBLE_SEED 101
+#define DIRT_PEBBLE_SEED 102
 
 // This is absolutely filthy code but it is necessary when multiple machines
 // enter the picture.

@@ -12,7 +12,6 @@
 #include "CFenceEntity.hpp"
 #include "CBarEntity.hpp"
 #include "CGateEntity.hpp"
-#include "CGrassEntity.hpp"
 #include "CTriggerEntity.hpp"
 #include "CPlungerEntity.hpp"
 #include "CRopeEntity.hpp"

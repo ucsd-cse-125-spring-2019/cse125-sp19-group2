@@ -329,16 +329,14 @@ void GridLevelParser::parseLevelFromFile(
 				}
 			}
 
-			// Build floor tile if not default floor
-			if (tile->groundType != 0)
-			{
-				auto floorTile = std::make_shared<SFloorEntity>(
-					(FloorType)tile->groundType,
-					xIndex,
-					zIndex,
-					tileWidth);
-				structureInfo->entityMap->insert({ floorTile->getState()->id, floorTile });
-			}
+			// Build floor tile
+			auto floorTile = std::make_shared<SFloorEntity>(
+				(FloorType)tile->groundType,
+				xIndex,
+				zIndex,
+				tileWidth,
+				tile->isClaimed);
+			structureInfo->entityMap->insert({ floorTile->getState()->id, floorTile });
 		}
 	}
 }

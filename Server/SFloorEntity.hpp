@@ -12,7 +12,8 @@ public:
 		FloorType type,
 		int xIndex,
 		int zIndex,
-		float scale)
+		float scale,
+		bool structureExist)
 	{
 		_state = std::make_shared<BaseState>();
 
@@ -30,6 +31,9 @@ public:
 		// Position is saved with indices
 		_state->pos.x = (float)xIndex;
 		_state->pos.z = (float)zIndex;
+
+		// y position = 1 if have structure on it
+		_state->pos.y = structureExist;
 
 		// Floor tiles don't collide with anything
 		_collider = std::make_unique<EmptyCollider>();

@@ -285,9 +285,6 @@
     <ClInclude Include="ImageGUI.hpp">
       <Filter>Header Files\Graphics</Filter>
     </ClInclude>
-    <ClInclude Include="CGrassEntity.hpp">
-      <Filter>Header Files\Entity</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
@@ -364,6 +361,9 @@
       <Filter>Resource Files</Filter>
     </None>
     <None Include="Resources\Shaders\imageGUI.vert">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="Resources\Shaders\floorBlend.frag">
       <Filter>Resource Files</Filter>
     </None>
   </ItemGroup>

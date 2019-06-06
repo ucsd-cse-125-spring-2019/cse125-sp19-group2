@@ -595,6 +595,8 @@ void Application::Draw() {
 
 	  // Everything from the server is loaded, so create grass
 	  CFloorEntity::getInstance().initGrass();
+	  CFloorEntity::getInstance().initPebble();
+	  CFloorEntity::getInstance().initDirtPebble();
 
 	  // Send ready event
 	  auto readyEvent = std::make_shared<GameEvent>();
