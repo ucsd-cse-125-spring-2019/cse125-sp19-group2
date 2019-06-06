@@ -590,6 +590,9 @@ void Application::Draw() {
 		  }
 		  else if (_localPlayer->getPlayerEntity()->getType() == ENTITY_HUMAN) {
 			  compassGUI->render();
+			  glEnable(GL_DEPTH_TEST);
+			  auto humanEntity = std::static_pointer_cast<CHumanEntity>(_localPlayer->getPlayerEntity());
+			  humanEntity->renderArrow(_localPlayer->getCamera());
 		  }
 
 		  glEnable(GL_DEPTH_TEST);
