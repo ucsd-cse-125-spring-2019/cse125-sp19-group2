@@ -17,6 +17,7 @@ private:
 	std::unique_ptr<FrameBuffer> fbo;
 	bool updatedTexture;
 	std::unique_ptr<Shader> _textureShader;
+	bool isGrassIntialized;
 
 public:
 	/**

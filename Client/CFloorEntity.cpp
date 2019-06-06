@@ -34,6 +34,7 @@ CFloorEntity::CFloorEntity()
 
 
 	updatedTexture = false;
+	isGrassIntialized = false;
 }
 
 CFloorEntity & CFloorEntity::getInstance()
@@ -111,11 +112,14 @@ void CFloorEntity::render(std::unique_ptr<Camera> const & camera)
 }
 void CFloorEntity::initGrass()
 {
+	if (isGrassIntialized) {
+		return;
+	}
+	srand(GRASS_SEED);
 	for (int x = 0; x < _floorMap.size(); x++) {
 		for (int z = 0; z < _floorMap[0].size(); z++) {
 			// skip the tile that is default
-			if (_floorMap[x][z] == FLOOR_GRASS) {
-				//Logger::getInstance()->debug("x: " + std::to_string(x) + " z " + std::to_string(z));
+			if (_floorMap[x][z] == FLOOR_GRASS && rand() % 2) {
 				std::shared_ptr<BaseState> state = std::make_shared<BaseState>();
 				state->type = ENTITY_GRASS;
 				// get actual position and scale of tile
@@ -126,6 +130,7 @@ void CFloorEntity::initGrass()
 			}
 		}
 	}
+	isGrassIntialized = true;
 }
 void CFloorEntity::createFloorTexture(std::unique_ptr<Camera> const & camera)
 {
