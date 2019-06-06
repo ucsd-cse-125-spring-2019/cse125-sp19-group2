@@ -526,6 +526,7 @@ void Application::Update()
 	  _networkClient->closeConnection();
 	  InputManager::getInstance().reset();
 	  EntityManager::getInstance().clearAll();
+	  CFloorEntity::getInstance().reset();
 	  AudioManager::getInstance().reset();
 	  ColliderManager::getInstance().clear();
 	  ParticleSystemManager::getInstance().clear();
@@ -633,6 +634,13 @@ void Application::Draw() {
   // If we rendered all the server entities, send a gameReady event
   if (!_gameLoaded && !_inLobby &&
 	  EntityManager::getInstance().getEntityCount() >= _serverEntityCount) {
+
+	  // Everything from the server is loaded, so create grass
+	  CFloorEntity::getInstance().initGrass();
+	  CFloorEntity::getInstance().initPebble();
+	  CFloorEntity::getInstance().initDirtPebble();
+
+	  // Send ready event
 	  auto readyEvent = std::make_shared<GameEvent>();
 	  readyEvent->type = EVENT_CLIENT_READY;
 	  readyEvent->playerId = _localPlayer->getPlayerId();
