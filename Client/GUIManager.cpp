@@ -4,6 +4,7 @@
 #include "AudioManager.hpp"
 #include <chrono>
 #include "Texture.hpp"
+#include "nanogui_resources.h"
 
 using namespace nanogui;
 using namespace std;
@@ -34,10 +35,14 @@ void GuiManager::init(GLFWwindow* window) {
         _window, [](GLFWwindow*, int count, const char** filenames) {
             GuiManager::getInstance().getScreen()->dropCallbackEvent(count, filenames);
         });
-
+    //nvgCreateFontMem(_screen->nvgContext(), "agentorange", agentorange_ttf, agentorange_ttf_size, 0);
+    nvgCreateFont(_screen->nvgContext(), "AgentOrange", "./Resources/Font/AgentOrange.ttf");
+    nvgCreateFont(_screen->nvgContext(), "ComicSans", "./Resources/Font/ComicSans.ttf");
+    nvgCreateFont(_screen->nvgContext(), "ComicSansBold", "./Resources/Font/ComicSansBold.ttf");
+    
     _fpsCounter = new Label(_screen, "fps: 0", "sans", 32);
     _fpsCounter->setColor(SOLID_WHITE);
-    
+    _fpsCounter->setFont("AgentOrange");
 }
 
 void GuiManager::draw() {
@@ -656,6 +661,7 @@ void GuiManager::initHUD() {
     _timer->alpha = 0.7f;
     _timer->setBackgroundTexture(graybg, 0, 0);
     _timer->drawBackground = true;
+    _timer->setFont("AgentOrange");
 
 	// Empty right widget
 	//new nanogui::Label(topHUD, "", "sans", 5);
