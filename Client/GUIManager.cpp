@@ -605,7 +605,7 @@ void GuiManager::initConnectScreen() {
 	// Connect button
 	_connectButton = new nanogui::Button(connectScreen, " ");
 	_connectButton->setFontSize(28);
-	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+
     auto unfocused = LoadTextureFromFile("connect.png", "./Resources/Textures/Menu/");
     auto focused = LoadTextureFromFile("connectfocused.png", "./Resources/Textures/Menu/");
     auto pushed = LoadTextureFromFile("connectpushed.png", "./Resources/Textures/Menu/");

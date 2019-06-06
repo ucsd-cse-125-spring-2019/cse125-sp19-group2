@@ -103,14 +103,17 @@ public:
 
 		// Requires a cast
 		Animation* dogAnimation = static_cast<Animation*>(_objectModel.get());
-		if (newState->isPlayOnce)
-		{
-			dogAnimation->playOnce(newState->currentAnimation, newState->animationDuration);
-		}
-		else
-		{
-			dogAnimation->play(newState->currentAnimation);
-		}
+            if (newState->isPlayOnce)
+		    {
+			    dogAnimation->playOnce(dogAnimations[newState->currentAnimation], newState->animationDuration);
+		    }
+		    else
+		    {
+			    dogAnimation->play(dogAnimations[newState->currentAnimation]);
+		    }
+
+        // Animation
+		currentState->currentAnimation = newState->currentAnimation;
 
 		// Dog attributes and items
 		if (_isLocal)
