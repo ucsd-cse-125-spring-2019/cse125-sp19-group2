@@ -74,25 +74,30 @@ public:
     void init(const std::unique_ptr<Shader>& shader);
 
     void play(std::string newTake, bool noTransition = false) {
-        if (newTake != _currentTakeStr && !_isPlayOnce) {
-            //if(noTransition){
-            //    std::cout << "NoTran Play:" << newTake << std::endl;
-			//}else {
-            //    if(newTake == "swinging1") {
-            //        //std::cout << "bp" << std::endl;
-            //    }
-			//    std::cout << "Tran Play:" << newTake << std::endl;
-			//}
-            _lastTakeStr = _currentTakeStr;
-            if(!noTransition) {
-                //_takeBeforeTransitionStr = _lastTakeStr;
+        if (!_isPlayOnce) {
+            if (newTake != _currentTakeStr) {
+                //if(noTransition){
+                //    std::cout << "NoTran Play:" << newTake << std::endl;
+                //}else {
+                //    if(newTake == "swinging1") {
+                //        //std::cout << "bp" << std::endl;
+                //    }
+                //    std::cout << "Tran Play:" << newTake << std::endl;
+                //}
+                _lastTakeStr = _currentTakeStr;
+                if (!noTransition) {
+                    //_takeBeforeTransitionStr = _lastTakeStr;
+                }
+                _currentTakeStr = newTake;
+                _isTransition = true;
+                if (!noTransition) {
+                    _takeAfterTransitionStr = newTake;
+                    playTransition(_lastTakeStr, _takeAfterTransitionStr);
+                }
             }
-            _currentTakeStr = newTake;
-            _isTransition = true;
-            if(!noTransition){
-                _takeAfterTransitionStr = newTake;
-                playTransition(_lastTakeStr, _takeAfterTransitionStr);
-			}
+        }
+        else {
+            _takeBeforeTransitionStr = newTake;
         }
     }
 
@@ -100,31 +105,31 @@ public:
         if (newTake != _currentTakeStr && !_isPlayOnce) {
             //if(noTransition){
             //    std::cout << "NoTran Playonce:" << newTake << std::endl;
-			//}else {
+            //}else {
             //    if(newTake == "swinging1") {
             //        //std::cout << "bp" << std::endl;
             //    }
-			//    std::cout << "Tran Playonce:" << newTake << std::endl;
-			//}
+            //    std::cout << "Tran Playonce:" << newTake << std::endl;
+            //}
             _lastTakeStr = _currentTakeStr;
-            if(!noTransition) {
+            if (!noTransition) {
                 _takeBeforeTransitionStr = _lastTakeStr;
                 _isPlayOnceAfter = true;
             }
             _currentTakeStr = newTake;
             _isPlayOnce = true;
-			if (endingTime > 0) {
-				_endingTime = endingTime;
-			}
-			else {
-				_endingTime = 0;
-			}
+            if (endingTime > 0) {
+                _endingTime = endingTime;
+            }
+            else {
+                _endingTime = 0;
+            }
             _isTransition = true;
-			if(!noTransition){
+            if (!noTransition) {
                 _takeAfterTransitionStr = newTake;
-				_endingTime -= _animatedMesh->getDuration(newTake) * 1000;
+                _endingTime -= _animatedMesh->getDuration(newTake) * 1000;
                 playTransition(_lastTakeStr, _takeAfterTransitionStr);
-			}
+            }
         }
     }
 
@@ -133,7 +138,7 @@ public:
         playTransition(transition);
     }
 
-    void playTransition(Transition & transition) {
+    void playTransition(Transition& transition) {
         if (auto* pval = std::get_if<KeyframePair>(&transition)) {
             // TODO
             //_isTransition = true;
@@ -142,8 +147,9 @@ public:
         else if (auto* pval = std::get_if<Take*>(&transition)) {
             _isPlayingTransition = true;
             playOnce((*pval)->takeName, -1, true);
-			_endingTime -= _animatedMesh->getDuration((*pval)->takeName) * 1000;
-        }else {
+            _endingTime -= _animatedMesh->getDuration((*pval)->takeName) * 1000;
+        }
+        else {
             throw std::exception("Bad format in Transition");
         }
     }
