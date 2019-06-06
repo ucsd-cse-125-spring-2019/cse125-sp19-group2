@@ -178,6 +178,10 @@ private:
 	nanogui::Label* _lobbyPadding;
 	nanogui::Button* _readyButton;
 
+	// Loading screen
+	GLuint _dogsLoadingScreen;
+	GLuint _humansLoadingScreen;
+
 	// Controls menu
 	nanogui::detail::FormWidget<GamePadIndex, std::integral_constant<bool, true>>* _gamepadSelect;
 	nanogui::Button* _muteButton;

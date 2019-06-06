@@ -186,32 +186,25 @@ void GuiManager::initWidgets() {
 }
 
 void GuiManager::showLoadingScreen(EntityType playerType) {
-	// First remove loading screen if it exists
 	auto res = getWidget(WIDGET_LOADING);
 	if (res)
 	{
-		_widgets.erase(WIDGET_LOADING);
-		_screen->removeChild(res);
+		if (playerType == ENTITY_HUMAN) {
+			res->setBackgroundTexture(_humansLoadingScreen, 0, 0);
+		}
+		else if (playerType == ENTITY_DOG)
+		{
+			res->setBackgroundTexture(_dogsLoadingScreen, 0, 0);
+		}
+		else
+		{
+			return;
+		}
+		res->alpha = 1.0;
+		res->drawBackground = true;
+		res->setVisible(true);
+		refresh();
 	}
-
-	// Re-initialize it
-	auto loadingScreen = createWidget(_screen, WIDGET_LOADING);
-	GLuint bg;
-	if (playerType == ENTITY_HUMAN) {
-		bg = LoadTextureFromFile("loadingscreenhuman.png", "./Resources/Textures/Menu/");
-	}
-	else if (playerType == ENTITY_DOG)
-	{
-		bg = LoadTextureFromFile("loadingscreendog.png", "./Resources/Textures/Menu/");
-	}
-	else
-	{
-		return;
-	}
-    loadingScreen->alpha = 1.0;
-    loadingScreen->setBackgroundTexture(bg, 0, 0);
-    loadingScreen->drawBackground = true;
-	refresh();
 }
 
 void GuiManager::registerConnectCallback(const std::function<void()> f) {
@@ -704,11 +697,11 @@ void GuiManager::initLobbyScreen() {
 void GuiManager::initLoadingScreen() {
 	auto loadingScreen = createWidget(_screen, WIDGET_LOADING);
 
-	// TODO: loading screen background goes here
-    auto bg = LoadTextureFromFile("loadingscreen.png", "./Resources/Textures/Menu/");
+	// Textures for each type of player
+	_dogsLoadingScreen = LoadTextureFromFile("loadingscreendog.png", "Resources/Textures/Menu/");
+	_humansLoadingScreen = LoadTextureFromFile("loadingscreenhuman.png", "Resources/Textures/Menu/");
     loadingScreen->setVisible(false);
     loadingScreen->alpha = 1.0;
-    loadingScreen->setBackgroundTexture(bg, 0, 0);
     loadingScreen->drawBackground = true;
 }
 
@@ -832,6 +825,9 @@ void GuiManager::initHUD() {
 	_trapCooldown->setDirection(Vector2i(0, 1)); // Up
 	_trapCooldown->setOffset(nanogui::Vector2f(6.0f, 6.0f));
 	_trapCooldown->setPercentage(0);
+
+	// Empty widget to put space between skills and swinging
+	new nanogui::Label(humanSkills, "        ", DEFAULT_FONT, 32);
 
 	//_trapInfo = new nanogui::Label(humanSkills, "Trap: Ready", DEFAULT_FONT, 32);
 	//_trapInfo->setColor(SOLID_WHITE);
