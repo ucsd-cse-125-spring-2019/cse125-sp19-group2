@@ -63,6 +63,7 @@ std::shared_ptr<CBaseEntity> EntityManager::getEntity(std::shared_ptr<BaseState>
     EntityType type = state->type;
 
 	std::shared_ptr<PlayerState> playerState;
+	std::shared_ptr<CDogEntity> temp;
 
     switch (type)
     {
@@ -70,7 +71,10 @@ std::shared_ptr<CBaseEntity> EntityManager::getEntity(std::shared_ptr<BaseState>
         break;
     case ENTITY_DOG:
 		playerState = std::static_pointer_cast<PlayerState>(state);
-        entity = std::make_shared<CDogEntity>(id, playerState->skinID);
+		temp = std::make_shared<CDogEntity>(id, playerState->skinID);
+        entity = temp;
+		_dogList.push_back(temp);
+		temp = nullptr;
         break;
     case ENTITY_HUMAN:
 		playerState = std::static_pointer_cast<PlayerState>(state);
@@ -176,6 +180,14 @@ void EntityManager::update(std::shared_ptr<BaseState> const &state)
 
 			// Erase from map
 			_entityList[result->second] = nullptr;
+			if (state->type == ENTITY_DOG) {
+				for (int i = 0; i < _dogList.size(); i++) {
+					if (_dogList[i]->getId() == state->id) {
+						_dogList.erase(_dogList.begin() + i);
+						break;
+					}
+				}
+			}
 			_entityMap.erase(result);
 		}
 
@@ -256,4 +268,10 @@ void EntityManager::render(std::unique_ptr<Camera> const &camera)
 void EntityManager::clearAll() {
 	_entityList.clear();
 	_entityMap.clear();
+	_dogList.clear();
+}
+
+std::vector<std::shared_ptr<CDogEntity>> EntityManager::getDogList()
+{
+	return _dogList;
 }

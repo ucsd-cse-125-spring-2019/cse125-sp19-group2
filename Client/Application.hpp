@@ -24,6 +24,9 @@
 #include "Shared/GameEvent.hpp"
 #include "Font.h"
 #include "CompassGUI.hpp"
+#include "DogPointerGUI.hpp"
+#include "CDogEntity.hpp"
+#include "CHumanEntity.hpp"
 
 #define SESSION_FILE_PATH "last_session.txt"
 
@@ -147,6 +150,7 @@ private:
 
 	// Compass GUI
 	std::unique_ptr<CompassGUI> compassGUI;
+	std::unique_ptr<DogPointerGUI> dogPointerGUI;
 };
 
 #endif

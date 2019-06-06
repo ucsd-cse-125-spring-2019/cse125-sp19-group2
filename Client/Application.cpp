@@ -215,6 +215,7 @@ void Application::Setup() {
 	});
 
 	compassGUI = std::make_unique<CompassGUI>(_win_width, _win_height);
+	dogPointerGUI = std::make_unique<DogPointerGUI>(_win_width, _win_height);
 
 	_bgm = AudioManager::getInstance().getAudioSource("bgm");
 	_bgm->init("Resources/Sounds/bgm1.mp3");
@@ -284,9 +285,8 @@ void Application::Update()
     {
         // Update entity
         EntityManager::getInstance().update(state);
-		auto playerEntity = _localPlayer->getPlayerEntity();
-		if (playerEntity != nullptr)
-			compassGUI->updateRotation(_localPlayer->getCompassDirection(playerEntity->getPos() + glm::vec3(0,0,1)));
+
+		
 
 		// Update entity particle system
 		ParticleSystemManager::getInstance().updateState(state);
@@ -304,22 +304,41 @@ void Application::Update()
 			{
 				GuiManager::getInstance().updateDogsList(
 					gameState->dogs,
+					gameState->readyPlayers,
 					_localPlayer->getPlayerId());
 
 				GuiManager::getInstance().updateHumansList(
 					gameState->humans,
+					gameState->readyPlayers,
 					_localPlayer->getPlayerId());
 
-				// Ready button text
 				int numPlayers = gameState->dogs.size() + gameState->humans.size();
-				GuiManager::getInstance().setReadyText("(" + std::to_string(gameState->readyPlayers.size()) + std::string("/") + std::to_string(numPlayers) + std::string(")"));
 
 				// If everyone is ready, show loading screen
 				if (numPlayers == gameState->readyPlayers.size())
 				{
 					GuiManager::getInstance().getWidget(WIDGET_LOBBY)->setVisible(false);
 					GuiManager::getInstance().getWidget(WIDGET_OPTIONS)->setVisible(false);
-					GuiManager::getInstance().getWidget(WIDGET_LOADING)->setVisible(true);
+
+					// Show dog loading screen if we are a dog
+					for (auto& player : gameState->dogs)
+					{
+						if (player.first == _localPlayer->getPlayerId())
+						{
+							GuiManager::getInstance().showLoadingScreen(ENTITY_DOG);
+							break;
+						}
+					}
+
+					// Show human loading screen if we are a human
+					for (auto& player : gameState->humans)
+					{
+						if (player.first == _localPlayer->getPlayerId())
+						{
+							GuiManager::getInstance().showLoadingScreen(ENTITY_HUMAN);
+							break;
+						}
+					}
 
 					// Get mute status first, then mute
 					_muteSetting = AudioManager::getInstance().getMute();
@@ -375,8 +394,9 @@ void Application::Update()
 					}
 				}
 
-				// Redraw
-				GuiManager::getInstance().refresh();
+				// Trigger a manual resize of the screen
+				auto screen = GuiManager::getInstance().getScreen();
+				StaticResize(_window, screen->size().x(), screen->size().y());
 			}
 			// Conversely, did a game just end and send us back to the lobby?
 			else if (gameState->inLobby && !_inLobby)
@@ -492,6 +512,11 @@ void Application::Update()
 			_inLobby = gameState->inLobby;
         }
     }
+
+	// update compass rotation
+	auto playerEntity = _localPlayer->getPlayerEntity();
+	if (playerEntity != nullptr)
+		compassGUI->updateRotation(_localPlayer->getCompassDirection(playerEntity->getPos() + glm::vec3(0, 0, 1)));
   }
   catch (std::runtime_error e)
   {
@@ -573,7 +598,24 @@ void Application::Draw() {
 		  _debuglightShader->set_uniform("u_view", _localPlayer->getCamera()->view_matrix());
 
 		  glDisable(GL_DEPTH_TEST);
-		  compassGUI->render();
+
+		  if (_localPlayer->getPlayerEntity()->getType() == ENTITY_DOG) {
+			  auto dogEntity = std::static_pointer_cast<CDogEntity>(_localPlayer->getPlayerEntity());
+			  if (!dogEntity->isCaught()) {
+				  auto dogList = EntityManager::getInstance().getDogList();
+				  for (int i = 0; i < dogList.size(); i++) {
+					  if (dogList[i]->getId() != _localPlayer->getPlayerId() && dogList[i]->isCaught())
+						  dogPointerGUI->render(_localPlayer->getCamera(), dogList[i]->getPos() + glm::vec3(0, 1.5f, 0));
+				  }
+			  }
+		  }
+		  else if (_localPlayer->getPlayerEntity()->getType() == ENTITY_HUMAN) {
+			  compassGUI->render();
+			  glEnable(GL_DEPTH_TEST);
+			  auto humanEntity = std::static_pointer_cast<CHumanEntity>(_localPlayer->getPlayerEntity());
+			  humanEntity->renderArrow(_localPlayer->getCamera());
+		  }
+
 		  glEnable(GL_DEPTH_TEST);
 	  }
 
@@ -608,10 +650,6 @@ void Application::Draw() {
 	  catch (std::runtime_error e) {};
 
 	  _gameLoaded = true;
-
-	  // Trigger a manual resize
-	  auto screen = GuiManager::getInstance().getScreen();
-	  StaticResize(_window, screen->size().x(), screen->size().y());
   }
   // Edge case in which not all state was received by the client
   else if (!_gameLoaded && !_inLobby &&
@@ -682,7 +720,12 @@ void Application::Resize(int x, int y) {
   glViewport(0, 0, x, y);
   _frameBuffer->resize(x, y);
 	_quadFrameBuffer->resize(x, y);
-	compassGUI->updateWindowSize(x, y);
+	if (compassGUI != nullptr) {
+		compassGUI->updateWindowSize(x, y);
+	}
+	if (dogPointerGUI != nullptr) {
+		dogPointerGUI->updateWindowSize(x, y);
+	}
   if (_localPlayer) {
 	  _localPlayer->resize(x, y);
   }
@@ -776,13 +819,16 @@ void Application::registerGlobalKeys() {
 
 	InputManager::getInstance().getKey(GLFW_KEY_ESCAPE)->onPress([&]
 	{
-		GuiManager::getInstance().setVisibility(WIDGET_OPTIONS,
-			!GuiManager::getInstance().getWidget(WIDGET_OPTIONS)->visible());
-		if (_localPlayer) {
-			bool curState = _localPlayer->getMouseCaptured();
-			if (!_inLobby)
-			{
-				_localPlayer->setMouseCaptured(!curState);
+		if (!GuiManager::getInstance().getWidget(WIDGET_LOADING)->visible())
+		{
+			GuiManager::getInstance().setVisibility(WIDGET_OPTIONS,
+				!GuiManager::getInstance().getWidget(WIDGET_OPTIONS)->visible());
+			if (_localPlayer) {
+				bool curState = _localPlayer->getMouseCaptured();
+				if (!_inLobby)
+				{
+					_localPlayer->setMouseCaptured(!curState);
+				}
 			}
 		}
 	});
@@ -799,5 +845,9 @@ void Application::registerGlobalKeys() {
 		GuiManager::getInstance().toggleMusicMute();
 	});
 
-
+	// F to toggle FPS counter
+	InputManager::getInstance().getKey(GLFW_KEY_F)->onPress([&]
+	{
+		GuiManager::getInstance().toggleFPS();
+	});
 }

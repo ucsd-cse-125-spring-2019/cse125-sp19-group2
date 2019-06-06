@@ -159,6 +159,21 @@ void GameServer::update()
 
 void GameServer::updateGameState()
 {
+	// Enforce a minimum load time for all players before game starts
+	if (_gameState->waitingForClients &&
+		_gameState->clientReadyCount >= _gameState->dogs.size() + _gameState->humans.size())
+	{
+		// First check elapsed time
+		auto elapsed = std::chrono::steady_clock::now() - _gameState->_loadedStart;
+		if (elapsed >= LOADING_LENGTH)
+		{
+			_gameState->pregameCountdown = true;
+			_gameState->_pregameStart = std::chrono::steady_clock::now();
+			_gameState->waitingForClients = false;
+			_gameState->clientReadyCount = 0;
+		}
+	}
+
 	// Check if all the dogs have been caught
 	bool dogsCaught = true;
 	for (auto& dogPair : _gameState->dogs)

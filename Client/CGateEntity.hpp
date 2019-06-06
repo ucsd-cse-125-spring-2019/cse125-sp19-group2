@@ -15,7 +15,7 @@ public:
 		_state = std::make_shared<GateState>();
 
 		_objectShader->LoadFromFile(GL_VERTEX_SHADER, "./Resources/Shaders/wall.vert");
-		_objectShader->LoadFromFile(GL_FRAGMENT_SHADER, "./Resources/Shaders/basiclight.frag");
+		_objectShader->LoadFromFile(GL_FRAGMENT_SHADER, "./Resources/Shaders/wall.frag");
 		_objectShader->CreateProgram();
 	};
 	~CGateEntity() {};

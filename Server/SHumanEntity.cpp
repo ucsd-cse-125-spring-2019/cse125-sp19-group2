@@ -80,14 +80,7 @@ void SHumanEntity::update(std::vector<std::shared_ptr<GameEvent>> events)
 		switch (event->type)
 		{
 		case EVENT_PLAYER_CHARGE_NET:
-			if (!_isSwinging)
-			{
-				_isCharging = true;
-			}
-			else
-			{
-				_isCharging = false;
-			}
+			_isCharging = true;
 			break;
 		case EVENT_PLAYER_SWING_NET:
 			_isCharging = false;
@@ -132,7 +125,7 @@ void SHumanEntity::update(std::vector<std::shared_ptr<GameEvent>> events)
 	SPlayerEntity::update(events);
 
 	// Update net charge amount
-	if (_isCharging && humanState->chargeMeter < MAX_HUMAN_CHARGE) {
+	if (_isCharging && !_isSwinging && humanState->chargeMeter < MAX_HUMAN_CHARGE) {
 		humanState->chargeMeter += 2.0f / TICKS_PER_SEC;
 		hasChanged = true;
 	}
@@ -224,11 +217,11 @@ void SHumanEntity::update(std::vector<std::shared_ptr<GameEvent>> events)
 		if (actionChanged) {
 			humanState->currentAnimation = ANIMATION_HUMAN_SLIPPING;
 			humanState->isPlayOnce = true;
-			humanState->animationDuration = 1400;
+			humanState->animationDuration = 1500;
 			hasChanged = true;
 
 			// Timer until immobility stops
-			registerTimer(2000, [&]()
+			registerTimer(1500, [&]()
 				{
 					_isSlipping = false;
 					_isSlipImmune = true;
@@ -257,7 +250,7 @@ void SHumanEntity::update(std::vector<std::shared_ptr<GameEvent>> events)
 				stuntDuration = std::max(stuntDuration, (19.0f / 60 - chargeDuration) * 1000);
 				humanState->currentAnimation = ANIMATION_HUMAN_SWINGING1;
 				humanState->isPlayOnce = true;
-				humanState->animationDuration = stuntDuration + chargeDuration;
+				humanState->animationDuration = stuntDuration + chargeDuration * 1000;
 				if (netEntity == nullptr)
 				{
 					netEntity = std::make_shared<SNetEntity>(_state->pos, 0.08f, 1.0f);
@@ -270,7 +263,7 @@ void SHumanEntity::update(std::vector<std::shared_ptr<GameEvent>> events)
 				stuntDuration = std::max(stuntDuration, (36.0f / 60 - chargeDuration) * 1000);
 				humanState->currentAnimation = ANIMATION_HUMAN_SWINGING2;
 				humanState->isPlayOnce = true;
-				humanState->animationDuration = stuntDuration + chargeDuration;
+				humanState->animationDuration = stuntDuration + chargeDuration * 1000;
 				if (netEntity == nullptr)
 				{
 					netEntity = std::make_shared<SNetEntity>(_state->pos, 0.08f, 1.8f);
@@ -283,7 +276,7 @@ void SHumanEntity::update(std::vector<std::shared_ptr<GameEvent>> events)
 				stuntDuration = std::max(stuntDuration, (55.0f / 60 - chargeDuration) * 1000);
 				humanState->currentAnimation = ANIMATION_HUMAN_SWINGING3;
 				humanState->isPlayOnce = true;
-				humanState->animationDuration = stuntDuration + chargeDuration;
+				humanState->animationDuration = stuntDuration + chargeDuration * 1000;
 				if (netEntity == nullptr)
 				{
 					netEntity = std::make_shared<SNetEntity>(_state->pos, 0.07f, 2.0f);
@@ -291,7 +284,7 @@ void SHumanEntity::update(std::vector<std::shared_ptr<GameEvent>> events)
 				}
 			}
 				
-
+			humanState->chargeMeter = 0;
 			hasChanged = true;
 
 			// alarm for end of charging
