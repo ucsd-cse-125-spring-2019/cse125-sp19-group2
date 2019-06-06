@@ -53,6 +53,7 @@ struct GameState : public BaseState
 	}
 
 	// Some items used by server, not serialized for the client
+	std::chrono::time_point<std::chrono::steady_clock> _loadedStart;
 	std::chrono::time_point<std::chrono::steady_clock> _pregameStart;
 	std::chrono::time_point<std::chrono::steady_clock> _gameStart;
 	std::chrono::time_point<std::chrono::steady_clock> _endgameStart;

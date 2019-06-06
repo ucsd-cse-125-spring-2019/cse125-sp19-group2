@@ -23,10 +23,14 @@ enum WidgetType {
 // Standard text elements
 static const nanogui::Color SOLID_HIGHLIGHTED = nanogui::Color(247, 201, 210, 255);
 static const nanogui::Color SOLID_WHITE = nanogui::Color(1.0f, 1.0f, 1.0f, 1.0f);
+static const nanogui::Color SOLID_GREEN = nanogui::Color(145, 237, 120, 255);
 
 // Skill elements
 static const nanogui::Color SKILL_NORMAL = nanogui::Color(0, 160);
 static const nanogui::Color SKILL_HIGHLIGHTED = nanogui::Color(168, 255, 255, 160);
+
+// Default font
+static const std::string DEFAULT_FONT = "ComicSansBold";
 
 class GuiManager {
 public: 
@@ -62,6 +66,9 @@ public:
 	// Initializes all widgets
 	void initWidgets();
 
+	// Shows the loading screen, given an entity type of dog or human
+	void showLoadingScreen(EntityType playerType);
+
 	// Register callbacks for various buttons
 	void registerConnectCallback(const std::function<void()> f);
 	void registerSwitchSidesCallback(const std::function<void()> f);
@@ -80,11 +87,14 @@ public:
 	void setAddress(std::string val);
 
 	// Updates list of dogs/humans in the lobby
-	void updateDogsList(std::unordered_map<uint32_t, std::string> dogs, uint32_t playerId);
-	void updateHumansList(std::unordered_map<uint32_t, std::string> humans, uint32_t playerId);
-
-	// Sets text for ready button
-	void setReadyText(std::string text);
+	void updateDogsList(
+		std::unordered_map<uint32_t, std::string> dogs,
+		std::vector<uint32_t> readyPlayers,
+		uint32_t playerId);
+	void updateHumansList(
+		std::unordered_map<uint32_t, std::string> humans,
+		std::vector<uint32_t> readyPlayers,
+		uint32_t playerId);
 
 	// Sets enabled status for ready and switch buttons
 	void setSwitchEnabled(bool enabled);
@@ -167,7 +177,6 @@ private:
 	nanogui::Button* _switchSidesButton;
 	nanogui::Label* _lobbyPadding;
 	nanogui::Button* _readyButton;
-	nanogui::Label* _readyLabel;
 
 	// Controls menu
 	nanogui::detail::FormWidget<GamePadIndex, std::integral_constant<bool, true>>* _gamepadSelect;

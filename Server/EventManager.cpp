@@ -57,14 +57,7 @@ bool EventManager::update()
 		{
 			// Client has fully loaded the game
 			_gameState->clientReadyCount++;
-			if (_gameState->waitingForClients &&
-				_gameState->clientReadyCount >= _gameState->dogs.size() + _gameState->humans.size())
-			{
-				_gameState->pregameCountdown = true;
-				_gameState->_pregameStart = std::chrono::steady_clock::now();
-				_gameState->waitingForClients = false;
-				_gameState->clientReadyCount = 0;
-			}
+			_gameState->_loadedStart = std::chrono::steady_clock::now();
 			break;
 		}
 		case EVENT_REQUEST_RESEND:
