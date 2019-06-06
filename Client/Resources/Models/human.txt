@@ -9,6 +9,7 @@ idleLauncher 170 241
 flying 242 243
 slipping 244 278
 slipping-idle 279 298
+slipping-running 279 298
 swinging1 299 312
 swinging1-idle 313 318
 swinging1-running 313 318
