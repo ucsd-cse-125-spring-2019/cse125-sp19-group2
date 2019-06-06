@@ -153,7 +153,6 @@ void SHumanEntity::update(std::vector<std::shared_ptr<GameEvent>> events)
 		}
 		break;
 	case ACTION_HUMAN_MOVING:
-		Logger::getInstance()->debug("running");
 		if (actionChanged) {
 			humanState->currentAnimation = ANIMATION_HUMAN_RUNNING;
 			hasChanged = true;
@@ -225,11 +224,11 @@ void SHumanEntity::update(std::vector<std::shared_ptr<GameEvent>> events)
 		if (actionChanged) {
 			humanState->currentAnimation = ANIMATION_HUMAN_SLIPPING;
 			humanState->isPlayOnce = true;
-			humanState->animationDuration = 1400;
+			humanState->animationDuration = 1500;
 			hasChanged = true;
 
 			// Timer until immobility stops
-			registerTimer(2000, [&]()
+			registerTimer(1500, [&]()
 				{
 					_isSlipping = false;
 					_isSlipImmune = true;
@@ -246,7 +245,6 @@ void SHumanEntity::update(std::vector<std::shared_ptr<GameEvent>> events)
 		}
 		break;
 	case ACTION_HUMAN_SWINGING:
-		Logger::getInstance()->debug("swinging");
 		if (actionChanged) {
 			float chargeDistance = humanState->chargeMeter * 3.0f;
 			float chargeDuration = chargeDistance / HUMAN_SWING_VELOCITY;
