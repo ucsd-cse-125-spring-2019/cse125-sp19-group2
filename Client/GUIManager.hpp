@@ -63,6 +63,9 @@ public:
 	// Initializes all widgets
 	void initWidgets();
 
+	// Shows the loading screen, given an entity type of dog or human
+	void showLoadingScreen(EntityType playerType);
+
 	// Register callbacks for various buttons
 	void registerConnectCallback(const std::function<void()> f);
 	void registerSwitchSidesCallback(const std::function<void()> f);

@@ -186,6 +186,35 @@ void GuiManager::initWidgets() {
 	hideAll();
 }
 
+void GuiManager::showLoadingScreen(EntityType playerType) {
+	// First remove loading screen if it exists
+	auto res = getWidget(WIDGET_LOADING);
+	if (res)
+	{
+		_widgets.erase(WIDGET_LOADING);
+		_screen->removeChild(res);
+	}
+
+	// Re-initialize it
+	auto loadingScreen = createWidget(_screen, WIDGET_LOADING);
+	GLuint bg;
+	if (playerType == ENTITY_HUMAN) {
+		bg = LoadTextureFromFile("loadingscreenhuman.png", "./Resources/Textures/Menu/");
+	}
+	else if (playerType == ENTITY_DOG)
+	{
+		bg = LoadTextureFromFile("loadingscreendog.png", "./Resources/Textures/Menu/");
+	}
+	else
+	{
+		return;
+	}
+    loadingScreen->alpha = 1.0;
+    loadingScreen->setBackgroundTexture(bg, 0, 0);
+    loadingScreen->drawBackground = true;
+	refresh();
+}
+
 void GuiManager::registerConnectCallback(const std::function<void()> f) {
 	_connectButton->setCallback(f);
 }
