@@ -19,6 +19,9 @@
 #define FENCE_WIDTH 0.2f
 #define FENCE_HEIGHT 3.0f
 
+// Loading screen minimum time
+const std::chrono::seconds LOADING_LENGTH(10);
+
 // Pregame countdown
 const std::chrono::seconds PREGAME_LENGTH(5);
 

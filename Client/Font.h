@@ -28,13 +28,15 @@ class Font {
     std::unique_ptr<FrameBuffer> _fb;
 
     glm::ivec2 screenSize;
-
+    
     
 public:
     
     glm::vec4 _textColor;
     glm::vec4 _backgroundColor;
     bool center = true;
+    bool cut = true;
+    glm::vec2 edge = glm::vec2(0.1, 0.1);
 
     Font();
 

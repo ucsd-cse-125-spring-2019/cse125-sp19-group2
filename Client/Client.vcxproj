@@ -263,6 +263,7 @@ xcopy /y /d  "$(SolutionDir)Library\lib\x64\Release\*.dll" "$(OutDir)"</Command>
     <ClCompile Include="Key.cpp" />
     <ClCompile Include="LocalPlayer.cpp" />
     <ClCompile Include="Light.cpp" />
+    <ClCompile Include="nanogui_resources.cpp" />
     <ClCompile Include="ParticleSystem.cpp" />
     <ClCompile Include="ParticleSystemManager.cpp" />
     <ClCompile Include="PointLight.cpp" />
@@ -304,6 +305,7 @@ xcopy /y /d  "$(SolutionDir)Library\lib\x64\Release\*.dll" "$(OutDir)"</Command>
     <None Include="Resources\Shaders\skybox.vert" />
     <None Include="Resources\Shaders\urine.frag" />
     <None Include="Resources\Shaders\urine.vert" />
+    <None Include="Resources\Shaders\wall.frag" />
     <None Include="Resources\Shaders\wall.vert" />
   </ItemGroup>
   <ItemGroup>
@@ -347,6 +349,7 @@ xcopy /y /d  "$(SolutionDir)Library\lib\x64\Release\*.dll" "$(OutDir)"</Command>
     <ClInclude Include="LocalPlayer.hpp" />
     <ClInclude Include="DirectionalLight.hpp" />
     <ClInclude Include="Light.hpp" />
+    <ClInclude Include="nanogui_resources.h" />
     <ClInclude Include="ParticleSystem.hpp" />
     <ClInclude Include="ParticleSystemManager.hpp" />
     <ClInclude Include="Physics.hpp" />

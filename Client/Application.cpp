@@ -304,22 +304,41 @@ void Application::Update()
 			{
 				GuiManager::getInstance().updateDogsList(
 					gameState->dogs,
+					gameState->readyPlayers,
 					_localPlayer->getPlayerId());
 
 				GuiManager::getInstance().updateHumansList(
 					gameState->humans,
+					gameState->readyPlayers,
 					_localPlayer->getPlayerId());
 
-				// Ready button text
 				int numPlayers = gameState->dogs.size() + gameState->humans.size();
-				GuiManager::getInstance().setReadyText("(" + std::to_string(gameState->readyPlayers.size()) + std::string("/") + std::to_string(numPlayers) + std::string(")"));
 
 				// If everyone is ready, show loading screen
 				if (numPlayers == gameState->readyPlayers.size())
 				{
 					GuiManager::getInstance().getWidget(WIDGET_LOBBY)->setVisible(false);
 					GuiManager::getInstance().getWidget(WIDGET_OPTIONS)->setVisible(false);
-					GuiManager::getInstance().getWidget(WIDGET_LOADING)->setVisible(true);
+
+					// Show dog loading screen if we are a dog
+					for (auto& player : gameState->dogs)
+					{
+						if (player.first == _localPlayer->getPlayerId())
+						{
+							GuiManager::getInstance().showLoadingScreen(ENTITY_DOG);
+							break;
+						}
+					}
+
+					// Show human loading screen if we are a human
+					for (auto& player : gameState->humans)
+					{
+						if (player.first == _localPlayer->getPlayerId())
+						{
+							GuiManager::getInstance().showLoadingScreen(ENTITY_HUMAN);
+							break;
+						}
+					}
 
 					// Get mute status first, then mute
 					_muteSetting = AudioManager::getInstance().getMute();
@@ -375,8 +394,9 @@ void Application::Update()
 					}
 				}
 
-				// Redraw
-				GuiManager::getInstance().refresh();
+				// Trigger a manual resize of the screen
+				auto screen = GuiManager::getInstance().getScreen();
+				StaticResize(_window, screen->size().x(), screen->size().y());
 			}
 			// Conversely, did a game just end and send us back to the lobby?
 			else if (gameState->inLobby && !_inLobby)
@@ -600,10 +620,6 @@ void Application::Draw() {
 	  catch (std::runtime_error e) {};
 
 	  _gameLoaded = true;
-
-	  // Trigger a manual resize
-	  auto screen = GuiManager::getInstance().getScreen();
-	  StaticResize(_window, screen->size().x(), screen->size().y());
   }
   // Edge case in which not all state was received by the client
   else if (!_gameLoaded && !_inLobby &&
@@ -768,13 +784,16 @@ void Application::registerGlobalKeys() {
 
 	InputManager::getInstance().getKey(GLFW_KEY_ESCAPE)->onPress([&]
 	{
-		GuiManager::getInstance().setVisibility(WIDGET_OPTIONS,
-			!GuiManager::getInstance().getWidget(WIDGET_OPTIONS)->visible());
-		if (_localPlayer) {
-			bool curState = _localPlayer->getMouseCaptured();
-			if (!_inLobby)
-			{
-				_localPlayer->setMouseCaptured(!curState);
+		if (!GuiManager::getInstance().getWidget(WIDGET_LOADING)->visible())
+		{
+			GuiManager::getInstance().setVisibility(WIDGET_OPTIONS,
+				!GuiManager::getInstance().getWidget(WIDGET_OPTIONS)->visible());
+			if (_localPlayer) {
+				bool curState = _localPlayer->getMouseCaptured();
+				if (!_inLobby)
+				{
+					_localPlayer->setMouseCaptured(!curState);
+				}
 			}
 		}
 	});
@@ -791,5 +810,9 @@ void Application::registerGlobalKeys() {
 		GuiManager::getInstance().toggleMusicMute();
 	});
 
-
+	// F to toggle FPS counter
+	InputManager::getInstance().getKey(GLFW_KEY_F)->onPress([&]
+	{
+		GuiManager::getInstance().toggleFPS();
+	});
 }

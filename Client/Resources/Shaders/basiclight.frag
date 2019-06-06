@@ -106,7 +106,7 @@ void main(void)
     resultCol += CalcPointLight(u_pointlight, normal, pass_fragPos, viewDir);
   }
   
-  float alpha = 1.0f * u_transparency;
+  float alpha = 1.0f * u_transparency * texture(u_material.diffuse, pass_uv).a;
 
   if(alpha < 0.01){
 	discard;
