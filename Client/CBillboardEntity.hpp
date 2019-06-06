@@ -44,7 +44,7 @@ public:
 
 		_objectShader->Use();
 		_state->scale.z = 0.001f;
-		_state->scale.y = 1.0f;
+		_state->scale.y = 0.7f;
 		
 		CBaseEntity::setUniforms(camera);
 
