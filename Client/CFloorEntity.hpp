@@ -1,6 +1,7 @@
 #pragma once
 
 #include "CBaseEntity.hpp"
+#include "CGrassEntity.hpp"
 #include "Model.hpp"
 #include "FrameBuffer.h"
 
@@ -11,6 +12,7 @@ class CFloorEntity : public CBaseEntity
 private:
 	CFloorEntity();
 	static std::vector<std::vector<FloorType>> _floorMap;
+	static std::vector<std::shared_ptr<CGrassEntity>> _grassList;
 	float tileScale;
 	unsigned int dirtTextureID;
 	unsigned int roadTextureID;
@@ -45,6 +47,9 @@ public:
 	* \param camera(std::unique_ptr<Camera> const&) Local camera
 	*/
 	void createFloorTexture(std::unique_ptr<Camera> const& camera);
+
+	// Deletes all grass entities
+	void reset();
 
 	void initGrass();
 };

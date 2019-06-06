@@ -4,6 +4,7 @@
 #include "EntityManager.hpp"
 
 std::vector<std::vector<FloorType>> CFloorEntity::_floorMap;
+std::vector<std::shared_ptr<CGrassEntity>> CFloorEntity::_grassList;
 
 CFloorEntity::CFloorEntity()
 {
@@ -107,6 +108,12 @@ void CFloorEntity::render(std::unique_ptr<Camera> const & camera)
 		}
 	}
 
+	// Also draw the grass
+	for (auto& grassEntity : _grassList)
+	{
+		grassEntity->render(camera);
+	}
+
 	//floorMesh.Draw(_objectShader, fbo->getRGBA());
 
 }
@@ -120,13 +127,12 @@ void CFloorEntity::initGrass()
 		for (int z = 0; z < _floorMap[0].size(); z++) {
 			// skip the tile that is default
 			if (_floorMap[x][z] == FLOOR_GRASS && !(rand() % 5)) {
-				std::shared_ptr<BaseState> state = std::make_shared<BaseState>();
-				state->type = ENTITY_GRASS;
 				// get actual position and scale of tile
 				float xPos = ((float)x * tileScale) - (MAP_WIDTH / 2) + tileScale / 2;
 				float zPos = ((float)z * tileScale) - (MAP_WIDTH / 2) + tileScale / 2;
-				state->pos = glm::vec3(xPos, 0.002f, zPos);
-				EntityManager::getInstance().createEntity(state);
+
+				auto grassEntity = std::make_shared<CGrassEntity>(glm::vec3(xPos, 0.002f, zPos));
+				_grassList.push_back(grassEntity);
 			}
 		}
 	}
@@ -196,4 +202,10 @@ void CFloorEntity::createFloorTexture(std::unique_ptr<Camera> const & camera)
 	// bind the previous framebuffer and viewport after drawing the texture
 	glBindFramebuffer(GL_FRAMEBUFFER, old_fbo);
 	glViewport(old_viewport[0], old_viewport[1], old_viewport[2], old_viewport[3]);
+}
+
+void CFloorEntity::reset()
+{
+	_grassList.clear();
+	isGrassIntialized = false;
 }
