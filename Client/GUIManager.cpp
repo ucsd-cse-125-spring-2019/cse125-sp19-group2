@@ -342,18 +342,50 @@ void GuiManager::updateTimer(long milliseconds) {
 	long minutes = (milliseconds / (1000 * 60)) % 60;
 
 	// String buffer
-	char buf[10];
-	snprintf(buf, 10, "%02d:%02d.%03d", minutes, seconds, milliseconds % 1000);
+	char buf[14];
+	snprintf(buf, 14, "  %02d:%02d.%03d  ", minutes, seconds, milliseconds % 1000);
 
 	_timer->setCaption(std::string(buf));
 }
 
 void GuiManager::setPrimaryMessage(std::string message) {
-	_primaryMessage->setCaption(message);
+	if (message == "")
+	{
+		if (_primaryMessage->visible())
+		{
+			_primaryMessage->setVisible(false);
+			refresh();
+		}
+	}
+	else
+	{
+		_primaryMessage->setCaption("  " + message + "  ");
+		if (!_primaryMessage->visible())
+		{
+			_primaryMessage->setVisible(true);
+			refresh();
+		}
+	}
 }
 
 void GuiManager::setSecondaryMessage(std::string message) {
-	_secondaryMessage->setCaption(message);
+	if (message == "")
+	{
+		if (_secondaryMessage->visible())
+		{
+			_secondaryMessage->setVisible(false);
+			refresh();
+		}
+	}
+	else
+	{
+		_secondaryMessage->setCaption("  " + message + "  ");
+		if (!_secondaryMessage->visible())
+		{
+			_secondaryMessage->setVisible(true);
+			refresh();
+		}
+	}
 }
 
 void GuiManager::setActiveSkill(bool usePlunger) {
@@ -616,8 +648,14 @@ void GuiManager::initHUD() {
 	new nanogui::Label(topHUD, "", "sans", 5);
 
 	// Clock
-	_timer = new nanogui::Label(topHUD, "00:00.000", "sans", 52);
+	_timer = new nanogui::Label(topHUD, "  00:00.000  ", "sans", 52);
 	_timer->setColor(SOLID_WHITE);
+
+	// Gray background for better text readability
+    auto graybg = LoadTextureFromFile("dark_gray2.jpg", "./Resources/Textures/");
+    _timer->alpha = 0.7f;
+    _timer->setBackgroundTexture(graybg, 0, 0);
+    _timer->drawBackground = true;
 
 	// Empty right widget
 	//new nanogui::Label(topHUD, "", "sans", 5);
@@ -629,8 +667,15 @@ void GuiManager::initHUD() {
 
 	_primaryMessage = new nanogui::Label(middleHUD, "", "sans", 72);
 	_primaryMessage->setColor(SOLID_WHITE);
+    _primaryMessage->alpha = 0.7f;
+    _primaryMessage->setBackgroundTexture(graybg, 0, 0);
+    _primaryMessage->drawBackground = true;
+
 	_secondaryMessage = new nanogui::Label(middleHUD, "", "sans", 48);
 	_secondaryMessage->setColor(SOLID_WHITE);
+    _secondaryMessage->alpha = 0.7f;
+    _secondaryMessage->setBackgroundTexture(graybg, 0, 0);
+    _secondaryMessage->drawBackground = true;
 
 	// Bottom HUD
 	auto bottomHUD = createWidget(hudContainer, WIDGET_HUD_BOTTOM);
