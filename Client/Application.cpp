@@ -299,15 +299,15 @@ void Application::Update()
 			{
 				GuiManager::getInstance().updateDogsList(
 					gameState->dogs,
+					gameState->readyPlayers,
 					_localPlayer->getPlayerId());
 
 				GuiManager::getInstance().updateHumansList(
 					gameState->humans,
+					gameState->readyPlayers,
 					_localPlayer->getPlayerId());
 
-				// Ready button text
 				int numPlayers = gameState->dogs.size() + gameState->humans.size();
-				GuiManager::getInstance().setReadyText("(" + std::to_string(gameState->readyPlayers.size()) + std::string("/") + std::to_string(numPlayers) + std::string(")"));
 
 				// If everyone is ready, show loading screen
 				if (numPlayers == gameState->readyPlayers.size())

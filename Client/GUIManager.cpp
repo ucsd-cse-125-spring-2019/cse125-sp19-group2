@@ -233,6 +233,7 @@ void GuiManager::setAddress(std::string val) {
 
 void GuiManager::updateDogsList(
 	std::unordered_map<uint32_t, std::string> dogs,
+	std::vector<uint32_t> readyPlayers,
 	uint32_t playerId) {
 
 	auto dogList = GuiManager::getInstance().getWidget(WIDGET_LIST_DOGS);
@@ -268,13 +269,41 @@ void GuiManager::updateDogsList(
 			auto playerLabel = new nanogui::Label(dogList, dogName, "sans", 45);
 			playerLabel->setId(dogId);
 			_dogs[dogId] = dogName;
-			if (dogPair.first == playerId)
+			playerLabel->setColor(SOLID_WHITE);
+
+			if (playerId == dogPair.first)
 			{
-				playerLabel->setColor(SOLID_HIGHLIGHTED);
+				playerLabel->setCaption("> " + dogName + " <");
+			}
+		}
+
+		// Get widget based on ID
+		nanogui::Label* dogLabel = nullptr;
+		for (auto& label : dogList->children())
+		{
+			if (label->id() == dogId)
+			{
+				dogLabel = static_cast<nanogui::Label*>(label);
+				break;
+			}
+		}
+
+		// Set color based on ready state
+		if (dogLabel)
+		{
+			bool isReady = false;
+			for (auto& id : readyPlayers)
+			{
+				isReady |= (id == dogPair.first);
+			}
+
+			if (isReady)
+			{
+				dogLabel->setColor(SOLID_GREEN);
 			}
 			else
 			{
-				playerLabel->setColor(SOLID_WHITE);
+				dogLabel->setColor(SOLID_WHITE);
 			}
 		}
 	}
@@ -282,6 +311,7 @@ void GuiManager::updateDogsList(
 
 void GuiManager::updateHumansList(
 	std::unordered_map<uint32_t, std::string> humans,
+	std::vector<uint32_t> readyPlayers,
 	uint32_t playerId) {
 
 	auto humanList = getWidget(WIDGET_LIST_HUMANS);
@@ -317,20 +347,44 @@ void GuiManager::updateHumansList(
 			auto playerLabel = new nanogui::Label(humanList, humanPair.second, "sans", 45);
 			playerLabel->setId(humanId);
 			_humans[humanId] = humanName;
-			if (humanPair.first == playerId)
+			playerLabel->setColor(SOLID_WHITE);
+
+			if (playerId == humanPair.first)
 			{
-				playerLabel->setColor(SOLID_HIGHLIGHTED);
+				playerLabel->setCaption("> " + humanName + " <");
+			}
+		}
+
+		// Get widget based on ID
+		nanogui::Label* humanLabel = nullptr;
+		for (auto& label : humanList->children())
+		{
+			if (label->id() == humanId)
+			{
+				humanLabel = static_cast<nanogui::Label*>(label);
+				break;
+			}
+		}
+
+		// Set color based on ready state
+		if (humanLabel)
+		{
+			bool isReady = false;
+			for (auto& id : readyPlayers)
+			{
+				isReady |= (id == humanPair.first);
+			}
+
+			if (isReady)
+			{
+				humanLabel->setColor(SOLID_GREEN);
 			}
 			else
 			{
-				playerLabel->setColor(SOLID_WHITE);
+				humanLabel->setColor(SOLID_WHITE);
 			}
 		}
 	}
-}
-
-void GuiManager::setReadyText(std::string text) {
-	_readyLabel->setCaption(text);
 }
 
 void GuiManager::setSwitchEnabled(bool enabled) {
@@ -399,8 +453,8 @@ void GuiManager::setActiveSkill(bool usePlunger) {
 		//_trapInfo->setColor(SOLID_WHITE);
 
 		// TODO: change frame image as well
-		_plungerCooldown->setColor(SKILL_HIGHLIGHTED);
-		_trapCooldown->setColor(SKILL_NORMAL);
+		//_plungerCooldown->setColor(SKILL_HIGHLIGHTED);
+		//_trapCooldown->setColor(SKILL_NORMAL);
 		_trapCooldown->setBackgroundTexture(_trapIcon, 0, 0);
 		_plungerCooldown->setBackgroundTexture(_plungerIconSelected, 0, 0);
 	}
@@ -408,8 +462,8 @@ void GuiManager::setActiveSkill(bool usePlunger) {
 	{
 		//_plungerInfo->setColor(SOLID_WHITE);
 		//_trapInfo->setColor(SOLID_HIGHLIGHTED);
-		_trapCooldown->setColor(SKILL_HIGHLIGHTED);
-		_plungerCooldown->setColor(SKILL_NORMAL);
+		//_trapCooldown->setColor(SKILL_HIGHLIGHTED);
+		//_plungerCooldown->setColor(SKILL_NORMAL);
 		_trapCooldown->setBackgroundTexture(_trapIconSelected, 0, 0);
 		_plungerCooldown->setBackgroundTexture(_plungerIcon, 0, 0);
 	}
@@ -617,14 +671,6 @@ void GuiManager::initLobbyScreen() {
 	_readyButton->setTheme(new nanogui::Theme(_screen->nvgContext()));
 	_readyButton->setFixedHeight(40);
 	_readyButton->setFixedWidth(100);
-
-
-	// Row 6
-	// Ready label TODO: get this to work
-	_readyLabel = new nanogui::Label(lobbyScreen, "(0/1)", "sans", 15);
-	_readyLabel->setTheme(new nanogui::Theme(_screen->nvgContext()));
-	_readyLabel->theme()->mTextColor = nanogui::Color(0, 0, 255, 255);
-	_readyLabel->theme()->mTextColorShadow = nanogui::Color(0, 0, 0, 0);
 }
 
 void GuiManager::initLoadingScreen() {
@@ -739,7 +785,7 @@ void GuiManager::initHUD() {
 	_plungerCooldown->alpha = 1.0;
 	_plungerCooldown->setBackgroundTexture(_plungerIconSelected, 0, 0);
 	_plungerCooldown->drawBackground = true;
-	_plungerCooldown->setColor(SKILL_HIGHLIGHTED);
+	_plungerCooldown->setColor(SKILL_NORMAL);
 	_plungerCooldown->setDirection(Vector2i(0, 1)); // Up
 	_plungerCooldown->setOffset(nanogui::Vector2f(6.0f, 6.0f));
 	_plungerCooldown->setPercentage(0);
