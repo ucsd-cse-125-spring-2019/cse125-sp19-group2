@@ -119,7 +119,7 @@ void CFloorEntity::initGrass()
 	for (int x = 0; x < _floorMap.size(); x++) {
 		for (int z = 0; z < _floorMap[0].size(); z++) {
 			// skip the tile that is default
-			if (_floorMap[x][z] == FLOOR_GRASS && rand() % 2) {
+			if (_floorMap[x][z] == FLOOR_GRASS && !(rand() % 5)) {
 				std::shared_ptr<BaseState> state = std::make_shared<BaseState>();
 				state->type = ENTITY_GRASS;
 				// get actual position and scale of tile
