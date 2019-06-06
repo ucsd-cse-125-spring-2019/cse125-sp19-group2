@@ -34,7 +34,7 @@ public:
 		// Render text with its own framebuffer
 		auto screen = GuiManager::getInstance().getScreen();
 		_text->setScreenSize(glm::ivec2(screen->size().x(), screen->size().y()));
-		_text->_backgroundColor = glm::vec4(0.5, 0.5, 0.5, 0.5f);
+		_text->_backgroundColor = glm::vec4(0.2, 0.2, 0.2, 0.6f);
         _text->cut = true;
 		_text->renderToTexture(_string.c_str(), 2.5f);
         _text->edge = glm::vec2(0.03,0.03);

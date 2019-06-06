@@ -303,6 +303,7 @@ xcopy /y /d  "$(SolutionDir)Library\lib\x64\Release\*.dll" "$(OutDir)"</Command>
     <None Include="Resources\Shaders\skybox.vert" />
     <None Include="Resources\Shaders\urine.frag" />
     <None Include="Resources\Shaders\urine.vert" />
+    <None Include="Resources\Shaders\wall.frag" />
     <None Include="Resources\Shaders\wall.vert" />
   </ItemGroup>
   <ItemGroup>
