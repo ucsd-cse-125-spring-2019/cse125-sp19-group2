@@ -144,7 +144,7 @@ void Animation::eval() {
             const float endingTime = _animatedMesh->getTimeInTick(_currentTakeStr, _endingTime / 1000.0f);
             const float duration = _animatedMesh->getDuration(_currentTakeStr);
             
-            std::cout << "currentTime: " << currentTime << ";duration: " << duration << ";endingTime: " << endingTime << std::endl;
+            //std::cout << "currentTime: " << currentTime << ";duration: " << duration << ";endingTime: " << endingTime << std::endl;
             if (currentTime > duration) {
                 if (currentTime > duration + endingTime) {
                     _isPlayOnce = false;
@@ -153,6 +153,9 @@ void Animation::eval() {
                             playOnce(_takeAfterTransitionStr, -1, true);
                             _isPlayOnceAfter = false;
                         }else {
+                            if(_takeAfterTransitionStr == "idle" || _takeAfterTransitionStr == "running") {
+							    _takeAfterTransitionStr = _takeBeforeTransitionStr;
+                            }
                             play(_takeAfterTransitionStr, true);
                         }
                         _isPlayingTransition = false;
@@ -160,7 +163,9 @@ void Animation::eval() {
                         if(_currentTakeStr == "shoot"){
                             play("idleLauncher");
 						}else{
-                            play(_takeBeforeTransitionStr);
+                            //std::cout << "_takeBeforeTransitionStr" << _currentTakeStr << std::endl;
+                            //if(_currentTakeStr == "slipping-idle")
+						    play(_takeBeforeTransitionStr);
 						}
 					}
                     _lastTime = high_resolution_clock::now();

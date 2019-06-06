@@ -3,113 +3,112 @@
 #include "CPlayerEntity.hpp"
 #include "Shared/HumanState.hpp"
 
-class CHumanEntity : public CPlayerEntity
-{
+class CHumanEntity : public CPlayerEntity {
 public:
-    CHumanEntity(uint32_t id, int skinID) : CPlayerEntity()
-    {
-		// Init player state
-		_state = std::make_shared<HumanState>();
+    CHumanEntity(uint32_t id, int skinID) : CPlayerEntity() {
+        // Init player state
+        _state = std::make_shared<HumanState>();
 
         // Load Animation based on skin
-		std::string modelLoc = "./Resources/Models/human";
-		int usedSkin = skinID % HUMAN_SKIN_AMOUNT;
-		if (usedSkin != 0)
-			modelLoc += std::to_string(usedSkin);
-		modelLoc += ".dae";
+        std::string modelLoc = "./Resources/Models/human";
+        int usedSkin = skinID % HUMAN_SKIN_AMOUNT;
+        if (usedSkin != 0)
+            modelLoc += std::to_string(usedSkin);
+        modelLoc += ".dae";
         initAnimation(modelLoc);
 
-		// Load positional sounds
-		_runningSound = AudioManager::getInstance().getAudioSource("human running" + std::to_string(id));
-		_runningSound->init("Resources/Sounds/human_running.wav", true, true);
-		_runningSound->setVolume(0.1f);
+        // Load positional sounds
+        _runningSound = AudioManager::getInstance().getAudioSource("human running" + std::to_string(id));
+        _runningSound->init("Resources/Sounds/human_running.wav", true, true);
+        _runningSound->setVolume(0.1f);
 
-		_swingSound = AudioManager::getInstance().getAudioSource("human swinging" + std::to_string(id));
+        _swingSound = AudioManager::getInstance().getAudioSource("human swinging" + std::to_string(id));
 
-		_flyingSound = AudioManager::getInstance().getAudioSource("human flying" + std::to_string(id));
-		_flyingSound->init("Resources/Sounds/human_flying.wav", true, true);
-		_flyingSound->setVolume(0.1f);
+        _flyingSound = AudioManager::getInstance().getAudioSource("human flying" + std::to_string(id));
+        _flyingSound->init("Resources/Sounds/human_flying.wav", true, true);
+        _flyingSound->setVolume(0.1f);
 
-		_slippingSound = AudioManager::getInstance().getAudioSource("human slipping" + std::to_string(id));
+        _slippingSound = AudioManager::getInstance().getAudioSource("human slipping" + std::to_string(id));
 
     };
-    ~CHumanEntity() {};
 
-	void updateState(std::shared_ptr<BaseState> state) override {
-		// Set generic stuff first
-		CPlayerEntity::updateState(state);
+    ~CHumanEntity() {
+    };
 
-		// Set human-specific state variables
-		auto currentState = std::static_pointer_cast<HumanState>(_state);
-		auto newState = std::static_pointer_cast<HumanState>(state);
+    void updateState(std::shared_ptr<BaseState> state) override {
+        // Set generic stuff first
+        CPlayerEntity::updateState(state);
 
-		/** Sounds **/
-		_runningSound->setPosition(_state->pos);
-		_swingSound->setPosition(_state->pos);
-		_flyingSound->setPosition(_state->pos);
-		_slippingSound->setPosition(_state->pos);
+        // Set human-specific state variables
+        auto currentState = std::static_pointer_cast<HumanState>(_state);
+        auto newState = std::static_pointer_cast<HumanState>(state);
 
-		// Running
-		_runningSound->play(newState->currentAnimation == ANIMATION_HUMAN_RUNNING);
+        /** Sounds **/
+        _runningSound->setPosition(_state->pos);
+        _swingSound->setPosition(_state->pos);
+        _flyingSound->setPosition(_state->pos);
+        _slippingSound->setPosition(_state->pos);
 
-		// Net swing
-		if (newState->currentAnimation != currentState->currentAnimation &&
-			(newState->currentAnimation == ANIMATION_HUMAN_SWINGING1 ||
-			 newState->currentAnimation == ANIMATION_HUMAN_SWINGING2 ||
-			 newState->currentAnimation == ANIMATION_HUMAN_SWINGING3))
-		{
-			_swingSound->init("Resources/Sounds/swing1.wav", false, true);
-			_swingSound->setVolume(0.3f);
-			_swingSound->setPosition(_state->pos);
-			_swingSound->play(true);
-		}
+        // Running
+        _runningSound->play(newState->currentAnimation == ANIMATION_HUMAN_RUNNING);
 
-		// Flying
-		_flyingSound->play(newState->currentAnimation == ANIMATION_HUMAN_FLYING);
+        // Net swing
+        if (newState->currentAnimation != currentState->currentAnimation &&
+            (newState->currentAnimation == ANIMATION_HUMAN_SWINGING1 ||
+                newState->currentAnimation == ANIMATION_HUMAN_SWINGING2 ||
+                newState->currentAnimation == ANIMATION_HUMAN_SWINGING3)) {
+            _swingSound->init("Resources/Sounds/swing1.wav", false, true);
+            _swingSound->setVolume(0.3f);
+            _swingSound->setPosition(_state->pos);
+            _swingSound->play(true);
+        }
 
-		// Slipping
-		if (newState->currentAnimation != currentState->currentAnimation &&
-			newState->currentAnimation == ANIMATION_HUMAN_SLIPPING)
-		{
-			_slippingSound->init("Resources/Sounds/human_slipping.wav", false, true);
-			_slippingSound->setVolume(0.10f);
-			_slippingSound->setPosition(_state->pos);
-			_slippingSound->play(true);
-		}
+        // Flying
+        _flyingSound->play(newState->currentAnimation == ANIMATION_HUMAN_FLYING);
 
-		/** Animation **/
-		currentState->currentAnimation = newState->currentAnimation;
+        // Slipping
+        if (newState->currentAnimation != currentState->currentAnimation &&
+            newState->currentAnimation == ANIMATION_HUMAN_SLIPPING) {
+            _slippingSound->init("Resources/Sounds/human_slipping.wav", false, true);
+            _slippingSound->setVolume(0.10f);
+            _slippingSound->setPosition(_state->pos);
+            _slippingSound->play(true);
+        }
 
-		// Requires a cast
-		Animation* humanAnimation = static_cast<Animation*>(_objectModel.get());
-		if (newState->isPlayOnce)
-		{
-			humanAnimation->playOnce(humanAnimations[newState->currentAnimation], newState->animationDuration);
-		}
-		else
-		{
-			humanAnimation->play(humanAnimations[newState->currentAnimation]);
-		}
+        // Requires a cast
+        Animation* humanAnimation = static_cast<Animation*>(_objectModel.get());
         
-		// Human attributes and items
-		if (_isLocal)
-		{
-			// Update state
-			currentState->plungerCooldown = newState->plungerCooldown;
-			currentState->trapCooldown = newState->trapCooldown;
-			currentState->chargeMeter = newState->chargeMeter;
+        if (newState->currentAnimation != currentState->currentAnimation) {
+            //std::cout << "newState->currentAnimation: " << humanAnimations[newState->currentAnimation] << std::endl;
+            
+            if (newState->isPlayOnce) {
+                humanAnimation->playOnce(humanAnimations[newState->currentAnimation], newState->animationDuration);
+            }
+            else {
+                humanAnimation->play(humanAnimations[newState->currentAnimation]);
+            }
+        }
+        
+        /** Animation **/
+        currentState->currentAnimation = newState->currentAnimation;
 
-			// Update HUD
-			GuiManager::getInstance().updatePlunger(newState->plungerCooldown);
-			GuiManager::getInstance().updateTrap(newState->trapCooldown);
-			GuiManager::getInstance().updateCharge(currentState->chargeMeter / MAX_HUMAN_CHARGE);
-		}
-	}
+        // Human attributes and items
+        if (_isLocal) {
+            // Update state
+            currentState->plungerCooldown = newState->plungerCooldown;
+            currentState->trapCooldown = newState->trapCooldown;
+            currentState->chargeMeter = newState->chargeMeter;
+
+            // Update HUD
+            GuiManager::getInstance().updatePlunger(newState->plungerCooldown);
+            GuiManager::getInstance().updateTrap(newState->trapCooldown);
+            GuiManager::getInstance().updateCharge(currentState->chargeMeter / MAX_HUMAN_CHARGE);
+        }
+    }
 
 protected:
-	AudioSource* _runningSound;
-	AudioSource* _swingSound;
-	AudioSource* _flyingSound;
-	AudioSource* _slippingSound;
+    AudioSource* _runningSound;
+    AudioSource* _swingSound;
+    AudioSource* _flyingSound;
+    AudioSource* _slippingSound;
 };
-

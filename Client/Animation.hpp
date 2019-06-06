@@ -98,6 +98,7 @@ public:
         }
         else {
             _takeBeforeTransitionStr = newTake;
+            std::cout << newTake << std::endl;
         }
     }
 

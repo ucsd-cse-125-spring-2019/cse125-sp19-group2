@@ -152,7 +152,7 @@ void AnimatedMesh::getTransform(float second, vector<mat4>& transforms) {
 }
 
 void AnimatedMesh::setTakes(std::string name) {
-    std::cout << name << std::endl;
+    //std::cout << name << std::endl;
     auto res = getTakeIndex(name);
     if (!res.has_value()) {
         throw std::exception("Non-exist animation name");
