@@ -92,7 +92,7 @@ void Font::setScreenSize(glm::ivec2 s) {
     screenSize = s;
     _fb->resize(s.x, s.y);
 }
-#pragma optimize("", off)
+
 void Font::render_text(const char* text, float x, float y, float sx, float sy) {
     
     const char* p;
@@ -205,7 +205,7 @@ void Font::render_text(const char* text, float x, float y, float sx, float sy) {
 	    glDisable(GL_SCISSOR_TEST);
     }
 }
-#pragma optimize("", on)
+
 void Font::display(
     bool depth, std::unique_ptr<Camera> const& camera, glm::mat4 toWorld, const std::string & str, float size,
     float xcoord, float ycoord) {
