@@ -21,6 +21,7 @@ enum WidgetType {
 #define CONNECT_MARGIN 0.15f
 
 // Standard text elements
+static const nanogui::Color SOLID_NONE = nanogui::Color(1, 1, 1, 0);
 static const nanogui::Color SOLID_HIGHLIGHTED = nanogui::Color(247, 201, 210, 255);
 static const nanogui::Color SOLID_WHITE = nanogui::Color(1.0f, 1.0f, 1.0f, 1.0f);
 static const nanogui::Color SOLID_GREEN = nanogui::Color(145, 237, 120, 255);
@@ -79,6 +80,9 @@ public:
 	// Callbacks on mute buttons
 	void toggleMute();
 	void toggleMusicMute();
+
+	// Toggle FPS
+	void toggleFPS();
 
 	// Text in player name and address boxes
 	std::string getPlayerName();

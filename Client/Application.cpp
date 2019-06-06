@@ -800,5 +800,9 @@ void Application::registerGlobalKeys() {
 		GuiManager::getInstance().toggleMusicMute();
 	});
 
-
+	// F to toggle FPS counter
+	InputManager::getInstance().getKey(GLFW_KEY_F)->onPress([&]
+	{
+		GuiManager::getInstance().toggleFPS();
+	});
 }
