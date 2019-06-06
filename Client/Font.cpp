@@ -202,6 +202,7 @@ void Font::render_text(const char* text, float x, float y, float sx, float sy) {
 
     if(cut) {
         glScissor(box[0], box[1], box[2], box[3]);
+	    glDisable(GL_SCISSOR_TEST);
     }
 }
 #pragma optimize("", on)
