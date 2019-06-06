@@ -80,14 +80,7 @@ void SHumanEntity::update(std::vector<std::shared_ptr<GameEvent>> events)
 		switch (event->type)
 		{
 		case EVENT_PLAYER_CHARGE_NET:
-			if (!_isSwinging)
-			{
-				_isCharging = true;
-			}
-			else
-			{
-				_isCharging = false;
-			}
+			_isCharging = true;
 			break;
 		case EVENT_PLAYER_SWING_NET:
 			_isCharging = false;
@@ -132,7 +125,7 @@ void SHumanEntity::update(std::vector<std::shared_ptr<GameEvent>> events)
 	SPlayerEntity::update(events);
 
 	// Update net charge amount
-	if (_isCharging && humanState->chargeMeter < MAX_HUMAN_CHARGE) {
+	if (_isCharging && !_isSwinging && humanState->chargeMeter < MAX_HUMAN_CHARGE) {
 		humanState->chargeMeter += 2.0f / TICKS_PER_SEC;
 		hasChanged = true;
 	}
@@ -291,7 +284,7 @@ void SHumanEntity::update(std::vector<std::shared_ptr<GameEvent>> events)
 				}
 			}
 				
-
+			humanState->chargeMeter = 0;
 			hasChanged = true;
 
 			// alarm for end of charging
