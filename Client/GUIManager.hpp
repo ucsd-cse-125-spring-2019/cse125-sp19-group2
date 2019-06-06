@@ -29,6 +29,9 @@ static const nanogui::Color SOLID_GREEN = nanogui::Color(145, 237, 120, 255);
 static const nanogui::Color SKILL_NORMAL = nanogui::Color(0, 160);
 static const nanogui::Color SKILL_HIGHLIGHTED = nanogui::Color(168, 255, 255, 160);
 
+// Default font
+static const std::string DEFAULT_FONT = "ComicSansBold";
+
 class GuiManager {
 public: 
     /**

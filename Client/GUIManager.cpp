@@ -40,9 +40,8 @@ void GuiManager::init(GLFWwindow* window) {
     nvgCreateFont(_screen->nvgContext(), "ComicSans", "./Resources/Font/ComicSans.ttf");
     nvgCreateFont(_screen->nvgContext(), "ComicSansBold", "./Resources/Font/ComicSansBold.ttf");
     
-    _fpsCounter = new Label(_screen, "fps: 0", "sans", 32);
+    _fpsCounter = new Label(_screen, "fps: 0", DEFAULT_FONT, 32);
     _fpsCounter->setColor(SOLID_WHITE);
-    _fpsCounter->setFont("AgentOrange");
 }
 
 void GuiManager::draw() {
@@ -295,7 +294,7 @@ void GuiManager::updateDogsList(
 		if (_dogs.find(dogId) == _dogs.end())
 		{
 			auto dogName = dogPair.second;
-			auto playerLabel = new nanogui::Label(dogList, dogName, "sans", 45);
+			auto playerLabel = new nanogui::Label(dogList, dogName, DEFAULT_FONT, 45);
 			playerLabel->setId(dogId);
 			_dogs[dogId] = dogName;
 			playerLabel->setColor(SOLID_WHITE);
@@ -373,7 +372,7 @@ void GuiManager::updateHumansList(
 		if (_humans.find(humanId) == _humans.end())
 		{
 			auto humanName = humanPair.second;
-			auto playerLabel = new nanogui::Label(humanList, humanPair.second, "sans", 45);
+			auto playerLabel = new nanogui::Label(humanList, humanPair.second, DEFAULT_FONT, 45);
 			playerLabel->setId(humanId);
 			_humans[humanId] = humanName;
 			playerLabel->setColor(SOLID_WHITE);
@@ -577,7 +576,7 @@ void GuiManager::initConnectScreen() {
 	_connectPadding = new nanogui::Label(connectScreen, " ");
 
 	// Game title
-	auto gameTitle = new nanogui::Label(connectScreen, " ", "sans", 125);
+	auto gameTitle = new nanogui::Label(connectScreen, " ", DEFAULT_FONT, 125);
 
 	// Player name
 	_playerNameBox = new nanogui::TextBox(connectScreen, "PlayerName");
@@ -628,7 +627,7 @@ void GuiManager::initLobbyScreen() {
 	/** Row 1 **/
 
 	// Title for dogs list
-	auto dogsLabel = new nanogui::Label(lobbyScreen, " ", "sans", 60);
+	auto dogsLabel = new nanogui::Label(lobbyScreen, " ", DEFAULT_FONT, 60);
 
 	// Controls button
 	auto controlsButton = new nanogui::Button(lobbyScreen, "");
@@ -648,14 +647,14 @@ void GuiManager::initLobbyScreen() {
 		});
 
 	// Title for humans list
-	auto humansLabel = new nanogui::Label(lobbyScreen, " ", "sans", 60);
+	auto humansLabel = new nanogui::Label(lobbyScreen, " ", DEFAULT_FONT, 60);
 
 	/** Row 2: Fixed-width padding **/
-	_lobbyPadding = new nanogui::Label(lobbyScreen, " ", "sans", 60);
+	_lobbyPadding = new nanogui::Label(lobbyScreen, " ", DEFAULT_FONT, 60);
 
 	// Two empty widgets to fix size of each column
-	new nanogui::Label(lobbyScreen, "", "sans", 5);
-	new nanogui::Label(lobbyScreen, "", "sans", 5);
+	new nanogui::Label(lobbyScreen, "", DEFAULT_FONT, 5);
+	new nanogui::Label(lobbyScreen, "", DEFAULT_FONT, 5);
 
 	/** Row 3 **/
 
@@ -682,13 +681,13 @@ void GuiManager::initLobbyScreen() {
 
 	/** Row 4: padding **/
 	for (int i = 0; i < 3; i++) {
-		new nanogui::Label(lobbyScreen, "", "sans", 5);
+		new nanogui::Label(lobbyScreen, "", DEFAULT_FONT, 5);
 	}
 
 	/** Row 5 **/
 
 	// Empty label for padding in grid
-	new nanogui::Label(lobbyScreen, "", "sans", 60);
+	new nanogui::Label(lobbyScreen, "", DEFAULT_FONT, 60);
 
 	// Ready button
 	_readyButton = new nanogui::Button(lobbyScreen, "");
@@ -725,10 +724,10 @@ void GuiManager::initHUD() {
 	topHUD->setLayout(topHUDLayout);
 
 	// Empty left widget
-	new nanogui::Label(topHUD, "", "sans", 5);
+	new nanogui::Label(topHUD, "", DEFAULT_FONT, 5);
 
 	// Clock
-	_timer = new nanogui::Label(topHUD, "  00:00.000  ", "sans", 52);
+	_timer = new nanogui::Label(topHUD, "  00:00.000  ", DEFAULT_FONT, 52);
 	_timer->setColor(SOLID_WHITE);
 
 	// Gray background for better text readability
@@ -736,23 +735,22 @@ void GuiManager::initHUD() {
     _timer->alpha = 0.7f;
     _timer->setBackgroundTexture(graybg, 0, 0);
     _timer->drawBackground = true;
-    _timer->setFont("AgentOrange");
 
 	// Empty right widget
-	//new nanogui::Label(topHUD, "", "sans", 5);
+	//new nanogui::Label(topHUD, "", DEFAULT_FONT, 5);
 
 	// Middle HUD
 	auto middleHUD = createWidget(hudContainer, WIDGET_HUD_MIDDLE);
 	auto middleHUDLayout = new nanogui::BoxLayout(nanogui::Orientation::Vertical, nanogui::Alignment::Middle, 0, 35);
 	middleHUD->setLayout(middleHUDLayout);
 
-	_primaryMessage = new nanogui::Label(middleHUD, "", "sans", 72);
+	_primaryMessage = new nanogui::Label(middleHUD, "", DEFAULT_FONT, 72);
 	_primaryMessage->setColor(SOLID_WHITE);
     _primaryMessage->alpha = 0.7f;
     _primaryMessage->setBackgroundTexture(graybg, 0, 0);
     _primaryMessage->drawBackground = true;
 
-	_secondaryMessage = new nanogui::Label(middleHUD, "", "sans", 48);
+	_secondaryMessage = new nanogui::Label(middleHUD, "", DEFAULT_FONT, 48);
 	_secondaryMessage->setColor(SOLID_WHITE);
     _secondaryMessage->alpha = 0.7f;
     _secondaryMessage->setBackgroundTexture(graybg, 0, 0);
@@ -764,7 +762,7 @@ void GuiManager::initHUD() {
 	bottomHUD->setLayout(bottomHUDLayout);
 
 	// Empty left widget
-	new nanogui::Label(bottomHUD, "", "sans", 5);
+	new nanogui::Label(bottomHUD, "", DEFAULT_FONT, 5);
 
 	// Dog skills
 	auto dogSkills= createWidget(bottomHUD, WIDGET_HUD_DOG_SKILLS);
@@ -783,7 +781,7 @@ void GuiManager::initHUD() {
 	_staminaCooldown->setOffset(nanogui::Vector2f(6.0f, 6.0f));
 	_staminaCooldown->setPercentage(0);
 
-	//_staminaInfo = new nanogui::Label(dogSkills, "Stamina: 100%", "sans", 32);
+	//_staminaInfo = new nanogui::Label(dogSkills, "Stamina: 100%", DEFAULT_FONT, 32);
 	//_staminaInfo->setColor(SOLID_WHITE);
 
 	// Pee
@@ -798,7 +796,7 @@ void GuiManager::initHUD() {
 	_peeCooldown->setOffset(nanogui::Vector2f(6.0f, 6.0f));
 	_peeCooldown->setPercentage(0);
 
-	//_peeInfo = new nanogui::Label(dogSkills, "Pee: 100%", "sans", 32);
+	//_peeInfo = new nanogui::Label(dogSkills, "Pee: 100%", DEFAULT_FONT, 32);
 	//_peeInfo->setColor(SOLID_WHITE);
 
 	// Human skills
@@ -819,7 +817,7 @@ void GuiManager::initHUD() {
 	_plungerCooldown->setOffset(nanogui::Vector2f(6.0f, 6.0f));
 	_plungerCooldown->setPercentage(0);
 
-	//_plungerInfo = new nanogui::Label(humanSkills, "Plunger: Ready", "sans", 32);
+	//_plungerInfo = new nanogui::Label(humanSkills, "Plunger: Ready", DEFAULT_FONT, 32);
 	//_plungerInfo->setColor(SOLID_HIGHLIGHTED);
 
 	// Trap
@@ -835,7 +833,7 @@ void GuiManager::initHUD() {
 	_trapCooldown->setOffset(nanogui::Vector2f(6.0f, 6.0f));
 	_trapCooldown->setPercentage(0);
 
-	//_trapInfo = new nanogui::Label(humanSkills, "Trap: Ready", "sans", 32);
+	//_trapInfo = new nanogui::Label(humanSkills, "Trap: Ready", DEFAULT_FONT, 32);
 	//_trapInfo->setColor(SOLID_WHITE);
 
 	// Charge rate of swinging
@@ -851,26 +849,26 @@ void GuiManager::initHUD() {
 	_swingCharge->setOffset(nanogui::Vector2f(6.0f, 6.0f));
 	_swingCharge->setPercentage(1.0f);
 
-	//_chargeInfo = new nanogui::Label(humanSkills, "Charge: 0%", "sans", 32);
+	//_chargeInfo = new nanogui::Label(humanSkills, "Charge: 0%", DEFAULT_FONT, 32);
 	//chargeInfo->setColor(SOLID_WHITE);
 
-	//auto skillsPlaceholder = new nanogui::Label(bottomHUD, "Skills go here", "sans", 52);
+	//auto skillsPlaceholder = new nanogui::Label(bottomHUD, "Skills go here", DEFAULT_FONT, 52);
 	//skillsPlaceholder->setColor(Color(Vector4f(1,1,1,0.2f)));
 
 	// Empty right widget
-	new nanogui::Label(bottomHUD, "", "sans", 5);
+	new nanogui::Label(bottomHUD, "", DEFAULT_FONT, 5);
 }
 
 void GuiManager::initControlMenu() {
 	auto controlsWidget = createWidget(_screen, WIDGET_OPTIONS);
 	controlsWidget->setLayout(new nanogui::GroupLayout());
 
-	auto controllerLabel = new Label(controlsWidget, "Select Controller", "sans", 16);
+	auto controllerLabel = new Label(controlsWidget, "Select Controller", DEFAULT_FONT, 16);
 	_gamepadSelect = new nanogui::detail::FormWidget<GamePadIndex, std::integral_constant<bool, true>>(controlsWidget);
 	_gamepadSelect->setItems({ "None", "1", "2", "3", "4" });
 
 	// Mute button
-	new Label(controlsWidget, "Audio options", "sans", 16);
+	new Label(controlsWidget, "Audio options", DEFAULT_FONT, 16);
 	_muteButton = new nanogui::Button(controlsWidget, "Mute All");
 	_muteButton->setCallback([&]()
 	{
@@ -904,7 +902,7 @@ void GuiManager::initControlMenu() {
 	});
 
 	// Other miscellaneous buttons
-	new Label(controlsWidget, "Other", "sans", 16);
+	new Label(controlsWidget, "Other", DEFAULT_FONT, 16);
 
 	// Disconnect from server
 	_disconnectButton = new nanogui::Button(controlsWidget, "Disconnect");
