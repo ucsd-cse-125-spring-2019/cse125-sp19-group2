@@ -372,6 +372,9 @@
     <None Include="Resources\Shaders\imageGUI.vert">
       <Filter>Resource Files</Filter>
     </None>
+    <None Include="Resources\Shaders\floorBlend.frag">
+      <Filter>Resource Files</Filter>
+    </None>
     <None Include="Resources\Shaders\wall.frag">
       <Filter>Resource Files</Filter>
     </None>

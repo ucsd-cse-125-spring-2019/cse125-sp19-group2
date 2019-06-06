@@ -45,7 +45,7 @@ std::shared_ptr<CBaseEntity> EntityManager::getEntity(uint32_t id)
     }
     return nullptr;
 }
-
+ 
 std::shared_ptr<CBaseEntity> EntityManager::getEntity(std::shared_ptr<BaseState> const &state)
 {
     // Check if the Entity is already created
