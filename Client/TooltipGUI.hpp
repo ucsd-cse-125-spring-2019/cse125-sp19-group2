@@ -10,6 +10,7 @@ public:
 		_quad_size = glm::vec2(TOOLTIP_SIZE, TOOLTIP_SIZE);
 		_fountainTooltipTexture = LoadTextureFromFile("drink_instructions.png", "Resources/Textures/Menu/");
 		_jailTooltipTexture = LoadTextureFromFile("jail_instructions.png", "Resources/Textures/Menu/");
+		_trappedTooltipTexture = LoadTextureFromFile("trap_instructions.png", "Resources/Textures/Menu/");
 	}
 
 	virtual void updateWindowSize(float width, float height) override
@@ -39,6 +40,9 @@ public:
 		case TOOLTIP_DRINK:
 			_quadFrameBuffer->drawQuad(_quadShader, _fountainTooltipTexture);
 			break;
+		case TOOLTIP_TRAPPED:
+			_quadFrameBuffer->drawQuad(_quadShader, _trappedTooltipTexture);
+			break;
 		}
 	}
 
@@ -51,4 +55,5 @@ private:
 	PlayerTooltip _currentTooltip = TOOLTIP_NONE;
 	GLuint _fountainTooltipTexture;
 	GLuint _jailTooltipTexture;
+	GLuint _trappedTooltipTexture;
 };

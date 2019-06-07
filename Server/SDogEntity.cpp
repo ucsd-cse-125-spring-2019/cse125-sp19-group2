@@ -224,9 +224,10 @@ void SDogEntity::update(std::vector<std::shared_ptr<GameEvent>> events)
 		break;
 	case ACTION_DOG_TRAPPED:
 		// Update dog's message
-		dogState->message = "Escape (Left click / A) [" +
-			std::to_string(_numEscapePressed) + "/" +
-			std::to_string(MAX_DOG_ESCAPE_PRESSES) + "]";
+		//dogState->message = "Escape (Left click / A) [" +
+		//	std::to_string(_numEscapePressed) + "/" +
+		//	std::to_string(MAX_DOG_ESCAPE_PRESSES) + "]";
+		dogState->tooltip = TOOLTIP_TRAPPED;
 		hasChanged = true;
 
 		if (actionChanged) {
