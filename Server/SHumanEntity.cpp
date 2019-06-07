@@ -320,7 +320,7 @@ void SHumanEntity::update(std::vector<std::shared_ptr<GameEvent>> events)
 		{
 			humanState->currentAnimation = ANIMATION_HUMAN_PLACING;
 			humanState->isPlayOnce = true;
-			humanState->animationDuration = 70;
+			humanState->animationDuration = 400;
 			hasChanged = true;
 			registerTimer(400, [&]()
 				{
