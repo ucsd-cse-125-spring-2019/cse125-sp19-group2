@@ -415,6 +415,7 @@ void Application::Update()
 				// Reset UI
 				_inLobby = true;
 				GuiManager::getInstance().hideAll();
+				GuiManager::getInstance().setTooltip(TOOLTIP_NONE);
 				GuiManager::getInstance().getWidget(WIDGET_LOBBY)->setVisible(true);
 				GuiManager::getInstance().getWidget(WIDGET_LIST_DOGS)->setVisible(true);
 				GuiManager::getInstance().getWidget(WIDGET_LIST_HUMANS)->setVisible(true);
@@ -536,6 +537,7 @@ void Application::Update()
 	  bool controlsShown = (controls && controls->visible());
 
 	  GuiManager::getInstance().hideAll();
+	  GuiManager::getInstance().setTooltip(TOOLTIP_NONE);
 	  GuiManager::getInstance().setVisibility(WIDGET_CONNECT, true);
 	  
 	  if (controls)

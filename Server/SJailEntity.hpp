@@ -211,7 +211,8 @@ public:
 		jailSensorBox->getState()->isSolid = false;
 		jailSensorBox->onCollision([&](SBaseEntity* entity, SBaseEntity* collidingEntity)
 		{
-			if (collidingEntity->getState()->type == ENTITY_DOG)
+			if (collidingEntity->getState()->type == ENTITY_DOG &&
+				collidingEntity->getState()->isSolid)
 			{
 				DogState* dogState = static_cast<DogState*>(collidingEntity->getState().get());
 				dogState->isCaught = true;
