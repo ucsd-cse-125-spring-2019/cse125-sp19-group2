@@ -105,11 +105,17 @@ void GuiManager::resize(int x, int y) {
 
 	// Cooldown bar scaling
 	int scaledSize = (int)(_baseCooldownSize * std::max(rescaleFactor, 1.0f));
+	int offset = (int)(_baseCooldownOffset * std::max(rescaleFactor, 1.0f));
 	_staminaCooldown->setFixedSize(nanogui::Vector2i(scaledSize, scaledSize));
+	_staminaCooldown->setOffset(nanogui::Vector2f(offset, offset));
 	_peeCooldown->setFixedSize(nanogui::Vector2i(scaledSize, scaledSize));
+	_peeCooldown->setOffset(nanogui::Vector2f(offset, offset));
 	_plungerCooldown->setFixedSize(nanogui::Vector2i(scaledSize, scaledSize));
+	_plungerCooldown->setOffset(nanogui::Vector2f(offset, offset));
 	_trapCooldown->setFixedSize(nanogui::Vector2i(scaledSize, scaledSize));
+	_trapCooldown->setOffset(nanogui::Vector2f(offset, offset));
 	_swingCharge->setFixedSize(nanogui::Vector2i(scaledSize, scaledSize));
+	_swingCharge->setOffset(nanogui::Vector2f(offset, offset));
 
 	// Connect padding
 	if (_connectPadding)

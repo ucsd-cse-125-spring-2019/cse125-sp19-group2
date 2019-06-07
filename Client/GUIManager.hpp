@@ -179,9 +179,10 @@ private:
 	int _baseFontScale = 1280 * 720;
 
 	// Scaling stuff
-	int _largeFontSize = 100;
+	int _largeFontSize = 90;
 	int _mediumFontSize = 68;
 	int _baseCooldownSize = 100;
+	int _baseCooldownOffset = 6;
 
 	// Connect screen
 	nanogui::Label* _connectPadding;
