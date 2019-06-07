@@ -182,7 +182,7 @@ void SHumanEntity::update(std::vector<std::shared_ptr<GameEvent>> events)
 		// stage 1: create plunger entity and wait until it hit the wall
 		if (actionStage == 1) {
 			if (plungerEntity == nullptr) {
-				plungerEntity = std::make_shared<SPlungerEntity>(_state->pos + _state->forward * 0.4f, _state->forward);
+				plungerEntity = std::make_shared<SPlungerEntity>(_state->pos/* + _state->forward * 0.4f*/, _state->forward);
 				_structureInfo->newEntities->push_back(plungerEntity);
 			}
 			if (ropeEntity == nullptr) {
