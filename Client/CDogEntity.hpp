@@ -58,12 +58,18 @@ public:
 			_barkingSound = AudioManager::getInstance().getAudioSource("dog barking" + std::to_string(_state->id));
 		}
 
+		if (!_teleportingSound)
+		{
+			_teleportingSound = AudioManager::getInstance().getAudioSource("dog teleporting" + std::to_string(_state->id));
+		}
+
 		_pantingSound->setPosition(_state->pos);
 		_runningSound->setPosition(_state->pos);
 		_drinkingSound->setPosition(_state->pos);
 		_peeingSound->setPosition(_state->pos);
 		_yelpingSound->setPosition(_state->pos);
 		_barkingSound->setPosition(_state->pos);
+		_teleportingSound->setPosition(_state->pos);
 
 		// Panting
 		_pantingSound->play(newState->currentAnimation == ANIMATION_DOG_IDLE);
@@ -95,8 +101,17 @@ public:
 			//_barkingSound->play(true);
 		}
 
+		// Teleporting sound when walking towards doghouse
+		if (!currentState->isTeleporting && newState->isTeleporting)
+		{
+			_teleportingSound->init("Resources/Sounds/minecraft_portal_trigger.mp3", false, true);
+			_teleportingSound->setVolume(0.3f);
+			_teleportingSound->play(true);
+		}
+
 		currentState->isCaught = newState->isCaught;
 		currentState->isBarking = newState->isBarking;
+		currentState->isTeleporting = newState->isTeleporting;
 
 		/** Animation **/
 		currentState->currentAnimation = newState->currentAnimation;
@@ -139,5 +154,6 @@ protected:
 	AudioSource * _peeingSound;
 	AudioSource * _yelpingSound = nullptr;
 	AudioSource * _barkingSound = nullptr;
+	AudioSource * _teleportingSound = nullptr;
 };
 
