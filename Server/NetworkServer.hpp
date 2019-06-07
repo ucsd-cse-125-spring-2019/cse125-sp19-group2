@@ -15,7 +15,7 @@
 #include "Shared/BlockingQueue.hpp"
 #include "IdGenerator.hpp"
 
-#define MAX_CONNECTIONS 10
+#define MAX_CONNECTIONS 50
 #define SELECT_TIMEOUT_SEC 1   // Timeout for the select() syscall
 #define RECV_BUFSIZE 8192
 #define SEND_BUFSIZE 8192

@@ -220,4 +220,7 @@ private:
 	GLuint _trapIconSelected;
 	GLuint _swingIcon;
 	GLuint _swingIconSelected;
+
+	// Tooltips
+
 };
