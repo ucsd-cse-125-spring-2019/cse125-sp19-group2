@@ -154,7 +154,9 @@ void Animation::eval() {
                             _isPlayOnceAfter = false;
                         }else {
                             if(_takeAfterTransitionStr == "idle" || _takeAfterTransitionStr == "running") {
-							    _takeAfterTransitionStr = _takeBeforeTransitionStr;
+							    if(_takeBeforeTransitionStr == "idle" || _takeBeforeTransitionStr == "running"){
+                                _takeAfterTransitionStr = _takeBeforeTransitionStr;
+								}
                             }
                             play(_takeAfterTransitionStr, true);
                         }
