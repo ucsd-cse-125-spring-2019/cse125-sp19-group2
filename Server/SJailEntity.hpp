@@ -146,7 +146,7 @@ public:
 			{
 				SDogEntity* collidingDog = static_cast<SDogEntity*>(collidingEntity);
 				DogState* dogState = static_cast<DogState*>(collidingEntity->getState().get());
-				dogState->message = "Raise (Left click / A)";
+				dogState->tooltip = TOOLTIP_JAIL;
 				collidingDog->setNearTrigger(true);
 				collidingDog->hasChanged = true;
 

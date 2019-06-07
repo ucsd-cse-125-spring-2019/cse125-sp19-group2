@@ -65,6 +65,9 @@ const std::chrono::seconds TRAP_COOLDOWN(10);
 #define COMPASS_SIZE 200
 #define COMPASS_POS_OFFSET 110
 
+#define TOOLTIP_SIZE 200
+#define TOOLTIP_OFFSET 150
+
 #define DOGPOINTER_SIZE 75
 #define DOGPOINTER_RADIUS_RATIO 0.75f
 #define DOGPOINTER_BORDER_OFFSET 100
@@ -190,6 +193,14 @@ enum DogAnimation
 	ANIMATION_DOG_DIGGING_OUT,
 	ANIMATION_DOG_WALKING,
 	ANIMATION_DOG_EATING
+};
+
+// Tooltip images to be displayed to players
+enum PlayerTooltip
+{
+	TOOLTIP_NONE,
+	TOOLTIP_DRINK,
+	TOOLTIP_JAIL
 };
 
 #ifndef ANIMATIONSTR

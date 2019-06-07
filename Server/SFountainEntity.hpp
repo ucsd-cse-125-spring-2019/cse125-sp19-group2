@@ -39,7 +39,7 @@ public:
 					collidingDog->setNearFountain(true);
 
 					DogState* dogState = static_cast<DogState*>(collidingEntity->getState().get());
-					dogState->message = "Drink (Left click / A)";
+					dogState->tooltip = TOOLTIP_DRINK;
 					collidingEntity->hasChanged = true;
 
 					// Get unit vector of dog to fountain

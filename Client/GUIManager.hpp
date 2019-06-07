@@ -2,6 +2,7 @@
 #include <nanogui/nanogui.h>
 #include <chrono>
 #include "GamePadXbox.hpp"
+#include "TooltipGUI.hpp"
 
 enum WidgetType {
 	WIDGET_CONNECT,
@@ -110,6 +111,9 @@ public:
 	// Primary and secondary messages for main HUD
 	void setPrimaryMessage(std::string message);
 	void setSecondaryMessage(std::string message);
+
+	// Set current tooltip for player
+	void setTooltip(PlayerTooltip tooltip);
 
 	// Set active skill for human
 	void setActiveSkill(bool usePlunger);
@@ -222,5 +226,5 @@ private:
 	GLuint _swingIconSelected;
 
 	// Tooltips
-
+	std::unique_ptr<TooltipGUI> _tooltipGUI;
 };

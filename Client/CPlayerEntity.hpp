@@ -73,6 +73,13 @@ public:
 		// Also update billboard
 		_billboard->updateState(_state);
 		_billboard->setText(newState->playerName);
+
+		// Player tooltip
+		if (currentState->tooltip != newState->tooltip && _isLocal)
+		{
+			currentState->tooltip = newState->tooltip;
+			GuiManager::getInstance().setTooltip(currentState->tooltip);
+		}
 	}
 
 	std::shared_ptr<BaseState> const& getState() { return _state; }

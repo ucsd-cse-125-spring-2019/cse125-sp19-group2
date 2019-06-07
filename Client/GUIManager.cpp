@@ -42,6 +42,9 @@ void GuiManager::init(GLFWwindow* window) {
     
     _fpsCounter = new Label(_screen, "fps: 0", DEFAULT_FONT, 32);
     _fpsCounter->setColor(SOLID_NONE);
+
+	// Tooltip display for players
+	_tooltipGUI = std::make_unique<TooltipGUI>(_screen->size().x(), _screen->size().y());
 }
 
 void GuiManager::draw() {
@@ -68,6 +71,13 @@ void GuiManager::draw() {
     // Draw nanogui
     _screen->drawContents();
     _screen->drawWidgets();
+
+	// Draw tooltip
+	if (_tooltipGUI)
+	{
+		_tooltipGUI->render();
+	}
+
     glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_LEQUAL);
 }
@@ -127,6 +137,11 @@ void GuiManager::resize(int x, int y) {
 			static_cast<nanogui::BoxLayout*>(widgetPair.second->layout())->setSpacing(spacing / 2);
 			break;
 		}
+	}
+
+	if (_tooltipGUI)
+	{
+		_tooltipGUI->updateWindowSize(x, y);
 	}
 }
 
@@ -480,6 +495,10 @@ void GuiManager::setSecondaryMessage(std::string message) {
 			refresh();
 		}
 	}
+}
+
+void GuiManager::setTooltip(PlayerTooltip tooltip) {
+	_tooltipGUI->setTooltip(tooltip);
 }
 
 void GuiManager::setActiveSkill(bool usePlunger) {

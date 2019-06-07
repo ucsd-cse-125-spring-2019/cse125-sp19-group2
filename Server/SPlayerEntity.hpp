@@ -24,6 +24,12 @@ public:
 
 		// Players are not static
 		_state->isStatic = false;
+
+		// Cast as player
+		auto playerState = std::static_pointer_cast<PlayerState>(_state);
+
+		// No tooltip by default
+		playerState->tooltip = TOOLTIP_NONE;
 	}
 
 	virtual void update(std::vector<std::shared_ptr<GameEvent>> events) override
@@ -103,6 +109,9 @@ public:
 
 		// Reset custom player message
 		playerState->message = "";
+
+		// Reset tooltip
+		playerState->tooltip = TOOLTIP_NONE;
 
 		// Reset playOnce animation stuff
 		playerState->isPlayOnce = false;
