@@ -95,17 +95,48 @@ void GuiManager::resize(int x, int y) {
 		return;
 	}
 
-	// Rescale fonts
-	float rescaleFactor = (float)(x * y * 0.6f) / _baseFontScale;
-	_timer->setFontSize(_mediumFontSize * std::max(rescaleFactor, 1.0f));
-	_primaryMessage->setFontSize(_largeFontSize * std::max(rescaleFactor, 1.0f));
-	_secondaryMessage->setFontSize(_mediumFontSize * std::max(rescaleFactor, 1.0f));
+	// Font base values (mostly for lobby player names)
+	float rescaleFactor = (float)(x) / _baseFontScale;
+	_scaledSmallFontSize = _smallFontSize * rescaleFactor;
+	_scaledMediumFontSize = _mediumFontSize * rescaleFactor;
+	_scaledLargeFontSize = _largeFontSize * rescaleFactor;
 
-	// TODO: lobby stuff
+	// Rescale fonts
+	_timer->setFontSize(_mediumFontSize * rescaleFactor);
+	_primaryMessage->setFontSize(_largeFontSize * rescaleFactor);
+	_secondaryMessage->setFontSize(_mediumFontSize * rescaleFactor);
+
+	int buttonWidth = _baseButtonWidth * rescaleFactor;
+	int buttonHeight = _baseButtonHeight * rescaleFactor;
+
+	// Rescale connect screen elements
+	_connectButton->setFixedSize(nanogui::Vector2i(buttonWidth, buttonHeight));
+	_playerNameBox->setFixedWidth(x / _screen->pixelRatio() / 4);
+	_playerNameBox->setFontSize(_scaledSmallFontSize * 0.9f);
+	_addressBox->setFixedWidth(x / _screen->pixelRatio() / 3);
+	_addressBox->setFontSize(_scaledSmallFontSize * 0.9f);
+
+	// Rescale lobby elements
+	_optionsButton->setFixedSize(nanogui::Vector2i(buttonWidth, buttonHeight));
+	_switchSidesButton->setFixedSize(nanogui::Vector2i(buttonWidth, buttonHeight));
+	_readyButton->setFixedSize(nanogui::Vector2i(buttonWidth, buttonHeight));
+
+	// Player names
+	for (auto& widget : getWidget(WIDGET_LIST_DOGS)->children())
+	{
+		auto labelCast = static_cast<nanogui::Label*>(widget);
+		labelCast->setFontSize(_scaledSmallFontSize);
+	}
+
+	for (auto& widget : getWidget(WIDGET_LIST_HUMANS)->children())
+	{
+		auto labelCast = static_cast<nanogui::Label*>(widget);
+		labelCast->setFontSize(_scaledSmallFontSize);
+	}
 
 	// Cooldown bar scaling
-	int scaledSize = (int)(_baseCooldownSize * std::max(rescaleFactor, 1.0f));
-	int offset = (int)(_baseCooldownOffset * std::max(rescaleFactor, 1.0f));
+	int scaledSize = (int)(_baseCooldownSize * rescaleFactor);
+	int offset = (int)(_baseCooldownOffset * rescaleFactor);
 	_staminaCooldown->setFixedSize(nanogui::Vector2i(scaledSize, scaledSize));
 	_staminaCooldown->setOffset(nanogui::Vector2f(offset, offset));
 	_peeCooldown->setFixedSize(nanogui::Vector2i(scaledSize, scaledSize));
@@ -126,7 +157,7 @@ void GuiManager::resize(int x, int y) {
 		}
 		else
 		{
-			_connectPadding->setFixedHeight(y / _screen->pixelRatio() * 0.3f);
+			_connectPadding->setFixedHeight(y / _screen->pixelRatio() * 0.35f);
 		}
 	}
 
@@ -344,7 +375,7 @@ void GuiManager::updateDogsList(
 		if (_dogs.find(dogId) == _dogs.end())
 		{
 			auto dogName = dogPair.second;
-			auto playerLabel = new nanogui::Label(dogList, dogName, DEFAULT_FONT, 45);
+			auto playerLabel = new nanogui::Label(dogList, dogName, DEFAULT_FONT, _scaledSmallFontSize);
 			playerLabel->setId(dogId);
 			_dogs[dogId] = dogName;
 			playerLabel->setColor(SOLID_WHITE);
@@ -422,7 +453,7 @@ void GuiManager::updateHumansList(
 		if (_humans.find(humanId) == _humans.end())
 		{
 			auto humanName = humanPair.second;
-			auto playerLabel = new nanogui::Label(humanList, humanPair.second, DEFAULT_FONT, 45);
+			auto playerLabel = new nanogui::Label(humanList, humanPair.second, DEFAULT_FONT, _scaledSmallFontSize);
 			playerLabel->setId(humanId);
 			_humans[humanId] = humanName;
 			playerLabel->setColor(SOLID_WHITE);
@@ -684,18 +715,18 @@ void GuiManager::initLobbyScreen() {
 	auto dogsLabel = new nanogui::Label(lobbyScreen, " ", DEFAULT_FONT, 60);
 
 	// Controls button
-	auto controlsButton = new nanogui::Button(lobbyScreen, "");
+	_optionsButton = new nanogui::Button(lobbyScreen, "");
 	auto controlsUnfocused = LoadTextureFromFile("controls.png", "./Resources/Textures/Menu/");
 	auto controlsFocused = LoadTextureFromFile("controlsfocused.png", "./Resources/Textures/Menu/");
 	auto controlsPushed = LoadTextureFromFile("controlsdown.png", "./Resources/Textures/Menu/");
-	controlsButton->setBackgroundTexture(controlsUnfocused, controlsFocused, controlsPushed);
-	controlsButton->alpha = 1;
-	controlsButton->setTheme(new nanogui::Theme(_screen->nvgContext()));
-	controlsButton->theme()->mTextColor = nanogui::Color(0, 0, 255, 255);
-	controlsButton->theme()->mTextColorShadow = nanogui::Color(0, 0, 0, 0);
-	controlsButton->setFixedHeight(40);
-	controlsButton->setFixedWidth(100);
-	controlsButton->setCallback([&]()
+	_optionsButton->setBackgroundTexture(controlsUnfocused, controlsFocused, controlsPushed);
+	_optionsButton->alpha = 1;
+	_optionsButton->setTheme(new nanogui::Theme(_screen->nvgContext()));
+	_optionsButton->theme()->mTextColor = nanogui::Color(0, 0, 255, 255);
+	_optionsButton->theme()->mTextColorShadow = nanogui::Color(0, 0, 0, 0);
+	_optionsButton->setFixedHeight(40);
+	_optionsButton->setFixedWidth(100);
+	_optionsButton->setCallback([&]()
 		{
 			setVisibility(WIDGET_OPTIONS, !getWidget(WIDGET_OPTIONS)->visible());
 		});
@@ -820,7 +851,7 @@ void GuiManager::initHUD() {
 
 	// Dog skills
 	auto dogSkills= createWidget(bottomHUD, WIDGET_HUD_DOG_SKILLS);
-	auto dogSkillsLayout = new nanogui::BoxLayout(nanogui::Orientation::Horizontal, nanogui::Alignment::Middle, 0, 35);
+	auto dogSkillsLayout = new nanogui::BoxLayout(nanogui::Orientation::Horizontal, nanogui::Alignment::Middle, 0, 50);
 	dogSkills->setLayout(dogSkillsLayout);
 
 	// Stamina
