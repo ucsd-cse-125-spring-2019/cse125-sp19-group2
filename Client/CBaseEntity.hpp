@@ -45,7 +45,7 @@ public:
 
 		// Pass model matrix into shader
 		_objectShader->set_uniform("u_model", model);
-		_objectShader->set_uniform("u_dirlight.direction", glm::vec3(0.0f, -1.0f, -0.4f));
+		_objectShader->set_uniform("u_dirlight.direction", glm::vec3(-0.4f, -1.0f, -0.4f));
 		_objectShader->set_uniform("u_dirlight.ambient", glm::vec3(0.2f, 0.2f, 0.3f));
 		_objectShader->set_uniform("u_dirlight.diffuse", glm::vec3(0.8f, 0.8f, 0.9f));
 		_objectShader->set_uniform("u_numdirlights", static_cast<GLuint>(1));
