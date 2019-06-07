@@ -448,16 +448,30 @@ void LocalPlayer::updateController() {
 			InputManager::getInstance().fire(GLFW_KEY_Q, KeyState::Release);
 		}
 
-		// Map right bumper to charging net
-		if (_gamePad->isKeyDown(GamePad_Button_RIGHT_THUMB)) {
-			if (!_rightBumperDown) {
-				_rightBumperDown = true;
-				InputManager::getInstance().fire(GLFW_MOUSE_BUTTON_LEFT, KeyState::Press);
+		// Map right bumper to charging net for humans, sprinting for dogs
+		if (_playerEntity && _playerEntity->getState()) {
+			if (_gamePad->isKeyDown(GamePad_Button_RIGHT_THUMB)) {
+				if (!_rightBumperDown) {
+					_rightBumperDown = true;
+
+					if (_playerEntity->getState()->type == ENTITY_HUMAN) {
+						InputManager::getInstance().fire(GLFW_MOUSE_BUTTON_LEFT, KeyState::Press);
+					}
+					else {
+						InputManager::getInstance().fire(GLFW_KEY_LEFT_SHIFT, KeyState::Press);
+					}
+				}
 			}
-		}
-		else if (_gamePad->isKeyUp(GamePad_Button_RIGHT_THUMB) && _rightBumperDown) {
-			_rightBumperDown = false;
-			InputManager::getInstance().fire(GLFW_MOUSE_BUTTON_LEFT, KeyState::Release);
+			else if (_gamePad->isKeyUp(GamePad_Button_RIGHT_THUMB) && _rightBumperDown) {
+				_rightBumperDown = false;
+
+				if (_playerEntity->getState()->type == ENTITY_HUMAN) {
+					InputManager::getInstance().fire(GLFW_MOUSE_BUTTON_LEFT, KeyState::Release);
+				}
+				else {
+					InputManager::getInstance().fire(GLFW_KEY_LEFT_SHIFT, KeyState::Release);
+				}
+			}
 		}
     }
 }
