@@ -142,7 +142,8 @@ public:
 		// Collision handling function for trigger
 		auto collisionFunc = [&](SBaseEntity* entity, SBaseEntity* collidingEntity)
 		{
-			if (collidingEntity->getState()->type == ENTITY_DOG)
+			if (collidingEntity->getState()->type == ENTITY_DOG &&
+				collidingEntity->getState()->isSolid)
 			{
 				SDogEntity* collidingDog = static_cast<SDogEntity*>(collidingEntity);
 				DogState* dogState = static_cast<DogState*>(collidingEntity->getState().get());

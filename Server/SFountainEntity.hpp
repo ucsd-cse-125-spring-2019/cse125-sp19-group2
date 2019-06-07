@@ -33,7 +33,8 @@ public:
 		// Collision sensor for dogs
 		dogSensor->onCollision([&](SBaseEntity * entity, SBaseEntity * collidingEntity)
 			{
-				if (collidingEntity->getState()->type == ENTITY_DOG)
+				if (collidingEntity->getState()->type == ENTITY_DOG &&
+					collidingEntity->getState()->isSolid)
 				{
 					SDogEntity* collidingDog = static_cast<SDogEntity*>(collidingEntity);
 					collidingDog->setNearFountain(true);
