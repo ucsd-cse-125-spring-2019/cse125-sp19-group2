@@ -84,7 +84,7 @@ public:
         // Requires a cast
         Animation* humanAnimation = static_cast<Animation*>(_objectModel.get());
         
-        if (newState->currentAnimation != currentState->currentAnimation) {
+        //if (newState->currentAnimation != currentState->currentAnimation) {
             //std::cout << "newState->currentAnimation: " << humanAnimations[newState->currentAnimation] << std::endl;
             
             if (newState->isPlayOnce) {
@@ -93,7 +93,7 @@ public:
             else {
                 humanAnimation->play(humanAnimations[newState->currentAnimation]);
             }
-        }
+        //}
         
         /** Animation **/
         currentState->currentAnimation = newState->currentAnimation;

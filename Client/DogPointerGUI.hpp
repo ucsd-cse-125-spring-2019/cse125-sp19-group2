@@ -20,15 +20,20 @@ public:
 
 	virtual void updateWindowSize(float width, float height) override {
 		ImageGUI::updateWindowSize(width, height);
+
+		float rescaleFactor = (float)(width) / 1280;
+
 		//version 1 update
-		float actualRadius = std::min(width, height) * DOGPOINTER_RADIUS_RATIO;
-		radius = actualRadius / DOGPOINTER_SIZE;
+		float actualRadius = std::min(width, height) * DOGPOINTER_RADIUS_RATIO * rescaleFactor;
+		radius = actualRadius / DOGPOINTER_SIZE * rescaleFactor;
 
 		//version 2 update
-		borderWidth = (width - DOGPOINTER_BORDER_OFFSET) / width;
-		if (borderWidth < 0) borderWidth = 0.8f;
-		borderHeight = (height - DOGPOINTER_BORDER_OFFSET) / height;
-		if (borderHeight < 0) borderHeight = 0.8f;
+		borderWidth = (width - DOGPOINTER_BORDER_OFFSET * rescaleFactor) / width;
+		if (borderWidth < 0) borderWidth = 0.8f * rescaleFactor;
+		borderHeight = (height - DOGPOINTER_BORDER_OFFSET * rescaleFactor) / height;
+		if (borderHeight < 0) borderHeight = 0.8f * rescaleFactor;
+
+		_quad_size = glm::vec2(DOGPOINTER_SIZE * rescaleFactor, DOGPOINTER_SIZE * rescaleFactor);
 	}
 	
 	// version 1 (rotate around radius) (similar to compass)

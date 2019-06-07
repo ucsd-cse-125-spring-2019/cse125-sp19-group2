@@ -43,9 +43,12 @@ public:
 		glBindFramebuffer(GL_FRAMEBUFFER, oldFBO);
 
 		_objectShader->Use();
-		_state->scale.z = 0.001f;
-		_state->scale.y = 0.7f;
-		
+
+		float scaleFactor = (float)(screen->size().x()) / 1280;
+		_state->scale.z = 0.001f * scaleFactor;
+		_state->scale.y = 0.7f * scaleFactor;
+		_state->scale.x = scaleFactor;
+
 		CBaseEntity::setUniforms(camera);
 
 		// Uniforms

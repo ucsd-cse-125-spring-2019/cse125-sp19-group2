@@ -31,6 +31,7 @@ SDogEntity::SDogEntity(
 	dogState->urineMeter = MAX_DOG_URINE;
 	dogState->isCaught = false;
 	_barkTime = std::chrono::steady_clock::now();
+	dogState->isTeleporting = false;
 
 	// Player-specific stuff
 	dogState->playerName = playerName;
@@ -224,9 +225,10 @@ void SDogEntity::update(std::vector<std::shared_ptr<GameEvent>> events)
 		break;
 	case ACTION_DOG_TRAPPED:
 		// Update dog's message
-		dogState->message = "Escape (Left click / A) [" +
-			std::to_string(_numEscapePressed) + "/" +
-			std::to_string(MAX_DOG_ESCAPE_PRESSES) + "]";
+		//dogState->message = "Escape (Left click / A) [" +
+		//	std::to_string(_numEscapePressed) + "/" +
+		//	std::to_string(MAX_DOG_ESCAPE_PRESSES) + "]";
+		dogState->tooltip = TOOLTIP_TRAPPED;
 		hasChanged = true;
 
 		if (actionChanged) {
@@ -274,6 +276,9 @@ void SDogEntity::update(std::vector<std::shared_ptr<GameEvent>> events)
 
 			dogState->currentAnimation = ANIMATION_DOG_WALKING;
 
+			// Play sound
+			dogState->isTeleporting = true;
+
 			// Make the dog walk slowly into the doghouse
 			interpolateMovement(
 				_sourceDoghousePos,
@@ -282,6 +287,7 @@ void SDogEntity::update(std::vector<std::shared_ptr<GameEvent>> events)
 				[&]()
 				{
 					actionStage++;
+					dogState->isTeleporting = false;	// No longer need to play sound
 				},
 				0,
 				false);

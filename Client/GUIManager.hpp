@@ -2,6 +2,7 @@
 #include <nanogui/nanogui.h>
 #include <chrono>
 #include "GamePadXbox.hpp"
+#include "TooltipGUI.hpp"
 
 enum WidgetType {
 	WIDGET_CONNECT,
@@ -111,6 +112,9 @@ public:
 	void setPrimaryMessage(std::string message);
 	void setSecondaryMessage(std::string message);
 
+	// Set current tooltip for player
+	void setTooltip(PlayerTooltip tooltip);
+
 	// Set active skill for human
 	void setActiveSkill(bool usePlunger);
 
@@ -171,6 +175,23 @@ private:
 
 	/*** UI elements ***/
 
+	// Base font scale
+	int _baseFontScale = 1280;
+
+	// Scaling stuff
+	int _largeFontSize = 90;
+	int _mediumFontSize = 68;
+	int _smallFontSize = 45;
+
+	int _scaledSmallFontSize = _smallFontSize;
+	int _scaledMediumFontSize = _mediumFontSize;
+	int _scaledLargeFontSize = _largeFontSize;
+
+	int _baseCooldownSize = 100;
+	int _baseCooldownOffset = 6;
+	int _baseButtonWidth = 100;
+	int _baseButtonHeight = 40;
+
 	// Connect screen
 	nanogui::Label* _connectPadding;
 	nanogui::TextBox* _playerNameBox;
@@ -178,6 +199,7 @@ private:
 	nanogui::Button* _connectButton;
 
 	// Lobby screen
+	nanogui::Button* _optionsButton;
 	nanogui::Button* _switchSidesButton;
 	nanogui::Label* _lobbyPadding;
 	nanogui::Button* _readyButton;
@@ -222,5 +244,5 @@ private:
 	GLuint _swingIconSelected;
 
 	// Tooltips
-
+	std::unique_ptr<TooltipGUI> _tooltipGUI;
 };

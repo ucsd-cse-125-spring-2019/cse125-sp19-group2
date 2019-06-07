@@ -18,7 +18,9 @@ public:
 
 	virtual void updateWindowSize(float width, float height) override {
 		ImageGUI::updateWindowSize(width, height);
-		_quad_pos = glm::vec2(width - COMPASS_POS_OFFSET, height - COMPASS_POS_OFFSET);
+		float rescaleFactor = (float)(width) / 1280;
+		_quad_size = glm::vec2(COMPASS_SIZE * rescaleFactor, COMPASS_SIZE * rescaleFactor);
+		_quad_pos = glm::vec2(width - COMPASS_POS_OFFSET * rescaleFactor, height - COMPASS_POS_OFFSET * rescaleFactor);
 	}
 
 	virtual void render() override {

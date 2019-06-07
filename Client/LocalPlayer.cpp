@@ -175,7 +175,7 @@ LocalPlayer::LocalPlayer(uint32_t playerId, std::unique_ptr<NetworkClient> const
             vec.y = -vec.y;
 
 			// Scale look movement with time
-            _camera->move_camera(vec * ((float)GuiManager::getInstance().getLastFrameLength() / 1000));
+            _camera->move_camera(vec * ((float)GuiManager::getInstance().getLastFrameLength() / 800));
         });
 
     InputManager::getInstance().getKey2D(Key::KEYTYPE::LSTICK)->onMove(
@@ -376,7 +376,7 @@ void LocalPlayer::updateController() {
         auto s = rt - lt;
 
 		// Scale trigger by time
-		float scaledTrigger = s * ((float)GuiManager::getInstance().getLastFrameLength() / 50000);
+		float scaledTrigger = s * ((float)GuiManager::getInstance().getLastFrameLength() / 25000);
         InputManager::getInstance().scroll(scaledTrigger);
 
         if (_gamePad->isKeyDown(GamePad_Button_DPAD_LEFT)) {
@@ -428,26 +428,36 @@ void LocalPlayer::updateController() {
 			InputManager::getInstance().fire(GLFW_MOUSE_BUTTON_LEFT, KeyState::Release);
 		}
 
-		// Map both bumpers to "Q" to switch skills on the human
+		// Map "Y" on xbox to 'Q' on keyboard (switch skill for humans)
+		if (_gamePad->isKeyDown(GamePad_Button_Y)) {
+			InputManager::getInstance().fire(GLFW_KEY_Q, KeyState::Press);
+		}
+		if (_gamePad->isKeyUp(GamePad_Button_Y)) {
+			InputManager::getInstance().fire(GLFW_KEY_Q, KeyState::Release);
+		}
+
+		// Map left bumper to switch skills
 		if (_gamePad->isKeyDown(GamePad_Button_LEFT_THUMB)) {
 			if (!_leftBumperDown) {
 				_leftBumperDown = true;
 				InputManager::getInstance().fire(GLFW_KEY_Q, KeyState::Press);
 			}
 		}
-		else {
+		else if (_gamePad->isKeyUp(GamePad_Button_LEFT_THUMB) && _leftBumperDown) {
 			_leftBumperDown = false;
 			InputManager::getInstance().fire(GLFW_KEY_Q, KeyState::Release);
 		}
+
+		// Map right bumper to charging net
 		if (_gamePad->isKeyDown(GamePad_Button_RIGHT_THUMB)) {
 			if (!_rightBumperDown) {
 				_rightBumperDown = true;
-				InputManager::getInstance().fire(GLFW_KEY_Q, KeyState::Press);
+				InputManager::getInstance().fire(GLFW_MOUSE_BUTTON_LEFT, KeyState::Press);
 			}
 		}
-		else {
+		else if (_gamePad->isKeyUp(GamePad_Button_RIGHT_THUMB) && _rightBumperDown) {
 			_rightBumperDown = false;
-			InputManager::getInstance().fire(GLFW_KEY_Q, KeyState::Release);
+			InputManager::getInstance().fire(GLFW_MOUSE_BUTTON_LEFT, KeyState::Release);
 		}
     }
 }

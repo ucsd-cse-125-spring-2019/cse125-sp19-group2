@@ -21,7 +21,7 @@ public:
 		_state->colliderType = COLLIDER_CAPSULE;
 		_state->width = 1.5f;
 		_state->depth = 1.5f;
-		_state->height = 1.5f;
+		_state->height = 2.0f;
 		_state->scale.y = 2.0f;
 
 		// Plunger collider

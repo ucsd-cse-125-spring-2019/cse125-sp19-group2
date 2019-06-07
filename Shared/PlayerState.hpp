@@ -15,6 +15,9 @@ struct PlayerState : BaseState
 
 	int skinID;
 
+	// Tooltip to be shown to player
+	PlayerTooltip tooltip;
+
 	template<class Archive>
 	void serialize(Archive & archive)
 	{
@@ -24,7 +27,8 @@ struct PlayerState : BaseState
 			message,
 			isPlayOnce,
 			animationDuration,
-			skinID);
+			skinID,
+			tooltip);
 	}
 };
 

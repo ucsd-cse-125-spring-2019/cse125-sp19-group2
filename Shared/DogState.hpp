@@ -11,6 +11,7 @@ struct DogState : PlayerState
 	float urineMeter;
 	bool isCaught;
 	bool isBarking;
+	bool isTeleporting;	// Used only for teleporting sound
 
 	template<class Archive>
 	void serialize(Archive & archive)
@@ -21,7 +22,8 @@ struct DogState : PlayerState
 			runStamina,
 			urineMeter,
 			isCaught,
-			isBarking);
+			isBarking,
+			isTeleporting);
 	}
 };
 

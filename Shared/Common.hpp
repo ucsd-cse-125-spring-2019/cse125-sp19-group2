@@ -43,7 +43,7 @@ const std::chrono::seconds TRAP_COOLDOWN(10);
 
 // Dog-specific stats
 #define DOG_SKIN_AMOUNT 3
-#define DOG_BASE_VELOCITY 4.8f
+#define DOG_BASE_VELOCITY 5.5f
 #define DOG_RUN_VELOCITY DOG_BASE_VELOCITY * 1.5f
 #define DOG_TELEPORT_VELOCITY DOG_BASE_VELOCITY * 5.0f
 #define MAX_DOG_STAMINA 3.0f			// Dog can sprint for three seconds max
@@ -52,8 +52,8 @@ const std::chrono::seconds TRAP_COOLDOWN(10);
 
 // Human-spedific stats
 #define HUMAN_SKIN_AMOUNT 3
-#define HUMAN_BASE_VELOCITY 5.0f
-#define HUMAN_SWING_VELOCITY 10.0f
+#define HUMAN_BASE_VELOCITY 6.0f
+#define HUMAN_SWING_VELOCITY 11.0f
 #define MAX_HUMAN_CHARGE 2.0f
 #define HUMAN_CHARGE_THRESHOLD1 0.5f // lower than that will be swing1
 #define HUMAN_CHARGE_THRESHOLD2 1.5f // lower than that will be swing2
@@ -65,7 +65,10 @@ const std::chrono::seconds TRAP_COOLDOWN(10);
 #define COMPASS_SIZE 200
 #define COMPASS_POS_OFFSET 110
 
-#define DOGPOINTER_SIZE 75
+#define TOOLTIP_SIZE 250
+#define TOOLTIP_OFFSET 140
+
+#define DOGPOINTER_SIZE 100
 #define DOGPOINTER_RADIUS_RATIO 0.75f
 #define DOGPOINTER_BORDER_OFFSET 100
 
@@ -190,6 +193,15 @@ enum DogAnimation
 	ANIMATION_DOG_DIGGING_OUT,
 	ANIMATION_DOG_WALKING,
 	ANIMATION_DOG_EATING
+};
+
+// Tooltip images to be displayed to players
+enum PlayerTooltip
+{
+	TOOLTIP_NONE,
+	TOOLTIP_DRINK,
+	TOOLTIP_JAIL,
+	TOOLTIP_TRAPPED
 };
 
 #ifndef ANIMATIONSTR

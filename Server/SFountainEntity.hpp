@@ -33,13 +33,14 @@ public:
 		// Collision sensor for dogs
 		dogSensor->onCollision([&](SBaseEntity * entity, SBaseEntity * collidingEntity)
 			{
-				if (collidingEntity->getState()->type == ENTITY_DOG)
+				if (collidingEntity->getState()->type == ENTITY_DOG &&
+					collidingEntity->getState()->isSolid)
 				{
 					SDogEntity* collidingDog = static_cast<SDogEntity*>(collidingEntity);
 					collidingDog->setNearFountain(true);
 
 					DogState* dogState = static_cast<DogState*>(collidingEntity->getState().get());
-					dogState->message = "Drink (Left click / A)";
+					dogState->tooltip = TOOLTIP_DRINK;
 					collidingEntity->hasChanged = true;
 
 					// Get unit vector of dog to fountain

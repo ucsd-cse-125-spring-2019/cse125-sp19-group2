@@ -367,6 +367,7 @@ xcopy /y /d  "$(SolutionDir)Library\lib\x64\Release\*.dll" "$(OutDir)"</Command>
     <ClInclude Include="Model.hpp" />
     <ClInclude Include="Shader.hpp" />
     <ClInclude Include="Camera.hpp" />
+    <ClInclude Include="TooltipGUI.hpp" />
     <ClInclude Include="UrineParticleSystem.hpp" />
     <ClInclude Include="Vertex.hpp" />
   </ItemGroup>
