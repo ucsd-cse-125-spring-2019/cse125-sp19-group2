@@ -89,6 +89,22 @@ void GuiManager::refresh() {
 void GuiManager::resize(int x, int y) {
 	_screen->resizeCallbackEvent(x, y);
 
+	// Rescale fonts
+	float rescaleFactor = (float)(x * y * 0.6f) / _baseFontScale;
+	_timer->setFontSize(_mediumFontSize * std::max(rescaleFactor, 1.0f));
+	_primaryMessage->setFontSize(_largeFontSize * std::max(rescaleFactor, 1.0f));
+	_secondaryMessage->setFontSize(_mediumFontSize * std::max(rescaleFactor, 1.0f));
+
+	// TODO: lobby stuff
+
+	// Cooldown bar scaling
+	int scaledSize = (int)(_baseCooldownSize * std::max(rescaleFactor, 1.0f));
+	_staminaCooldown->setFixedSize(nanogui::Vector2i(scaledSize, scaledSize));
+	_peeCooldown->setFixedSize(nanogui::Vector2i(scaledSize, scaledSize));
+	_plungerCooldown->setFixedSize(nanogui::Vector2i(scaledSize, scaledSize));
+	_trapCooldown->setFixedSize(nanogui::Vector2i(scaledSize, scaledSize));
+	_swingCharge->setFixedSize(nanogui::Vector2i(scaledSize, scaledSize));
+
 	// Connect padding
 	if (_connectPadding)
 	{

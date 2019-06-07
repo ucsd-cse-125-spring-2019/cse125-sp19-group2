@@ -16,7 +16,10 @@ public:
 	virtual void updateWindowSize(float width, float height) override
 	{
 		ImageGUI::updateWindowSize(width, height);
-		_quad_pos = glm::vec2(width / 2 + TOOLTIP_OFFSET, height / 2 + TOOLTIP_OFFSET);
+		float rescaleFactor = (float)(width) / 1280;
+		_quad_size = glm::vec2(TOOLTIP_SIZE * rescaleFactor, TOOLTIP_SIZE * rescaleFactor);
+		_quad_pos = glm::vec2(width / 2 + TOOLTIP_OFFSET * rescaleFactor, height / 2 + TOOLTIP_OFFSET * rescaleFactor);
+
 	}
 
 	virtual void render() override {

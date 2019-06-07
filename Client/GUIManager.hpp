@@ -175,6 +175,14 @@ private:
 
 	/*** UI elements ***/
 
+	// Base font scale
+	int _baseFontScale = 1280 * 720;
+
+	// Scaling stuff
+	int _largeFontSize = 100;
+	int _mediumFontSize = 68;
+	int _baseCooldownSize = 100;
+
 	// Connect screen
 	nanogui::Label* _connectPadding;
 	nanogui::TextBox* _playerNameBox;
